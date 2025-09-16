@@ -1,0 +1,252 @@
+{% extends "base.html" %}
+
+{% block title %}Calendario de Horarios - Atma suddhi{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0">
+                    <i class="fas fa-calendar-plus"></i> Configurar Horarios Semanales
+                </h4>
+                <p class="mb-0 text-muted">Haz clic en las celdas para agregar clases. Duración fija: 1 hora y 15 minutos</p>
+            </div>
+            <div class="card-body">
+                <form method="POST" id="horariosForm">
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th style="width: 120px;">Hora</th>
+                                    <th>Lunes</th>
+                                    <th>Martes</th>
+                                    <th>Miércoles</th>
+                                    <th>Jueves</th>
+                                    <th>Viernes</th>
+                                    <th>Sábado</th>
+                                    <th>Domingo</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for hora in range(8, 22) %}
+                                <tr>
+                                    <td class="bg-light fw-bold text-center">
+                                        {{ "%02d:00"|format(hora) }}
+                                    </td>
+                                    {% for dia in range(7) %}
+                                    <td class="celda-horario" data-dia="{{ dia }}" data-hora="{{ "%02d:00"|format(hora) }}" style="height: 60px; cursor: pointer; position: relative;">
+                                        <div class="horario-content"></div>
+                                    </td>
+                                    {% endfor %}
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between mt-4">
+                        <a href="{{ url_for('horarios') }}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Volver a Horarios
+                        </a>
+                        <button type="submit" class="btn btn-success" id="guardarHorarios" disabled>
+                            <i class="fas fa-save"></i> Guardar Horarios
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para seleccionar clase -->
+<div class="modal fade" id="claseModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Seleccionar Clase</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label for="claseSelect" class="form-label">Clase:</label>
+                    <select class="form-select" id="claseSelect">
+                        <option value="">Seleccionar clase</option>
+                        {% for clase in clases %}
+                        <option value="{{ clase.id }}">{{ clase.nombre }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Horario:</label>
+                    <p class="form-control-plaintext" id="horarioInfo"></p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-success" id="confirmarClase">Agregar Clase</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.celda-horario {
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+}
+
+.celda-horario:hover {
+    background-color: rgba(139, 95, 191, 0.1) !important;
+    border-color: var(--primary-purple);
+}
+
+.celda-horario.con-clase {
+    background-color: var(--light-purple) !important;
+    border-color: var(--primary-purple);
+}
+
+.horario-content {
+    padding: 5px;
+    font-size: 0.8rem;
+    text-align: center;
+}
+
+.clase-badge {
+    background: linear-gradient(135deg, var(--primary-purple) 0%, var(--dark-purple) 100%);
+    color: white;
+    padding: 2px 6px;
+    border-radius: 10px;
+    font-size: 0.7rem;
+    display: block;
+    margin: 2px 0;
+}
+
+.btn-eliminar-horario {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    background: rgba(220, 53, 69, 0.8);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    font-size: 0.6rem;
+    display: none;
+}
+
+.celda-horario.con-clase:hover .btn-eliminar-horario {
+    display: block;
+}
+</style>
+
+<script>
+let horariosSeleccionados = [];
+let celdaActual = null;
+
+// Mapeo de días
+const dias = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+
+document.addEventListener('DOMContentLoaded', function() {
+    const celdas = document.querySelectorAll('.celda-horario');
+    
+    celdas.forEach(celda => {
+        celda.addEventListener('click', function() {
+            if (this.classList.contains('con-clase')) {
+                // Si ya tiene clase, mostrar opción de eliminar
+                return;
+            }
+            
+            celdaActual = this;
+            const dia = this.dataset.dia;
+            const hora = this.dataset.hora;
+            
+            document.getElementById('horarioInfo').textContent = 
+                `${dias[dia]} - ${hora} a ${calcularHoraFin(hora)}`;
+            
+            const modal = new bootstrap.Modal(document.getElementById('claseModal'));
+            modal.show();
+        });
+    });
+    
+    document.getElementById('confirmarClase').addEventListener('click', function() {
+        const claseId = document.getElementById('claseSelect').value;
+        const claseNombre = document.getElementById('claseSelect').selectedOptions[0].text;
+        
+        if (claseId && celdaActual) {
+            const dia = celdaActual.dataset.dia;
+            const hora = celdaActual.dataset.hora;
+            
+            // Agregar a la lista de horarios
+            const horarioData = `${claseId}|${dia}|${hora}`;
+            horariosSeleccionados.push(horarioData);
+            
+            // Actualizar la celda visualmente
+            actualizarCelda(celdaActual, claseNombre, horarioData);
+            
+            // Actualizar formulario
+            actualizarFormulario();
+            
+            // Cerrar modal
+            bootstrap.Modal.getInstance(document.getElementById('claseModal')).hide();
+            
+            // Limpiar formulario
+            document.getElementById('claseSelect').value = '';
+        }
+    });
+    
+    // Función para eliminar horario
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('btn-eliminar-horario')) {
+            const horarioData = e.target.dataset.horario;
+            const index = horariosSeleccionados.indexOf(horarioData);
+            if (index > -1) {
+                horariosSeleccionados.splice(index, 1);
+                actualizarFormulario();
+                
+                // Limpiar celda
+                const celda = e.target.closest('.celda-horario');
+                celda.classList.remove('con-clase');
+                celda.querySelector('.horario-content').innerHTML = '';
+            }
+        }
+    });
+});
+
+function calcularHoraFin(horaInicio) {
+    const [hora, minutos] = horaInicio.split(':').map(Number);
+    const totalMinutos = hora * 60 + minutos + 75; // +1 hora y 15 minutos
+    const nuevaHora = Math.floor(totalMinutos / 60);
+    const nuevosMinutos = totalMinutos % 60;
+    return `${nuevaHora.toString().padStart(2, '0')}:${nuevosMinutos.toString().padStart(2, '0')}`;
+}
+
+function actualizarCelda(celda, claseNombre, horarioData) {
+    celda.classList.add('con-clase');
+    celda.querySelector('.horario-content').innerHTML = `
+        <span class="clase-badge">${claseNombre}</span>
+        <button type="button" class="btn-eliminar-horario" data-horario="${horarioData}">×</button>
+    `;
+}
+
+function actualizarFormulario() {
+    // Limpiar inputs existentes
+    const inputsExistentes = document.querySelectorAll('input[name="horarios[]"]');
+    inputsExistentes.forEach(input => input.remove());
+    
+    // Agregar nuevos inputs
+    horariosSeleccionados.forEach(horario => {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'horarios[]';
+        input.value = horario;
+        document.getElementById('horariosForm').appendChild(input);
+    });
+    
+    // Actualizar botón de guardar
+    const botonGuardar = document.getElementById('guardarHorarios');
+    botonGuardar.disabled = horariosSeleccionados.length === 0;
+}
+</script>
+{% endblock %}

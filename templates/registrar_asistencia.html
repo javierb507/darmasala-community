@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+
+{% block title %}Registrar Asistencia - Atma suddhi{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2><i class="fas fa-calendar-plus"></i> Registrar Asistencia</h2>
+            <a href="{{ url_for('asistencias') }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Volver a Asistencias
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Nueva Asistencia</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="horario_id" class="form-label">Clase *</label>
+                                <select class="form-select" id="horario_id" name="horario_id" required>
+                                    <option value="">Seleccionar clase...</option>
+                                    {% for horario in horarios %}
+                                    <option value="{{ horario.id }}">
+                                        {{ horario.clase.nombre }} - {{ horario.dia_semana }} {{ horario.hora_inicio.strftime('%H:%M') }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="fecha_clase" class="form-label">Fecha de la Clase *</label>
+                                <input type="date" class="form-control" id="fecha_clase" name="fecha_clase" required>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="alumno_id" class="form-label">Alumno *</label>
+                        <select class="form-select" id="alumno_id" name="alumno_id" required>
+                            <option value="">Seleccionar alumno...</option>
+                            {% for alumno in alumnos %}
+                            <option value="{{ alumno.id }}">
+                                {{ alumno.nombre }} {{ alumno.apellido }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="presente" name="presente" checked>
+                            <label class="form-check-label" for="presente">
+                                Alumno presente
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="observaciones" class="form-label">Observaciones</label>
+                        <textarea class="form-control" id="observaciones" name="observaciones" rows="3" placeholder="Observaciones sobre la asistencia..."></textarea>
+                    </div>
+                    
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="{{ url_for('asistencias') }}" class="btn btn-secondary me-md-2">Cancelar</a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Registrar Asistencia
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Información</h5>
+            </div>
+            <div class="card-body">
+                <p class="text-muted">
+                    <i class="fas fa-info-circle"></i> 
+                    Selecciona la clase, fecha y alumno para registrar la asistencia.
+                </p>
+                <p class="text-muted">
+                    <i class="fas fa-calendar"></i> 
+                    Puedes registrar asistencias para clases pasadas o futuras.
+                </p>
+                <p class="text-muted">
+                    <i class="fas fa-user-check"></i> 
+                    Marca la casilla si el alumno asistió a la clase.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Establecer fecha actual por defecto
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('fecha_clase').value = today;
+});
+</script>
+{% endblock %}

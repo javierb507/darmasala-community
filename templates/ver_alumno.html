@@ -1,0 +1,153 @@
+{% extends "base.html" %}
+
+{% block title %}{{ alumno.nombre }} {{ alumno.apellido }} - Atma suddhi{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h4 class="mb-0">
+                    <i class="fas fa-user"></i> {{ alumno.nombre }} {{ alumno.apellido }}
+                </h4>
+                <div>
+                    <a href="{{ url_for('editar_alumno', alumno_id=alumno.id) }}" class="btn btn-sm btn-outline-secondary">
+                        <i class="fas fa-edit"></i> Editar
+                    </a>
+                    <a href="{{ url_for('alumnos') }}" class="btn btn-sm btn-outline-primary">
+                        <i class="fas fa-arrow-left"></i> Volver a Alumnos
+                    </a>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Información Personal</h6>
+                        <table class="table table-sm">
+                            <tr>
+                                <td><strong>Nombre:</strong></td>
+                                <td>{{ alumno.nombre }} {{ alumno.apellido }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Email:</strong></td>
+                                <td>{{ alumno.email }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Teléfono:</strong></td>
+                                <td>{{ alumno.telefono or 'No proporcionado' }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Fecha de Nacimiento:</strong></td>
+                                <td>{{ alumno.fecha_nacimiento.strftime('%d/%m/%Y') if alumno.fecha_nacimiento else 'No proporcionado' }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Fecha de Registro:</strong></td>
+                                <td>{{ alumno.fecha_registro.strftime('%d/%m/%Y %H:%M') }}</td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Información de Cuota y Estado</h6>
+                        <table class="table table-sm">
+                            <tr>
+                                <td><strong>Dirección:</strong></td>
+                                <td>{{ alumno.direccion or 'No proporcionado' }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Tipo de Cuota:</strong></td>
+                                <td><span class="badge bg-info">{{ alumno.get_tipo_cuota_display() }} - €{{ "%.2f"|format(alumno.get_precio_cuota()) }}</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Matrícula:</strong></td>
+                                <td>
+                                    {% if alumno.matricula_pagada %}
+                                        <span class="badge bg-success">Pagada</span> ({{ alumno.fecha_matricula.strftime('%d/%m/%Y') if alumno.fecha_matricula else 'Fecha no disponible' }})
+                                    {% else %}
+                                        <span class="badge bg-warning">Pendiente</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>Estado:</strong></td>
+                                <td>
+                                    {% if alumno.activo %}
+                                        <span class="badge bg-success">Activo</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">Inactivo</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+                
+                {% if alumno.condiciones_medicas %}
+                <div class="mt-4">
+                    <h6>Condiciones Médicas</h6>
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        {{ alumno.condiciones_medicas }}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Sección de Pagos -->
+        <div class="card mt-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="fas fa-credit-card"></i> Historial de Pagos
+                </h5>
+                <a href="{{ url_for('agregar_pago', alumno_id=alumno.id) }}" class="btn btn-success btn-sm">
+                    <i class="fas fa-plus"></i> Agregar Pago
+                </a>
+            </div>
+            <div class="card-body">
+                {% if pagos %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Período</th>
+                                <th>Tipo</th>
+                                <th>Monto</th>
+                                <th>Fecha de Registro</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for pago in pagos %}
+                            <tr>
+                                <td><strong>
+                                    {% if pago.tipo_pago == 'matricula' %}
+                                        {{ pago.año }}
+                                    {% else %}
+                                        {{ pago.mes }}
+                                    {% endif %}
+                                </strong></td>
+                                <td>
+                                    <span class="badge bg-{% if pago.tipo_pago == 'cuota' %}primary{% elif pago.tipo_pago == 'matricula' %}success{% else %}info{% endif %}">
+                                        {{ pago.descripcion or pago.tipo_pago }}
+                                    </span>
+                                </td>
+                                <td>€{{ "%.2f"|format(pago.monto) }}</td>
+                                <td>{{ pago.fecha_creacion.strftime('%d/%m/%Y') }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-4">
+                    <i class="fas fa-credit-card fa-3x text-muted mb-3"></i>
+                    <p class="text-muted">No hay pagos registrados para este alumno.</p>
+                    <a href="{{ url_for('agregar_pago', alumno_id=alumno.id) }}" class="btn btn-success">
+                        <i class="fas fa-plus"></i> Agregar Primer Pago
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

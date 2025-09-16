@@ -1,0 +1,218 @@
+{% extends "base.html" %}
+
+{% block title %}Configuración - Atma suddhi{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0">
+                    <i class="fas fa-cog"></i> Configuración del Sistema
+                </h4>
+                <p class="mb-0 text-muted">Configura los datos generales de la escuela y precios</p>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('guardar_configuracion') }}">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <h5 class="text-primary mb-3">
+                                <i class="fas fa-euro-sign"></i> Tarifas
+                            </h5>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="precio_clase_suelta" class="form-label">Clase Suelta</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text">€</span>
+                                            <input type="number" step="0.01" class="form-control" id="precio_clase_suelta" 
+                                                   name="precio_clase_suelta" value="{{ config.get('precio_clase_suelta', '15.00') }}" required>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="precio_1_clase_semanal" class="form-label">1 Clase por Semana</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text">€</span>
+                                            <input type="number" step="0.01" class="form-control" id="precio_1_clase_semanal" 
+                                                   name="precio_1_clase_semanal" value="{{ config.get('precio_1_clase_semanal', '40.00') }}" required>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="precio_2_clases_semanal" class="form-label">2 Clases por Semana</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text">€</span>
+                                            <input type="number" step="0.01" class="form-control" id="precio_2_clases_semanal" 
+                                                   name="precio_2_clases_semanal" value="{{ config.get('precio_2_clases_semanal', '70.00') }}" required>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="precio_tarifa_plana" class="form-label">Tarifa Plana</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text">€</span>
+                                            <input type="number" step="0.01" class="form-control" id="precio_tarifa_plana" 
+                                                   name="precio_tarifa_plana" value="{{ config.get('precio_tarifa_plana', '90.00') }}" required>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="precio_1_clase_bimensual" class="form-label">1 Clase Bimensual</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text">€</span>
+                                            <input type="number" step="0.01" class="form-control" id="precio_1_clase_bimensual" 
+                                                   name="precio_1_clase_bimensual" value="{{ config.get('precio_1_clase_bimensual', '75.00') }}" required>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="precio_2_clases_bimensual" class="form-label">2 Clases Bimensual</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text">€</span>
+                                            <input type="number" step="0.01" class="form-control" id="precio_2_clases_bimensual" 
+                                                   name="precio_2_clases_bimensual" value="{{ config.get('precio_2_clases_bimensual', '135.00') }}" required>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="precio_matricula" class="form-label">Matrícula Anual</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text">€</span>
+                                            <input type="number" step="0.01" class="form-control" id="precio_matricula" 
+                                                   name="precio_matricula" value="{{ config.get('precio_matricula', '25.00') }}" required>
+                                        </div>
+                                        <div class="form-text">Pago único al año</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <hr class="my-4">
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5 class="text-primary mb-3">
+                                <i class="fas fa-user"></i> Instructora
+                            </h5>
+                            
+                            <div class="mb-3">
+                                <label for="nombre_instructora" class="form-label">Nombre de la Instructora *</label>
+                                <input type="text" class="form-control" id="nombre_instructora" 
+                                       name="nombre_instructora" value="{{ config.get('nombre_instructora', 'Minouche') }}" required>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <h5 class="text-primary mb-3">
+                                <i class="fas fa-user"></i> Instructora
+                            </h5>
+                            
+                            <div class="mb-3">
+                                <label for="nombre_instructora" class="form-label">Nombre de la Instructora *</label>
+                                <input type="text" class="form-control" id="nombre_instructora" 
+                                       name="nombre_instructora" value="{{ config.get('nombre_instructora', 'Minouche') }}" required>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <hr class="my-4">
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5 class="text-primary mb-3">
+                                <i class="fas fa-map-marker-alt"></i> Información de la Escuela
+                            </h5>
+                            
+                            <div class="mb-3">
+                                <label for="direccion_escuela" class="form-label">Dirección</label>
+                                <textarea class="form-control" id="direccion_escuela" name="direccion_escuela" 
+                                          rows="3" placeholder="Calle, número, ciudad, código postal">{{ config.get('direccion_escuela', '') }}</textarea>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="telefono_escuela" class="form-label">Teléfono</label>
+                                <input type="tel" class="form-control" id="telefono_escuela" 
+                                       name="telefono_escuela" value="{{ config.get('telefono_escuela', '') }}" 
+                                       placeholder="+34 123 456 789">
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="email_escuela" class="form-label">Email</label>
+                                <input type="email" class="form-control" id="email_escuela" 
+                                       name="email_escuela" value="{{ config.get('email_escuela', '') }}" 
+                                       placeholder="contacto@atmasuddhi.com">
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <h5 class="text-primary mb-3">
+                                <i class="fas fa-university"></i> Información Bancaria
+                            </h5>
+                            
+                            <div class="mb-3">
+                                <label for="numero_cuenta" class="form-label">Número de Cuenta</label>
+                                <input type="text" class="form-control" id="numero_cuenta" 
+                                       name="numero_cuenta" value="{{ config.get('numero_cuenta', '') }}" 
+                                       placeholder="ES12 1234 5678 9012 3456 7890">
+                                <div class="form-text">Para transferencias bancarias</div>
+                            </div>
+                            
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle"></i>
+                                <strong>Nota:</strong> Esta información se utilizará para generar facturas y comunicaciones con los alumnos.
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between mt-4">
+                        <a href="{{ url_for('index') }}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Volver al Inicio
+                        </a>
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-save"></i> Guardar Configuración
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Información adicional -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-lightbulb"></i> Información del Sistema
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Precios por Tipo de Cuota</h6>
+                        <ul class="list-unstyled">
+                            <li><strong>1 clase/semana:</strong> Precio base por clase</li>
+                            <li><strong>2 clases/semana:</strong> Precio base × 2</li>
+                            <li><strong>3 clases/semana:</strong> Precio base × 3</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Configuración Actual</h6>
+                        <ul class="list-unstyled">
+                            <li><strong>Precio por clase:</strong> €{{ config.get('precio_clase', '15.00') }}</li>
+                            <li><strong>Instructora:</strong> {{ config.get('nombre_instructora', 'Minouche') }}</li>
+                            <li><strong>Escuela:</strong> Atma suddhi</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

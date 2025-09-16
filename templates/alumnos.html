@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+
+{% block title %}Alumnos - Atma suddhi{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="fas fa-users"></i> Alumnos</h1>
+    <a href="{{ url_for('nuevo_alumno') }}" class="btn btn-success">
+        <i class="fas fa-plus"></i> Agregar Nuevo Alumno
+    </a>
+</div>
+
+{% if alumnos %}
+<div class="card">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Email</th>
+                        <th>Teléfono</th>
+                        <th>Tipo de Cuota</th>
+                        <th>Fecha de Registro</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for alumno in alumnos %}
+                    <tr>
+                        <td>
+                            <strong>{{ alumno.nombre }} {{ alumno.apellido }}</strong>
+                        </td>
+                        <td>{{ alumno.email }}</td>
+                        <td>{{ alumno.telefono or 'N/A' }}</td>
+                        <td>
+                            <span class="badge bg-info">{{ alumno.get_tipo_cuota_display() }}</span>
+                        </td>
+                        <td>{{ alumno.fecha_registro.strftime('%d/%m/%Y') }}</td>
+                        <td>
+                            <div class="btn-group" role="group">
+                                <a href="{{ url_for('ver_alumno', alumno_id=alumno.id) }}" 
+                                   class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-eye"></i> Ver
+                                </a>
+                                <a href="{{ url_for('editar_alumno', alumno_id=alumno.id) }}" 
+                                   class="btn btn-sm btn-outline-secondary">
+                                    <i class="fas fa-edit"></i> Editar
+                                </a>
+                                <form method="POST" action="{{ url_for('eliminar_alumno', alumno_id=alumno.id) }}" 
+                                      style="display: inline;" 
+                                      onsubmit="return confirm('¿Estás seguro de que quieres desactivar este alumno?')">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">
+                                        <i class="fas fa-trash"></i> Desactivar
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% else %}
+<div class="text-center py-5">
+    <i class="fas fa-users fa-5x text-muted mb-3"></i>
+    <h3 class="text-muted">No se encontraron alumnos</h3>
+    <p class="text-muted">Comienza agregando tu primer alumno.</p>
+    <a href="{{ url_for('nuevo_alumno') }}" class="btn btn-success">
+        <i class="fas fa-plus"></i> Agregar Primer Alumno
+    </a>
+</div>
+{% endif %}
+{% endblock %}
+

@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+
+{% block title %}Agregar Pago - {{ alumno.nombre }} {{ alumno.apellido }} - Atma suddhi{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-6 mx-auto">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0">
+                    <i class="fas fa-credit-card"></i> Agregar Pago - {{ alumno.nombre }} {{ alumno.apellido }}
+                </h4>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    <div class="mb-3" id="mes-field">
+                        <label for="mes" class="form-label">Mes *</label>
+                        <input type="month" class="form-control" id="mes" name="mes">
+                    </div>
+                    
+                    <div class="mb-3" id="año-field" style="display: none;">
+                        <label for="año" class="form-label">Año de Matrícula *</label>
+                        <select class="form-select" id="año" name="año">
+                            <option value="">Seleccionar año</option>
+                            {% for año in range(2020, 2030) %}
+                            <option value="{{ año }}" {% if año == current_year %}selected{% endif %}>{{ año }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="tipo_pago" class="form-label">Tipo de Pago *</label>
+                        <select class="form-select" id="tipo_pago" name="tipo_pago" required>
+                            <option value="cuota">Cuota mensual ({{ alumno.get_tipo_cuota_display() }} - €{{ "%.2f"|format(alumno.get_precio_cuota()) }})</option>
+                            <option value="matricula">Matrícula anual (€25.00)</option>
+                            <option value="clase_suelta">Clase suelta (€15.00)</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="monto" class="form-label">Monto *</label>
+                        <div class="input-group">
+                            <span class="input-group-text">€</span>
+                            <input type="number" class="form-control" id="monto" name="monto" 
+                                   step="0.01" min="0" required placeholder="0.00" readonly>
+                        </div>
+                        <div class="form-text">El monto se calcula automáticamente según el tipo de pago</div>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between">
+                        <a href="{{ url_for('ver_alumno', alumno_id=alumno.id) }}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Cancelar
+                        </a>
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-save"></i> Registrar Pago
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const tipoPagoSelect = document.getElementById('tipo_pago');
+    const montoInput = document.getElementById('monto');
+    const mesField = document.getElementById('mes-field');
+    const añoField = document.getElementById('año-field');
+    const mesInput = document.getElementById('mes');
+    const añoInput = document.getElementById('año');
+    
+    // Precios fijos
+    const precios = {
+        'cuota': {{ alumno.get_precio_cuota() }},
+        'matricula': 25.00,
+        'clase_suelta': 15.00
+    };
+    
+    function actualizarMonto() {
+        const tipoSeleccionado = tipoPagoSelect.value;
+        const precio = precios[tipoSeleccionado];
+        montoInput.value = precio.toFixed(2);
+    }
+    
+    function actualizarCampos() {
+        const tipoSeleccionado = tipoPagoSelect.value;
+        
+        if (tipoSeleccionado === 'matricula') {
+            mesField.style.display = 'none';
+            añoField.style.display = 'block';
+            mesInput.required = false;
+            añoInput.required = true;
+        } else {
+            mesField.style.display = 'block';
+            añoField.style.display = 'none';
+            mesInput.required = true;
+            añoInput.required = false;
+        }
+    }
+    
+    // Actualizar monto al cambiar el tipo de pago
+    tipoPagoSelect.addEventListener('change', function() {
+        actualizarMonto();
+        actualizarCampos();
+    });
+    
+    // Establecer estado inicial
+    actualizarMonto();
+    actualizarCampos();
+});
+</script>
+{% endblock %}
