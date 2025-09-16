@@ -178,11 +178,23 @@
                             <i class="fas fa-home"></i> Inicio
                         </a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('alumnos') }}">
-                            <i class="fas fa-users"></i> Alumnos
-                        </a>
-                    </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-users"></i> Alumnos
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="{{ url_for('alumnos') }}">
+                                    <i class="fas fa-user-check"></i> Alumnos Activos
+                                </a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('nuevo_alumno') }}">
+                                    <i class="fas fa-plus"></i> Nuevo Alumno
+                                </a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="{{ url_for('alumnos_desactivados') }}">
+                                    <i class="fas fa-user-times"></i> Desactivados/Suspendidos
+                                </a></li>
+                            </ul>
+                        </li>
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('horarios') }}">
                             <i class="fas fa-calendar-alt"></i> Horarios
@@ -198,11 +210,21 @@
                             <i class="fas fa-chart-bar"></i> Reportes
                         </a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('configuracion') }}">
-                            <i class="fas fa-cog"></i> Configuración
-                        </a>
-                    </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('economia') }}">
+                                <i class="fas fa-chart-line"></i> Economía
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('configuracion') }}">
+                                <i class="fas fa-cog"></i> Configuración
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="http://atmasuddhi.es" target="_blank">
+                                <i class="fas fa-external-link-alt"></i> Web Atma suddhi
+                            </a>
+                        </li>
                 </ul>
             </div>
         </div>

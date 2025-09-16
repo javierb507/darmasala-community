@@ -3,75 +3,281 @@
 {% block title %}Alumnos - Atma suddhi{% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h1><i class="fas fa-users"></i> Alumnos</h1>
-    <a href="{{ url_for('nuevo_alumno') }}" class="btn btn-success">
-        <i class="fas fa-plus"></i> Agregar Nuevo Alumno
-    </a>
-</div>
-
-{% if alumnos %}
-<div class="card">
-    <div class="card-body">
-        <div class="table-responsive">
-            <table class="table table-hover">
-                <thead>
-                    <tr>
-                        <th>Nombre</th>
-                        <th>Email</th>
-                        <th>Teléfono</th>
-                        <th>Tipo de Cuota</th>
-                        <th>Fecha de Registro</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for alumno in alumnos %}
-                    <tr>
-                        <td>
-                            <strong>{{ alumno.nombre }} {{ alumno.apellido }}</strong>
-                        </td>
-                        <td>{{ alumno.email }}</td>
-                        <td>{{ alumno.telefono or 'N/A' }}</td>
-                        <td>
-                            <span class="badge bg-info">{{ alumno.get_tipo_cuota_display() }}</span>
-                        </td>
-                        <td>{{ alumno.fecha_registro.strftime('%d/%m/%Y') }}</td>
-                        <td>
-                            <div class="btn-group" role="group">
-                                <a href="{{ url_for('ver_alumno', alumno_id=alumno.id) }}" 
-                                   class="btn btn-sm btn-outline-primary">
-                                    <i class="fas fa-eye"></i> Ver
-                                </a>
-                                <a href="{{ url_for('editar_alumno', alumno_id=alumno.id) }}" 
-                                   class="btn btn-sm btn-outline-secondary">
-                                    <i class="fas fa-edit"></i> Editar
-                                </a>
-                                <form method="POST" action="{{ url_for('eliminar_alumno', alumno_id=alumno.id) }}" 
-                                      style="display: inline;" 
-                                      onsubmit="return confirm('¿Estás seguro de que quieres desactivar este alumno?')">
-                                    <button type="submit" class="btn btn-sm btn-outline-danger">
-                                        <i class="fas fa-trash"></i> Desactivar
-                                    </button>
-                                </form>
-                            </div>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2><i class="fas fa-users"></i> Alumnos</h2>
+            <a href="{{ url_for('nuevo_alumno') }}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Nuevo Alumno
+            </a>
         </div>
     </div>
 </div>
-{% else %}
-<div class="text-center py-5">
-    <i class="fas fa-users fa-5x text-muted mb-3"></i>
-    <h3 class="text-muted">No se encontraron alumnos</h3>
-    <p class="text-muted">Comienza agregando tu primer alumno.</p>
-    <a href="{{ url_for('nuevo_alumno') }}" class="btn btn-success">
-        <i class="fas fa-plus"></i> Agregar Primer Alumno
-    </a>
-</div>
-{% endif %}
-{% endblock %}
 
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Lista de Alumnos</h5>
+            </div>
+            <div class="card-body">
+                {% if alumnos %}
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5><i class="fas fa-user-check text-success"></i> Alumnos Activos</h5>
+                        <a href="{{ url_for('alumnos_desactivados') }}" class="btn btn-outline-secondary btn-sm">
+                            <i class="fas fa-user-times"></i> Ver Desactivados
+                        </a>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Alumno</th>
+                                    <th>Contacto</th>
+                                    <th>Tipo de Cuota</th>
+                                    <th>Estado de Pagos</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for alumno in alumnos %}
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar-circle me-2">
+                                                {{ alumno.nombre[0] }}{{ alumno.apellido[0] }}
+                                            </div>
+                                            <div>
+                                                <strong>{{ alumno.nombre }} {{ alumno.apellido }}</strong>
+                                                <br>
+                                                <small class="text-muted">
+                                                    {% if alumno.tipo_cuota.endswith('_bimensual') %}
+                                                        <i class="fas fa-calendar-alt"></i> Bimensual
+                                                    {% else %}
+                                                        <i class="fas fa-calendar"></i> Mensual
+                                                    {% endif %}
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div>
+                                            <i class="fas fa-envelope text-muted me-1"></i>
+                                            <small>{{ alumno.email }}</small>
+                                        </div>
+                                        <div>
+                                            <i class="fas fa-phone text-muted me-1"></i>
+                                            <small>{{ alumno.telefono }}</small>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-info">{{ alumno.get_tipo_cuota_display() }}</span>
+                                        <br>
+                                        <small class="text-muted">{{ alumno.get_precio_cuota() }}€/mes</small>
+                                    </td>
+                                    <td>
+                                        <div class="payment-status">
+                                            <!-- Estado de Matrícula -->
+                                            <div class="mb-2">
+                                                {% set curso_actual = current_year|string + "/" + (current_year + 1)|string %}
+                                                {% if alumno.matricula_pagada and alumno.fecha_matricula and alumno.fecha_matricula.year == current_year %}
+                                                    <span class="badge bg-success">
+                                                        <i class="fas fa-check"></i> Matrícula {{ curso_actual }}
+                                                    </span>
+                                                {% else %}
+                                                    <span class="badge bg-warning">
+                                                        <i class="fas fa-exclamation"></i> Matrícula {{ curso_actual }} Pendiente
+                                                    </span>
+                                                {% endif %}
+                                            </div>
+                                            
+                                            <!-- Estado de Pagos Mensuales/Bimensuales -->
+                                            <div class="monthly-payments">
+                                                {% set meses_nombres = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dec'] %}
+                                                {% set es_bimensual = alumno.tipo_cuota.endswith('_bimensual') %}
+                                                
+                                                {% if es_bimensual %}
+                                                    <!-- Para pagos bimensuales: mostrar pares de meses -->
+                                                    {% for bimestre in range(0, 6) %}
+                                                        {% set mes1 = bimestre * 2 + 1 %}
+                                                        {% set mes2 = bimestre * 2 + 2 %}
+                                                        {% set bimestre_str = "%04d-%02d-%02d"|format(current_year, mes1, mes2) %}
+                                                        
+                                                        {% set pago_bimestre = false %}
+                                                        {% for pago in alumno.pagos %}
+                                                            {% if pago.mes and pago.mes.startswith(current_year|string) and pago.tipo_pago == 'cuota' %}
+                                                                {% set pago_mes_num = pago.mes.split('-')[1]|int %}
+                                                                {% if pago_mes_num == mes1 or pago_mes_num == mes2 %}
+                                                                    {% set pago_bimestre = true %}
+                                                                {% endif %}
+                                                            {% endif %}
+                                                        {% endfor %}
+                                                        
+                                                        {% if pago_bimestre %}
+                                                            <span class="badge bg-success text-white me-1 mb-1" title="✅ Pagado: {{ meses_nombres[mes1-1] }}/{{ meses_nombres[mes2-1] }} {{ current_year }}">
+                                                                {{ meses_nombres[mes1-1] }}/{{ meses_nombres[mes2-1] }}
+                                                            </span>
+                                                        {% else %}
+                                                            <span class="badge bg-danger text-white me-1 mb-1" title="❌ Pendiente: {{ meses_nombres[mes1-1] }}/{{ meses_nombres[mes2-1] }} {{ current_year }}">
+                                                                {{ meses_nombres[mes1-1] }}/{{ meses_nombres[mes2-1] }}
+                                                            </span>
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                {% else %}
+                                                    <!-- Para pagos mensuales normales -->
+                                                    {% for mes in range(1, 13) %}
+                                                        {% set mes_str = "%04d-%02d"|format(current_year, mes) %}
+                                                        {% set pago_mes = false %}
+                                                        {% for pago in alumno.pagos %}
+                                                            {% if pago.mes == mes_str and pago.tipo_pago == 'cuota' %}
+                                                                {% set pago_mes = true %}
+                                                            {% endif %}
+                                                        {% endfor %}
+                                                        {% if pago_mes %}
+                                                            <span class="badge bg-success text-white me-1 mb-1" title="✅ Pagado: {{ meses_nombres[mes-1] }} {{ current_year }}">
+                                                                {{ meses_nombres[mes-1] }}
+                                                            </span>
+                                                        {% else %}
+                                                            <span class="badge bg-danger text-white me-1 mb-1" title="❌ Pendiente: {{ meses_nombres[mes-1] }} {{ current_year }}">
+                                                                {{ meses_nombres[mes-1] }}
+                                                            </span>
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group-vertical btn-group-sm" role="group">
+                                            <a href="{{ url_for('ver_alumno', alumno_id=alumno.id) }}" 
+                                               class="btn btn-outline-primary btn-sm" 
+                                               title="Ver detalles">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <a href="{{ url_for('editar_alumno', alumno_id=alumno.id) }}" 
+                                               class="btn btn-outline-warning btn-sm" 
+                                               title="Editar">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <a href="{{ url_for('agregar_pago', alumno_id=alumno.id) }}" 
+                                               class="btn btn-outline-success btn-sm" 
+                                               title="Agregar pago">
+                                                <i class="fas fa-plus"></i>
+                                            </a>
+                                            <a href="{{ url_for('eliminar_alumno', alumno_id=alumno.id) }}" 
+                                               class="btn btn-outline-danger btn-sm" 
+                                               title="Deshabilitar"
+                                               onclick="return confirm('¿Estás seguro de que quieres deshabilitar este alumno?')">
+                                                <i class="fas fa-user-times"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    </div>
+                {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                        <p class="text-muted">No hay alumnos registrados.</p>
+                        <a href="{{ url_for('nuevo_alumno') }}" class="btn btn-primary">
+                            <i class="fas fa-plus"></i> Agregar Primer Alumno
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.avatar-circle {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary-purple), var(--accent-yellow));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 16px;
+}
+
+.avatar-circle-inactive {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #6c757d, #adb5bd);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 16px;
+    opacity: 0.7;
+}
+
+.payment-status {
+    min-width: 200px;
+}
+
+.monthly-payments {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px;
+}
+
+.monthly-payments .badge {
+    font-size: 0.65rem;
+    padding: 0.25em 0.35em;
+    min-width: 35px;
+    text-align: center;
+    font-weight: 500;
+}
+
+.btn-group-vertical .btn {
+    margin-bottom: 2px;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.table th {
+    border-top: none;
+    font-weight: 600;
+}
+
+.table td {
+    vertical-align: middle;
+}
+</style>
+
+<script>
+function reactivarAlumno(alumnoId) {
+    if (confirm('¿Estás seguro de que quieres reactivar este alumno?')) {
+        fetch(`/alumnos/${alumnoId}/reactivar`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Error al reactivar el alumno');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error al reactivar el alumno');
+        });
+    }
+}
+</script>
+{% endblock %}
