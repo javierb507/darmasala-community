@@ -85,13 +85,17 @@
                                                 </span>
                                             </td>
                                             <td>{{ clase.capacidad_maxima }} personas</td>
-                                            <td>
-                                                <div class="btn-group btn-group-sm">
-                                                    <a href="{{ url_for('editar_clase', clase_id=clase.id) }}" class="btn btn-outline-warning">
-                                                        <i class="fas fa-edit"></i>
-                                                    </a>
-                                                </div>
-                                            </td>
+                                                <td>
+                                                    <div class="btn-group btn-group-sm">
+                                                        <a href="{{ url_for('editar_clase', clase_id=clase.id) }}" class="btn btn-outline-warning" title="Editar clase">
+                                                            <i class="fas fa-edit"></i>
+                                                        </a>
+                                                        <a href="{{ url_for('eliminar_clase', clase_id=clase.id) }}" class="btn btn-outline-danger" 
+                                                           onclick="return confirm('¿Eliminar esta clase? Esta acción no se puede deshacer.')" title="Eliminar clase">
+                                                            <i class="fas fa-trash"></i>
+                                                        </a>
+                                                    </div>
+                                                </td>
                                         </tr>
                                         {% endfor %}
                                     </tbody>

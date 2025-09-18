@@ -937,6 +937,10 @@ def calendario_unificado():
     # Obtener parámetros de fecha
     año = request.args.get('año', datetime.now().year, type=int)
     mes = request.args.get('mes', datetime.now().month, type=int)
+    vista = request.args.get('vista', 'mes')  # mes, semana
+    
+    if vista == 'semana':
+        return calendario_semanal(año, mes)
     
     # Obtener sesiones de yogaterapia del mes
     sesiones_yogaterapia = SesionYogaterapia.query.filter(
@@ -950,19 +954,80 @@ def calendario_unificado():
     # Obtener clases disponibles
     clases = Clase.query.filter_by(activa=True).all()
     
+    # Calcular datos del calendario
+    primer_dia = datetime(año, mes, 1).weekday()
+    dias_mes = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+    if año % 4 == 0 and (año % 100 != 0 or año % 400 == 0):
+        dias_mes[1] = 29
+    dias_en_mes = dias_mes[mes-1]
+    
+    # Nombres de meses
+    nombres_meses = [
+        'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+        'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+    ]
+    nombre_mes = nombres_meses[mes-1]
+    
+    # Generar días del mes para el calendario
+    dias_calendario = []
+    for dia in range(1, dias_en_mes + 1):
+        fecha_actual = datetime(año, mes, dia).date()
+        dias_calendario.append(fecha_actual)
+    
+    # Obtener fecha actual
+    today = datetime.now().date()
+    
     return render_template('calendario_unificado.html', 
                          año=año, 
                          mes=mes,
+                         nombre_mes=nombre_mes,
+                         primer_dia=primer_dia,
+                         dias_en_mes=dias_en_mes,
+                         dias_calendario=dias_calendario,
                          sesiones_yogaterapia=sesiones_yogaterapia,
                          horarios=horarios,
-                         clases=clases)
+                         clases=clases,
+                         vista=vista,
+                         today=today)
 
-@app.route('/horarios/calendario-anual')
+def calendario_semanal(año, mes):
+    """Vista semanal del calendario"""
+    # Obtener la semana actual
+    hoy = datetime.now().date()
+    inicio_semana = hoy - timedelta(days=hoy.weekday())
+    
+    # Obtener sesiones de la semana
+    fin_semana = inicio_semana + timedelta(days=6)
+    sesiones_yogaterapia = SesionYogaterapia.query.filter(
+        SesionYogaterapia.fecha_sesion >= inicio_semana,
+        SesionYogaterapia.fecha_sesion <= fin_semana
+    ).order_by(SesionYogaterapia.fecha_sesion).all()
+    
+    # Obtener horarios semanales
+    horarios = HorarioSemanal.query.filter_by(activo=True).all()
+    
+    # Obtener clases disponibles
+    clases = Clase.query.filter_by(activa=True).all()
+    
+    # Generar días de la semana
+    dias_semana = []
+    for i in range(7):
+        dia = inicio_semana + timedelta(days=i)
+        dias_semana.append(dia)
+    
+    return render_template('calendario_semanal.html',
+                         dias_semana=dias_semana,
+                         sesiones_yogaterapia=sesiones_yogaterapia,
+                         horarios=horarios,
+                         clases=clases,
+                         vista='semana')
+
+@app.route('/calendario/anual')
 def calendario_anual():
     """Vista de calendario anual para agendar sesiones individuales"""
     año = request.args.get('año', datetime.now().year, type=int)
     
-    # Obtener sesiones de yogaterapia del año
+    # Obtener todas las sesiones de yogaterapia del año
     sesiones_yogaterapia = SesionYogaterapia.query.filter(
         db.extract('year', SesionYogaterapia.fecha_sesion) == año
     ).order_by(SesionYogaterapia.fecha_sesion).all()
@@ -970,10 +1035,51 @@ def calendario_anual():
     # Obtener horarios semanales
     horarios = HorarioSemanal.query.filter_by(activo=True).all()
     
-    return render_template('calendario_anual.html', 
-                         año=año, 
-                         sesiones_yogaterapia=sesiones_yogaterapia,
-                         horarios=horarios)
+    # Obtener clases disponibles
+    clases = Clase.query.filter_by(activa=True).all()
+    
+    # Generar datos para cada mes
+    meses_datos = []
+    nombres_meses = [
+        'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+        'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+    ]
+    
+    for mes in range(1, 13):
+        # Obtener sesiones del mes
+        sesiones_mes = [s for s in sesiones_yogaterapia if s.fecha_sesion.month == mes]
+        
+        # Calcular datos del mes
+        primer_dia = datetime(año, mes, 1).weekday()
+        dias_mes = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+        if año % 4 == 0 and (año % 100 != 0 or año % 400 == 0):
+            dias_mes[1] = 29
+        dias_en_mes = dias_mes[mes-1]
+        
+        # Generar días del mes
+        dias_calendario = []
+        for dia in range(1, dias_en_mes + 1):
+            fecha_actual = datetime(año, mes, dia).date()
+            dias_calendario.append(fecha_actual)
+        
+        meses_datos.append({
+            'mes': mes,
+            'nombre': nombres_meses[mes-1],
+            'primer_dia': primer_dia,
+            'dias_en_mes': dias_en_mes,
+            'dias_calendario': dias_calendario,
+            'sesiones': sesiones_mes
+        })
+    
+    # Obtener fecha actual
+    today = datetime.now().date()
+    
+    return render_template('calendario_anual.html',
+                         año=año,
+                         meses_datos=meses_datos,
+                         horarios=horarios,
+                         clases=clases,
+                         today=today)
 
 @app.route('/horarios/historico')
 def horarios_historico():
@@ -1793,6 +1899,15 @@ def nueva_clase():
             db.session.rollback()
     
     return render_template('configuracion/nueva_clase.html')
+
+@app.route('/configuracion/clases/<int:clase_id>/eliminar')
+def eliminar_clase(clase_id):
+    """Eliminar clase (desactivar)"""
+    clase = Clase.query.get_or_404(clase_id)
+    clase.activa = False
+    db.session.commit()
+    flash('Clase eliminada exitosamente', 'success')
+    return redirect(url_for('configuracion'))
 
 @app.route('/configuracion/clases/<int:clase_id>/editar', methods=['GET', 'POST'])
 def editar_clase(clase_id):

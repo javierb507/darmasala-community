@@ -15,6 +15,15 @@
                     <a href="{{ url_for('calendario_unificado', año=año, mes=mes+1) }}" class="btn btn-outline-secondary">
                         Mes Siguiente <i class="fas fa-chevron-right"></i>
                     </a>
+                    <a href="{{ url_for('calendario_unificado') }}" class="btn btn-info">
+                        <i class="fas fa-calendar-day"></i> Mes Actual
+                    </a>
+                    <a href="{{ url_for('calendario_unificado', vista='semana') }}" class="btn btn-outline-info">
+                        <i class="fas fa-calendar-week"></i> Vista Semanal
+                    </a>
+                    <a href="{{ url_for('calendario_anual') }}" class="btn btn-outline-success">
+                        <i class="fas fa-calendar-alt"></i> Vista Anual
+                    </a>
                     <a href="{{ url_for('nueva_yogaterapia') }}" class="btn btn-primary">
                         <i class="fas fa-plus"></i> Nueva Cita Individual
                     </a>
@@ -69,19 +78,7 @@
                 <div class="card-header">
                     <h5 class="mb-0">
                         <i class="fas fa-calendar"></i> 
-                        {% if mes == 1 %}Enero
-                        {% elif mes == 2 %}Febrero
-                        {% elif mes == 3 %}Marzo
-                        {% elif mes == 4 %}Abril
-                        {% elif mes == 5 %}Mayo
-                        {% elif mes == 6 %}Junio
-                        {% elif mes == 7 %}Julio
-                        {% elif mes == 8 %}Agosto
-                        {% elif mes == 9 %}Septiembre
-                        {% elif mes == 10 %}Octubre
-                        {% elif mes == 11 %}Noviembre
-                        {% elif mes == 12 %}Diciembre
-                        {% endif %} {{ año }}
+                        {{ nombre_mes }} {{ año }}
                     </h5>
                 </div>
                 <div class="card-body">
@@ -99,13 +96,6 @@
                         
                         <!-- Días del mes -->
                         <div class="calendar-grid">
-                            {% set dias_mes = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31] %}
-                            {% if año % 4 == 0 and (año % 100 != 0 or año % 400 == 0) %}
-                                {% set dias_mes = [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31] %}
-                            {% endif %}
-                            
-                            {% set primer_dia = datetime(año, mes, 1).weekday() %}
-                            {% set dias_en_mes = dias_mes[mes-1] %}
                             
                             <!-- Espacios vacíos para alinear el primer día -->
                             {% for i in range(primer_dia) %}
@@ -113,18 +103,17 @@
                             {% endfor %}
                             
                             <!-- Días del mes -->
-                            {% for dia in range(1, dias_en_mes + 1) %}
-                            {% set fecha_actual = datetime(año, mes, dia).date() %}
+                            {% for fecha_actual in dias_calendario %}
                             {% set sesiones_dia = sesiones_yogaterapia|selectattr('fecha_sesion', 'equalto', fecha_actual)|list %}
                             {% set dia_semana = fecha_actual.weekday() %}
                             {% set horarios_dia = horarios|selectattr('dia_semana', 'equalto', dia_semana)|list %}
                             
-                            <div class="calendar-day {% if sesiones_dia %}has-appointments{% endif %} {% if horarios_dia %}has-schedule{% endif %}" 
-                                 data-fecha="{{ fecha_actual.isoformat() }}"
-                                 data-sesiones="{{ sesiones_dia|length }}"
-                                 data-horarios="{{ horarios_dia|length }}">
-                                
-                                <div class="day-number">{{ dia }}</div>
+                        <div class="calendar-day {% if sesiones_dia %}has-appointments{% endif %} {% if horarios_dia %}has-schedule{% endif %} {% if fecha_actual == today %}today{% endif %}" 
+                             data-fecha="{{ fecha_actual.isoformat() }}"
+                             data-sesiones="{{ sesiones_dia|length }}"
+                             data-horarios="{{ horarios_dia|length }}">
+                            
+                            <div class="day-number">{{ fecha_actual.day }}</div>
                                 
                                 <!-- Actividades periódicas (horarios semanales) -->
                                 {% if horarios_dia %}
@@ -153,11 +142,9 @@
                                 {% endif %}
                                 
                                 <!-- Indicador de clic para crear nueva cita -->
-                                {% if not sesiones_dia %}
                                 <div class="add-appointment" title="Crear nueva cita individual">
                                     <i class="fas fa-plus-circle text-muted"></i>
                                 </div>
-                                {% endif %}
                             </div>
                             {% endfor %}
                         </div>
@@ -304,28 +291,49 @@
     padding: 8px;
     position: relative;
     cursor: pointer;
-    transition: all 0.2s;
-    border: 1px solid transparent;
+    transition: all 0.3s ease;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    margin: 1px;
 }
 
 .calendar-day:hover {
-    background-color: #f8f9fa;
+    background-color: #e3f2fd;
     border-color: #007bff;
+    transform: scale(1.02);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    z-index: 10;
 }
 
 .calendar-day.empty {
     background-color: #f8f9fa;
     cursor: default;
+    border: 1px solid #e9ecef;
 }
 
 .calendar-day.has-appointments {
-    background-color: #fff3cd;
-    border-color: #ffc107;
+    background-color: #ffebee;
+    border-color: #ffcdd2;
+    box-shadow: 0 2px 8px rgba(244, 67, 54, 0.2);
 }
 
 .calendar-day.has-schedule {
-    background-color: #d1ecf1;
-    border-color: #17a2b8;
+    background-color: #e8f5e8;
+    border-color: #c8e6c9;
+    box-shadow: 0 2px 8px rgba(76, 175, 80, 0.2);
+}
+
+.calendar-day.has-appointments.has-schedule {
+    background: linear-gradient(135deg, #ffebee 50%, #e8f5e8 50%);
+    border-color: #ffcdd2;
+    box-shadow: 0 2px 8px rgba(244, 67, 54, 0.2), 0 2px 8px rgba(76, 175, 80, 0.2);
+}
+
+.calendar-day.today {
+    background-color: #fff3e0;
+    border-color: #ffcc02;
+    box-shadow: 0 4px 12px rgba(255, 193, 7, 0.3);
+    font-weight: bold;
 }
 
 .day-number {
@@ -386,15 +394,60 @@ document.addEventListener('DOMContentLoaded', function() {
             const sesiones = parseInt(this.dataset.sesiones);
             const horarios = parseInt(this.dataset.horarios);
             
-            if (sesiones > 0) {
-                // Mostrar sesiones del día
-                alert(`Día ${fecha}:\n- ${sesiones} cita(s) individual(es)\n- ${horarios} horario(s) semanal(es)`);
-            } else {
-                // Crear nueva cita para este día
-                if (confirm(`¿Crear nueva cita individual para el ${fecha}?`)) {
-                    window.location.href = `{{ url_for('nueva_yogaterapia') }}?fecha=${fecha}`;
-                }
+            // Crear modal de información del día
+            let modalContent = `<div class="modal fade" id="dayModal" tabindex="-1">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">${fecha}</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <h6>Actividades del día:</h6>
+                            <ul class="list-group list-group-flush">`;
+            
+            if (horarios > 0) {
+                modalContent += `<li class="list-group-item d-flex justify-content-between align-items-center">
+                    <span><i class="fas fa-clock text-primary"></i> Horarios semanales</span>
+                    <span class="badge bg-primary">${horarios}</span>
+                </li>`;
             }
+            
+            if (sesiones > 0) {
+                modalContent += `<li class="list-group-item d-flex justify-content-between align-items-center">
+                    <span><i class="fas fa-heart text-danger"></i> Citas individuales</span>
+                    <span class="badge bg-danger">${sesiones}</span>
+                </li>`;
+            }
+            
+            if (horarios === 0 && sesiones === 0) {
+                modalContent += `<li class="list-group-item text-muted">No hay actividades programadas</li>`;
+            }
+            
+            modalContent += `</ul>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                            <a href="{{ url_for('nueva_yogaterapia') }}?fecha=${fecha}" class="btn btn-primary">
+                                <i class="fas fa-plus"></i> Nueva Cita Individual
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>`;
+            
+            // Remover modal existente si hay uno
+            const existingModal = document.getElementById('dayModal');
+            if (existingModal) {
+                existingModal.remove();
+            }
+            
+            // Agregar modal al DOM
+            document.body.insertAdjacentHTML('beforeend', modalContent);
+            
+            // Mostrar modal
+            const modal = new bootstrap.Modal(document.getElementById('dayModal'));
+            modal.show();
         });
     });
 });
