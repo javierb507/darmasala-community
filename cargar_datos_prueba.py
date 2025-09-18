@@ -159,11 +159,14 @@ def cargar_datos_prueba():
         
         for i in range(20):
             fecha_sesion = date.today() - timedelta(days=random.randint(0, 60))
+            # Seleccionar un alumno aleatorio
+            alumno = random.choice(alumnos)
+            
             sesion = SesionYogaterapia(
-                nombre_persona=random.choice(nombres_personas),
-                email_persona=f"persona{i+1}@email.com",
-                telefono_persona=f"6{random.randint(10000000, 99999999)}",
+                alumno_id=alumno.id,
                 fecha_sesion=fecha_sesion,
+                hora_inicio=datetime.strptime(f"{random.randint(9, 18):02d}:{random.choice(['00', '15', '30', '45'])}", '%H:%M').time(),
+                hora_fin=datetime.strptime(f"{random.randint(10, 19):02d}:{random.choice(['00', '15', '30', '45'])}", '%H:%M').time(),
                 duracion_minutos=random.choice([45, 60, 75, 90]),
                 tipo_sesion='individual',
                 motivo_consulta=f'Consulta {i+1}: Dolor de espalda, estrés, flexibilidad',

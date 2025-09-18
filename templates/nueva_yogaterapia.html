@@ -26,38 +26,57 @@
                 <div class="card-body">
                     <form method="POST" action="{% if from_student %}{{ url_for('nueva_yogaterapia_alumno', alumno_id=alumno.id) }}{% else %}{{ url_for('procesar_yogaterapia_general') }}{% endif %}" enctype="multipart/form-data">
                         <div class="row">
-                            <!-- Información Personal -->
-                            <div class="col-md-6">
-                                <h6 class="text-muted mb-3">Datos de Contacto</h6>
-                                
-                                <div class="mb-3">
-                                    <label for="nombre_persona" class="form-label">Nombre Completo *</label>
-                                    <input type="text" class="form-control" id="nombre_persona" name="nombre_persona" 
-                                           value="{% if alumno %}{{ alumno.nombre }} {{ alumno.apellido }}{% endif %}" required>
-                                </div>
-                                
-                                <div class="mb-3">
-                                    <label for="email_persona" class="form-label">Email</label>
-                                    <input type="email" class="form-control" id="email_persona" name="email_persona"
-                                           value="{% if alumno %}{{ alumno.email }}{% endif %}">
-                                </div>
-                                
-                                <div class="mb-3">
-                                    <label for="telefono_persona" class="form-label">Teléfono</label>
-                                    <input type="tel" class="form-control" id="telefono_persona" name="telefono_persona"
-                                           value="{% if alumno %}{{ alumno.telefono }}{% endif %}">
-                                </div>
-                            </div>
+                <!-- Selección de Alumno -->
+                <div class="col-md-6">
+                    <h6 class="text-muted mb-3">Seleccionar Alumno</h6>
+                    
+                    <div class="mb-3">
+                        <label for="alumno_id" class="form-label">Alumno *</label>
+                        <select class="form-select" id="alumno_id" name="alumno_id" required>
+                            <option value="">Seleccionar alumno...</option>
+                            {% for alumno in alumnos %}
+                            <option value="{{ alumno.id }}" {% if from_student and alumno.id == alumno.id %}selected{% endif %}>
+                                {{ alumno.nombre }} {{ alumno.apellido }} - {{ alumno.email }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    {% if from_student %}
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i>
+                        <strong>Datos del alumno:</strong><br>
+                        <strong>Email:</strong> {{ alumno.email }}<br>
+                        <strong>Teléfono:</strong> {{ alumno.telefono }}
+                    </div>
+                    {% endif %}
+                </div>
 
                             <!-- Información de la Sesión -->
                             <div class="col-md-6">
                                 <h6 class="text-muted mb-3">Detalles de la Sesión</h6>
                                 
-                                <div class="mb-3">
-                                    <label for="fecha_sesion" class="form-label">Fecha de la Sesión *</label>
-                                    <input type="date" class="form-control" id="fecha_sesion" name="fecha_sesion" 
-                                           value="{{ request.args.get('fecha', '') }}" required>
-                                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="fecha_sesion" class="form-label">Fecha de la Sesión *</label>
+                            <input type="date" class="form-control" id="fecha_sesion" name="fecha_sesion" 
+                                   value="{{ request.args.get('fecha', '') }}" required>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="mb-3">
+                            <label for="hora_inicio" class="form-label">Hora de Inicio</label>
+                            <input type="time" class="form-control" id="hora_inicio" name="hora_inicio">
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="mb-3">
+                            <label for="hora_fin" class="form-label">Hora de Fin</label>
+                            <input type="time" class="form-control" id="hora_fin" name="hora_fin">
+                        </div>
+                    </div>
+                </div>
                                 
                                 <div class="mb-3">
                                     <label for="duracion_minutos" class="form-label">Duración (minutos)</label>

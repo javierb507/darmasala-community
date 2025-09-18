@@ -352,10 +352,10 @@ class TipoClase(db.Model):
 # Modelo de Yogaterapia (Sesiones Individuales)
 class SesionYogaterapia(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    nombre_persona = db.Column(db.String(100), nullable=False)  # Nombre de la persona
-    email_persona = db.Column(db.String(100))  # Email opcional
-    telefono_persona = db.Column(db.String(20))  # Teléfono opcional
+    alumno_id = db.Column(db.Integer, db.ForeignKey('alumno.id'), nullable=False)  # Referencia al alumno
     fecha_sesion = db.Column(db.Date, nullable=False)
+    hora_inicio = db.Column(db.Time)  # Hora de inicio de la sesión
+    hora_fin = db.Column(db.Time)  # Hora de fin de la sesión
     duracion_minutos = db.Column(db.Integer, default=60)
     tipo_sesion = db.Column(db.String(50), default='individual')  # individual, pareja
     
@@ -383,10 +383,11 @@ class SesionYogaterapia(db.Model):
     fecha_creacion = db.Column(db.DateTime, default=datetime.utcnow)
     
     # Relaciones
+    alumno = db.relationship('Alumno', backref='sesiones_yogaterapia', lazy=True)
     archivos = db.relationship('ArchivoYogaterapia', backref='sesion_yogaterapia', lazy=True, cascade='all, delete-orphan')
     
     def __repr__(self):
-        return f'<SesionYogaterapia {self.nombre_persona} - {self.fecha_sesion}>'
+        return f'<SesionYogaterapia {self.alumno.nombre if self.alumno else "Sin alumno"} - {self.fecha_sesion}>'
 
 # Modelo de Archivo de Yogaterapia
 class ArchivoYogaterapia(db.Model):
@@ -1175,21 +1176,29 @@ def yogaterapia():
 @app.route('/yogaterapia/nueva')
 def nueva_yogaterapia():
     """Formulario para nueva sesión de yogaterapia"""
-    return render_template('nueva_yogaterapia.html')
+    alumnos = Alumno.query.filter_by(activo=True).order_by(Alumno.nombre, Alumno.apellido).all()
+    return render_template('nueva_yogaterapia.html', alumnos=alumnos)
 
 @app.route('/yogaterapia/procesar', methods=['POST'])
 def procesar_yogaterapia_general():
     """Procesar nueva sesión de yogaterapia general"""
     try:
-        nombre_persona = request.form['nombre_persona']
-        email_persona = request.form.get('email_persona', '')
-        telefono_persona = request.form.get('telefono_persona', '')
+        alumno_id = request.form['alumno_id']
+        alumno = Alumno.query.get_or_404(alumno_id)
+        
+        # Procesar horas
+        hora_inicio = None
+        hora_fin = None
+        if request.form.get('hora_inicio'):
+            hora_inicio = datetime.strptime(request.form['hora_inicio'], '%H:%M').time()
+        if request.form.get('hora_fin'):
+            hora_fin = datetime.strptime(request.form['hora_fin'], '%H:%M').time()
         
         sesion = SesionYogaterapia(
-            nombre_persona=nombre_persona,
-            email_persona=email_persona,
-            telefono_persona=telefono_persona,
+            alumno_id=alumno_id,
             fecha_sesion=datetime.strptime(request.form['fecha_sesion'], '%Y-%m-%d').date(),
+            hora_inicio=hora_inicio,
+            hora_fin=hora_fin,
             duracion_minutos=int(request.form.get('duracion_minutos', 60)),
             tipo_sesion=request.form.get('tipo_sesion', 'individual'),
             motivo_consulta=request.form.get('motivo_consulta'),
@@ -1252,7 +1261,7 @@ def procesar_yogaterapia_general():
             db.session.add(pago)
         
         db.session.commit()
-        flash(f'¡Sesión de yogaterapia registrada exitosamente para {nombre_persona}!', 'success')
+        flash(f'¡Sesión de yogaterapia registrada exitosamente para {alumno.nombre} {alumno.apellido}!', 'success')
         return redirect(url_for('yogaterapia'))
         
     except Exception as e:
@@ -1276,6 +1285,17 @@ def editar_sesion_yogaterapia(sesion_id):
         try:
             # Actualizar datos de la sesión
             sesion.fecha_sesion = datetime.strptime(request.form['fecha_sesion'], '%Y-%m-%d').date()
+            
+            # Procesar horas
+            if request.form.get('hora_inicio'):
+                sesion.hora_inicio = datetime.strptime(request.form['hora_inicio'], '%H:%M').time()
+            else:
+                sesion.hora_inicio = None
+            if request.form.get('hora_fin'):
+                sesion.hora_fin = datetime.strptime(request.form['hora_fin'], '%H:%M').time()
+            else:
+                sesion.hora_fin = None
+            
             sesion.duracion_minutos = int(request.form.get('duracion_minutos', 75))
             sesion.tipo_sesion = request.form.get('tipo_sesion', 'individual')
             sesion.motivo_consulta = request.form.get('motivo_consulta')
@@ -1356,11 +1376,19 @@ def nueva_yogaterapia_alumno(alumno_id):
     
     if request.method == 'POST':
         try:
+            # Procesar horas
+            hora_inicio = None
+            hora_fin = None
+            if request.form.get('hora_inicio'):
+                hora_inicio = datetime.strptime(request.form['hora_inicio'], '%H:%M').time()
+            if request.form.get('hora_fin'):
+                hora_fin = datetime.strptime(request.form['hora_fin'], '%H:%M').time()
+            
             sesion = SesionYogaterapia(
-                nombre_persona=f"{alumno.nombre} {alumno.apellido}",
-                email_persona=alumno.email,
-                telefono_persona=alumno.telefono,
+                alumno_id=alumno_id,
                 fecha_sesion=datetime.strptime(request.form['fecha_sesion'], '%Y-%m-%d').date(),
+                hora_inicio=hora_inicio,
+                hora_fin=hora_fin,
                 duracion_minutos=int(request.form.get('duracion_minutos', 60)),
                 tipo_sesion=request.form.get('tipo_sesion', 'individual'),
                 motivo_consulta=request.form.get('motivo_consulta'),

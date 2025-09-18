@@ -132,10 +132,10 @@
                                 {% if sesiones_dia %}
                                 <div class="appointment-events">
                                     {% for sesion in sesiones_dia %}
-                                    <div class="appointment-event" title="{{ sesion.nombre_persona }} - {{ sesion.duracion_minutos }}min - {{ "%.2f"|format(sesion.precio) }}€">
+                                    <div class="appointment-event" title="{{ sesion.alumno.nombre }} {{ sesion.alumno.apellido }} - {{ sesion.duracion_minutos }}min - {{ "%.2f"|format(sesion.precio) }}€">
                                         <i class="fas fa-heart text-danger"></i>
                                         <small>{{ sesion.hora_inicio.strftime('%H:%M') if sesion.hora_inicio else 'Sin hora' }}</small>
-                                        <br><small>{{ sesion.nombre_persona }}</small>
+                                        <br><small>{{ sesion.alumno.nombre }} {{ sesion.alumno.apellido }}</small>
                                     </div>
                                     {% endfor %}
                                 </div>
@@ -170,9 +170,9 @@
                         <div class="list-group-item d-flex justify-content-between align-items-center">
                             <div>
                                 <strong>{{ sesion.fecha_sesion.strftime('%d/%m/%Y') }}</strong>
-                                <br><small>{{ sesion.nombre_persona }}</small>
-                                {% if sesion.email_persona %}
-                                    <br><small class="text-muted">{{ sesion.email_persona }}</small>
+                                <br><small>{{ sesion.alumno.nombre }} {{ sesion.alumno.apellido }}</small>
+                                {% if sesion.alumno.email %}
+                                    <br><small class="text-muted">{{ sesion.alumno.email }}</small>
                                 {% endif %}
                             </div>
                             <div class="text-end">

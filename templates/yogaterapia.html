@@ -27,7 +27,7 @@
                             <thead class="table-dark">
                                 <tr>
                                     <th>Fecha</th>
-                                    <th>Persona</th>
+                                    <th>Alumno</th>
                                     <th>Tipo</th>
                                     <th>Duración</th>
                                     <th>Precio</th>
@@ -40,9 +40,9 @@
                                 <tr>
                                     <td>{{ (sesion.fecha_sesion or sesion.fecha_clase).strftime('%d/%m/%Y') }}</td>
                                     <td>
-                                        <strong>{{ sesion.nombre_persona }}</strong>
-                                        {% if sesion.email_persona %}
-                                            <br><small class="text-muted">{{ sesion.email_persona }}</small>
+                                        <strong>{{ sesion.alumno.nombre }} {{ sesion.alumno.apellido }}</strong>
+                                        {% if sesion.alumno.email %}
+                                        <br><small class="text-muted">{{ sesion.alumno.email }}</small>
                                         {% endif %}
                                     </td>
                                     <td>
