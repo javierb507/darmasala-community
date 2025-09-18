@@ -17,6 +17,45 @@ db = SQLAlchemy(app)
 
 # MODELOS DE BASE DE DATOS
 
+# Modelo de Usuario del Sistema
+class Usuario(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(50), unique=True, nullable=False)
+    email = db.Column(db.String(100), unique=True, nullable=False)
+    password_hash = db.Column(db.String(255), nullable=False)
+    nombre = db.Column(db.String(50), nullable=False)
+    apellido = db.Column(db.String(50), nullable=False)
+    rol = db.Column(db.String(20), nullable=False, default='instructor')  # admin, instructor, recepcionista
+    activo = db.Column(db.Boolean, default=True)
+    fecha_creacion = db.Column(db.DateTime, default=datetime.utcnow)
+    ultimo_acceso = db.Column(db.DateTime)
+    
+    def __repr__(self):
+        return f'<Usuario {self.username}>'
+    
+    def get_rol_display(self):
+        roles = {
+            'admin': 'Administrador',
+            'instructor': 'Instructor',
+            'recepcionista': 'Recepcionista'
+        }
+        return roles.get(self.rol, self.rol)
+    
+    def is_admin(self):
+        return self.rol == 'admin'
+    
+    def is_instructor(self):
+        return self.rol in ['admin', 'instructor']
+    
+    def can_manage_users(self):
+        return self.rol == 'admin'
+    
+    def can_manage_payments(self):
+        return self.rol in ['admin', 'recepcionista']
+    
+    def can_manage_yogaterapia(self):
+        return self.rol in ['admin', 'instructor']
+
 # Modelo de Alumno
 class Alumno(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -36,7 +75,6 @@ class Alumno(db.Model):
     # Relaciones
     pagos = db.relationship('Pago', backref='alumno', lazy=True)
     asistencias = db.relationship('Asistencia', backref='alumno', lazy=True)
-    sesiones_yogaterapia = db.relationship('SesionYogaterapia', backref='alumno', lazy=True)
     clases_personales = db.relationship('ClasePersonal', backref='alumno', lazy=True)
     
     def __repr__(self):
@@ -96,12 +134,7 @@ class Clase(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     nombre = db.Column(db.String(50), nullable=False, unique=True)
     descripcion = db.Column(db.Text)
-    precio_clase_suelta = db.Column(db.Float, default=15.00)
-    precio_1_semanal = db.Column(db.Float, default=40.00)
-    precio_2_semanal = db.Column(db.Float, default=70.00)
-    precio_plana = db.Column(db.Float, default=90.00)
-    precio_1_bimensual = db.Column(db.Float, default=75.00)
-    precio_2_bimensual = db.Column(db.Float, default=135.00)
+    precio = db.Column(db.Float, default=15.00)  # Precio base de la clase
     color = db.Column(db.String(7), default='#007bff')  # Color para visualización
     nivel = db.Column(db.String(20), default='todos')  # principiante, intermedio, avanzado, todos
     duracion_minutos = db.Column(db.Integer, default=75)
@@ -319,13 +352,15 @@ class TipoClase(db.Model):
 # Modelo de Yogaterapia (Sesiones Individuales)
 class SesionYogaterapia(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    alumno_id = db.Column(db.Integer, db.ForeignKey('alumno.id'), nullable=False)
+    nombre_persona = db.Column(db.String(100), nullable=False)  # Nombre de la persona
+    email_persona = db.Column(db.String(100))  # Email opcional
+    telefono_persona = db.Column(db.String(20))  # Teléfono opcional
     fecha_sesion = db.Column(db.Date, nullable=False)
-    duracion_minutos = db.Column(db.Integer, default=75)
+    duracion_minutos = db.Column(db.Integer, default=60)
     tipo_sesion = db.Column(db.String(50), default='individual')  # individual, pareja
     
     # Información terapéutica
-    motivo_consulta = db.Column(db.Text)  # Por qué viene el alumno
+    motivo_consulta = db.Column(db.Text)  # Por qué viene la persona
     objetivos_terapeuticos = db.Column(db.Text)  # Objetivos específicos
     tecnicas_aplicadas = db.Column(db.Text)  # Técnicas de yoga utilizadas
     posturas_trabajadas = db.Column(db.Text)  # Asanas específicas
@@ -333,16 +368,16 @@ class SesionYogaterapia(db.Model):
     meditacion_relajacion = db.Column(db.Text)  # Técnicas de meditación
     
     # Evaluación y seguimiento
-    estado_inicial = db.Column(db.Text)  # Cómo llegó el alumno
+    estado_inicial = db.Column(db.Text)  # Cómo llegó la persona
     respuesta_sesion = db.Column(db.Text)  # Cómo respondió durante la sesión
-    estado_final = db.Column(db.Text)  # Cómo se fue el alumno
+    estado_final = db.Column(db.Text)  # Cómo se fue la persona
     observaciones_terapeuta = db.Column(db.Text)  # Observaciones profesionales
     recomendaciones_casa = db.Column(db.Text)  # Práctica para casa
     proxima_sesion = db.Column(db.Text)  # Plan para próxima sesión
     
     # Información administrativa
     instructor = db.Column(db.String(50), default='Minouche')
-    precio = db.Column(db.Float, default=50.00)
+    precio = db.Column(db.Float, default=45.00)
     pagado = db.Column(db.Boolean, default=False)
     metodo_pago = db.Column(db.String(50))
     fecha_creacion = db.Column(db.DateTime, default=datetime.utcnow)
@@ -351,7 +386,7 @@ class SesionYogaterapia(db.Model):
     archivos = db.relationship('ArchivoYogaterapia', backref='sesion_yogaterapia', lazy=True, cascade='all, delete-orphan')
     
     def __repr__(self):
-        return f'<SesionYogaterapia {self.alumno.nombre} - {self.fecha_sesion}>'
+        return f'<SesionYogaterapia {self.nombre_persona} - {self.fecha_sesion}>'
 
 # Modelo de Archivo de Yogaterapia
 class ArchivoYogaterapia(db.Model):
@@ -545,9 +580,8 @@ def ver_alumno(alumno_id):
     asistencias_presentes = sum(1 for a in asistencias if a.presente)
     porcentaje_asistencia = round((asistencias_presentes / total_asistencias * 100), 1) if total_asistencias > 0 else 0
     
-    # Obtener sesiones de yogaterapia
-    sesiones_yogaterapia = SesionYogaterapia.query.filter_by(alumno_id=alumno_id)\
-        .order_by(SesionYogaterapia.fecha_sesion.desc()).all()
+    # Las sesiones de yogaterapia ya no están asociadas a alumnos específicos
+    sesiones_yogaterapia = []
     
     return render_template('ver_alumno_compacto.html', 
                          alumno=alumno, 
@@ -840,6 +874,107 @@ def horarios_calendario():
     horarios = HorarioSemanal.query.filter_by(activo=True).order_by(HorarioSemanal.dia_semana, HorarioSemanal.hora_inicio).all()
     return render_template('horarios_calendario.html', horarios=horarios)
 
+@app.route('/horarios/nuevo', methods=['GET', 'POST'])
+def nuevo_horario():
+    """Crear nuevo horario semanal"""
+    if request.method == 'POST':
+        try:
+            horario = HorarioSemanal(
+                clase_id=int(request.form['clase_id']),
+                dia_semana=int(request.form['dia_semana']),
+                hora_inicio=datetime.strptime(request.form['hora_inicio'], '%H:%M').time(),
+                hora_fin=datetime.strptime(request.form['hora_fin'], '%H:%M').time(),
+                instructor=request.form.get('instructor', 'Minouche'),
+                activo=True
+            )
+            db.session.add(horario)
+            db.session.commit()
+            flash('¡Horario creado exitosamente!', 'success')
+            return redirect(url_for('horarios'))
+        except Exception as e:
+            flash(f'Error al crear horario: {str(e)}', 'error')
+            db.session.rollback()
+    
+    clases = Clase.query.filter_by(activa=True).all()
+    return render_template('nuevo_horario.html', clases=clases)
+
+@app.route('/horarios/<int:horario_id>/editar', methods=['GET', 'POST'])
+def editar_horario(horario_id):
+    """Editar horario existente"""
+    horario = HorarioSemanal.query.get_or_404(horario_id)
+    
+    if request.method == 'POST':
+        try:
+            horario.clase_id = int(request.form['clase_id'])
+            horario.dia_semana = int(request.form['dia_semana'])
+            horario.hora_inicio = datetime.strptime(request.form['hora_inicio'], '%H:%M').time()
+            horario.hora_fin = datetime.strptime(request.form['hora_fin'], '%H:%M').time()
+            horario.instructor = request.form.get('instructor', 'Minouche')
+            horario.activo = 'activo' in request.form
+            
+            db.session.commit()
+            flash('¡Horario actualizado exitosamente!', 'success')
+            return redirect(url_for('horarios'))
+        except Exception as e:
+            flash(f'Error al actualizar horario: {str(e)}', 'error')
+            db.session.rollback()
+    
+    clases = Clase.query.filter_by(activa=True).all()
+    return render_template('editar_horario.html', horario=horario, clases=clases)
+
+@app.route('/horarios/<int:horario_id>/eliminar')
+def eliminar_horario(horario_id):
+    """Eliminar horario (desactivar)"""
+    horario = HorarioSemanal.query.get_or_404(horario_id)
+    horario.activo = False
+    db.session.commit()
+    flash('Horario desactivado exitosamente', 'success')
+    return redirect(url_for('horarios'))
+
+@app.route('/calendario')
+def calendario_unificado():
+    """Calendario unificado con actividades periódicas y citas individuales"""
+    # Obtener parámetros de fecha
+    año = request.args.get('año', datetime.now().year, type=int)
+    mes = request.args.get('mes', datetime.now().month, type=int)
+    
+    # Obtener sesiones de yogaterapia del mes
+    sesiones_yogaterapia = SesionYogaterapia.query.filter(
+        db.extract('year', SesionYogaterapia.fecha_sesion) == año,
+        db.extract('month', SesionYogaterapia.fecha_sesion) == mes
+    ).order_by(SesionYogaterapia.fecha_sesion).all()
+    
+    # Obtener horarios semanales
+    horarios = HorarioSemanal.query.filter_by(activo=True).all()
+    
+    # Obtener clases disponibles
+    clases = Clase.query.filter_by(activa=True).all()
+    
+    return render_template('calendario_unificado.html', 
+                         año=año, 
+                         mes=mes,
+                         sesiones_yogaterapia=sesiones_yogaterapia,
+                         horarios=horarios,
+                         clases=clases)
+
+@app.route('/horarios/calendario-anual')
+def calendario_anual():
+    """Vista de calendario anual para agendar sesiones individuales"""
+    año = request.args.get('año', datetime.now().year, type=int)
+    
+    # Obtener sesiones de yogaterapia del año
+    sesiones_yogaterapia = SesionYogaterapia.query.filter(
+        db.extract('year', SesionYogaterapia.fecha_sesion) == año
+    ).order_by(SesionYogaterapia.fecha_sesion).all()
+    
+    # Obtener horarios semanales
+    horarios = HorarioSemanal.query.filter_by(activo=True).all()
+    
+    return render_template('calendario_anual.html', 
+                         año=año, 
+                         sesiones_yogaterapia=sesiones_yogaterapia,
+                         horarios=horarios)
+
 @app.route('/horarios/historico')
 def horarios_historico():
     """Vista del histórico de horarios y cambios"""
@@ -933,9 +1068,181 @@ def yogaterapia():
 
 @app.route('/yogaterapia/nueva')
 def nueva_yogaterapia():
-    """Nueva sesión de yogaterapia sin alumno específico"""
-    alumnos = Alumno.query.filter_by(activo=True).all()
-    return render_template('nueva_yogaterapia_general.html', alumnos=alumnos)
+    """Formulario para nueva sesión de yogaterapia"""
+    return render_template('nueva_yogaterapia.html')
+
+@app.route('/yogaterapia/procesar', methods=['POST'])
+def procesar_yogaterapia_general():
+    """Procesar nueva sesión de yogaterapia general"""
+    try:
+        nombre_persona = request.form['nombre_persona']
+        email_persona = request.form.get('email_persona', '')
+        telefono_persona = request.form.get('telefono_persona', '')
+        
+        sesion = SesionYogaterapia(
+            nombre_persona=nombre_persona,
+            email_persona=email_persona,
+            telefono_persona=telefono_persona,
+            fecha_sesion=datetime.strptime(request.form['fecha_sesion'], '%Y-%m-%d').date(),
+            duracion_minutos=int(request.form.get('duracion_minutos', 60)),
+            tipo_sesion=request.form.get('tipo_sesion', 'individual'),
+            motivo_consulta=request.form.get('motivo_consulta'),
+            objetivos_terapeuticos=request.form.get('objetivos_terapeuticos'),
+            tecnicas_aplicadas=request.form.get('tecnicas_aplicadas'),
+            posturas_trabajadas=request.form.get('posturas_trabajadas'),
+            respiracion_pranayama=request.form.get('respiracion_pranayama'),
+            meditacion_relajacion=request.form.get('meditacion_relajacion'),
+            estado_inicial=request.form.get('estado_inicial'),
+            respuesta_sesion=request.form.get('respuesta_sesion'),
+            estado_final=request.form.get('estado_final'),
+            observaciones_terapeuta=request.form.get('observaciones_terapeuta'),
+            recomendaciones_casa=request.form.get('recomendaciones_casa'),
+            proxima_sesion=request.form.get('proxima_sesion'),
+            instructor=request.form.get('instructor', 'Minouche'),
+            precio=float(request.form.get('precio', 50.00)),
+            pagado='pagado' in request.form,
+            metodo_pago=request.form.get('metodo_pago')
+        )
+        
+        db.session.add(sesion)
+        db.session.flush()
+        
+        # Manejar archivos subidos
+        archivos = request.files.getlist('archivos')
+        for archivo in archivos:
+            if archivo and archivo.filename:
+                # Crear directorio para archivos de yogaterapia
+                upload_dir = os.path.join('uploads', 'yogaterapia', str(sesion.id))
+                os.makedirs(upload_dir, exist_ok=True)
+                
+                # Generar nombre único para el archivo
+                timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+                filename = f"{timestamp}_{archivo.filename}"
+                filepath = os.path.join(upload_dir, filename)
+                
+                # Guardar archivo
+                archivo.save(filepath)
+                
+                # Crear registro en base de datos
+                archivo_db = ArchivoYogaterapia(
+                    sesion_yogaterapia_id=sesion.id,
+                    nombre_archivo=archivo.filename,
+                    ruta_archivo=filepath,
+                    tipo_archivo=filename.split('.')[-1].lower() if '.' in filename else 'unknown',
+                    tamaño_bytes=os.path.getsize(filepath) if os.path.exists(filepath) else 0
+                )
+                db.session.add(archivo_db)
+        
+        # Si está pagado, crear registro de pago
+        if sesion.pagado:
+            pago = Pago(
+                alumno_id=alumno_id,
+                fecha_clase=sesion.fecha_sesion,
+                monto=sesion.precio,
+                tipo_pago='yogaterapia',
+                descripcion=f'Yogaterapia - {sesion.tipo_sesion}',
+                metodo_pago=sesion.metodo_pago
+            )
+            db.session.add(pago)
+        
+        db.session.commit()
+        flash(f'¡Sesión de yogaterapia registrada exitosamente para {nombre_persona}!', 'success')
+        return redirect(url_for('yogaterapia'))
+        
+    except Exception as e:
+        flash(f'Error al registrar sesión: {str(e)}', 'error')
+        db.session.rollback()
+        return redirect(url_for('nueva_yogaterapia'))
+
+@app.route('/yogaterapia/<int:sesion_id>')
+def ver_sesion_yogaterapia(sesion_id):
+    """Ver detalles de una sesión de yogaterapia"""
+    sesion = SesionYogaterapia.query.get_or_404(sesion_id)
+    archivos = ArchivoYogaterapia.query.filter_by(sesion_yogaterapia_id=sesion_id).all()
+    return render_template('ver_sesion_yogaterapia.html', sesion=sesion, archivos=archivos)
+
+@app.route('/yogaterapia/<int:sesion_id>/editar', methods=['GET', 'POST'])
+def editar_sesion_yogaterapia(sesion_id):
+    """Editar una sesión de yogaterapia"""
+    sesion = SesionYogaterapia.query.get_or_404(sesion_id)
+    
+    if request.method == 'POST':
+        try:
+            # Actualizar datos de la sesión
+            sesion.fecha_sesion = datetime.strptime(request.form['fecha_sesion'], '%Y-%m-%d').date()
+            sesion.duracion_minutos = int(request.form.get('duracion_minutos', 75))
+            sesion.tipo_sesion = request.form.get('tipo_sesion', 'individual')
+            sesion.motivo_consulta = request.form.get('motivo_consulta')
+            sesion.objetivos_terapeuticos = request.form.get('objetivos_terapeuticos')
+            sesion.tecnicas_aplicadas = request.form.get('tecnicas_aplicadas')
+            sesion.posturas_trabajadas = request.form.get('posturas_trabajadas')
+            sesion.respiracion_pranayama = request.form.get('respiracion_pranayama')
+            sesion.meditacion_relajacion = request.form.get('meditacion_relajacion')
+            sesion.estado_inicial = request.form.get('estado_inicial')
+            sesion.respuesta_sesion = request.form.get('respuesta_sesion')
+            sesion.estado_final = request.form.get('estado_final')
+            sesion.observaciones_terapeuta = request.form.get('observaciones_terapeuta')
+            sesion.recomendaciones_casa = request.form.get('recomendaciones_casa')
+            sesion.proxima_sesion = request.form.get('proxima_sesion')
+            sesion.instructor = request.form.get('instructor', 'Minouche')
+            sesion.precio = float(request.form.get('precio', 50.00))
+            sesion.pagado = 'pagado' in request.form
+            sesion.metodo_pago = request.form.get('metodo_pago')
+            
+            # Manejar archivos adicionales
+            archivos = request.files.getlist('archivos')
+            for archivo in archivos:
+                if archivo and archivo.filename:
+                    upload_dir = os.path.join('uploads', 'yogaterapia', str(sesion.id))
+                    os.makedirs(upload_dir, exist_ok=True)
+                    
+                    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+                    filename = f"{timestamp}_{archivo.filename}"
+                    filepath = os.path.join(upload_dir, filename)
+                    
+                    archivo.save(filepath)
+                    
+                    archivo_db = ArchivoYogaterapia(
+                        sesion_yogaterapia_id=sesion.id,
+                        nombre_archivo=archivo.filename,
+                        ruta_archivo=filepath,
+                        tipo_archivo=filename.split('.')[-1].lower() if '.' in filename else 'unknown',
+                        tamaño_bytes=os.path.getsize(filepath) if os.path.exists(filepath) else 0
+                    )
+                    db.session.add(archivo_db)
+            
+            db.session.commit()
+            flash('¡Sesión de yogaterapia actualizada exitosamente!', 'success')
+            return redirect(url_for('ver_sesion_yogaterapia', sesion_id=sesion_id))
+            
+        except Exception as e:
+            flash(f'Error al actualizar sesión: {str(e)}', 'error')
+            db.session.rollback()
+    
+    archivos = ArchivoYogaterapia.query.filter_by(sesion_yogaterapia_id=sesion_id).all()
+    return render_template('editar_sesion_yogaterapia.html', sesion=sesion, archivos=archivos)
+
+@app.route('/yogaterapia/<int:sesion_id>/marcar_pagado', methods=['POST'])
+def marcar_sesion_pagada(sesion_id):
+    """Marcar una sesión como pagada"""
+    sesion = SesionYogaterapia.query.get_or_404(sesion_id)
+    
+    try:
+        sesion.pagado = True
+        sesion.metodo_pago = request.form.get('metodo_pago', 'efectivo')
+        
+        # Crear registro de pago si no existe
+        # Para yogaterapia no creamos registro de pago automáticamente
+        # ya que no está asociado a un alumno específico
+        
+        db.session.commit()
+        flash('¡Sesión marcada como pagada!', 'success')
+        
+    except Exception as e:
+        flash(f'Error al marcar como pagada: {str(e)}', 'error')
+        db.session.rollback()
+    
+    return redirect(url_for('yogaterapia'))
 
 @app.route('/alumnos/<int:alumno_id>/yogaterapia/nueva', methods=['GET', 'POST'])
 def nueva_yogaterapia_alumno(alumno_id):
@@ -944,9 +1251,11 @@ def nueva_yogaterapia_alumno(alumno_id):
     if request.method == 'POST':
         try:
             sesion = SesionYogaterapia(
-                alumno_id=alumno_id,
+                nombre_persona=f"{alumno.nombre} {alumno.apellido}",
+                email_persona=alumno.email,
+                telefono_persona=alumno.telefono,
                 fecha_sesion=datetime.strptime(request.form['fecha_sesion'], '%Y-%m-%d').date(),
-                duracion_minutos=int(request.form.get('duracion_minutos', 75)),
+                duracion_minutos=int(request.form.get('duracion_minutos', 60)),
                 tipo_sesion=request.form.get('tipo_sesion', 'individual'),
                 motivo_consulta=request.form.get('motivo_consulta'),
                 objetivos_terapeuticos=request.form.get('objetivos_terapeuticos'),
@@ -961,7 +1270,7 @@ def nueva_yogaterapia_alumno(alumno_id):
                 recomendaciones_casa=request.form.get('recomendaciones_casa'),
                 proxima_sesion=request.form.get('proxima_sesion'),
                 instructor=request.form.get('instructor', 'Minouche'),
-                precio=float(request.form.get('precio', 50.00)),
+                precio=float(request.form.get('precio', 45.00)),
                 pagado='pagado' in request.form,
                 metodo_pago=request.form.get('metodo_pago')
             )
@@ -1008,14 +1317,14 @@ def nueva_yogaterapia_alumno(alumno_id):
                 db.session.add(pago)
             
             db.session.commit()
-            flash('¡Sesión de yogaterapia registrada exitosamente!', 'success')
+            flash(f'¡Sesión de yogaterapia registrada exitosamente para {alumno.nombre} {alumno.apellido}!', 'success')
             return redirect(url_for('ver_alumno', alumno_id=alumno_id))
             
         except Exception as e:
             flash(f'Error al registrar sesión: {str(e)}', 'error')
             db.session.rollback()
     
-    return render_template('nueva_yogaterapia.html', alumno=alumno)
+    return render_template('nueva_yogaterapia.html', alumno=alumno, from_student=True)
 
 # RUTAS PARA GESTIÓN ECONÓMICA
 
@@ -1116,7 +1425,8 @@ def facturas():
 def configuracion():
     configuraciones = Configuracion.query.all()
     config_dict = {config.clave: config.valor for config in configuraciones}
-    return render_template('configuracion.html', config=config_dict)
+    clases = Clase.query.order_by(Clase.nombre).all()
+    return render_template('configuracion.html', config=config_dict, clases=clases)
 
 @app.route('/configuracion/guardar', methods=['POST'])
 def guardar_configuracion():
@@ -1317,10 +1627,11 @@ def exportar():
 # Función para inicializar las clases básicas
 def inicializar_clases():
     clases_basicas = [
-        {'nombre': 'Yoga menopausia', 'descripcion': 'Clase especializada para mujeres en etapa de menopausia'},
-        {'nombre': 'Yoga integral', 'descripcion': 'Práctica completa de yoga que integra posturas, respiración y meditación'},
-        {'nombre': 'Yoga embarazadas', 'descripcion': 'Yoga adaptado para mujeres embarazadas'},
-        {'nombre': 'Meditación', 'descripcion': 'Práctica de meditación y mindfulness'}
+        {'nombre': 'Yoga menopausia', 'descripcion': 'Clase especializada para mujeres en etapa de menopausia', 'precio': 15.00, 'duracion_minutos': 60},
+        {'nombre': 'Yoga integral', 'descripcion': 'Práctica completa de yoga que integra posturas, respiración y meditación', 'precio': 15.00, 'duracion_minutos': 60},
+        {'nombre': 'Yoga embarazadas', 'descripcion': 'Yoga adaptado para mujeres embarazadas', 'precio': 15.00, 'duracion_minutos': 60},
+        {'nombre': 'Meditación', 'descripcion': 'Práctica de meditación y mindfulness', 'precio': 12.00, 'duracion_minutos': 45},
+        {'nombre': 'Yogaterapia', 'descripcion': 'Sesión individual de yogaterapia personalizada', 'precio': 45.00, 'duracion_minutos': 60}
     ]
     
     for clase_data in clases_basicas:
@@ -1328,12 +1639,15 @@ def inicializar_clases():
         if not clase_existente:
             clase = Clase(
                 nombre=clase_data['nombre'],
-                descripcion=clase_data['descripcion']
+                descripcion=clase_data['descripcion'],
+                precio=clase_data['precio'],
+                duracion_minutos=clase_data['duracion_minutos']
             )
             db.session.add(clase)
     
     try:
         db.session.commit()
+        print("✅ Clases básicas inicializadas")
     except Exception as e:
         db.session.rollback()
         print(f"Error al inicializar clases: {e}")
@@ -1464,15 +1778,10 @@ def nueva_clase():
             clase = Clase(
                 nombre=request.form['nombre'],
                 descripcion=request.form.get('descripcion'),
-                precio_clase_suelta=float(request.form.get('precio_clase_suelta', 15.00)),
-                precio_1_semanal=float(request.form.get('precio_1_semanal', 40.00)),
-                precio_2_semanal=float(request.form.get('precio_2_semanal', 70.00)),
-                precio_plana=float(request.form.get('precio_plana', 90.00)),
-                precio_1_bimensual=float(request.form.get('precio_1_bimensual', 75.00)),
-                precio_2_bimensual=float(request.form.get('precio_2_bimensual', 135.00)),
+                precio=float(request.form.get('precio', 15.00)),
+                duracion_minutos=int(request.form.get('duracion_minutos', 60)),
                 color=request.form.get('color', '#007bff'),
                 nivel=request.form.get('nivel', 'todos'),
-                duracion_minutos=int(request.form.get('duracion_minutos', 75)),
                 capacidad_maxima=int(request.form.get('capacidad_maxima', 15))
             )
             db.session.add(clase)
@@ -1494,15 +1803,10 @@ def editar_clase(clase_id):
         try:
             clase.nombre = request.form['nombre']
             clase.descripcion = request.form.get('descripcion')
-            clase.precio_clase_suelta = float(request.form.get('precio_clase_suelta', 15.00))
-            clase.precio_1_semanal = float(request.form.get('precio_1_semanal', 40.00))
-            clase.precio_2_semanal = float(request.form.get('precio_2_semanal', 70.00))
-            clase.precio_plana = float(request.form.get('precio_plana', 90.00))
-            clase.precio_1_bimensual = float(request.form.get('precio_1_bimensual', 75.00))
-            clase.precio_2_bimensual = float(request.form.get('precio_2_bimensual', 135.00))
+            clase.precio = float(request.form.get('precio', 15.00))
+            clase.duracion_minutos = int(request.form.get('duracion_minutos', 60))
             clase.color = request.form.get('color', '#007bff')
             clase.nivel = request.form.get('nivel', 'todos')
-            clase.duracion_minutos = int(request.form.get('duracion_minutos', 75))
             clase.capacidad_maxima = int(request.form.get('capacidad_maxima', 15))
             
             db.session.commit()
@@ -1514,10 +1818,158 @@ def editar_clase(clase_id):
     
     return render_template('configuracion/editar_clase.html', clase=clase)
 
+# RUTAS PARA GESTIÓN DE USUARIOS
+
+@app.route('/usuarios')
+def usuarios():
+    """Lista de usuarios del sistema"""
+    usuarios = Usuario.query.order_by(Usuario.fecha_creacion.desc()).all()
+    return render_template('usuarios.html', usuarios=usuarios)
+
+@app.route('/usuarios/nuevo', methods=['GET', 'POST'])
+def nuevo_usuario():
+    """Crear nuevo usuario"""
+    if request.method == 'POST':
+        try:
+            # Verificar que el username y email no existan
+            if Usuario.query.filter_by(username=request.form['username']).first():
+                flash('El nombre de usuario ya existe', 'error')
+                return render_template('nuevo_usuario.html')
+            
+            if Usuario.query.filter_by(email=request.form['email']).first():
+                flash('El email ya está registrado', 'error')
+                return render_template('nuevo_usuario.html')
+            
+            # Crear hash de la contraseña (simple para demo)
+            import hashlib
+            password_hash = hashlib.sha256(request.form['password'].encode()).hexdigest()
+            
+            usuario = Usuario(
+                username=request.form['username'],
+                email=request.form['email'],
+                password_hash=password_hash,
+                nombre=request.form['nombre'],
+                apellido=request.form['apellido'],
+                rol=request.form['rol']
+            )
+            
+            db.session.add(usuario)
+            db.session.commit()
+            flash('¡Usuario creado exitosamente!', 'success')
+            return redirect(url_for('usuarios'))
+            
+        except Exception as e:
+            flash(f'Error al crear usuario: {str(e)}', 'error')
+            db.session.rollback()
+    
+    return render_template('nuevo_usuario.html')
+
+@app.route('/usuarios/<int:usuario_id>')
+def ver_usuario(usuario_id):
+    """Ver detalles de un usuario"""
+    usuario = Usuario.query.get_or_404(usuario_id)
+    return render_template('ver_usuario.html', usuario=usuario)
+
+@app.route('/usuarios/<int:usuario_id>/editar', methods=['GET', 'POST'])
+def editar_usuario(usuario_id):
+    """Editar usuario"""
+    usuario = Usuario.query.get_or_404(usuario_id)
+    
+    if request.method == 'POST':
+        try:
+            # Verificar que el username y email no existan (excepto para el usuario actual)
+            username_existente = Usuario.query.filter(
+                Usuario.username == request.form['username'],
+                Usuario.id != usuario_id
+            ).first()
+            
+            if username_existente:
+                flash('El nombre de usuario ya existe', 'error')
+                return render_template('editar_usuario.html', usuario=usuario)
+            
+            email_existente = Usuario.query.filter(
+                Usuario.email == request.form['email'],
+                Usuario.id != usuario_id
+            ).first()
+            
+            if email_existente:
+                flash('El email ya está registrado', 'error')
+                return render_template('editar_usuario.html', usuario=usuario)
+            
+            # Actualizar datos
+            usuario.username = request.form['username']
+            usuario.email = request.form['email']
+            usuario.nombre = request.form['nombre']
+            usuario.apellido = request.form['apellido']
+            usuario.rol = request.form['rol']
+            usuario.activo = 'activo' in request.form
+            
+            # Actualizar contraseña si se proporciona
+            if request.form['password']:
+                import hashlib
+                usuario.password_hash = hashlib.sha256(request.form['password'].encode()).hexdigest()
+            
+            db.session.commit()
+            flash('¡Usuario actualizado exitosamente!', 'success')
+            return redirect(url_for('ver_usuario', usuario_id=usuario_id))
+            
+        except Exception as e:
+            flash(f'Error al actualizar usuario: {str(e)}', 'error')
+            db.session.rollback()
+    
+    return render_template('editar_usuario.html', usuario=usuario)
+
+@app.route('/usuarios/<int:usuario_id>/eliminar', methods=['POST'])
+def eliminar_usuario(usuario_id):
+    """Eliminar usuario (desactivar)"""
+    usuario = Usuario.query.get_or_404(usuario_id)
+    
+    try:
+        usuario.activo = False
+        db.session.commit()
+        flash('Usuario desactivado exitosamente', 'success')
+    except Exception as e:
+        flash(f'Error al desactivar usuario: {str(e)}', 'error')
+        db.session.rollback()
+    
+    return redirect(url_for('usuarios'))
+
+@app.route('/usuarios/<int:usuario_id>/reactivar', methods=['POST'])
+def reactivar_usuario(usuario_id):
+    """Reactivar usuario"""
+    usuario = Usuario.query.get_or_404(usuario_id)
+    
+    try:
+        usuario.activo = True
+        db.session.commit()
+        flash('Usuario reactivado exitosamente', 'success')
+    except Exception as e:
+        flash(f'Error al reactivar usuario: {str(e)}', 'error')
+        db.session.rollback()
+    
+    return redirect(url_for('usuarios'))
+
 # Initialize database and run app
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
         inicializar_clases()
         inicializar_categorias_gastos()
+        
+        # Crear usuario administrador por defecto si no existe
+        admin_existente = Usuario.query.filter_by(username='admin').first()
+        if not admin_existente:
+            import hashlib
+            admin = Usuario(
+                username='admin',
+                email='admin@atmasuddhi.es',
+                password_hash=hashlib.sha256('admin123'.encode()).hexdigest(),
+                nombre='Administrador',
+                apellido='Sistema',
+                rol='admin'
+            )
+            db.session.add(admin)
+            db.session.commit()
+            print("Usuario administrador creado: admin / admin123")
+    
     app.run(debug=True, port=5000)

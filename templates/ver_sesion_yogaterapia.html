@@ -1,0 +1,243 @@
+{% extends "base.html" %}
+
+{% block title %}Sesión de Yogaterapia - Atma suddhi{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2><i class="fas fa-heart"></i> Sesión de Yogaterapia</h2>
+            <div>
+                <a href="{{ url_for('editar_sesion_yogaterapia', sesion_id=sesion.id) }}" class="btn btn-warning me-2">
+                    <i class="fas fa-edit"></i> Editar
+                </a>
+                <a href="{{ url_for('yogaterapia') }}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Volver
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-leaf"></i> {{ sesion.nombre_persona }} - {{ sesion.fecha_sesion.strftime('%d/%m/%Y') }}
+                </h5>
+            </div>
+            <div class="card-body">
+                <!-- Información básica -->
+                <div class="row mb-4">
+                    <div class="col-md-3">
+                        <strong>Fecha:</strong> {{ sesion.fecha_sesion.strftime('%d/%m/%Y') }}
+                    </div>
+                    <div class="col-md-3">
+                        <strong>Duración:</strong> {{ sesion.duracion_minutos }} minutos
+                    </div>
+                    <div class="col-md-3">
+                        <strong>Tipo:</strong> 
+                        <span class="badge bg-info">{{ sesion.tipo_sesion.replace('_', ' ').title() }}</span>
+                    </div>
+                    <div class="col-md-3">
+                        <strong>Estado:</strong>
+                        {% if sesion.pagado %}
+                            <span class="badge bg-success">Pagado</span>
+                        {% else %}
+                            <span class="badge bg-warning">Pendiente</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <strong>Precio:</strong> {{ "%.2f"|format(sesion.precio) }}€
+                    </div>
+                    <div class="col-md-6">
+                        <strong>Terapeuta:</strong> {{ sesion.instructor }}
+                    </div>
+                </div>
+
+                <!-- Información terapéutica -->
+                {% if sesion.motivo_consulta or sesion.objetivos_terapeuticos %}
+                <div class="card mb-4">
+                    <div class="card-header bg-light">
+                        <h6 class="mb-0"><i class="fas fa-stethoscope"></i> Información Terapéutica</h6>
+                    </div>
+                    <div class="card-body">
+                        {% if sesion.motivo_consulta %}
+                        <div class="mb-3">
+                            <strong>Motivo de Consulta:</strong>
+                            <p class="mt-1">{{ sesion.motivo_consulta }}</p>
+                        </div>
+                        {% endif %}
+                        
+                        {% if sesion.objetivos_terapeuticos %}
+                        <div class="mb-3">
+                            <strong>Objetivos Terapéuticos:</strong>
+                            <p class="mt-1">{{ sesion.objetivos_terapeuticos }}</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Estados inicial y final -->
+                {% if sesion.estado_inicial or sesion.estado_final %}
+                <div class="card mb-4">
+                    <div class="card-header bg-light">
+                        <h6 class="mb-0"><i class="fas fa-balance-scale"></i> Estados de la Sesión</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            {% if sesion.estado_inicial %}
+                            <div class="col-md-6">
+                                <strong>Estado Inicial:</strong>
+                                <p class="mt-1">{{ sesion.estado_inicial }}</p>
+                            </div>
+                            {% endif %}
+                            {% if sesion.estado_final %}
+                            <div class="col-md-6">
+                                <strong>Estado Final:</strong>
+                                <p class="mt-1">{{ sesion.estado_final }}</p>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Técnicas aplicadas -->
+                {% if sesion.posturas_trabajadas or sesion.respiracion_pranayama or sesion.meditacion_relajacion or sesion.tecnicas_aplicadas %}
+                <div class="card mb-4">
+                    <div class="card-header bg-light">
+                        <h6 class="mb-0"><i class="fas fa-om"></i> Técnicas Aplicadas</h6>
+                    </div>
+                    <div class="card-body">
+                        {% if sesion.posturas_trabajadas %}
+                        <div class="mb-3">
+                            <strong>Posturas Trabajadas (Asanas):</strong>
+                            <p class="mt-1">{{ sesion.posturas_trabajadas }}</p>
+                        </div>
+                        {% endif %}
+                        
+                        {% if sesion.respiracion_pranayama %}
+                        <div class="mb-3">
+                            <strong>Respiración y Pranayama:</strong>
+                            <p class="mt-1">{{ sesion.respiracion_pranayama }}</p>
+                        </div>
+                        {% endif %}
+                        
+                        {% if sesion.meditacion_relajacion %}
+                        <div class="mb-3">
+                            <strong>Meditación y Relajación:</strong>
+                            <p class="mt-1">{{ sesion.meditacion_relajacion }}</p>
+                        </div>
+                        {% endif %}
+                        
+                        {% if sesion.tecnicas_aplicadas %}
+                        <div class="mb-3">
+                            <strong>Otras Técnicas:</strong>
+                            <p class="mt-1">{{ sesion.tecnicas_aplicadas }}</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Evaluación y seguimiento -->
+                {% if sesion.respuesta_sesion or sesion.observaciones_terapeuta or sesion.recomendaciones_casa or sesion.proxima_sesion %}
+                <div class="card mb-4">
+                    <div class="card-header bg-light">
+                        <h6 class="mb-0"><i class="fas fa-clipboard-list"></i> Evaluación y Seguimiento</h6>
+                    </div>
+                    <div class="card-body">
+                        {% if sesion.respuesta_sesion %}
+                        <div class="mb-3">
+                            <strong>Respuesta Durante la Sesión:</strong>
+                            <p class="mt-1">{{ sesion.respuesta_sesion }}</p>
+                        </div>
+                        {% endif %}
+                        
+                        {% if sesion.observaciones_terapeuta %}
+                        <div class="mb-3">
+                            <strong>Observaciones del Terapeuta:</strong>
+                            <p class="mt-1">{{ sesion.observaciones_terapeuta }}</p>
+                        </div>
+                        {% endif %}
+                        
+                        {% if sesion.recomendaciones_casa %}
+                        <div class="mb-3">
+                            <strong>Recomendaciones para Casa:</strong>
+                            <p class="mt-1">{{ sesion.recomendaciones_casa }}</p>
+                        </div>
+                        {% endif %}
+                        
+                        {% if sesion.proxima_sesion %}
+                        <div class="mb-3">
+                            <strong>Plan para Próxima Sesión:</strong>
+                            <p class="mt-1">{{ sesion.proxima_sesion }}</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Archivos adjuntos -->
+                {% if archivos %}
+                <div class="card mb-4">
+                    <div class="card-header bg-light">
+                        <h6 class="mb-0"><i class="fas fa-camera"></i> Archivos de la Sesión ({{ archivos|length }})</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            {% for archivo in archivos %}
+                            <div class="col-md-4 mb-3">
+                                <div class="card">
+                                    <div class="card-body text-center">
+                                        {% if archivo.tipo_archivo in ['jpg', 'jpeg', 'png', 'gif'] %}
+                                            <i class="fas fa-image fa-3x text-primary mb-2"></i>
+                                        {% elif archivo.tipo_archivo == 'pdf' %}
+                                            <i class="fas fa-file-pdf fa-3x text-danger mb-2"></i>
+                                        {% elif archivo.tipo_archivo in ['mp4', 'avi', 'mov'] %}
+                                            <i class="fas fa-video fa-3x text-success mb-2"></i>
+                                        {% elif archivo.tipo_archivo in ['mp3', 'wav', 'm4a'] %}
+                                            <i class="fas fa-music fa-3x text-warning mb-2"></i>
+                                        {% else %}
+                                            <i class="fas fa-file fa-3x text-secondary mb-2"></i>
+                                        {% endif %}
+                                        
+                                        <h6 class="card-title">{{ archivo.nombre_archivo }}</h6>
+                                        <p class="card-text small text-muted">
+                                            {{ (archivo.tamaño_bytes / 1024)|round(1) }} KB
+                                        </p>
+                                        <a href="/{{ archivo.ruta_archivo }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                            <i class="fas fa-download"></i> Ver
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Información de pago -->
+                {% if sesion.pagado %}
+                <div class="alert alert-success">
+                    <i class="fas fa-check-circle"></i>
+                    <strong>Sesión pagada</strong> - Método: {{ sesion.metodo_pago.title() }}
+                </div>
+                {% else %}
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <strong>Pago pendiente</strong> - {{ "%.2f"|format(sesion.precio) }}€
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

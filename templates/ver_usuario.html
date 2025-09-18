@@ -1,0 +1,171 @@
+{% extends "base.html" %}
+
+{% block title %}Usuario: {{ usuario.nombre }} {{ usuario.apellido }} - Atma suddhi{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2><i class="fas fa-user"></i> {{ usuario.nombre }} {{ usuario.apellido }}</h2>
+            <div>
+                <a href="{{ url_for('editar_usuario', usuario_id=usuario.id) }}" class="btn btn-warning me-2">
+                    <i class="fas fa-edit"></i> Editar
+                </a>
+                <a href="{{ url_for('usuarios') }}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Volver
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-user"></i> Información del Usuario
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <strong>Nombre de Usuario:</strong>
+                        <p class="mt-1">{{ usuario.username }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <strong>Email:</strong>
+                        <p class="mt-1">{{ usuario.email }}</p>
+                    </div>
+                </div>
+
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <strong>Nombre Completo:</strong>
+                        <p class="mt-1">{{ usuario.nombre }} {{ usuario.apellido }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <strong>Rol:</strong>
+                        <p class="mt-1">
+                            {% if usuario.rol == 'admin' %}
+                                <span class="badge bg-danger fs-6">{{ usuario.get_rol_display() }}</span>
+                            {% elif usuario.rol == 'instructor' %}
+                                <span class="badge bg-primary fs-6">{{ usuario.get_rol_display() }}</span>
+                            {% else %}
+                                <span class="badge bg-info fs-6">{{ usuario.get_rol_display() }}</span>
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <strong>Estado:</strong>
+                        <p class="mt-1">
+                            {% if usuario.activo %}
+                                <span class="badge bg-success fs-6">Activo</span>
+                            {% else %}
+                                <span class="badge bg-secondary fs-6">Inactivo</span>
+                            {% endif %}
+                        </p>
+                    </div>
+                    <div class="col-md-6">
+                        <strong>Fecha de Creación:</strong>
+                        <p class="mt-1">{{ usuario.fecha_creacion.strftime('%d/%m/%Y %H:%M') }}</p>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <strong>Último Acceso:</strong>
+                        <p class="mt-1">
+                            {% if usuario.ultimo_acceso %}
+                                {{ usuario.ultimo_acceso.strftime('%d/%m/%Y %H:%M') }}
+                            {% else %}
+                                <span class="text-muted">Nunca ha accedido</span>
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header bg-light">
+                <h6 class="mb-0"><i class="fas fa-shield-alt"></i> Permisos</h6>
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled">
+                    <li class="mb-2">
+                        <i class="fas fa-{% if usuario.can_manage_users() %}check text-success{% else %}times text-muted{% endif %}"></i>
+                        <strong>Gestionar Usuarios:</strong>
+                        {% if usuario.can_manage_users() %}
+                            <span class="text-success">Sí</span>
+                        {% else %}
+                            <span class="text-muted">No</span>
+                        {% endif %}
+                    </li>
+                    <li class="mb-2">
+                        <i class="fas fa-{% if usuario.can_manage_payments() %}check text-success{% else %}times text-muted{% endif %}"></i>
+                        <strong>Gestionar Pagos:</strong>
+                        {% if usuario.can_manage_payments() %}
+                            <span class="text-success">Sí</span>
+                        {% else %}
+                            <span class="text-muted">No</span>
+                        {% endif %}
+                    </li>
+                    <li class="mb-2">
+                        <i class="fas fa-{% if usuario.can_manage_yogaterapia() %}check text-success{% else %}times text-muted{% endif %}"></i>
+                        <strong>Gestionar Yogaterapia:</strong>
+                        {% if usuario.can_manage_yogaterapia() %}
+                            <span class="text-success">Sí</span>
+                        {% else %}
+                            <span class="text-muted">No</span>
+                        {% endif %}
+                    </li>
+                    <li class="mb-2">
+                        <i class="fas fa-{% if usuario.is_instructor() %}check text-success{% else %}times text-muted{% endif %}"></i>
+                        <strong>Gestionar Clases:</strong>
+                        {% if usuario.is_instructor() %}
+                            <span class="text-success">Sí</span>
+                        {% else %}
+                            <span class="text-muted">No</span>
+                        {% endif %}
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="card mt-3">
+            <div class="card-header bg-light">
+                <h6 class="mb-0"><i class="fas fa-cogs"></i> Acciones</h6>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="{{ url_for('editar_usuario', usuario_id=usuario.id) }}" class="btn btn-warning">
+                        <i class="fas fa-edit"></i> Editar Usuario
+                    </a>
+                    
+                    {% if usuario.activo %}
+                        <form method="POST" action="{{ url_for('eliminar_usuario', usuario_id=usuario.id) }}">
+                            <button type="submit" class="btn btn-danger w-100" 
+                                    onclick="return confirm('¿Desactivar este usuario?')">
+                                <i class="fas fa-user-times"></i> Desactivar
+                            </button>
+                        </form>
+                    {% else %}
+                        <form method="POST" action="{{ url_for('reactivar_usuario', usuario_id=usuario.id) }}">
+                            <button type="submit" class="btn btn-success w-100" 
+                                    onclick="return confirm('¿Reactivar este usuario?')">
+                                <i class="fas fa-user-check"></i> Reactivar
+                            </button>
+                        </form>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

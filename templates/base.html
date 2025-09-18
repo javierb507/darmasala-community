@@ -134,8 +134,13 @@
                         </a>
                     </li>
                     <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('calendario_unificado') }}">
+                            <i class="fas fa-calendar-alt"></i> Calendario
+                        </a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('horarios') }}">
-                            <i class="fas fa-calendar-alt"></i> Horarios
+                            <i class="fas fa-clock"></i> Horarios
                         </a>
                     </li>
                     <li class="nav-item dropdown">
@@ -168,6 +173,10 @@
                             <i class="fas fa-cog"></i> Sistema
                         </a>
                         <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{{ url_for('usuarios') }}">
+                                <i class="fas fa-users-cog"></i> Gestión de Usuarios
+                            </a></li>
+                            <li><hr class="dropdown-divider"></li>
                             <li><a class="dropdown-item" href="{{ url_for('configuracion') }}">
                                 <i class="fas fa-cog"></i> Configuración
                             </a></li>

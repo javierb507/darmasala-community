@@ -1,0 +1,402 @@
+{% extends "base.html" %}
+
+{% block title %}Calendario Unificado - Atma suddhi{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2><i class="fas fa-calendar-alt"></i> Calendario Unificado</h2>
+                <div class="btn-group">
+                    <a href="{{ url_for('calendario_unificado', año=año, mes=mes-1) }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-chevron-left"></i> Mes Anterior
+                    </a>
+                    <a href="{{ url_for('calendario_unificado', año=año, mes=mes+1) }}" class="btn btn-outline-secondary">
+                        Mes Siguiente <i class="fas fa-chevron-right"></i>
+                    </a>
+                    <a href="{{ url_for('nueva_yogaterapia') }}" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Nueva Cita Individual
+                    </a>
+                    <a href="{{ url_for('nuevo_horario') }}" class="btn btn-success">
+                        <i class="fas fa-clock"></i> Nuevo Horario
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Resumen del mes -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body text-center">
+                    <h5 class="card-title">{{ sesiones_yogaterapia|length }}</h5>
+                    <p class="card-text">Citas Individuales</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body text-center">
+                    <h5 class="card-title">{{ horarios|length }}</h5>
+                    <p class="card-text">Horarios Semanales</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body text-center">
+                    <h5 class="card-title">{{ sesiones_yogaterapia|selectattr('pagado')|list|length }}</h5>
+                    <p class="card-text">Citas Pagadas</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body text-center">
+                    <h5 class="card-title">{{ "%.2f"|format(sesiones_yogaterapia|sum(attribute='precio')) }}€</h5>
+                    <p class="card-text">Ingresos del Mes</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Calendario del mes -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-calendar"></i> 
+                        {% if mes == 1 %}Enero
+                        {% elif mes == 2 %}Febrero
+                        {% elif mes == 3 %}Marzo
+                        {% elif mes == 4 %}Abril
+                        {% elif mes == 5 %}Mayo
+                        {% elif mes == 6 %}Junio
+                        {% elif mes == 7 %}Julio
+                        {% elif mes == 8 %}Agosto
+                        {% elif mes == 9 %}Septiembre
+                        {% elif mes == 10 %}Octubre
+                        {% elif mes == 11 %}Noviembre
+                        {% elif mes == 12 %}Diciembre
+                        {% endif %} {{ año }}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="calendar-container">
+                        <!-- Días de la semana -->
+                        <div class="calendar-header">
+                            <div class="calendar-day-header">Lunes</div>
+                            <div class="calendar-day-header">Martes</div>
+                            <div class="calendar-day-header">Miércoles</div>
+                            <div class="calendar-day-header">Jueves</div>
+                            <div class="calendar-day-header">Viernes</div>
+                            <div class="calendar-day-header">Sábado</div>
+                            <div class="calendar-day-header">Domingo</div>
+                        </div>
+                        
+                        <!-- Días del mes -->
+                        <div class="calendar-grid">
+                            {% set dias_mes = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31] %}
+                            {% if año % 4 == 0 and (año % 100 != 0 or año % 400 == 0) %}
+                                {% set dias_mes = [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31] %}
+                            {% endif %}
+                            
+                            {% set primer_dia = datetime(año, mes, 1).weekday() %}
+                            {% set dias_en_mes = dias_mes[mes-1] %}
+                            
+                            <!-- Espacios vacíos para alinear el primer día -->
+                            {% for i in range(primer_dia) %}
+                            <div class="calendar-day empty"></div>
+                            {% endfor %}
+                            
+                            <!-- Días del mes -->
+                            {% for dia in range(1, dias_en_mes + 1) %}
+                            {% set fecha_actual = datetime(año, mes, dia).date() %}
+                            {% set sesiones_dia = sesiones_yogaterapia|selectattr('fecha_sesion', 'equalto', fecha_actual)|list %}
+                            {% set dia_semana = fecha_actual.weekday() %}
+                            {% set horarios_dia = horarios|selectattr('dia_semana', 'equalto', dia_semana)|list %}
+                            
+                            <div class="calendar-day {% if sesiones_dia %}has-appointments{% endif %} {% if horarios_dia %}has-schedule{% endif %}" 
+                                 data-fecha="{{ fecha_actual.isoformat() }}"
+                                 data-sesiones="{{ sesiones_dia|length }}"
+                                 data-horarios="{{ horarios_dia|length }}">
+                                
+                                <div class="day-number">{{ dia }}</div>
+                                
+                                <!-- Actividades periódicas (horarios semanales) -->
+                                {% if horarios_dia %}
+                                <div class="schedule-events">
+                                    {% for horario in horarios_dia %}
+                                    <div class="schedule-event" title="{{ horario.clase.nombre }} - {{ horario.hora_inicio.strftime('%H:%M') }}-{{ horario.hora_fin.strftime('%H:%M') }}">
+                                        <i class="fas fa-clock text-primary"></i>
+                                        <small>{{ horario.hora_inicio.strftime('%H:%M') }}</small>
+                                        <br><small>{{ horario.clase.nombre }}</small>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                                
+                                <!-- Citas individuales -->
+                                {% if sesiones_dia %}
+                                <div class="appointment-events">
+                                    {% for sesion in sesiones_dia %}
+                                    <div class="appointment-event" title="{{ sesion.nombre_persona }} - {{ sesion.duracion_minutos }}min - {{ "%.2f"|format(sesion.precio) }}€">
+                                        <i class="fas fa-heart text-danger"></i>
+                                        <small>{{ sesion.hora_inicio.strftime('%H:%M') if sesion.hora_inicio else 'Sin hora' }}</small>
+                                        <br><small>{{ sesion.nombre_persona }}</small>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                                
+                                <!-- Indicador de clic para crear nueva cita -->
+                                {% if not sesiones_dia %}
+                                <div class="add-appointment" title="Crear nueva cita individual">
+                                    <i class="fas fa-plus-circle text-muted"></i>
+                                </div>
+                                {% endif %}
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lista de actividades del mes -->
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-heart"></i> Citas Individuales del Mes
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if sesiones_yogaterapia %}
+                    <div class="list-group">
+                        {% for sesion in sesiones_yogaterapia %}
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <strong>{{ sesion.fecha_sesion.strftime('%d/%m/%Y') }}</strong>
+                                <br><small>{{ sesion.nombre_persona }}</small>
+                                {% if sesion.email_persona %}
+                                    <br><small class="text-muted">{{ sesion.email_persona }}</small>
+                                {% endif %}
+                            </div>
+                            <div class="text-end">
+                                <span class="badge bg-{% if sesion.pagado %}success{% else %}warning{% endif %}">
+                                    {% if sesion.pagado %}Pagado{% else %}Pendiente{% endif %}
+                                </span>
+                                <br><small>{{ "%.2f"|format(sesion.precio) }}€</small>
+                                <div class="btn-group btn-group-sm mt-1">
+                                    <a href="{{ url_for('ver_sesion_yogaterapia', sesion_id=sesion.id) }}" class="btn btn-outline-primary btn-sm">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="{{ url_for('editar_sesion_yogaterapia', sesion_id=sesion.id) }}" class="btn btn-outline-warning btn-sm">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-center py-3">
+                        <i class="fas fa-calendar-times fa-3x text-muted mb-3"></i>
+                        <p class="text-muted">No hay citas individuales este mes</p>
+                        <a href="{{ url_for('nueva_yogaterapia') }}" class="btn btn-primary">
+                            <i class="fas fa-plus"></i> Nueva Cita
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-clock"></i> Horarios Semanales
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if horarios %}
+                    <div class="list-group">
+                        {% for horario in horarios %}
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <strong>{{ horario.get_dia_display() }}</strong>
+                                <br><small>{{ horario.clase.nombre }}</small>
+                                <br><small class="text-muted">{{ horario.hora_inicio.strftime('%H:%M') }} - {{ horario.hora_fin.strftime('%H:%M') }}</small>
+                            </div>
+                            <div class="text-end">
+                                <span class="badge bg-success">Activo</span>
+                                <div class="btn-group btn-group-sm mt-1">
+                                    <a href="{{ url_for('editar_horario', horario_id=horario.id) }}" class="btn btn-outline-warning btn-sm">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <a href="{{ url_for('eliminar_horario', horario_id=horario.id) }}" class="btn btn-outline-danger btn-sm" 
+                                       onclick="return confirm('¿Desactivar este horario?')">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-center py-3">
+                        <i class="fas fa-clock fa-3x text-muted mb-3"></i>
+                        <p class="text-muted">No hay horarios configurados</p>
+                        <a href="{{ url_for('nuevo_horario') }}" class="btn btn-success">
+                            <i class="fas fa-plus"></i> Nuevo Horario
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.calendar-container {
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.calendar-header {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    background-color: #f8f9fa;
+    border-bottom: 2px solid #dee2e6;
+}
+
+.calendar-day-header {
+    padding: 12px 8px;
+    text-align: center;
+    font-weight: bold;
+    color: #495057;
+    border-right: 1px solid #dee2e6;
+}
+
+.calendar-day-header:last-child {
+    border-right: none;
+}
+
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 1px;
+    background-color: #dee2e6;
+}
+
+.calendar-day {
+    min-height: 120px;
+    background: white;
+    padding: 8px;
+    position: relative;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 1px solid transparent;
+}
+
+.calendar-day:hover {
+    background-color: #f8f9fa;
+    border-color: #007bff;
+}
+
+.calendar-day.empty {
+    background-color: #f8f9fa;
+    cursor: default;
+}
+
+.calendar-day.has-appointments {
+    background-color: #fff3cd;
+    border-color: #ffc107;
+}
+
+.calendar-day.has-schedule {
+    background-color: #d1ecf1;
+    border-color: #17a2b8;
+}
+
+.day-number {
+    font-weight: bold;
+    font-size: 1.1rem;
+    margin-bottom: 4px;
+}
+
+.schedule-events, .appointment-events {
+    margin-top: 4px;
+}
+
+.schedule-event, .appointment-event {
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 4px;
+    padding: 2px 4px;
+    margin-bottom: 2px;
+    font-size: 0.75rem;
+    border-left: 3px solid;
+}
+
+.schedule-event {
+    border-left-color: #007bff;
+}
+
+.appointment-event {
+    border-left-color: #dc3545;
+}
+
+.add-appointment {
+    position: absolute;
+    bottom: 4px;
+    right: 4px;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.calendar-day:hover .add-appointment {
+    opacity: 1;
+}
+
+.list-group-item {
+    border: none;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.list-group-item:last-child {
+    border-bottom: none;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Agregar funcionalidad de clic en días del calendario
+    document.querySelectorAll('.calendar-day:not(.empty)').forEach(function(day) {
+        day.addEventListener('click', function() {
+            const fecha = this.dataset.fecha;
+            const sesiones = parseInt(this.dataset.sesiones);
+            const horarios = parseInt(this.dataset.horarios);
+            
+            if (sesiones > 0) {
+                // Mostrar sesiones del día
+                alert(`Día ${fecha}:\n- ${sesiones} cita(s) individual(es)\n- ${horarios} horario(s) semanal(es)`);
+            } else {
+                // Crear nueva cita para este día
+                if (confirm(`¿Crear nueva cita individual para el ${fecha}?`)) {
+                    window.location.href = `{{ url_for('nueva_yogaterapia') }}?fecha=${fecha}`;
+                }
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

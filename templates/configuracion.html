@@ -53,9 +53,60 @@
                         </a>
                     </div>
                     <div class="card-body">
-                        <div class="row" id="clasesGrid">
-                            <!-- Las clases se cargarán aquí dinámicamente -->
-                        </div>
+                        {% if clases %}
+                            <div class="table-responsive">
+                                <table class="table table-striped table-hover">
+                                    <thead class="table-dark">
+                                        <tr>
+                                            <th>Clase</th>
+                                            <th>Descripción</th>
+                                            <th>Precio</th>
+                                            <th>Duración</th>
+                                            <th>Nivel</th>
+                                            <th>Capacidad</th>
+                                            <th>Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for clase in clases %}
+                                        <tr>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <div class="color-indicator me-2" style="background-color: {{ clase.color }}; width: 20px; height: 20px; border-radius: 50%;"></div>
+                                                    <strong>{{ clase.nombre }}</strong>
+                                                </div>
+                                            </td>
+                                            <td>{{ clase.descripcion or 'Sin descripción' }}</td>
+                                            <td><strong>{{ "%.2f"|format(clase.precio) }}€</strong></td>
+                                            <td>{{ clase.duracion_minutos }} min</td>
+                                            <td>
+                                                <span class="badge bg-{% if clase.nivel == 'principiante' %}success{% elif clase.nivel == 'intermedio' %}warning{% elif clase.nivel == 'avanzado' %}danger{% else %}info{% endif %}">
+                                                    {{ clase.nivel.title() }}
+                                                </span>
+                                            </td>
+                                            <td>{{ clase.capacidad_maxima }} personas</td>
+                                            <td>
+                                                <div class="btn-group btn-group-sm">
+                                                    <a href="{{ url_for('editar_clase', clase_id=clase.id) }}" class="btn btn-outline-warning">
+                                                        <i class="fas fa-edit"></i>
+                                                    </a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% else %}
+                            <div class="text-center py-5">
+                                <i class="fas fa-dumbbell fa-5x text-muted mb-3"></i>
+                                <h3 class="text-muted">No hay clases configuradas</h3>
+                                <p class="text-muted">Comienza creando tu primera clase.</p>
+                                <a href="{{ url_for('nueva_clase') }}" class="btn btn-primary">
+                                    <i class="fas fa-plus"></i> Crear Primera Clase
+                                </a>
+                            </div>
+                        {% endif %}
                     </div>
                 </div>
             </div>

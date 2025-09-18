@@ -41,7 +41,7 @@
                             <div class="mb-3">
                                 <label for="fecha_sesion" class="form-label">Fecha de la Sesión *</label>
                                 <input type="date" class="form-control" id="fecha_sesion" name="fecha_sesion" 
-                                       value="{{ date.today().isoformat() }}" required>
+                                       required>
                             </div>
                         </div>
                         <div class="col-md-3">
@@ -228,6 +228,12 @@
 </div>
 
 <script>
+// Establecer fecha actual
+document.addEventListener('DOMContentLoaded', function() {
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('fecha_sesion').value = today;
+});
+
 // Calcular precio según tipo de sesión
 document.getElementById('tipo_sesion').addEventListener('change', function() {
     const precios = {
