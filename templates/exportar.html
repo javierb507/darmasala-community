@@ -1,0 +1,272 @@
+{% extends "base.html" %}
+
+{% block title %}Exportar Datos - Atma suddhi{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2><i class="fas fa-download"></i> Exportar Datos</h2>
+            <a href="{{ url_for('index') }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Volver al Inicio
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Exportación de Alumnos -->
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-users"></i> Datos de Alumnos
+                </h5>
+            </div>
+            <div class="card-body">
+                <p class="text-muted">Exportar información completa de alumnos activos e inactivos.</p>
+                
+                <div class="mb-3">
+                    <label class="form-label">Filtros:</label>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="incluir_activos" checked>
+                        <label class="form-check-label" for="incluir_activos">
+                            Incluir alumnos activos
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="incluir_inactivos">
+                        <label class="form-check-label" for="incluir_inactivos">
+                            Incluir alumnos inactivos
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="btn-group w-100" role="group">
+                    <a href="{{ url_for('export_data', tipo='alumnos', formato='csv') }}" 
+                       class="btn btn-outline-primary">
+                        <i class="fas fa-file-csv"></i> CSV
+                    </a>
+                    <a href="{{ url_for('export_data', tipo='alumnos', formato='json') }}" 
+                       class="btn btn-outline-info">
+                        <i class="fas fa-file-code"></i> JSON
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Exportación de Pagos -->
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-euro-sign"></i> Datos de Pagos
+                </h5>
+            </div>
+            <div class="card-body">
+                <p class="text-muted">Exportar historial completo de pagos y matrículas.</p>
+                
+                <div class="mb-3">
+                    <label for="año_pagos" class="form-label">Año:</label>
+                    <select class="form-select" id="año_pagos">
+                        <option value="">Todos los años</option>
+                        <option value="2025" selected>2025</option>
+                        <option value="2024">2024</option>
+                        <option value="2023">2023</option>
+                    </select>
+                </div>
+                
+                <div class="btn-group w-100" role="group">
+                    <a href="{{ url_for('export_data', tipo='pagos', formato='csv') }}" 
+                       class="btn btn-outline-success">
+                        <i class="fas fa-file-csv"></i> CSV
+                    </a>
+                    <a href="{{ url_for('export_data', tipo='pagos', formato='json') }}" 
+                       class="btn btn-outline-info">
+                        <i class="fas fa-file-code"></i> JSON
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Exportación de Facturas -->
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-file-invoice"></i> Datos de Facturas
+                </h5>
+            </div>
+            <div class="card-body">
+                <p class="text-muted">Exportar facturas de proveedores y gastos.</p>
+                
+                <div class="mb-3">
+                    <label for="estado_facturas" class="form-label">Estado:</label>
+                    <select class="form-select" id="estado_facturas">
+                        <option value="">Todas las facturas</option>
+                        <option value="pendiente">Solo pendientes</option>
+                        <option value="pagada">Solo pagadas</option>
+                        <option value="vencida">Solo vencidas</option>
+                    </select>
+                </div>
+                
+                <div class="btn-group w-100" role="group">
+                    <a href="{{ url_for('export_data', tipo='facturas', formato='csv') }}" 
+                       class="btn btn-outline-warning">
+                        <i class="fas fa-file-csv"></i> CSV
+                    </a>
+                    <a href="{{ url_for('export_data', tipo='facturas', formato='json') }}" 
+                       class="btn btn-outline-info">
+                        <i class="fas fa-file-code"></i> JSON
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Exportación de Asistencias -->
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-clipboard-check"></i> Datos de Asistencias
+                </h5>
+            </div>
+            <div class="card-body">
+                <p class="text-muted">Exportar registro de asistencias a clases.</p>
+                
+                <div class="mb-3">
+                    <label for="periodo_asistencias" class="form-label">Período:</label>
+                    <select class="form-select" id="periodo_asistencias">
+                        <option value="">Todas las asistencias</option>
+                        <option value="mes_actual">Mes actual</option>
+                        <option value="trimestre">Último trimestre</option>
+                        <option value="año_actual" selected>Año actual</option>
+                    </select>
+                </div>
+                
+                <div class="btn-group w-100" role="group">
+                    <a href="{{ url_for('export_data', tipo='asistencias', formato='csv') }}" 
+                       class="btn btn-outline-info">
+                        <i class="fas fa-file-csv"></i> CSV
+                    </a>
+                    <a href="{{ url_for('export_data', tipo='asistencias', formato='json') }}" 
+                       class="btn btn-outline-info">
+                        <i class="fas fa-file-code"></i> JSON
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Backup Completo -->
+    <div class="col-md-8">
+        <div class="card border-warning">
+            <div class="card-header bg-warning text-dark">
+                <h5 class="mb-0">
+                    <i class="fas fa-database"></i> Backup Completo del Sistema
+                </h5>
+            </div>
+            <div class="card-body">
+                <p class="mb-3">
+                    <strong>Exportación completa</strong> de todos los datos del sistema en formato JSON. 
+                    Incluye alumnos, pagos, facturas, asistencias y configuración.
+                </p>
+                
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i>
+                    <strong>Recomendación:</strong> Realiza un backup completo antes de hacer cambios importantes en el sistema.
+                </div>
+                
+                <div class="d-grid gap-2 d-md-flex">
+                    <button class="btn btn-warning" onclick="createFullBackup()">
+                        <i class="fas fa-download"></i> Crear Backup Completo
+                    </button>
+                    <button class="btn btn-outline-secondary" onclick="showBackupHistory()">
+                        <i class="fas fa-history"></i> Ver Historial
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Estadísticas de Exportación -->
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i class="fas fa-chart-pie"></i> Estadísticas
+                </h6>
+            </div>
+            <div class="card-body">
+                <div id="exportStats">
+                    <div class="text-center">
+                        <div class="spinner-border spinner-border-sm" role="status">
+                            <span class="visually-hidden">Cargando...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Cargar estadísticas
+document.addEventListener('DOMContentLoaded', function() {
+    fetch('/api/export-stats')
+        .then(response => response.json())
+        .then(data => {
+            const statsHtml = `
+                <ul class="list-unstyled">
+                    <li><strong>Alumnos:</strong> ${data.alumnos_activos}/${data.alumnos_total}</li>
+                    <li><strong>Pagos:</strong> ${data.pagos_total}</li>
+                    <li><strong>Facturas:</strong> ${data.facturas_total}</li>
+                    <li><strong>Asistencias:</strong> ${data.asistencias_total}</li>
+                </ul>
+                <small class="text-muted">Actualizado: ${data.last_export}</small>
+            `;
+            document.getElementById('exportStats').innerHTML = statsHtml;
+        })
+        .catch(error => {
+            document.getElementById('exportStats').innerHTML = 
+                '<small class="text-danger">Error al cargar estadísticas</small>';
+        });
+});
+
+function createFullBackup() {
+    if (confirm('¿Crear backup completo del sistema? Esto puede tardar unos minutos.')) {
+        const btn = event.target;
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creando...';
+        btn.disabled = true;
+        
+        fetch('/api/backup-full', { method: 'POST' })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('✅ Backup completo creado exitosamente: ' + data.filename);
+                } else {
+                    alert('❌ Error al crear backup: ' + data.error);
+                }
+            })
+            .catch(error => {
+                alert('❌ Error de conexión: ' + error);
+            })
+            .finally(() => {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            });
+    }
+}
+
+function showBackupHistory() {
+    // Implementar modal con historial de backups
+    alert('Funcionalidad de historial de backups en desarrollo');
+}
+</script>
+{% endblock %}

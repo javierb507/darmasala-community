@@ -4,215 +4,434 @@
 
 {% block content %}
 <div class="row">
-    <div class="col-md-8 mx-auto">
-        <div class="card">
-            <div class="card-header">
-                <h4 class="mb-0">
-                    <i class="fas fa-cog"></i> Configuración del Sistema
-                </h4>
-                <p class="mb-0 text-muted">Configura los datos generales de la escuela y precios</p>
-            </div>
-            <div class="card-body">
-                <form method="POST" action="{{ url_for('guardar_configuracion') }}">
-                    <div class="row">
-                        <div class="col-md-12">
-                            <h5 class="text-primary mb-3">
-                                <i class="fas fa-euro-sign"></i> Tarifas
-                            </h5>
-                            
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label for="precio_clase_suelta" class="form-label">Clase Suelta</label>
-                                        <div class="input-group">
-                                            <span class="input-group-text">€</span>
-                                            <input type="number" step="0.01" class="form-control" id="precio_clase_suelta" 
-                                                   name="precio_clase_suelta" value="{{ config.get('precio_clase_suelta', '15.00') }}" required>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="mb-3">
-                                        <label for="precio_1_clase_semanal" class="form-label">1 Clase por Semana</label>
-                                        <div class="input-group">
-                                            <span class="input-group-text">€</span>
-                                            <input type="number" step="0.01" class="form-control" id="precio_1_clase_semanal" 
-                                                   name="precio_1_clase_semanal" value="{{ config.get('precio_1_clase_semanal', '40.00') }}" required>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="mb-3">
-                                        <label for="precio_2_clases_semanal" class="form-label">2 Clases por Semana</label>
-                                        <div class="input-group">
-                                            <span class="input-group-text">€</span>
-                                            <input type="number" step="0.01" class="form-control" id="precio_2_clases_semanal" 
-                                                   name="precio_2_clases_semanal" value="{{ config.get('precio_2_clases_semanal', '70.00') }}" required>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label for="precio_tarifa_plana" class="form-label">Tarifa Plana</label>
-                                        <div class="input-group">
-                                            <span class="input-group-text">€</span>
-                                            <input type="number" step="0.01" class="form-control" id="precio_tarifa_plana" 
-                                                   name="precio_tarifa_plana" value="{{ config.get('precio_tarifa_plana', '90.00') }}" required>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="mb-3">
-                                        <label for="precio_1_clase_bimensual" class="form-label">1 Clase Bimensual</label>
-                                        <div class="input-group">
-                                            <span class="input-group-text">€</span>
-                                            <input type="number" step="0.01" class="form-control" id="precio_1_clase_bimensual" 
-                                                   name="precio_1_clase_bimensual" value="{{ config.get('precio_1_clase_bimensual', '75.00') }}" required>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="mb-3">
-                                        <label for="precio_2_clases_bimensual" class="form-label">2 Clases Bimensual</label>
-                                        <div class="input-group">
-                                            <span class="input-group-text">€</span>
-                                            <input type="number" step="0.01" class="form-control" id="precio_2_clases_bimensual" 
-                                                   name="precio_2_clases_bimensual" value="{{ config.get('precio_2_clases_bimensual', '135.00') }}" required>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label for="precio_matricula" class="form-label">Matrícula Anual</label>
-                                        <div class="input-group">
-                                            <span class="input-group-text">€</span>
-                                            <input type="number" step="0.01" class="form-control" id="precio_matricula" 
-                                                   name="precio_matricula" value="{{ config.get('precio_matricula', '25.00') }}" required>
-                                        </div>
-                                        <div class="form-text">Pago único al año</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <hr class="my-4">
-                    
-                    <div class="row">
-                        <div class="col-md-6">
-                            <h5 class="text-primary mb-3">
-                                <i class="fas fa-user"></i> Instructora
-                            </h5>
-                            
-                            <div class="mb-3">
-                                <label for="nombre_instructora" class="form-label">Nombre de la Instructora *</label>
-                                <input type="text" class="form-control" id="nombre_instructora" 
-                                       name="nombre_instructora" value="{{ config.get('nombre_instructora', 'Minouche') }}" required>
-                            </div>
-                        </div>
-                        
-                        <div class="col-md-6">
-                            <h5 class="text-primary mb-3">
-                                <i class="fas fa-user"></i> Instructora
-                            </h5>
-                            
-                            <div class="mb-3">
-                                <label for="nombre_instructora" class="form-label">Nombre de la Instructora *</label>
-                                <input type="text" class="form-control" id="nombre_instructora" 
-                                       name="nombre_instructora" value="{{ config.get('nombre_instructora', 'Minouche') }}" required>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <hr class="my-4">
-                    
-                    <div class="row">
-                        <div class="col-md-6">
-                            <h5 class="text-primary mb-3">
-                                <i class="fas fa-map-marker-alt"></i> Información de la Escuela
-                            </h5>
-                            
-                            <div class="mb-3">
-                                <label for="direccion_escuela" class="form-label">Dirección</label>
-                                <textarea class="form-control" id="direccion_escuela" name="direccion_escuela" 
-                                          rows="3" placeholder="Calle, número, ciudad, código postal">{{ config.get('direccion_escuela', '') }}</textarea>
-                            </div>
-                            
-                            <div class="mb-3">
-                                <label for="telefono_escuela" class="form-label">Teléfono</label>
-                                <input type="tel" class="form-control" id="telefono_escuela" 
-                                       name="telefono_escuela" value="{{ config.get('telefono_escuela', '') }}" 
-                                       placeholder="+34 123 456 789">
-                            </div>
-                            
-                            <div class="mb-3">
-                                <label for="email_escuela" class="form-label">Email</label>
-                                <input type="email" class="form-control" id="email_escuela" 
-                                       name="email_escuela" value="{{ config.get('email_escuela', '') }}" 
-                                       placeholder="contacto@atmasuddhi.com">
-                            </div>
-                        </div>
-                        
-                        <div class="col-md-6">
-                            <h5 class="text-primary mb-3">
-                                <i class="fas fa-university"></i> Información Bancaria
-                            </h5>
-                            
-                            <div class="mb-3">
-                                <label for="numero_cuenta" class="form-label">Número de Cuenta</label>
-                                <input type="text" class="form-control" id="numero_cuenta" 
-                                       name="numero_cuenta" value="{{ config.get('numero_cuenta', '') }}" 
-                                       placeholder="ES12 1234 5678 9012 3456 7890">
-                                <div class="form-text">Para transferencias bancarias</div>
-                            </div>
-                            
-                            <div class="alert alert-info">
-                                <i class="fas fa-info-circle"></i>
-                                <strong>Nota:</strong> Esta información se utilizará para generar facturas y comunicaciones con los alumnos.
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="d-flex justify-content-between mt-4">
-                        <a href="{{ url_for('index') }}" class="btn btn-secondary">
-                            <i class="fas fa-arrow-left"></i> Volver al Inicio
-                        </a>
-                        <button type="submit" class="btn btn-success">
-                            <i class="fas fa-save"></i> Guardar Configuración
-                        </button>
-                    </div>
-                </form>
-            </div>
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2><i class="fas fa-cog"></i> Configuración del Sistema</h2>
+            <a href="{{ url_for('index') }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Volver al Inicio
+            </a>
         </div>
         
-        <!-- Información adicional -->
-        <div class="card mt-4">
-            <div class="card-header">
-                <h5 class="mb-0">
-                    <i class="fas fa-lightbulb"></i> Información del Sistema
-                </h5>
-            </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-6">
-                        <h6>Precios por Tipo de Cuota</h6>
-                        <ul class="list-unstyled">
-                            <li><strong>1 clase/semana:</strong> Precio base por clase</li>
-                            <li><strong>2 clases/semana:</strong> Precio base × 2</li>
-                            <li><strong>3 clases/semana:</strong> Precio base × 3</li>
-                        </ul>
+        <!-- Navegación por pestañas -->
+        <ul class="nav nav-tabs mb-4" id="configTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="clases-tab" data-bs-toggle="tab" data-bs-target="#clases" type="button" role="tab">
+                    <i class="fas fa-dumbbell"></i> Gestión de Clases
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="precios-tab" data-bs-toggle="tab" data-bs-target="#precios" type="button" role="tab">
+                    <i class="fas fa-euro-sign"></i> Precios
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="centro-tab" data-bs-toggle="tab" data-bs-target="#centro" type="button" role="tab">
+                    <i class="fas fa-building"></i> Centro
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="sistema-tab" data-bs-toggle="tab" data-bs-target="#sistema" type="button" role="tab">
+                    <i class="fas fa-tools"></i> Sistema
+                </button>
+            </li>
+        </ul>
+    </div>
+</div>
+
+<div class="tab-content" id="configTabsContent">
+    <!-- Gestión de Clases -->
+    <div class="tab-pane fade show active" id="clases" role="tabpanel">
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">
+                            <i class="fas fa-dumbbell"></i> Gestión de Clases y Actividades
+                        </h5>
+                        <a href="{{ url_for('nueva_clase') }}" class="btn btn-success">
+                            <i class="fas fa-plus"></i> Nueva Clase
+                        </a>
                     </div>
-                    <div class="col-md-6">
-                        <h6>Configuración Actual</h6>
-                        <ul class="list-unstyled">
-                            <li><strong>Precio por clase:</strong> €{{ config.get('precio_clase', '15.00') }}</li>
-                            <li><strong>Instructora:</strong> {{ config.get('nombre_instructora', 'Minouche') }}</li>
-                            <li><strong>Escuela:</strong> Atma suddhi</li>
-                        </ul>
+                    <div class="card-body">
+                        <div class="row" id="clasesGrid">
+                            <!-- Las clases se cargarán aquí dinámicamente -->
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+    
+    <!-- Configuración de Precios -->
+    <div class="tab-pane fade" id="precios" role="tabpanel">
+        <div class="row">
+            <div class="col-md-8 mx-auto">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-euro-sign"></i> Configuración de Precios
+                </h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('guardar_configuracion') }}">
+                    <input type="hidden" name="seccion" value="precios">
+                    
+                    <div class="mb-3">
+                        <label for="clase_suelta" class="form-label">Clase Suelta</label>
+                        <div class="input-group">
+                            <input type="number" step="0.01" class="form-control" id="clase_suelta" 
+                                   name="precio_clase_suelta" value="{{ config.get('precio_clase_suelta', '15.00') }}">
+                            <span class="input-group-text">€</span>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="1_clase_semanal" class="form-label">1 Clase Semanal</label>
+                        <div class="input-group">
+                            <input type="number" step="0.01" class="form-control" id="1_clase_semanal" 
+                                   name="precio_1_clase_semanal" value="{{ config.get('precio_1_clase_semanal', '40.00') }}">
+                            <span class="input-group-text">€/mes</span>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="2_clases_semanal" class="form-label">2 Clases Semanales</label>
+                        <div class="input-group">
+                            <input type="number" step="0.01" class="form-control" id="2_clases_semanal" 
+                                   name="precio_2_clases_semanal" value="{{ config.get('precio_2_clases_semanal', '70.00') }}">
+                            <span class="input-group-text">€/mes</span>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="plana" class="form-label">Tarifa Plana</label>
+                        <div class="input-group">
+                            <input type="number" step="0.01" class="form-control" id="plana" 
+                                   name="precio_plana" value="{{ config.get('precio_plana', '90.00') }}">
+                            <span class="input-group-text">€/mes</span>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="1_clase_bimensual" class="form-label">1 Clase Bimensual</label>
+                        <div class="input-group">
+                            <input type="number" step="0.01" class="form-control" id="1_clase_bimensual" 
+                                   name="precio_1_clase_bimensual" value="{{ config.get('precio_1_clase_bimensual', '75.00') }}">
+                            <span class="input-group-text">€/bimestre</span>
+                        </div>
+                        <div class="form-text">Pago cada 2 meses para 1 clase por semana</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="2_clases_bimensual" class="form-label">2 Clases Bimensuales</label>
+                        <div class="input-group">
+                            <input type="number" step="0.01" class="form-control" id="2_clases_bimensual" 
+                                   name="precio_2_clases_bimensual" value="{{ config.get('precio_2_clases_bimensual', '135.00') }}">
+                            <span class="input-group-text">€/bimestre</span>
+                        </div>
+                        <div class="form-text">Pago cada 2 meses para 2 clases por semana</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="matricula" class="form-label">Matrícula Anual</label>
+                        <div class="input-group">
+                            <input type="number" step="0.01" class="form-control" id="matricula" 
+                                   name="precio_matricula" value="{{ config.get('precio_matricula', '25.00') }}">
+                            <span class="input-group-text">€/año</span>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Guardar Precios
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+        </div>
+    </div>
+    
+    <!-- Información del Centro -->
+    <div class="tab-pane fade" id="centro" role="tabpanel">
+        <div class="row">
+            <div class="col-md-8 mx-auto">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-building"></i> Información del Centro
+                </h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('guardar_configuracion') }}">
+                    <input type="hidden" name="seccion" value="centro">
+                    
+                    <div class="mb-3">
+                        <label for="nombre_centro" class="form-label">Nombre del Centro</label>
+                        <input type="text" class="form-control" id="nombre_centro" 
+                               name="nombre_centro" value="{{ config.get('nombre_centro', 'Atma suddhi') }}">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="direccion_centro" class="form-label">Dirección</label>
+                        <textarea class="form-control" id="direccion_centro" name="direccion_centro" rows="2">{{ config.get('direccion_centro', '') }}</textarea>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="telefono_centro" class="form-label">Teléfono</label>
+                        <input type="tel" class="form-control" id="telefono_centro" 
+                               name="telefono_centro" value="{{ config.get('telefono_centro', '') }}">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="email_centro" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="email_centro" 
+                               name="email_centro" value="{{ config.get('email_centro', '') }}">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="web_centro" class="form-label">Página Web</label>
+                        <input type="url" class="form-control" id="web_centro" 
+                               name="web_centro" value="{{ config.get('web_centro', 'http://atmasuddhi.es') }}">
+                    </div>
+                    
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-save"></i> Guardar Información
+                    </button>
+                </form>
+            </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Sistema y Mantenimiento -->
+    <div class="tab-pane fade" id="sistema" role="tabpanel">
+        <div class="row">
+            <!-- Backup y Mantenimiento -->
+            <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-database"></i> Backup y Mantenimiento
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <h6>Backup de Base de Datos</h6>
+                    <p class="text-muted">Crear una copia de seguridad de todos los datos.</p>
+                    <button type="button" class="btn btn-warning" onclick="createBackup()">
+                        <i class="fas fa-download"></i> Crear Backup
+                    </button>
+                </div>
+                
+                <hr>
+                
+                <div class="mb-3">
+                    <h6>Información del Sistema</h6>
+                    <ul class="list-unstyled">
+                        <li><strong>Versión:</strong> 1.1.0</li>
+                        <li><strong>Base de Datos:</strong> SQLite</li>
+                        <li><strong>Alumnos Activos:</strong> <span id="alumnosCount">-</span></li>
+                        <li><strong>Último Backup:</strong> <span id="lastBackup">-</span></li>
+                    </ul>
+                </div>
+                
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i>
+                    <strong>Recomendación:</strong> Realiza backups regulares de tus datos.
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Configuración Avanzada -->
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-tools"></i> Configuración Avanzada
+                </h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('guardar_configuracion') }}">
+                    <input type="hidden" name="seccion" value="avanzada">
+                    
+                    <div class="mb-3">
+                        <label for="duracion_clase" class="form-label">Duración de Clase (minutos)</label>
+                        <input type="number" class="form-control" id="duracion_clase" 
+                               name="duracion_clase" value="{{ config.get('duracion_clase', '75') }}">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="instructor_default" class="form-label">Instructor por Defecto</label>
+                        <input type="text" class="form-control" id="instructor_default" 
+                               name="instructor_default" value="{{ config.get('instructor_default', 'Minouche') }}">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="backup_automatico" 
+                                   name="backup_automatico" {{ 'checked' if config.get('backup_automatico') == 'true' else '' }}>
+                            <label class="form-check-label" for="backup_automatico">
+                                Backup Automático Semanal
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="notificaciones_email" 
+                                   name="notificaciones_email" {{ 'checked' if config.get('notificaciones_email') == 'true' else '' }}>
+                            <label class="form-check-label" for="notificaciones_email">
+                                Notificaciones por Email
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Guardar Configuración
+                    </button>
+                </form>
+            </div>
+            </div>
+        </div>
+    </div>
 </div>
+
+<script>
+// Cargar estadísticas del sistema y clases
+document.addEventListener('DOMContentLoaded', function() {
+    // Cargar estadísticas
+    fetch('/api/stats')
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('alumnosCount').textContent = data.alumnos_activos || 0;
+            document.getElementById('lastBackup').textContent = data.ultimo_backup || 'Nunca';
+        })
+        .catch(error => {
+            console.error('Error cargando estadísticas:', error);
+        });
+    
+    // Cargar clases
+    cargarClases();
+});
+
+// Función para cargar clases
+function cargarClases() {
+    fetch('/api/clases')
+        .then(response => response.json())
+        .then(data => {
+            const grid = document.getElementById('clasesGrid');
+            grid.innerHTML = '';
+            
+            data.clases.forEach(clase => {
+                const claseCard = crearTarjetaClase(clase);
+                grid.appendChild(claseCard);
+            });
+        })
+        .catch(error => {
+            console.error('Error cargando clases:', error);
+        });
+}
+
+// Función para crear tarjeta de clase
+function crearTarjetaClase(clase) {
+    const col = document.createElement('div');
+    col.className = 'col-md-4 mb-3';
+    
+    col.innerHTML = `
+        <div class="card h-100" style="border-left: 4px solid ${clase.color}">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <h6 class="card-title mb-0">${clase.nombre}</h6>
+                    <div class="dropdown">
+                        <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-ellipsis-v"></i>
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="/configuracion/clases/${clase.id}/editar">
+                                <i class="fas fa-edit"></i> Editar
+                            </a></li>
+                            <li><a class="dropdown-item" href="#" onclick="toggleClase(${clase.id})">
+                                <i class="fas fa-${clase.activa ? 'eye-slash' : 'eye'}"></i> 
+                                ${clase.activa ? 'Desactivar' : 'Activar'}
+                            </a></li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <p class="card-text text-muted small mb-2">${clase.descripcion || 'Sin descripción'}</p>
+                
+                <div class="row text-center mb-2">
+                    <div class="col-4">
+                        <small class="text-muted">Duración</small>
+                        <div class="fw-bold">${clase.duracion_minutos}min</div>
+                    </div>
+                    <div class="col-4">
+                        <small class="text-muted">Capacidad</small>
+                        <div class="fw-bold">${clase.capacidad_maxima}</div>
+                    </div>
+                    <div class="col-4">
+                        <small class="text-muted">Nivel</small>
+                        <div class="fw-bold">${clase.nivel}</div>
+                    </div>
+                </div>
+                
+                <div class="mb-2">
+                    <small class="text-muted">Precios:</small>
+                    <div class="d-flex flex-wrap gap-1">
+                        <span class="badge bg-light text-dark">Suelta: €${clase.precio_clase_suelta}</span>
+                        <span class="badge bg-light text-dark">1/sem: €${clase.precio_1_semanal}</span>
+                        <span class="badge bg-light text-dark">2/sem: €${clase.precio_2_semanal}</span>
+                    </div>
+                </div>
+                
+                <div class="d-flex justify-content-between align-items-center">
+                    <span class="badge ${clase.activa ? 'bg-success' : 'bg-secondary'}">
+                        ${clase.activa ? 'Activa' : 'Inactiva'}
+                    </span>
+                    <small class="text-muted">${clase.horarios_count || 0} horarios</small>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    return col;
+}
+
+// Función para activar/desactivar clase
+function toggleClase(claseId) {
+    fetch(`/api/clases/${claseId}/toggle`, { method: 'POST' })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                cargarClases(); // Recargar las clases
+            } else {
+                alert('Error al cambiar estado de la clase');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error de conexión');
+        });
+}
+
+// Función para crear backup
+function createBackup() {
+    if (confirm('¿Crear backup de la base de datos?')) {
+        fetch('/api/backup', { method: 'POST' })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('✅ Backup creado exitosamente: ' + data.filename);
+                } else {
+                    alert('❌ Error al crear backup: ' + data.error);
+                }
+            })
+            .catch(error => {
+                alert('❌ Error de conexión: ' + error);
+            });
+    }
+}
+</script>
 {% endblock %}

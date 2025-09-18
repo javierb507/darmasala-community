@@ -52,8 +52,20 @@
             transform: translateY(-1px);
         }
         
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(139, 95, 191, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(139, 95, 191, 0.15);
+        }
+        
         .btn-primary {
-            background: linear-gradient(135deg, var(--primary-purple) 0%, var(--dark-purple) 100%);
+            background: linear-gradient(135deg, var(--primary-purple), var(--dark-purple));
             border: none;
             border-radius: 25px;
             padding: 10px 25px;
@@ -62,175 +74,119 @@
         }
         
         .btn-primary:hover {
-            background: linear-gradient(135deg, var(--dark-purple) 0%, var(--primary-purple) 100%);
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(139, 95, 191, 0.4);
         }
         
         .btn-success {
-            background: linear-gradient(135deg, var(--light-green) 0%, #7CB342 100%);
+            background: linear-gradient(135deg, #28a745, #20c997);
             border: none;
             border-radius: 25px;
-            color: #2E7D32;
+            padding: 10px 25px;
             font-weight: 500;
         }
         
-        .btn-success:hover {
-            background: linear-gradient(135deg, #7CB342 0%, var(--light-green) 100%);
-            transform: translateY(-2px);
-        }
-        
-        .card {
+        .btn-warning {
+            background: linear-gradient(135deg, #ffc107, #fd7e14);
             border: none;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(139, 95, 191, 0.1);
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-        }
-        
-        .card-header {
-            background: linear-gradient(135deg, var(--light-purple) 0%, var(--primary-purple) 100%);
-            color: white;
-            border-radius: 20px 20px 0 0 !important;
-            border: none;
-            padding: 20px;
-        }
-        
-        .card-header h4, .card-header h5 {
-            margin: 0;
-            font-family: 'Playfair Display', serif;
-            font-weight: 600;
-        }
-        
-        .table {
-            border-radius: 15px;
-            overflow: hidden;
-        }
-        
-        .table th {
-            background: linear-gradient(135deg, var(--pale-yellow) 0%, #FFF8DC 100%);
-            border: none;
-            color: var(--dark-purple);
-            font-weight: 600;
-            padding: 15px;
-        }
-        
-        .table td {
-            padding: 15px;
-            border-color: rgba(139, 95, 191, 0.1);
-        }
-        
-        .badge {
-            border-radius: 20px;
-            padding: 8px 15px;
+            border-radius: 25px;
+            padding: 10px 25px;
             font-weight: 500;
         }
         
-        .alert {
+        .btn-info {
+            background: linear-gradient(135deg, #17a2b8, #007bff);
             border: none;
-            border-radius: 15px;
-            padding: 20px;
-        }
-        
-        .form-control, .form-select {
-            border: 2px solid rgba(139, 95, 191, 0.2);
-            border-radius: 15px;
-            padding: 12px 20px;
-            transition: all 0.3s ease;
-        }
-        
-        .form-control:focus, .form-select:focus {
-            border-color: var(--primary-purple);
-            box-shadow: 0 0 0 0.2rem rgba(139, 95, 191, 0.25);
-        }
-        
-        .form-label {
-            font-weight: 600;
-            color: var(--dark-purple);
-            margin-bottom: 8px;
-        }
-        
-        h1, h2, h3, h4, h5, h6 {
-            font-family: 'Playfair Display', serif;
-            color: var(--dark-purple);
-        }
-        
-        .text-center.py-5 {
-            background: rgba(255, 255, 255, 0.7);
-            border-radius: 20px;
-            margin: 20px 0;
+            border-radius: 25px;
+            padding: 10px 25px;
+            font-weight: 500;
         }
     </style>
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
         <div class="container">
             <a class="navbar-brand" href="{{ url_for('index') }}">
-                <i class="fas fa-om"></i> Atma suddhi
+                <i class="fas fa-om"></i>
+                Atma suddhi
             </a>
+            
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
+            
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto">
+                <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('index') }}">
                             <i class="fas fa-home"></i> Inicio
                         </a>
                     </li>
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                                <i class="fas fa-users"></i> Alumnos
-                            </a>
-                            <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="{{ url_for('alumnos') }}">
-                                    <i class="fas fa-user-check"></i> Alumnos Activos
-                                </a></li>
-                                <li><a class="dropdown-item" href="{{ url_for('nuevo_alumno') }}">
-                                    <i class="fas fa-plus"></i> Nuevo Alumno
-                                </a></li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item" href="{{ url_for('alumnos_desactivados') }}">
-                                    <i class="fas fa-user-times"></i> Desactivados/Suspendidos
-                                </a></li>
-                            </ul>
-                        </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('alumnos') }}">
+                            <i class="fas fa-users"></i> Alumnos
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('clases') }}">
+                            <i class="fas fa-dumbbell"></i> Clases
+                        </a>
+                    </li>
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('horarios') }}">
                             <i class="fas fa-calendar-alt"></i> Horarios
                         </a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('asistencias') }}">
-                            <i class="fas fa-clipboard-check"></i> Asistencias
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-calculator"></i> Contabilidad
                         </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{{ url_for('economia') }}">
+                                <i class="fas fa-tachometer-alt"></i> Dashboard
+                            </a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{{ url_for('gastos_mensuales') }}">
+                                <i class="fas fa-receipt"></i> Gastos Mensuales
+                            </a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('facturas') }}">
+                                <i class="fas fa-file-invoice"></i> Facturas
+                            </a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('proveedores') }}">
+                                <i class="fas fa-building"></i> Proveedores
+                            </a></li>
+                        </ul>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('reporte_asistencia') }}">
-                            <i class="fas fa-chart-bar"></i> Reportes
+                        <a class="nav-link" href="{{ url_for('yogaterapia') }}">
+                            <i class="fas fa-user-md"></i> Yogaterapia
                         </a>
                     </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('economia') }}">
-                                <i class="fas fa-chart-line"></i> Economía
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('configuracion') }}">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-cog"></i> Sistema
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{{ url_for('configuracion') }}">
                                 <i class="fas fa-cog"></i> Configuración
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="http://atmasuddhi.es" target="_blank">
-                                <i class="fas fa-external-link-alt"></i> Web Atma suddhi
-                            </a>
-                        </li>
+                            </a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('backup') }}">
+                                <i class="fas fa-database"></i> Backup
+                            </a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('exportar') }}">
+                                <i class="fas fa-download"></i> Exportar
+                            </a></li>
+                        </ul>
+                    </li>
                 </ul>
             </div>
         </div>
     </nav>
 
+    <!-- Main Content -->
     <div class="container mt-4">
+        <!-- Flash Messages -->
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
                 {% for category, message in messages %}
@@ -242,9 +198,11 @@
             {% endif %}
         {% endwith %}
 
+        <!-- Page Content -->
         {% block content %}{% endblock %}
     </div>
 
+    <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

@@ -1,0 +1,258 @@
+{% extends "base.html" %}
+
+{% block title %}Nueva Sesión de Yogaterapia - Atma suddhi{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2><i class="fas fa-heart"></i> Nueva Sesión de Yogaterapia</h2>
+            <a href="{{ url_for('ver_alumno', alumno_id=alumno.id) }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Volver al Alumno
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-leaf"></i> Sesión de Yogaterapia para {{ alumno.nombre }} {{ alumno.apellido }}
+                </h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" enctype="multipart/form-data">
+                    <!-- Información básica -->
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="fecha_sesion" class="form-label">Fecha de la Sesión *</label>
+                                <input type="date" class="form-control" id="fecha_sesion" name="fecha_sesion" 
+                                       value="{{ date.today().isoformat() }}" required>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="duracion_minutos" class="form-label">Duración (minutos)</label>
+                                <select class="form-select" id="duracion_minutos" name="duracion_minutos">
+                                    <option value="60">60 minutos</option>
+                                    <option value="75" selected>75 minutos</option>
+                                    <option value="90">90 minutos</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="tipo_sesion" class="form-label">Tipo de Sesión</label>
+                                <select class="form-select" id="tipo_sesion" name="tipo_sesion">
+                                    <option value="individual">Individual</option>
+                                    <option value="pareja">En pareja</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Información terapéutica -->
+                    <div class="card mb-4">
+                        <div class="card-header bg-light">
+                            <h6 class="mb-0"><i class="fas fa-stethoscope"></i> Información Terapéutica</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label for="motivo_consulta" class="form-label">Motivo de Consulta</label>
+                                <textarea class="form-control" id="motivo_consulta" name="motivo_consulta" rows="2" 
+                                          placeholder="¿Por qué viene el alumno? ¿Qué problema o necesidad tiene?"></textarea>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="objetivos_terapeuticos" class="form-label">Objetivos Terapéuticos</label>
+                                <textarea class="form-control" id="objetivos_terapeuticos" name="objetivos_terapeuticos" rows="2" 
+                                          placeholder="¿Qué se quiere conseguir con esta sesión?"></textarea>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="estado_inicial" class="form-label">Estado Inicial</label>
+                                        <textarea class="form-control" id="estado_inicial" name="estado_inicial" rows="3" 
+                                                  placeholder="¿Cómo llegó el alumno? Estado físico, emocional, mental..."></textarea>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="estado_final" class="form-label">Estado Final</label>
+                                        <textarea class="form-control" id="estado_final" name="estado_final" rows="3" 
+                                                  placeholder="¿Cómo se fue el alumno? Cambios observados..."></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Técnicas aplicadas -->
+                    <div class="card mb-4">
+                        <div class="card-header bg-light">
+                            <h6 class="mb-0"><i class="fas fa-om"></i> Técnicas Aplicadas</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label for="posturas_trabajadas" class="form-label">Posturas Trabajadas (Asanas)</label>
+                                <textarea class="form-control" id="posturas_trabajadas" name="posturas_trabajadas" rows="3" 
+                                          placeholder="Ej: Balasana, Marjaryasana, Bhujangasana, adaptaciones específicas..."></textarea>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="respiracion_pranayama" class="form-label">Respiración y Pranayama</label>
+                                <textarea class="form-control" id="respiracion_pranayama" name="respiracion_pranayama" rows="2" 
+                                          placeholder="Ej: Respiración abdominal, Ujjayi, Nadi Shodhana..."></textarea>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="meditacion_relajacion" class="form-label">Meditación y Relajación</label>
+                                <textarea class="form-control" id="meditacion_relajacion" name="meditacion_relajacion" rows="2" 
+                                          placeholder="Ej: Yoga Nidra, meditación mindfulness, relajación progresiva..."></textarea>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="tecnicas_aplicadas" class="form-label">Otras Técnicas</label>
+                                <textarea class="form-control" id="tecnicas_aplicadas" name="tecnicas_aplicadas" rows="2" 
+                                          placeholder="Masaje, acupresión, uso de props, etc."></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Evaluación y seguimiento -->
+                    <div class="card mb-4">
+                        <div class="card-header bg-light">
+                            <h6 class="mb-0"><i class="fas fa-clipboard-list"></i> Evaluación y Seguimiento</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label for="respuesta_sesion" class="form-label">Respuesta Durante la Sesión</label>
+                                <textarea class="form-control" id="respuesta_sesion" name="respuesta_sesion" rows="3" 
+                                          placeholder="¿Cómo respondió el alumno? Dificultades, facilidades, reacciones..."></textarea>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="observaciones_terapeuta" class="form-label">Observaciones del Terapeuta</label>
+                                <textarea class="form-control" id="observaciones_terapeuta" name="observaciones_terapeuta" rows="3" 
+                                          placeholder="Observaciones profesionales, patrones detectados, áreas de mejora..."></textarea>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="recomendaciones_casa" class="form-label">Recomendaciones para Casa</label>
+                                <textarea class="form-control" id="recomendaciones_casa" name="recomendaciones_casa" rows="3" 
+                                          placeholder="Ejercicios, posturas o técnicas para practicar en casa..."></textarea>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="proxima_sesion" class="form-label">Plan para Próxima Sesión</label>
+                                <textarea class="form-control" id="proxima_sesion" name="proxima_sesion" rows="2" 
+                                          placeholder="¿Qué trabajar en la siguiente sesión?"></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Información administrativa -->
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="precio" class="form-label">Precio de la Sesión</label>
+                                <div class="input-group">
+                                    <input type="number" step="0.01" class="form-control" id="precio" name="precio" 
+                                           value="50.00">
+                                    <span class="input-group-text">€</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="metodo_pago" class="form-label">Método de Pago</label>
+                                <select class="form-select" id="metodo_pago" name="metodo_pago">
+                                    <option value="">Seleccionar...</option>
+                                    <option value="efectivo">Efectivo</option>
+                                    <option value="transferencia">Transferencia</option>
+                                    <option value="tarjeta">Tarjeta</option>
+                                    <option value="bizum">Bizum</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="instructor" class="form-label">Terapeuta</label>
+                                <input type="text" class="form-control" id="instructor" name="instructor" 
+                                       value="Minouche">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Archivos adjuntos -->
+                    <div class="card mb-4">
+                        <div class="card-header bg-light">
+                            <h6 class="mb-0"><i class="fas fa-camera"></i> Archivos de la Sesión</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label for="archivos" class="form-label">Fotos y Documentos</label>
+                                <input type="file" class="form-control" id="archivos" name="archivos" multiple 
+                                       accept=".jpg,.jpeg,.png,.pdf,.mp4,.mp3">
+                                <div class="form-text">
+                                    <i class="fas fa-info-circle"></i> 
+                                    Puedes subir fotos de la sesión, PDFs con ejercicios, videos o audios de relajación.
+                                    <br><strong>Formatos permitidos:</strong> JPG, PNG, PDF, MP4, MP3
+                                </div>
+                            </div>
+                            
+                            <div class="alert alert-info">
+                                <i class="fas fa-shield-alt"></i> 
+                                <strong>Privacidad:</strong> Los archivos subidos son confidenciales y solo accesibles por el terapeuta.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Estado de pago -->
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="pagado" name="pagado">
+                            <label class="form-check-label" for="pagado">
+                                Sesión pagada
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="{{ url_for('ver_alumno', alumno_id=alumno.id) }}" class="btn btn-secondary me-md-2">
+                            Cancelar
+                        </a>
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-save"></i> Guardar Sesión de Yogaterapia
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Calcular precio según tipo de sesión
+document.getElementById('tipo_sesion').addEventListener('change', function() {
+    const precios = {
+        'individual': 50.00,
+        'pareja': 70.00
+    };
+    
+    const precio = precios[this.value] || 50.00;
+    document.getElementById('precio').value = precio.toFixed(2);
+});
+
+// Auto-habilitar pago si se selecciona método
+document.getElementById('metodo_pago').addEventListener('change', function() {
+    if (this.value) {
+        document.getElementById('pagado').checked = true;
+    }
+});
+</script>
+{% endblock %}

@@ -13,9 +13,18 @@
             </div>
             <div class="card-body">
                 <form method="POST">
+                    <div class="mb-3">
+                        <label for="tipo_pago" class="form-label">Tipo de Pago *</label>
+                        <select class="form-select" id="tipo_pago" name="tipo_pago" required>
+                            <option value="cuota">Cuota mensual ({{ alumno.get_tipo_cuota_display() }} - €{{ "%.2f"|format(alumno.get_precio_cuota()) }})</option>
+                            <option value="matricula">Matrícula {{ matricula_year }} (€25.00)</option>
+                            <option value="clase_suelta">Clase suelta (€15.00)</option>
+                        </select>
+                    </div>
+                    
                     <div class="mb-3" id="mes-field">
                         <label for="mes" class="form-label">Mes *</label>
-                        <input type="month" class="form-control" id="mes" name="mes">
+                        <input type="month" class="form-control" id="mes" name="mes" value="{{ current_year }}-09">
                     </div>
                     
                     <div class="mb-3" id="año-field" style="display: none;">
@@ -23,18 +32,20 @@
                         <select class="form-select" id="año" name="año">
                             <option value="">Seleccionar año</option>
                             {% for año in range(2020, 2030) %}
-                            <option value="{{ año }}" {% if año == current_year %}selected{% endif %}>{{ año }}</option>
+                            <option value="{{ año }}" {% if año == matricula_year_numeric %}selected{% endif %}>
+                                {% if año >= 2025 %}
+                                    {{ (año % 100) }}/{{ ((año + 1) % 100) }}
+                                {% else %}
+                                    {{ año }}
+                                {% endif %}
+                            </option>
                             {% endfor %}
                         </select>
                     </div>
                     
-                    <div class="mb-3">
-                        <label for="tipo_pago" class="form-label">Tipo de Pago *</label>
-                        <select class="form-select" id="tipo_pago" name="tipo_pago" required>
-                            <option value="cuota">Cuota mensual ({{ alumno.get_tipo_cuota_display() }} - €{{ "%.2f"|format(alumno.get_precio_cuota()) }})</option>
-                            <option value="matricula">Matrícula anual (€25.00)</option>
-                            <option value="clase_suelta">Clase suelta (€15.00)</option>
-                        </select>
+                    <div class="mb-3" id="fecha-clase-field" style="display: none;">
+                        <label for="fecha_clase" class="form-label">Fecha de la Clase *</label>
+                        <input type="date" class="form-control" id="fecha_clase" name="fecha_clase">
                     </div>
                     
                     <div class="mb-3">
@@ -45,6 +56,16 @@
                                    step="0.01" min="0" required placeholder="0.00" readonly>
                         </div>
                         <div class="form-text">El monto se calcula automáticamente según el tipo de pago</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="metodo_pago" class="form-label">Método de Pago</label>
+                        <select class="form-select" id="metodo_pago" name="metodo_pago">
+                            <option value="efectivo">Efectivo</option>
+                            <option value="transferencia">Transferencia</option>
+                            <option value="tarjeta">Tarjeta</option>
+                            <option value="bizum">Bizum</option>
+                        </select>
                     </div>
                     
                     <div class="d-flex justify-content-between">
@@ -85,17 +106,29 @@ document.addEventListener('DOMContentLoaded', function() {
     
     function actualizarCampos() {
         const tipoSeleccionado = tipoPagoSelect.value;
+        const fechaClaseField = document.getElementById('fecha-clase-field');
+        const fechaClaseInput = document.getElementById('fecha_clase');
         
+        // Ocultar todos los campos primero
+        mesField.style.display = 'none';
+        añoField.style.display = 'none';
+        fechaClaseField.style.display = 'none';
+        
+        // Resetear required
+        mesInput.required = false;
+        añoInput.required = false;
+        fechaClaseInput.required = false;
+        
+        // Mostrar el campo apropiado
         if (tipoSeleccionado === 'matricula') {
-            mesField.style.display = 'none';
             añoField.style.display = 'block';
-            mesInput.required = false;
             añoInput.required = true;
+        } else if (tipoSeleccionado === 'clase_suelta') {
+            fechaClaseField.style.display = 'block';
+            fechaClaseInput.required = true;
         } else {
             mesField.style.display = 'block';
-            añoField.style.display = 'none';
             mesInput.required = true;
-            añoInput.required = false;
         }
     }
     

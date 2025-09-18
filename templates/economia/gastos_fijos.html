@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+
+{% block title %}Gastos Fijos - Atma suddhi{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2><i class="fas fa-calendar-alt"></i> Gastos Fijos</h2>
+            <div class="btn-group">
+                <a href="{{ url_for('nuevo_gasto_fijo') }}" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Nuevo Gasto Fijo
+                </a>
+                <a href="{{ url_for('economia') }}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Volver a Economía
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Lista de Gastos Fijos</h5>
+            </div>
+            <div class="card-body">
+                {% if gastos %}
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Concepto</th>
+                                    <th>Categoría</th>
+                                    <th>Importe</th>
+                                    <th>Frecuencia</th>
+                                    <th>Próximo Cargo</th>
+                                    <th>Estado</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for gasto in gastos %}
+                                <tr>
+                                    <td>
+                                        <strong>{{ gasto.nombre }}</strong>
+                                        {% if gasto.descripcion %}
+                                        <br>
+                                        <small class="text-muted">{{ gasto.descripcion }}</small>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <span class="badge" style="background-color: {{ gasto.categoria.color }}; color: white;">
+                                            {{ gasto.categoria.nombre }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <strong>{{ "%.2f"|format(gasto.importe) }}€</strong>
+                                    </td>
+                                    <td>
+                                        {% if gasto.frecuencia == 'mensual' %}
+                                            <i class="fas fa-calendar"></i> Mensual
+                                        {% elif gasto.frecuencia == 'trimestral' %}
+                                            <i class="fas fa-calendar-alt"></i> Trimestral
+                                        {% elif gasto.frecuencia == 'anual' %}
+                                            <i class="fas fa-calendar-year"></i> Anual
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <small class="text-muted">Día {{ gasto.dia_cargo }} del mes</small>
+                                    </td>
+                                    <td>
+                                        {% if gasto.activo %}
+                                            <span class="badge bg-success">Activo</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">Inactivo</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="btn-group-vertical btn-group-sm" role="group">
+                                            <button class="btn btn-outline-primary btn-sm" title="Ver detalles">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            <button class="btn btn-outline-warning btn-sm" title="Editar">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            {% if gasto.activo %}
+                                            <button class="btn btn-outline-danger btn-sm" title="Desactivar">
+                                                <i class="fas fa-pause"></i>
+                                            </button>
+                                            {% else %}
+                                            <button class="btn btn-outline-success btn-sm" title="Activar">
+                                                <i class="fas fa-play"></i>
+                                            </button>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-calendar-alt fa-5x text-muted mb-3"></i>
+                        <h3 class="text-muted">No hay gastos fijos configurados</h3>
+                        <p class="text-muted">Los gastos fijos te ayudan a automatizar el seguimiento de gastos recurrentes como alquiler, luz, agua, etc.</p>
+                        <a href="{{ url_for('nuevo_gasto_fijo') }}" class="btn btn-primary">
+                            <i class="fas fa-plus"></i> Agregar Primer Gasto Fijo
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.table td {
+    vertical-align: middle;
+}
+
+.btn-group-vertical .btn {
+    margin-bottom: 2px;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+</style>
+{% endblock %}

@@ -1,129 +1,108 @@
 {% extends "base.html" %}
 
-{% block title %}Inicio - Atma suddhi{% endblock %}
+{% block title %}Atma suddhi - Gestión de Escuela de Yoga{% endblock %}
 
 {% block content %}
-<div class="row">
-    <div class="col-12">
-        <div class="text-center mb-5">
-            <h1 class="mb-3" style="font-family: 'Playfair Display', serif; font-size: 3rem; color: var(--dark-purple);">
-                <i class="fas fa-om" style="color: var(--accent-yellow);"></i> Atma suddhi
+<div class="container mt-4">
+    <!-- Hero Section -->
+    <div class="row mb-5">
+        <div class="col-12 text-center">
+            <h1 class="display-4 mb-3">
+                <i class="fas fa-om text-warning"></i> 
+                Atma Suddhi
             </h1>
-            <p class="lead" style="color: var(--primary-purple); font-style: italic;">Meditación en movimiento</p>
-            <p style="color: var(--light-purple);">Espacio de yoga</p>
+            <p class="lead text-muted">Sistema de Gestión para Escuela de Yoga</p>
         </div>
     </div>
-</div>
 
-<div class="row">
-    <div class="col-md-4">
-        <div class="card text-center">
-            <div class="card-body">
-                <i class="fas fa-users fa-3x text-primary mb-3"></i>
-                <h5 class="card-title">Alumnos</h5>
-                <p class="card-text">Gestionar registros e información de alumnos</p>
-                <a href="{{ url_for('alumnos') }}" class="btn btn-primary">
-                    <i class="fas fa-eye"></i> Ver Alumnos
-                </a>
-            </div>
-        </div>
-    </div>
-    
-    <div class="col-md-4">
-        <div class="card text-center">
-            <div class="card-body">
-                <i class="fas fa-user-plus fa-3x text-success mb-3"></i>
-                <h5 class="card-title">Nuevo Alumno</h5>
-                <p class="card-text">Registrar un nuevo alumno</p>
-                <a href="{{ url_for('nuevo_alumno') }}" class="btn btn-success">
-                    <i class="fas fa-plus"></i> Agregar Alumno
-                </a>
-            </div>
-        </div>
-    </div>
-    
-    <div class="col-md-4">
-        <div class="card text-center">
-            <div class="card-body">
-                <i class="fas fa-calendar-alt fa-3x text-info mb-3"></i>
-                <h5 class="card-title">Horarios</h5>
-                <p class="card-text">Configurar horarios semanales de clases</p>
-                <a href="{{ url_for('horarios') }}" class="btn btn-info">
-                    <i class="fas fa-calendar"></i> Ver Horarios
-                </a>
-            </div>
-        </div>
-    </div>
-</div>
 
-<div class="row mt-4">
-    <div class="col-md-4">
-        <div class="card text-center">
-            <div class="card-body">
-                <i class="fas fa-clipboard-check fa-3x text-warning mb-3"></i>
-                <h5 class="card-title">Asistencias</h5>
-                <p class="card-text">Registrar asistencias a las clases</p>
-                <a href="{{ url_for('asistencias') }}" class="btn btn-warning">
-                    <i class="fas fa-clipboard-check"></i> Ver Asistencias
-                </a>
-            </div>
-        </div>
-    </div>
-    
-    <div class="col-md-4">
-        <div class="card text-center">
-            <div class="card-body">
-                <i class="fas fa-chart-bar fa-3x text-primary mb-3"></i>
-                <h5 class="card-title">Reportes</h5>
-                <p class="card-text">Consultar asistencias y estadísticas</p>
-                <a href="{{ url_for('reporte_asistencia') }}" class="btn btn-primary">
-                    <i class="fas fa-chart-bar"></i> Ver Reportes
-                </a>
-            </div>
-        </div>
-    </div>
-    
-    <div class="col-md-4">
-        <div class="card text-center">
-            <div class="card-body">
-                <i class="fas fa-plus-circle fa-3x text-success mb-3"></i>
-                <h5 class="card-title">Registrar Asistencia</h5>
-                <p class="card-text">Marcar asistencia después de cada clase</p>
-                <a href="{{ url_for('registrar_asistencia') }}" class="btn btn-success">
-                    <i class="fas fa-plus"></i> Registrar
-                </a>
-            </div>
-        </div>
-    </div>
-</div>
 
-<div class="row mt-4">
-    <div class="col-12">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="mb-0">
-                    <i class="fas fa-info-circle"></i> Información del Sistema
-                </h5>
+    <!-- Quick Actions -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h3><i class="fas fa-bolt"></i> Acciones Rápidas</h3>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-4 mb-3">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-user-plus fa-3x text-primary mb-3"></i>
+                    <h5>Nuevo Alumno</h5>
+                    <p class="text-muted">Registrar un nuevo alumno en la escuela</p>
+                    <a href="{{ url_for('nuevo_alumno') }}" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Agregar Alumno
+                    </a>
+                </div>
             </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-6">
-                        <h6>Base de Datos</h6>
-                        <p class="text-muted">SQLite - No requiere instalación, perfecto para laptops con recursos limitados</p>
-                    </div>
-                    <div class="col-md-6">
-                        <h6>Características Disponibles</h6>
-                        <ul class="list-unstyled">
-                            <li><i class="fas fa-check text-success"></i> Gestión de Alumnos</li>
-                            <li><i class="fas fa-check text-success"></i> Seguimiento de Pagos</li>
-                            <li><i class="fas fa-check text-success"></i> Horarios Semanales</li>
-                            <li><i class="fas fa-check text-success"></i> Registro de Asistencias</li>
-                            <li><i class="fas fa-check text-success"></i> Reportes de Asistencia</li>
-                        </ul>
+        </div>
+
+        <div class="col-md-4 mb-3">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-users fa-3x text-success mb-3"></i>
+                    <h5>Gestionar Alumnos</h5>
+                    <p class="text-muted">Ver y administrar todos los alumnos</p>
+                    <a href="{{ url_for('alumnos') }}" class="btn btn-success">
+                        <i class="fas fa-list"></i> Ver Alumnos
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-3">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-calendar-alt fa-3x text-info mb-3"></i>
+                    <h5>Horarios</h5>
+                    <p class="text-muted">Consultar horarios de clases</p>
+                    <a href="{{ url_for('horarios') }}" class="btn btn-info">
+                        <i class="fas fa-clock"></i> Ver Horarios
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <h3><i class="fas fa-history"></i> Actividad Reciente</h3>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="text-center py-4">
+                        <i class="fas fa-chart-line fa-3x text-muted mb-3"></i>
+                        <h5 class="text-muted">Panel de Control</h5>
+                        <p class="text-muted">Bienvenido al sistema de gestión de Atma Suddhi</p>
+                        <p class="text-muted">Utiliza el menú superior para navegar por las diferentes secciones.</p>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<style>
+.card {
+    transition: transform 0.2s;
+    border: none;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+.display-4 {
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+}
+</style>
 {% endblock %}

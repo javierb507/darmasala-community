@@ -1,0 +1,62 @@
+<!-- Componente reutilizable para búsqueda y filtros -->
+<div class="row mb-3">
+    <div class="col-md-6">
+        <div class="input-group">
+            <span class="input-group-text"><i class="fas fa-search"></i></span>
+            <input type="text" class="form-control" id="searchInput" placeholder="Buscar...">
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="btn-group w-100" role="group">
+            <button type="button" class="btn btn-outline-secondary" onclick="filterTable('all')">
+                <i class="fas fa-list"></i> Todos
+            </button>
+            <button type="button" class="btn btn-outline-success" onclick="filterTable('active')">
+                <i class="fas fa-check"></i> Activos
+            </button>
+            <button type="button" class="btn btn-outline-warning" onclick="filterTable('pending')">
+                <i class="fas fa-clock"></i> Pendientes
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+// Función de búsqueda en tiempo real
+document.getElementById('searchInput').addEventListener('keyup', function() {
+    const searchTerm = this.value.toLowerCase();
+    const tableRows = document.querySelectorAll('tbody tr');
+    
+    tableRows.forEach(row => {
+        const text = row.textContent.toLowerCase();
+        row.style.display = text.includes(searchTerm) ? '' : 'none';
+    });
+});
+
+// Función de filtrado
+function filterTable(filter) {
+    const tableRows = document.querySelectorAll('tbody tr');
+    
+    tableRows.forEach(row => {
+        switch(filter) {
+            case 'all':
+                row.style.display = '';
+                break;
+            case 'active':
+                const hasActiveStatus = row.querySelector('.badge.bg-success');
+                row.style.display = hasActiveStatus ? '' : 'none';
+                break;
+            case 'pending':
+                const hasPendingStatus = row.querySelector('.badge.bg-warning, .badge.bg-danger');
+                row.style.display = hasPendingStatus ? '' : 'none';
+                break;
+        }
+    });
+    
+    // Actualizar botones activos
+    document.querySelectorAll('.btn-group .btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    event.target.classList.add('active');
+}
+</script>

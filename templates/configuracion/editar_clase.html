@@ -1,0 +1,159 @@
+{% extends "base.html" %}
+
+{% block title %}Editar Clase - {{ clase.nombre }} - Atma suddhi{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0">
+                    <i class="fas fa-edit"></i> Editar Clase: {{ clase.nombre }}
+                </h4>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    <div class="row">
+                        <!-- Información Básica -->
+                        <div class="col-md-6">
+                            <h6 class="text-muted mb-3">Información Básica</h6>
+                            
+                            <div class="mb-3">
+                                <label for="nombre" class="form-label">Nombre de la Clase *</label>
+                                <input type="text" class="form-control" id="nombre" name="nombre" 
+                                       value="{{ clase.nombre }}" required>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="descripcion" class="form-label">Descripción</label>
+                                <textarea class="form-control" id="descripcion" name="descripcion" rows="3">{{ clase.descripcion or '' }}</textarea>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="nivel" class="form-label">Nivel</label>
+                                        <select class="form-select" id="nivel" name="nivel">
+                                            <option value="todos" {{ 'selected' if clase.nivel == 'todos' else '' }}>Todos los niveles</option>
+                                            <option value="principiante" {{ 'selected' if clase.nivel == 'principiante' else '' }}>Principiante</option>
+                                            <option value="intermedio" {{ 'selected' if clase.nivel == 'intermedio' else '' }}>Intermedio</option>
+                                            <option value="avanzado" {{ 'selected' if clase.nivel == 'avanzado' else '' }}>Avanzado</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="color" class="form-label">Color</label>
+                                        <input type="color" class="form-control form-control-color" 
+                                               id="color" name="color" value="{{ clase.color }}">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="duracion_minutos" class="form-label">Duración (min)</label>
+                                        <input type="number" class="form-control" id="duracion_minutos" 
+                                               name="duracion_minutos" value="{{ clase.duracion_minutos }}" min="30" max="180">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="capacidad_maxima" class="form-label">Capacidad Máxima</label>
+                                        <input type="number" class="form-control" id="capacidad_maxima" 
+                                               name="capacidad_maxima" value="{{ clase.capacidad_maxima }}" min="1" max="50">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Configuración de Precios -->
+                        <div class="col-md-6">
+                            <h6 class="text-muted mb-3">Configuración de Precios</h6>
+                            
+                            <div class="mb-3">
+                                <label for="precio_clase_suelta" class="form-label">Clase Suelta</label>
+                                <div class="input-group">
+                                    <input type="number" step="0.01" class="form-control" 
+                                           id="precio_clase_suelta" name="precio_clase_suelta" 
+                                           value="{{ clase.precio_clase_suelta }}">
+                                    <span class="input-group-text">€</span>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="precio_1_semanal" class="form-label">1 Clase Semanal</label>
+                                <div class="input-group">
+                                    <input type="number" step="0.01" class="form-control" 
+                                           id="precio_1_semanal" name="precio_1_semanal" 
+                                           value="{{ clase.precio_1_semanal }}">
+                                    <span class="input-group-text">€/mes</span>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="precio_2_semanal" class="form-label">2 Clases Semanales</label>
+                                <div class="input-group">
+                                    <input type="number" step="0.01" class="form-control" 
+                                           id="precio_2_semanal" name="precio_2_semanal" 
+                                           value="{{ clase.precio_2_semanal }}">
+                                    <span class="input-group-text">€/mes</span>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="precio_plana" class="form-label">Tarifa Plana</label>
+                                <div class="input-group">
+                                    <input type="number" step="0.01" class="form-control" 
+                                           id="precio_plana" name="precio_plana" 
+                                           value="{{ clase.precio_plana }}">
+                                    <span class="input-group-text">€/mes</span>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="precio_1_bimensual" class="form-label">1 Clase Bimensual</label>
+                                <div class="input-group">
+                                    <input type="number" step="0.01" class="form-control" 
+                                           id="precio_1_bimensual" name="precio_1_bimensual" 
+                                           value="{{ clase.precio_1_bimensual }}">
+                                    <span class="input-group-text">€/bimestre</span>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="precio_2_bimensual" class="form-label">2 Clases Bimensuales</label>
+                                <div class="input-group">
+                                    <input type="number" step="0.01" class="form-control" 
+                                           id="precio_2_bimensual" name="precio_2_bimensual" 
+                                           value="{{ clase.precio_2_bimensual }}">
+                                    <span class="input-group-text">€/bimestre</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <hr>
+                    
+                    <div class="d-flex justify-content-between">
+                        <a href="{{ url_for('configuracion') }}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Cancelar
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Guardar Cambios
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.form-control-color {
+    width: 100%;
+    height: 38px;
+}
+</style>
+{% endblock %}

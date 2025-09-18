@@ -1,0 +1,65 @@
+<!-- Sistema de notificaciones mejorado -->
+<div class="position-fixed top-0 end-0 p-3" style="z-index: 1050">
+    <div id="notificationContainer"></div>
+</div>
+
+<script>
+class NotificationSystem {
+    static show(message, type = 'info', duration = 5000) {
+        const container = document.getElementById('notificationContainer');
+        const notification = document.createElement('div');
+        
+        const icons = {
+            'success': 'fas fa-check-circle',
+            'error': 'fas fa-exclamation-circle',
+            'warning': 'fas fa-exclamation-triangle',
+            'info': 'fas fa-info-circle'
+        };
+        
+        notification.className = `toast align-items-center text-white bg-${type === 'error' ? 'danger' : type} border-0`;
+        notification.setAttribute('role', 'alert');
+        notification.innerHTML = `
+            <div class="d-flex">
+                <div class="toast-body">
+                    <i class="${icons[type]} me-2"></i>
+                    ${message}
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        `;
+        
+        container.appendChild(notification);
+        
+        const toast = new bootstrap.Toast(notification, {
+            autohide: true,
+            delay: duration
+        });
+        
+        toast.show();
+        
+        // Remover del DOM después de que se oculte
+        notification.addEventListener('hidden.bs.toast', () => {
+            notification.remove();
+        });
+    }
+    
+    static success(message) {
+        this.show(message, 'success');
+    }
+    
+    static error(message) {
+        this.show(message, 'error');
+    }
+    
+    static warning(message) {
+        this.show(message, 'warning');
+    }
+    
+    static info(message) {
+        this.show(message, 'info');
+    }
+}
+
+// Hacer disponible globalmente
+window.Notifications = NotificationSystem;
+</script>

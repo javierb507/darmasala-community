@@ -1,0 +1,187 @@
+{% extends "base.html" %}
+
+{% block title %}Editar Pago - {{ alumno.nombre }} {{ alumno.apellido }} - Atma suddhi{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-6 mx-auto">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0">
+                    <i class="fas fa-edit"></i> Editar Pago - {{ alumno.nombre }} {{ alumno.apellido }}
+                </h4>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i>
+                    <strong>Pago Original:</strong> {{ pago.descripcion }} - €{{ "%.2f"|format(pago.monto) }}
+                    <br><small>Creado el {{ pago.fecha_creacion.strftime('%d/%m/%Y %H:%M') }}</small>
+                </div>
+                
+                <form method="POST">
+                    <div class="mb-3">
+                        <label for="tipo_pago" class="form-label">Tipo de Pago *</label>
+                        <select class="form-select" id="tipo_pago" name="tipo_pago" required>
+                            <option value="cuota" {{ 'selected' if pago.tipo_pago == 'cuota' else '' }}>
+                                Cuota mensual ({{ alumno.get_tipo_cuota_display() }} - €{{ "%.2f"|format(alumno.get_precio_cuota()) }})
+                            </option>
+                            <option value="matricula" {{ 'selected' if pago.tipo_pago == 'matricula' else '' }}>
+                                Matrícula {{ matricula_year }} (€25.00)
+                            </option>
+                            <option value="clase_suelta" {{ 'selected' if pago.tipo_pago == 'clase_suelta' else '' }}>
+                                Clase suelta (€15.00)
+                            </option>
+                            <option value="yogaterapia" {{ 'selected' if pago.tipo_pago == 'yogaterapia' else '' }}>
+                                Yogaterapia (€50.00)
+                            </option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3" id="mes-field" {{ 'style="display: none;"' if pago.tipo_pago != 'cuota' else '' }}>
+                        <label for="mes" class="form-label">Mes *</label>
+                        <input type="month" class="form-control" id="mes" name="mes" 
+                               value="{{ pago.mes or '' }}">
+                    </div>
+                    
+                    <div class="mb-3" id="año-field" {{ 'style="display: none;"' if pago.tipo_pago != 'matricula' else '' }}>
+                        <label for="año" class="form-label">Año de Matrícula *</label>
+                        <select class="form-select" id="año" name="año">
+                            <option value="">Seleccionar año</option>
+                            {% for año in range(2020, 2030) %}
+                            <option value="{{ año }}" {{ 'selected' if pago.año == año else '' }}>
+                                {% if año >= 2025 %}
+                                    {{ (año % 100) }}/{{ ((año + 1) % 100) }}
+                                {% else %}
+                                    {{ año }}
+                                {% endif %}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3" id="fecha-clase-field" {{ 'style="display: none;"' if pago.tipo_pago not in ['clase_suelta', 'yogaterapia'] else '' }}>
+                        <label for="fecha_clase" class="form-label">Fecha de la Clase *</label>
+                        <input type="date" class="form-control" id="fecha_clase" name="fecha_clase"
+                               value="{{ pago.fecha_clase.strftime('%Y-%m-%d') if pago.fecha_clase else '' }}">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="monto" class="form-label">Monto *</label>
+                        <div class="input-group">
+                            <span class="input-group-text">€</span>
+                            <input type="number" class="form-control" id="monto" name="monto" 
+                                   step="0.01" min="0" required value="{{ pago.monto }}">
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="descripcion" class="form-label">Descripción</label>
+                        <input type="text" class="form-control" id="descripcion" name="descripcion"
+                               value="{{ pago.descripcion or '' }}" placeholder="Descripción del pago">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="metodo_pago" class="form-label">Método de Pago</label>
+                        <select class="form-select" id="metodo_pago" name="metodo_pago">
+                            <option value="efectivo" {{ 'selected' if pago.metodo_pago == 'efectivo' else '' }}>Efectivo</option>
+                            <option value="transferencia" {{ 'selected' if pago.metodo_pago == 'transferencia' else '' }}>Transferencia</option>
+                            <option value="tarjeta" {{ 'selected' if pago.metodo_pago == 'tarjeta' else '' }}>Tarjeta</option>
+                            <option value="bizum" {{ 'selected' if pago.metodo_pago == 'bizum' else '' }}>Bizum</option>
+                        </select>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <a href="{{ url_for('ver_alumno', alumno_id=alumno.id) }}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Cancelar
+                            </a>
+                            <button type="button" class="btn btn-danger" onclick="confirmarEliminar()">
+                                <i class="fas fa-trash"></i> Eliminar
+                            </button>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Guardar Cambios
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de confirmación para eliminar -->
+<div class="modal fade" id="eliminarModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirmar Eliminación</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>¿Estás seguro de que quieres eliminar este pago?</p>
+                <div class="alert alert-warning">
+                    <strong>{{ pago.descripcion }}</strong><br>
+                    Monto: €{{ "%.2f"|format(pago.monto) }}<br>
+                    Fecha: {{ pago.fecha_creacion.strftime('%d/%m/%Y') }}
+                </div>
+                <p class="text-danger"><strong>Esta acción no se puede deshacer.</strong></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <a href="{{ url_for('eliminar_pago', pago_id=pago.id) }}" class="btn btn-danger">
+                    <i class="fas fa-trash"></i> Eliminar Pago
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const tipoPagoSelect = document.getElementById('tipo_pago');
+    const mesField = document.getElementById('mes-field');
+    const añoField = document.getElementById('año-field');
+    const fechaClaseField = document.getElementById('fecha-clase-field');
+    const mesInput = document.getElementById('mes');
+    const añoInput = document.getElementById('año');
+    const fechaClaseInput = document.getElementById('fecha_clase');
+    
+    function actualizarCampos() {
+        const tipoSeleccionado = tipoPagoSelect.value;
+        
+        // Ocultar todos los campos primero
+        mesField.style.display = 'none';
+        añoField.style.display = 'none';
+        fechaClaseField.style.display = 'none';
+        
+        // Resetear required
+        mesInput.required = false;
+        añoInput.required = false;
+        fechaClaseInput.required = false;
+        
+        // Mostrar el campo apropiado
+        if (tipoSeleccionado === 'matricula') {
+            añoField.style.display = 'block';
+            añoInput.required = true;
+        } else if (tipoSeleccionado === 'clase_suelta' || tipoSeleccionado === 'yogaterapia') {
+            fechaClaseField.style.display = 'block';
+            fechaClaseInput.required = true;
+        } else {
+            mesField.style.display = 'block';
+            mesInput.required = true;
+        }
+    }
+    
+    // Actualizar campos al cambiar el tipo de pago
+    tipoPagoSelect.addEventListener('change', actualizarCampos);
+    
+    // Establecer estado inicial
+    actualizarCampos();
+});
+
+function confirmarEliminar() {
+    const modal = new bootstrap.Modal(document.getElementById('eliminarModal'));
+    modal.show();
+}
+</script>
+{% endblock %}

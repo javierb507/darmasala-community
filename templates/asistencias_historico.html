@@ -1,0 +1,180 @@
+{% extends "base.html" %}
+
+{% block title %}Histórico de Asistencias - Atma suddhi{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2><i class="fas fa-chart-bar"></i> Histórico de Asistencias</h2>
+            <div class="btn-group">
+                <a href="{{ url_for('horarios') }}" class="btn btn-outline-primary">
+                    <i class="fas fa-list"></i> Vista Lista
+                </a>
+                <a href="{{ url_for('horarios_calendario') }}" class="btn btn-outline-primary">
+                    <i class="fas fa-calendar"></i> Vista Calendario
+                </a>
+                <a href="{{ url_for('horarios_historico') }}" class="btn btn-outline-secondary">
+                    <i class="fas fa-history"></i> Histórico
+                </a>
+                <a href="{{ url_for('asistencias_historico') }}" class="btn btn-primary">
+                    <i class="fas fa-chart-bar"></i> Asistencias
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Filtros -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <form method="GET" class="row g-3">
+                    <div class="col-md-4">
+                        <label for="clase_id" class="form-label">Filtrar por clase</label>
+                        <select class="form-select" id="clase_id" name="clase_id">
+                            <option value="">Todas las clases</option>
+                            {% for clase in clases %}
+                            <option value="{{ clase.id }}" {{ 'selected' if clase_id == clase.id else '' }}>
+                                {{ clase.nombre }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="fecha_desde" class="form-label">Desde</label>
+                        <input type="date" class="form-control" id="fecha_desde" name="fecha_desde" 
+                               value="{{ fecha_desde or '' }}">
+                    </div>
+                    <div class="col-md-3">
+                        <label for="fecha_hasta" class="form-label">Hasta</label>
+                        <input type="date" class="form-control" id="fecha_hasta" name="fecha_hasta" 
+                               value="{{ fecha_hasta or '' }}">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">&nbsp;</label>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-outline-primary">
+                                <i class="fas fa-filter"></i> Filtrar
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Estadísticas por Clase -->
+{% if estadisticas %}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-chart-pie"></i> Estadísticas de Asistencia</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    {% for clase_nombre, stats in estadisticas.items() %}
+                    <div class="col-md-6 col-lg-3 mb-3">
+                        <div class="card bg-light">
+                            <div class="card-body text-center">
+                                <h6 class="card-title">{{ clase_nombre }}</h6>
+                                <div class="mb-2">
+                                    <span class="badge bg-primary">{{ stats.total_sesiones }} sesiones</span>
+                                </div>
+                                <div class="mb-2">
+                                    <span class="badge bg-success">{{ stats.total_asistencias }} asistencias</span>
+                                </div>
+                                <div class="mb-2">
+                                    <span class="badge bg-info">{{ stats.alumnos_unicos }} alumnos únicos</span>
+                                </div>
+                                <div>
+                                    <strong class="text-{{ 'success' if stats.porcentaje_asistencia >= 80 else 'warning' if stats.porcentaje_asistencia >= 60 else 'danger' }}">
+                                        {{ stats.porcentaje_asistencia }}% asistencia
+                                    </strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Lista de Asistencias -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Registro de Asistencias</h5>
+            </div>
+            <div class="card-body">
+                {% if asistencias %}
+                    <div class="table-responsive">
+                        <table class="table table-striped table-sm">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>Clase</th>
+                                    <th>Día/Hora</th>
+                                    <th>Alumno</th>
+                                    <th>Asistencia</th>
+                                    <th>Observaciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for asistencia in asistencias %}
+                                <tr>
+                                    <td>{{ asistencia.fecha_clase.strftime('%d/%m/%Y') }}</td>
+                                    <td>
+                                        <i class="fas fa-om text-primary"></i> {{ asistencia.horario.clase.nombre }}
+                                    </td>
+                                    <td>
+                                        <small>
+                                            {{ asistencia.horario.get_dia_display() }}<br>
+                                            {{ asistencia.horario.hora_inicio.strftime('%H:%M') }}
+                                        </small>
+                                    </td>
+                                    <td>
+                                        <a href="{{ url_for('ver_alumno', alumno_id=asistencia.alumno_id) }}" 
+                                           class="text-decoration-none">
+                                            {{ asistencia.alumno.nombre }} {{ asistencia.alumno.apellido }}
+                                        </a>
+                                    </td>
+                                    <td>
+                                        {% if asistencia.presente %}
+                                            <span class="badge bg-success">Presente</span>
+                                        {% else %}
+                                            <span class="badge bg-danger">Ausente</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ asistencia.observaciones or '-' }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="mt-3">
+                        <small class="text-muted">
+                            <i class="fas fa-info-circle"></i> 
+                            Mostrando {{ asistencias|length }} registros de asistencia
+                        </small>
+                    </div>
+                {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-chart-bar fa-5x text-muted mb-3"></i>
+                        <h3 class="text-muted">No hay asistencias registradas</h3>
+                        <p class="text-muted">Las asistencias aparecerán aquí cuando se registren.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
