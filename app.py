@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
+from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, send_from_directory
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import or_
 from datetime import datetime, date, timedelta
@@ -11,6 +11,7 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'atma-suddhi-yoga-management-2025-secure-key')
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///yoga_school.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['UPLOAD_FOLDER'] = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'uploads')
 
 # Initialize database
 db = SQLAlchemy(app)
@@ -2206,6 +2207,36 @@ def reactivar_usuario(usuario_id):
         db.session.rollback()
     
     return redirect(url_for('usuarios'))
+
+# Ruta para servir archivos estáticos de uploads
+@app.route('/uploads/<path:filename>')
+def uploaded_file(filename):
+    """Servir archivos subidos desde la carpeta uploads"""
+    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
+
+# Ruta para calendario de selección de citas
+@app.route('/calendario_seleccion_citas')
+@app.route('/calendario_seleccion_citas/<int:alumno_id>')
+def calendario_seleccion_citas(alumno_id=None):
+    """Mostrar calendario interactivo para seleccionar fecha y hora de cita"""
+    alumno = None
+    if alumno_id:
+        alumno = Alumno.query.get_or_404(alumno_id)
+    
+    # Calcular fechas para el calendario
+    hoy = date.today()
+    mes_actual = hoy.strftime('%B')
+    año_actual = hoy.year
+    
+    # Calcular inicio de semana (lunes)
+    lunes = hoy - timedelta(days=(hoy.weekday()))
+    fecha_inicio_semana = lunes
+    
+    return render_template('calendario_seleccion_citas.html', 
+                         alumno=alumno,
+                         mes_actual=mes_actual,
+                         año_actual=año_actual,
+                         fecha_inicio_semana=fecha_inicio_semana)
 
 # Initialize database and run app
 if __name__ == '__main__':

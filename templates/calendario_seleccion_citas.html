@@ -1,0 +1,675 @@
+{% extends "base.html" %}
+
+{% block title %}Calendario de Citas - Atma suddhi{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2><i class="fas fa-calendar-alt"></i> Seleccionar Fecha y Hora</h2>
+            <div>
+                <button type="button" class="btn btn-secondary" onclick="window.history.back()">
+                    <i class="fas fa-arrow-left"></i> Volver
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Información de la sesión -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card bg-light">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <i class="fas fa-user"></i> 
+                    {% if alumno %}
+                        {{ alumno.nombre }} {{ alumno.apellido }}
+                    {% else %}
+                        Nueva Sesión de Yogaterapia
+                    {% endif %}
+                </h5>
+                <p class="card-text">
+                    <strong>Duración:</strong> 60 minutos | 
+                    <strong>Precio:</strong> 45.00€
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Selector de vista -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="btn-group" role="group">
+            <button type="button" class="btn btn-outline-primary active" id="btnVistaMes" onclick="cambiarVista('mes')">
+                <i class="fas fa-calendar"></i> Vista Mensual
+            </button>
+            <button type="button" class="btn btn-outline-primary" id="btnVistaSemana" onclick="cambiarVista('semana')">
+                <i class="fas fa-calendar-week"></i> Vista Semanal
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Calendario Mensual -->
+<div id="vistaMensual" class="calendario-vista">
+    <div class="row mb-3">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <h4 id="mesAnioActual">{{ mes_actual }} {{ año_actual }}</h4>
+                <div>
+                    <button class="btn btn-outline-secondary" onclick="cambiarMes(-1)">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <button class="btn btn-outline-secondary" onclick="cambiarMes(1)">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered calendario-mensual">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="text-center">Lun</th>
+                            <th class="text-center">Mar</th>
+                            <th class="text-center">Mié</th>
+                            <th class="text-center">Jue</th>
+                            <th class="text-center">Vie</th>
+                            <th class="text-center">Sáb</th>
+                            <th class="text-center">Dom</th>
+                        </tr>
+                    </thead>
+                    <tbody id="calendarioMensual">
+                        <!-- Se llena dinámicamente con JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Calendario Semanal -->
+<div id="vistaSemanal" class="calendario-vista" style="display: none;">
+    <div class="row mb-3">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <h4 id="semanaActual">Semana del {{ fecha_inicio_semana.strftime('%d/%m/%Y') }}</h4>
+                <div>
+                    <button class="btn btn-outline-secondary" onclick="cambiarSemana(-1)">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <button class="btn btn-outline-secondary" onclick="cambiarSemana(1)">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered calendario-semanal">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="text-center">Hora</th>
+                            <th class="text-center">Lunes</th>
+                            <th class="text-center">Martes</th>
+                            <th class="text-center">Miércoles</th>
+                            <th class="text-center">Jueves</th>
+                            <th class="text-center">Viernes</th>
+                            <th class="text-center">Sábado</th>
+                            <th class="text-center">Domingo</th>
+                        </tr>
+                    </thead>
+                    <tbody id="calendarioSemanal">
+                        <!-- Se llena dinámicamente con JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de selección de hora -->
+<div class="modal fade" id="modalSeleccionHora" tabindex="-1" aria-labelledby="modalSeleccionHoraLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalSeleccionHoraLabel">
+                    <i class="fas fa-clock"></i> Seleccionar Hora
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label">Fecha seleccionada:</label>
+                    <input type="text" class="form-control" id="fechaSeleccionada" readonly>
+                </div>
+                <div class="mb-3">
+                    <label for="horaInicio" class="form-label">Hora de inicio:</label>
+                    <select class="form-select" id="horaInicio" onchange="actualizarHoraFin()">
+                        <option value="">Seleccionar hora...</option>
+                        <!-- Se llena dinámicamente -->
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="horaFin" class="form-label">Hora de fin:</label>
+                    <select class="form-select" id="horaFin">
+                        <option value="">Seleccionar hora...</option>
+                        <!-- Se llena dinámicamente -->
+                    </select>
+                </div>
+                <div id="conflictosInfo" class="alert alert-warning" style="display: none;">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <span id="conflictosTexto"></span>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="confirmarSeleccion()" id="btnConfirmar">
+                    <i class="fas fa-check"></i> Confirmar Cita
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.calendario-mensual td, .calendario-semanal td {
+    height: 80px;
+    vertical-align: top;
+    position: relative;
+}
+
+.calendario-mensual td:hover, .calendario-semanal td:hover {
+    background-color: #f8f9fa;
+}
+
+.dia-disponible {
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.dia-disponible:hover {
+    background-color: #e3f2fd !important;
+    transform: scale(1.02);
+}
+
+.dia-ocupado {
+    background-color: #ffebee !important;
+    cursor: not-allowed;
+}
+
+.dia-pasado {
+    background-color: #f5f5f5 !important;
+    color: #999;
+    cursor: not-allowed;
+}
+
+.hoy {
+    background-color: #fff3cd !important;
+    font-weight: bold;
+}
+
+.evento-horario {
+    font-size: 0.7rem;
+    padding: 2px 4px;
+    margin: 1px 0;
+    border-radius: 3px;
+    color: white;
+}
+
+.evento-yoga {
+    background-color: #28a745;
+}
+
+.evento-meditacion {
+    background-color: #6f42c1;
+}
+
+.evento-yogaterapia {
+    background-color: #dc3545;
+}
+
+.evento-conflicto {
+    background-color: #ffc107;
+    color: #000;
+}
+
+.slot-hora {
+    height: 40px;
+    border: 1px solid #dee2e6;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+}
+
+.slot-hora:hover {
+    background-color: #e3f2fd;
+}
+
+.slot-disponible {
+    background-color: #d4edda;
+}
+
+.slot-ocupado {
+    background-color: #f8d7da;
+    cursor: not-allowed;
+}
+
+.slot-conflicto {
+    background-color: #fff3cd;
+}
+
+.hora-label {
+    font-size: 0.8rem;
+    font-weight: bold;
+    color: #495057;
+}
+
+.evento-info {
+    font-size: 0.7rem;
+    color: #6c757d;
+    margin-top: 2px;
+}
+</style>
+
+<script>
+let fechaActual = new Date();
+let mesActual = fechaActual.getMonth();
+let añoActual = fechaActual.getFullYear();
+let fechaSeleccionada = null;
+
+// Horarios de trabajo
+const HORARIO_INICIO = 8; // 8:00 AM
+const HORARIO_FIN = 21; // 9:00 PM
+const DURACION_SESION = 60; // 60 minutos
+
+// Nombres de meses en español
+const MESES = [
+    'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+    'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+];
+
+// Días de la semana en español
+const DIAS_SEMANA = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+
+// Cargar datos al inicializar
+document.addEventListener('DOMContentLoaded', function() {
+    cargarCalendarioMensual();
+    cargarCalendarioSemanal();
+});
+
+function cambiarVista(vista) {
+    // Actualizar botones
+    document.getElementById('btnVistaMes').classList.toggle('active', vista === 'mes');
+    document.getElementById('btnVistaSemana').classList.toggle('active', vista === 'semana');
+    
+    // Mostrar/ocultar vistas
+    document.getElementById('vistaMensual').style.display = vista === 'mes' ? 'block' : 'none';
+    document.getElementById('vistaSemanal').style.display = vista === 'semana' ? 'block' : 'none';
+}
+
+function cargarCalendarioMensual() {
+    const tbody = document.getElementById('calendarioMensual');
+    tbody.innerHTML = '';
+    
+    const primerDia = new Date(añoActual, mesActual, 1);
+    const ultimoDia = new Date(añoActual, mesActual + 1, 0);
+    const diasEnMes = ultimoDia.getDate();
+    const diaSemanaInicio = (primerDia.getDay() + 6) % 7; // Lunes = 0
+    
+    // Actualizar título
+    document.getElementById('mesAnioActual').textContent = `${MESES[mesActual]} ${añoActual}`;
+    
+    let fila = document.createElement('tr');
+    let dia = 1;
+    
+    // Días del mes anterior
+    for (let i = 0; i < diaSemanaInicio; i++) {
+        const celda = document.createElement('td');
+        celda.className = 'text-muted';
+        celda.innerHTML = '&nbsp;';
+        fila.appendChild(celda);
+    }
+    
+    // Días del mes actual
+    for (let i = diaSemanaInicio; i < 42; i++) {
+        if (dia > diasEnMes) {
+            const celda = document.createElement('td');
+            celda.className = 'text-muted';
+            celda.innerHTML = '&nbsp;';
+            fila.appendChild(celda);
+        } else {
+            const celda = document.createElement('td');
+            const fecha = new Date(añoActual, mesActual, dia);
+            
+            // Determinar clase CSS
+            if (fecha < new Date().setHours(0, 0, 0, 0)) {
+                celda.className = 'dia-pasado';
+            } else {
+                celda.className = 'dia-disponible';
+                celda.onclick = () => seleccionarDia(fecha);
+            }
+            
+            // Marcar hoy
+            if (fecha.toDateString() === new Date().toDateString()) {
+                celda.classList.add('hoy');
+            }
+            
+            celda.innerHTML = `<div class="fw-bold">${dia}</div>`;
+            
+            // Cargar eventos del día
+            cargarEventosDia(celda, fecha);
+            
+            fila.appendChild(celda);
+            dia++;
+        }
+        
+        if (i % 7 === 6) {
+            tbody.appendChild(fila);
+            fila = document.createElement('tr');
+        }
+    }
+}
+
+function cargarCalendarioSemanal() {
+    const tbody = document.getElementById('calendarioSemanal');
+    tbody.innerHTML = '';
+    
+    // Calcular inicio de la semana (lunes)
+    const hoy = new Date();
+    const lunes = new Date(hoy);
+    lunes.setDate(hoy.getDate() - (hoy.getDay() + 6) % 7);
+    
+    // Actualizar título
+    const domingo = new Date(lunes);
+    domingo.setDate(lunes.getDate() + 6);
+    document.getElementById('semanaActual').textContent = 
+        `Semana del ${lunes.getDate()}/${lunes.getMonth() + 1}/${lunes.getFullYear()}`;
+    
+    // Crear filas de horas
+    for (let hora = HORARIO_INICIO; hora < HORARIO_FIN; hora++) {
+        const fila = document.createElement('tr');
+        
+        // Columna de hora
+        const celdaHora = document.createElement('td');
+        celdaHora.className = 'hora-label text-center';
+        celdaHora.textContent = `${hora.toString().padStart(2, '0')}:00`;
+        fila.appendChild(celdaHora);
+        
+        // Columnas de días
+        for (let dia = 0; dia < 7; dia++) {
+            const celda = document.createElement('td');
+            const fecha = new Date(lunes);
+            fecha.setDate(lunes.getDate() + dia);
+            fecha.setHours(hora, 0, 0, 0);
+            
+            celda.className = 'slot-hora slot-disponible';
+            celda.onclick = () => seleccionarHora(fecha);
+            
+            // Cargar eventos en este slot
+            cargarEventosSlot(celda, fecha);
+            
+            fila.appendChild(celda);
+        }
+        
+        tbody.appendChild(fila);
+    }
+}
+
+function cargarEventosDia(celda, fecha) {
+    // Simular carga de eventos (en producción vendría del servidor)
+    const eventos = obtenerEventosDia(fecha);
+    
+    eventos.forEach(evento => {
+        const div = document.createElement('div');
+        div.className = `evento-horario evento-${evento.tipo}`;
+        div.textContent = `${evento.hora} - ${evento.nombre}`;
+        celda.appendChild(div);
+    });
+}
+
+function cargarEventosSlot(celda, fecha) {
+    const eventos = obtenerEventosSlot(fecha);
+    
+    if (eventos.length > 0) {
+        celda.classList.remove('slot-disponible');
+        celda.classList.add('slot-ocupado');
+        celda.onclick = null;
+        
+        const div = document.createElement('div');
+        div.className = 'evento-info';
+        div.textContent = eventos[0].nombre;
+        celda.appendChild(div);
+    }
+}
+
+function obtenerEventosDia(fecha) {
+    // Simular datos de eventos
+    const eventos = [];
+    const diaSemana = fecha.getDay();
+    
+    // Horarios semanales simulados
+    const horarios = {
+        1: [ // Lunes
+            {hora: '08:00', nombre: 'Yoga', tipo: 'yoga'},
+            {hora: '10:00', nombre: 'Yoga', tipo: 'yoga'},
+            {hora: '11:30', nombre: 'Yoga', tipo: 'yoga'},
+            {hora: '12:45', nombre: 'Yoga', tipo: 'yoga'},
+            {hora: '17:00', nombre: 'Yoga', tipo: 'yoga'},
+            {hora: '18:30', nombre: 'Yoga Prenatal', tipo: 'yoga'},
+            {hora: '19:30', nombre: 'Meditación', tipo: 'meditacion'},
+            {hora: '20:45', nombre: 'Meditación Corta', tipo: 'meditacion'}
+        ],
+        2: [ // Martes
+            {hora: '10:00', nombre: 'Yoga', tipo: 'yoga'},
+            {hora: '11:30', nombre: 'Yoga', tipo: 'yoga'},
+            {hora: '12:45', nombre: 'Meditación', tipo: 'meditacion'},
+            {hora: '17:00', nombre: 'Yoga Menopausia', tipo: 'yoga'},
+            {hora: '18:30', nombre: 'Yoga', tipo: 'yoga'},
+            {hora: '19:30', nombre: 'Meditación', tipo: 'meditacion'},
+            {hora: '20:45', nombre: 'Meditación Corta', tipo: 'meditacion'}
+        ],
+        3: [ // Miércoles
+            {hora: '08:00', nombre: 'Yoga', tipo: 'yoga'},
+            {hora: '10:00', nombre: 'Yoga', tipo: 'yoga'},
+            {hora: '11:30', nombre: 'Yoga', tipo: 'yoga'},
+            {hora: '12:45', nombre: 'Yoga', tipo: 'yoga'},
+            {hora: '17:00', nombre: 'Yoga', tipo: 'yoga'},
+            {hora: '18:30', nombre: 'Yoga Prenatal', tipo: 'yoga'},
+            {hora: '19:30', nombre: 'Meditación', tipo: 'meditacion'},
+            {hora: '20:45', nombre: 'Meditación Corta', tipo: 'meditacion'}
+        ],
+        4: [ // Jueves
+            {hora: '10:00', nombre: 'Yoga', tipo: 'yoga'},
+            {hora: '11:30', nombre: 'Yoga', tipo: 'yoga'},
+            {hora: '12:45', nombre: 'Meditación', tipo: 'meditacion'},
+            {hora: '17:00', nombre: 'Yoga Menopausia', tipo: 'yoga'},
+            {hora: '18:30', nombre: 'Yoga', tipo: 'yoga'},
+            {hora: '19:30', nombre: 'Meditación', tipo: 'meditacion'},
+            {hora: '20:45', nombre: 'Meditación Corta', tipo: 'meditacion'}
+        ],
+        5: [ // Viernes
+            {hora: '08:00', nombre: 'Yoga', tipo: 'yoga'},
+            {hora: '10:00', nombre: 'Yoga', tipo: 'yoga'},
+            {hora: '11:30', nombre: 'Yoga', tipo: 'yoga'},
+            {hora: '12:45', nombre: 'Yoga', tipo: 'yoga'},
+            {hora: '17:00', nombre: 'Yoga', tipo: 'yoga'},
+            {hora: '18:30', nombre: 'Yoga', tipo: 'yoga'},
+            {hora: '19:30', nombre: 'Meditación', tipo: 'meditacion'},
+            {hora: '20:45', nombre: 'Meditación Corta', tipo: 'meditacion'}
+        ],
+        6: [ // Sábado
+            {hora: '10:00', nombre: 'Yoga', tipo: 'yoga'}
+        ]
+    };
+    
+    return horarios[diaSemana] || [];
+}
+
+function obtenerEventosSlot(fecha) {
+    const eventos = obtenerEventosDia(fecha);
+    const hora = fecha.getHours();
+    
+    return eventos.filter(evento => {
+        const [horaEvento] = evento.hora.split(':');
+        return parseInt(horaEvento) === hora;
+    });
+}
+
+function seleccionarDia(fecha) {
+    fechaSeleccionada = fecha;
+    mostrarModalSeleccionHora(fecha);
+}
+
+function seleccionarHora(fecha) {
+    fechaSeleccionada = fecha;
+    mostrarModalSeleccionHora(fecha);
+}
+
+function mostrarModalSeleccionHora(fecha) {
+    document.getElementById('fechaSeleccionada').value = 
+        fecha.toLocaleDateString('es-ES', { 
+            weekday: 'long', 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric' 
+        });
+    
+    // Llenar opciones de hora
+    const horaInicio = document.getElementById('horaInicio');
+    horaInicio.innerHTML = '<option value="">Seleccionar hora...</option>';
+    
+    for (let hora = HORARIO_INICIO; hora < HORARIO_FIN; hora++) {
+        const option = document.createElement('option');
+        option.value = `${hora.toString().padStart(2, '0')}:00`;
+        option.textContent = `${hora.toString().padStart(2, '0')}:00`;
+        horaInicio.appendChild(option);
+    }
+    
+    // Mostrar modal
+    const modal = new bootstrap.Modal(document.getElementById('modalSeleccionHora'));
+    modal.show();
+}
+
+function actualizarHoraFin() {
+    const horaInicio = document.getElementById('horaInicio').value;
+    const horaFin = document.getElementById('horaFin');
+    
+    horaFin.innerHTML = '<option value="">Seleccionar hora...</option>';
+    
+    if (horaInicio) {
+        const [hora] = horaInicio.split(':');
+        const horaInicioNum = parseInt(hora);
+        
+        for (let hora = horaInicioNum + 1; hora <= HORARIO_FIN; hora++) {
+            const option = document.createElement('option');
+            option.value = `${hora.toString().padStart(2, '0')}:00`;
+            option.textContent = `${hora.toString().padStart(2, '0')}:00`;
+            horaFin.appendChild(option);
+        }
+    }
+    
+    verificarConflictos();
+}
+
+function verificarConflictos() {
+    const fecha = fechaSeleccionada;
+    const horaInicio = document.getElementById('horaInicio').value;
+    const horaFin = document.getElementById('horaFin').value;
+    
+    if (!fecha || !horaInicio || !horaFin) return;
+    
+    // Simular verificación de conflictos
+    const conflictos = obtenerEventosSlot(fecha).filter(evento => {
+        const [horaEvento] = evento.hora.split(':');
+        const horaEventoNum = parseInt(horaEvento);
+        const [horaInicioNum] = horaInicio.split(':');
+        const [horaFinNum] = horaFin.split(':');
+        
+        return horaEventoNum >= parseInt(horaInicioNum) && horaEventoNum < parseInt(horaFinNum);
+    });
+    
+    const conflictosDiv = document.getElementById('conflictosInfo');
+    const conflictosTexto = document.getElementById('conflictosTexto');
+    const btnConfirmar = document.getElementById('btnConfirmar');
+    
+    if (conflictos.length > 0) {
+        conflictosDiv.style.display = 'block';
+        conflictosTexto.textContent = `Conflicto detectado: ${conflictos.map(c => c.nombre).join(', ')}`;
+        btnConfirmar.disabled = true;
+    } else {
+        conflictosDiv.style.display = 'none';
+        btnConfirmar.disabled = false;
+    }
+}
+
+function confirmarSeleccion() {
+    const horaInicio = document.getElementById('horaInicio').value;
+    const horaFin = document.getElementById('horaFin').value;
+    
+    if (!horaInicio || !horaFin) {
+        alert('Por favor selecciona hora de inicio y fin');
+        return;
+    }
+    
+    // Crear formulario y enviar datos
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = '{{ url_for("procesar_yogaterapia_general") }}';
+    
+    // Añadir campos
+    const campos = {
+        'fecha_sesion': fechaSeleccionada.toISOString().split('T')[0],
+        'hora_inicio': horaInicio,
+        'hora_fin': horaFin,
+        'duracion_minutos': DURACION_SESION,
+        'tipo_sesion': 'individual',
+        'precio': 45.00,
+        'instructor': '{{ session.get("usuario_nombre", "Instructor") }}',
+        'metodo_pago': 'efectivo',
+        'pagado': 'false'
+    };
+    
+    {% if alumno %}
+    campos['alumno_id'] = '{{ alumno.id }}';
+    {% endif %}
+    
+    Object.keys(campos).forEach(key => {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = key;
+        input.value = campos[key];
+        form.appendChild(input);
+    });
+    
+    document.body.appendChild(form);
+    form.submit();
+}
+
+function cambiarMes(direccion) {
+    mesActual += direccion;
+    if (mesActual < 0) {
+        mesActual = 11;
+        añoActual--;
+    } else if (mesActual > 11) {
+        mesActual = 0;
+        añoActual++;
+    }
+    cargarCalendarioMensual();
+}
+
+function cambiarSemana(direccion) {
+    // Implementar cambio de semana
+    cargarCalendarioSemanal();
+}
+</script>
+{% endblock %}

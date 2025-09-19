@@ -60,8 +60,13 @@
                     <div class="col-md-6">
                         <div class="mb-3">
                             <label for="fecha_sesion" class="form-label">Fecha de la Sesión *</label>
-                            <input type="date" class="form-control" id="fecha_sesion" name="fecha_sesion" 
-                                   value="{{ request.args.get('fecha', '') }}" required>
+                            <div class="input-group">
+                                <input type="date" class="form-control" id="fecha_sesion" name="fecha_sesion" 
+                                       value="{{ request.args.get('fecha', '') }}" required>
+                                <button type="button" class="btn btn-outline-primary" onclick="abrirCalendario()">
+                                    <i class="fas fa-calendar-alt"></i> Calendario
+                                </button>
+                            </div>
                         </div>
                     </div>
                     <div class="col-md-3">
@@ -317,5 +322,13 @@ document.addEventListener('DOMContentLoaded', function() {
     horaInicioInput.addEventListener('change', verificarConflictos);
     horaFinInput.addEventListener('change', verificarConflictos);
 });
+
+function abrirCalendario() {
+    {% if from_student and alumno %}
+        window.open('{{ url_for("calendario_seleccion_citas", alumno_id=alumno.id) }}', '_blank', 'width=1200,height=800,scrollbars=yes,resizable=yes');
+    {% else %}
+        window.open('{{ url_for("calendario_seleccion_citas") }}', '_blank', 'width=1200,height=800,scrollbars=yes,resizable=yes');
+    {% endif %}
+}
 </script>
 {% endblock %}
