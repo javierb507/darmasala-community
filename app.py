@@ -426,8 +426,18 @@ class ClasePersonal(db.Model):
 
 @app.route('/')
 def index():
-    # Dashboard simple sin estadísticas
-    return render_template('index.html')
+    # Dashboard con próximas citas y estadísticas
+    proximas_citas = obtener_proximas_citas(5)
+    total_alumnos = Alumno.query.filter_by(activo=True).count()
+    total_sesiones_hoy = SesionYogaterapia.query.filter(
+        SesionYogaterapia.fecha_sesion == datetime.now().date()
+    ).count()
+    
+    return render_template('index.html', 
+                         proximas_citas=proximas_citas,
+                         total_alumnos=total_alumnos,
+                         total_sesiones_hoy=total_sesiones_hoy,
+                         today=datetime.now().date())
 
 @app.route('/alumnos')
 def alumnos():
@@ -1194,6 +1204,14 @@ def procesar_yogaterapia_general():
         if request.form.get('hora_fin'):
             hora_fin = datetime.strptime(request.form['hora_fin'], '%H:%M').time()
         
+        # Verificar conflicto de horarios
+        fecha_sesion = datetime.strptime(request.form['fecha_sesion'], '%Y-%m-%d').date()
+        if hora_inicio and hora_fin:
+            conflicto, sesion_conflicto = verificar_conflicto_horario(fecha_sesion, hora_inicio, hora_fin)
+            if conflicto:
+                flash(f'⚠️ Conflicto de horario detectado! Ya existe una cita de {sesion_conflicto.hora_inicio.strftime("%H:%M")} a {sesion_conflicto.hora_fin.strftime("%H:%M")} con {sesion_conflicto.alumno.nombre} {sesion_conflicto.alumno.apellido}', 'warning')
+                return redirect(url_for('nueva_yogaterapia'))
+        
         sesion = SesionYogaterapia(
             alumno_id=alumno_id,
             fecha_sesion=datetime.strptime(request.form['fecha_sesion'], '%Y-%m-%d').date(),
@@ -1287,14 +1305,22 @@ def editar_sesion_yogaterapia(sesion_id):
             sesion.fecha_sesion = datetime.strptime(request.form['fecha_sesion'], '%Y-%m-%d').date()
             
             # Procesar horas
+            hora_inicio_nueva = None
+            hora_fin_nueva = None
             if request.form.get('hora_inicio'):
-                sesion.hora_inicio = datetime.strptime(request.form['hora_inicio'], '%H:%M').time()
-            else:
-                sesion.hora_inicio = None
+                hora_inicio_nueva = datetime.strptime(request.form['hora_inicio'], '%H:%M').time()
             if request.form.get('hora_fin'):
-                sesion.hora_fin = datetime.strptime(request.form['hora_fin'], '%H:%M').time()
-            else:
-                sesion.hora_fin = None
+                hora_fin_nueva = datetime.strptime(request.form['hora_fin'], '%H:%M').time()
+            
+            # Verificar conflicto de horarios
+            if hora_inicio_nueva and hora_fin_nueva:
+                conflicto, sesion_conflicto = verificar_conflicto_horario(fecha_sesion, hora_inicio_nueva, hora_fin_nueva, sesion_id)
+                if conflicto:
+                    flash(f'⚠️ Conflicto de horario detectado! Ya existe una cita de {sesion_conflicto.hora_inicio.strftime("%H:%M")} a {sesion_conflicto.hora_fin.strftime("%H:%M")} con {sesion_conflicto.alumno.nombre} {sesion_conflicto.alumno.apellido}', 'warning')
+                    return redirect(url_for('editar_sesion_yogaterapia', sesion_id=sesion_id))
+            
+            sesion.hora_inicio = hora_inicio_nueva
+            sesion.hora_fin = hora_fin_nueva
             
             sesion.duracion_minutos = int(request.form.get('duracion_minutos', 75))
             sesion.tipo_sesion = request.form.get('tipo_sesion', 'individual')
@@ -1347,6 +1373,58 @@ def editar_sesion_yogaterapia(sesion_id):
     
     archivos = ArchivoYogaterapia.query.filter_by(sesion_yogaterapia_id=sesion_id).all()
     return render_template('editar_sesion_yogaterapia.html', sesion=sesion, archivos=archivos)
+
+@app.route('/api/citas/<fecha>')
+def obtener_citas_fecha(fecha):
+    """API para obtener citas de una fecha específica (para el calendario)"""
+    try:
+        fecha_obj = datetime.strptime(fecha, '%Y-%m-%d').date()
+        citas = SesionYogaterapia.query.filter(
+            SesionYogaterapia.fecha_sesion == fecha_obj,
+            SesionYogaterapia.hora_inicio.isnot(None)
+        ).order_by(SesionYogaterapia.hora_inicio).all()
+        
+        citas_data = []
+        for cita in citas:
+            citas_data.append({
+                'id': cita.id,
+                'alumno': f"{cita.alumno.nombre} {cita.alumno.apellido}",
+                'hora_inicio': cita.hora_inicio.strftime('%H:%M'),
+                'hora_fin': cita.hora_fin.strftime('%H:%M') if cita.hora_fin else None,
+                'duracion': cita.duracion_minutos,
+                'precio': cita.precio,
+                'pagado': cita.pagado
+            })
+        
+        return jsonify(citas_data)
+    except ValueError:
+        return jsonify({'error': 'Formato de fecha inválido'}), 400
+
+@app.route('/yogaterapia/<int:sesion_id>/eliminar', methods=['POST'])
+def eliminar_sesion_yogaterapia(sesion_id):
+    """Eliminar una sesión de yogaterapia"""
+    sesion = SesionYogaterapia.query.get_or_404(sesion_id)
+    
+    try:
+        # Eliminar archivos asociados
+        for archivo in sesion.archivos:
+            try:
+                if os.path.exists(archivo.ruta_archivo):
+                    os.remove(archivo.ruta_archivo)
+            except Exception as e:
+                print(f"Error eliminando archivo {archivo.ruta_archivo}: {e}")
+        
+        # Eliminar la sesión
+        db.session.delete(sesion)
+        db.session.commit()
+        
+        flash(f'✅ Sesión de {sesion.alumno.nombre} {sesion.alumno.apellido} eliminada exitosamente', 'success')
+        return redirect(url_for('yogaterapia'))
+        
+    except Exception as e:
+        flash(f'Error al eliminar sesión: {str(e)}', 'error')
+        db.session.rollback()
+        return redirect(url_for('yogaterapia'))
 
 @app.route('/yogaterapia/<int:sesion_id>/marcar_pagado', methods=['POST'])
 def marcar_sesion_pagada(sesion_id):
@@ -1458,7 +1536,8 @@ def nueva_yogaterapia_alumno(alumno_id):
             flash(f'Error al registrar sesión: {str(e)}', 'error')
             db.session.rollback()
     
-    return render_template('nueva_yogaterapia.html', alumno=alumno, from_student=True)
+    alumnos = Alumno.query.filter_by(activo=True).order_by(Alumno.nombre, Alumno.apellido).all()
+    return render_template('nueva_yogaterapia.html', alumno=alumno, alumnos=alumnos, from_student=True)
 
 # RUTAS PARA GESTIÓN ECONÓMICA
 
@@ -1759,6 +1838,42 @@ def exportar():
     return render_template('exportar.html')
 
 # Función para inicializar las clases básicas
+# FUNCIONES AUXILIARES
+def verificar_conflicto_horario(fecha, hora_inicio, hora_fin, sesion_id=None):
+    """Verificar si hay conflicto de horarios en una fecha específica"""
+    if not hora_inicio or not hora_fin:
+        return False, None
+    
+    # Buscar sesiones en la misma fecha
+    sesiones_existentes = SesionYogaterapia.query.filter(
+        SesionYogaterapia.fecha_sesion == fecha,
+        SesionYogaterapia.hora_inicio.isnot(None),
+        SesionYogaterapia.hora_fin.isnot(None)
+    ).all()
+    
+    # Si estamos editando, excluir la sesión actual
+    if sesion_id:
+        sesiones_existentes = [s for s in sesiones_existentes if s.id != sesion_id]
+    
+    for sesion in sesiones_existentes:
+        # Verificar si los horarios se solapan
+        if (hora_inicio < sesion.hora_fin and hora_fin > sesion.hora_inicio):
+            return True, sesion
+    
+    return False, None
+
+def obtener_proximas_citas(limite=5):
+    """Obtener las próximas citas individuales para el dashboard"""
+    hoy = datetime.now().date()
+    proximas = SesionYogaterapia.query.filter(
+        SesionYogaterapia.fecha_sesion >= hoy
+    ).order_by(
+        SesionYogaterapia.fecha_sesion.asc(),
+        SesionYogaterapia.hora_inicio.asc()
+    ).limit(limite).all()
+    
+    return proximas
+
 def inicializar_clases():
     clases_basicas = [
         {'nombre': 'Yoga menopausia', 'descripcion': 'Clase especializada para mujeres en etapa de menopausia', 'precio': 15.00, 'duracion_minutos': 60},
