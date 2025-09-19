@@ -71,7 +71,7 @@
         <div class="card bg-success text-white">
             <div class="card-body text-center">
                 <i class="fas fa-arrow-up fa-2x mb-2"></i>
-                <h3>{{ "%.0f"|format(ingresos_total) }}€</h3>
+                <h3>{{ "%.0f"|format(total_ingresos) }}€</h3>
                 <p class="mb-0">Ingresos Totales</p>
             </div>
         </div>
@@ -80,16 +80,16 @@
         <div class="card bg-danger text-white">
             <div class="card-body text-center">
                 <i class="fas fa-arrow-down fa-2x mb-2"></i>
-                <h3>{{ "%.0f"|format(gastos_total) }}€</h3>
+                <h3>{{ "%.0f"|format(total_gastos) }}€</h3>
                 <p class="mb-0">Gastos Totales</p>
             </div>
         </div>
     </div>
     <div class="col-md-3">
-        <div class="card {{ 'bg-info' if balance_periodo >= 0 else 'bg-warning' }} text-white">
+        <div class="card {{ 'bg-info' if balance >= 0 else 'bg-warning' }} text-white">
             <div class="card-body text-center">
-                <i class="fas {{ 'fa-balance-scale' if balance_periodo >= 0 else 'fa-exclamation-triangle' }} fa-2x mb-2"></i>
-                <h3>{{ "%.0f"|format(balance_periodo) }}€</h3>
+                <i class="fas {{ 'fa-balance-scale' if balance >= 0 else 'fa-exclamation-triangle' }} fa-2x mb-2"></i>
+                <h3>{{ "%.0f"|format(balance) }}€</h3>
                 <p class="mb-0">Balance</p>
             </div>
         </div>
@@ -209,7 +209,7 @@
                 <h5 class="mb-0"><i class="fas fa-lightbulb"></i> Resumen del Período</h5>
             </div>
             <div class="card-body">
-                {% if balance_periodo >= 0 %}
+                {% if balance >= 0 %}
                 <div class="alert alert-success">
                     <i class="fas fa-thumbs-up"></i>
                     <strong>¡Excelente!</strong> El balance del período es positivo.

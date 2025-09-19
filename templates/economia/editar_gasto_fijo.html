@@ -1,12 +1,12 @@
 {% extends "base.html" %}
 
-{% block title %}Nuevo Gasto Fijo - Atma suddhi{% endblock %}
+{% block title %}Editar Gasto Fijo - Atma suddhi{% endblock %}
 
 {% block content %}
 <div class="row">
     <div class="col-12">
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2><i class="fas fa-calendar-plus"></i> Nuevo Gasto Fijo</h2>
+            <h2><i class="fas fa-edit"></i> Editar Gasto Fijo</h2>
             <a href="{{ url_for('gastos_fijos') }}" class="btn btn-secondary">
                 <i class="fas fa-arrow-left"></i> Volver a Gastos Fijos
             </a>
@@ -17,9 +17,9 @@
 <div class="row">
     <div class="col-md-8">
         <div class="card">
-            <div class="card-header bg-success text-white">
+            <div class="card-header bg-warning text-dark">
                 <h5 class="mb-0">
-                    <i class="fas fa-plus"></i> Datos del Gasto Fijo
+                    <i class="fas fa-edit"></i> Editar {{ gasto.nombre }}
                 </h5>
             </div>
             <div class="card-body">
@@ -28,8 +28,8 @@
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label for="nombre" class="form-label">Nombre del Gasto *</label>
-                                <input type="text" class="form-control" id="nombre" name="nombre" required
-                                       placeholder="Ej: Alquiler del local">
+                                <input type="text" class="form-control" id="nombre" name="nombre" 
+                                       value="{{ gasto.nombre }}" required>
                             </div>
                         </div>
                         <div class="col-md-6">
@@ -38,7 +38,9 @@
                                 <select class="form-select" id="categoria_id" name="categoria_id" required>
                                     <option value="">Seleccionar categoría...</option>
                                     {% for categoria in categorias %}
-                                    <option value="{{ categoria.id }}">{{ categoria.nombre }}</option>
+                                    <option value="{{ categoria.id }}" {% if categoria.id == gasto.categoria_id %}selected{% endif %}>
+                                        {{ categoria.nombre }}
+                                    </option>
                                     {% endfor %}
                                 </select>
                             </div>
@@ -47,8 +49,7 @@
 
                     <div class="mb-3">
                         <label for="descripcion" class="form-label">Descripción</label>
-                        <textarea class="form-control" id="descripcion" name="descripcion" rows="2"
-                                  placeholder="Descripción detallada del gasto..."></textarea>
+                        <textarea class="form-control" id="descripcion" name="descripcion" rows="2">{{ gasto.descripcion or '' }}</textarea>
                     </div>
 
                     <div class="row">
@@ -56,16 +57,16 @@
                             <div class="mb-3">
                                 <label for="importe" class="form-label">Importe (€) *</label>
                                 <input type="number" class="form-control" id="importe" name="importe" 
-                                       step="0.01" min="0" required placeholder="0.00">
+                                       value="{{ gasto.importe }}" step="0.01" min="0" required onchange="calcularCostos()">
                             </div>
                         </div>
                         <div class="col-md-4">
                             <div class="mb-3">
                                 <label for="frecuencia" class="form-label">Frecuencia *</label>
                                 <select class="form-select" id="frecuencia" name="frecuencia" required onchange="actualizarDiaCargo()">
-                                    <option value="mensual">Mensual</option>
-                                    <option value="trimestral">Trimestral</option>
-                                    <option value="anual">Anual</option>
+                                    <option value="mensual" {% if gasto.frecuencia == 'mensual' %}selected{% endif %}>Mensual</option>
+                                    <option value="trimestral" {% if gasto.frecuencia == 'trimestral' %}selected{% endif %}>Trimestral</option>
+                                    <option value="anual" {% if gasto.frecuencia == 'anual' %}selected{% endif %}>Anual</option>
                                 </select>
                             </div>
                         </div>
@@ -74,7 +75,7 @@
                                 <label for="dia_cargo" class="form-label">Día de Cargo</label>
                                 <select class="form-select" id="dia_cargo" name="dia_cargo">
                                     {% for i in range(1, 32) %}
-                                    <option value="{{ i }}" {% if i == 1 %}selected{% endif %}>{{ i }}</option>
+                                    <option value="{{ i }}" {% if i == gasto.dia_cargo %}selected{% endif %}>{{ i }}</option>
                                     {% endfor %}
                                 </select>
                             </div>
@@ -86,28 +87,37 @@
                             <div class="mb-3">
                                 <label for="fecha_inicio" class="form-label">Fecha de Inicio *</label>
                                 <input type="date" class="form-control" id="fecha_inicio" name="fecha_inicio" 
-                                       value="{{ date.today().strftime('%Y-%m-%d') }}" required>
+                                       value="{{ gasto.fecha_inicio.strftime('%Y-%m-%d') }}" required>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label for="fecha_fin" class="form-label">Fecha de Fin (Opcional)</label>
                                 <input type="date" class="form-control" id="fecha_fin" name="fecha_fin"
-                                       placeholder="Dejar vacío para gasto indefinido">
+                                       value="{{ gasto.fecha_fin.strftime('%Y-%m-%d') if gasto.fecha_fin else '' }}">
                             </div>
                         </div>
                     </div>
 
                     <div class="mb-3">
                         <label for="notas" class="form-label">Notas</label>
-                        <textarea class="form-control" id="notas" name="notas" rows="2"
-                                  placeholder="Notas adicionales sobre el gasto..."></textarea>
+                        <textarea class="form-control" id="notas" name="notas" rows="2">{{ gasto.notas or '' }}</textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="activo" name="activo" 
+                                   {% if gasto.activo %}checked{% endif %}>
+                            <label class="form-check-label" for="activo">
+                                Gasto activo
+                            </label>
+                        </div>
                     </div>
 
                     <div class="d-grid gap-2 d-md-flex justify-content-md-end">
                         <a href="{{ url_for('gastos_fijos') }}" class="btn btn-secondary me-md-2">Cancelar</a>
-                        <button type="submit" class="btn btn-success">
-                            <i class="fas fa-save"></i> Guardar Gasto Fijo
+                        <button type="submit" class="btn btn-warning">
+                            <i class="fas fa-save"></i> Actualizar Gasto Fijo
                         </button>
                     </div>
                 </form>
@@ -119,57 +129,65 @@
         <div class="card">
             <div class="card-header bg-info text-white">
                 <h6 class="mb-0">
-                    <i class="fas fa-info-circle"></i> Información
+                    <i class="fas fa-info-circle"></i> Estado Actual
                 </h6>
             </div>
             <div class="card-body">
-                <p class="small text-muted">
-                    <strong>Frecuencia:</strong> Define cada cuánto se repite el gasto.
-                </p>
-                <p class="small text-muted">
-                    <strong>Día de Cargo:</strong> Día del mes en que se realiza el pago.
-                </p>
-                <p class="small text-muted">
-                    <strong>Fecha de Fin:</strong> Opcional. Dejar vacío para gasto indefinido.
-                </p>
-            </div>
-        </div>
-
-        <div class="card mt-3">
-            <div class="card-header bg-warning text-dark">
-                <h6 class="mb-0">
-                    <i class="fas fa-lightbulb"></i> Gastos Fijos Comunes
-                </h6>
-            </div>
-            <div class="card-body">
-                <ul class="list-unstyled small">
-                    <li><i class="fas fa-home text-primary"></i> <strong>Alquiler:</strong> Local, equipos</li>
-                    <li><i class="fas fa-bolt text-warning"></i> <strong>Suministros:</strong> Luz, agua, gas</li>
-                    <li><i class="fas fa-phone text-info"></i> <strong>Telecomunicaciones:</strong> Internet, teléfono</li>
-                    <li><i class="fas fa-shield-alt text-success"></i> <strong>Seguros:</strong> Responsabilidad civil</li>
-                    <li><i class="fas fa-tools text-secondary"></i> <strong>Mantenimiento:</strong> Limpieza, reparaciones</li>
-                    <li><i class="fas fa-graduation-cap text-purple"></i> <strong>Formación:</strong> Cursos, certificaciones</li>
-                </ul>
+                <div class="mb-3">
+                    <strong>Estado:</strong>
+                    <span class="badge {% if gasto.activo %}bg-success{% else %}bg-secondary{% endif %}">
+                        {% if gasto.activo %}Activo{% else %}Inactivo{% endif %}
+                    </span>
+                </div>
+                <div class="mb-3">
+                    <strong>Fecha de Registro:</strong><br>
+                    <small class="text-muted">{{ gasto.fecha_registro.strftime('%d/%m/%Y %H:%M') }}</small>
+                </div>
+                <div class="mb-3">
+                    <strong>Período Actual:</strong><br>
+                    <small class="text-muted">
+                        Desde: {{ gasto.fecha_inicio.strftime('%d/%m/%Y') }}<br>
+                        {% if gasto.fecha_fin %}
+                        Hasta: {{ gasto.fecha_fin.strftime('%d/%m/%Y') }}
+                        {% else %}
+                        <span class="text-success">Indefinido</span>
+                        {% endif %}
+                    </small>
+                </div>
             </div>
         </div>
 
         <div class="card mt-3">
             <div class="card-header bg-success text-white">
                 <h6 class="mb-0">
-                    <i class="fas fa-calculator"></i> Cálculo Estimado
+                    <i class="fas fa-calculator"></i> Cálculo Actual
                 </h6>
             </div>
             <div class="card-body">
                 <div class="row text-center">
                     <div class="col-6">
                         <small class="text-muted">Mensual</small>
-                        <div id="costo_mensual" class="h5 mb-0 text-primary">0.00€</div>
+                        <div id="costo_mensual" class="h5 mb-0 text-primary">{{ "%.2f"|format(gasto.importe if gasto.frecuencia == 'mensual' else gasto.importe / 3 if gasto.frecuencia == 'trimestral' else gasto.importe / 12) }}€</div>
                     </div>
                     <div class="col-6">
                         <small class="text-muted">Anual</small>
-                        <div id="costo_anual" class="h5 mb-0 text-success">0.00€</div>
+                        <div id="costo_anual" class="h5 mb-0 text-success">{{ "%.2f"|format(gasto.importe * 12 if gasto.frecuencia == 'mensual' else gasto.importe * 4 if gasto.frecuencia == 'trimestral' else gasto.importe) }}€</div>
                     </div>
                 </div>
+            </div>
+        </div>
+
+        <div class="card mt-3">
+            <div class="card-header bg-warning text-dark">
+                <h6 class="mb-0">
+                    <i class="fas fa-exclamation-triangle"></i> Advertencia
+                </h6>
+            </div>
+            <div class="card-body">
+                <p class="small text-muted">
+                    <strong>Desactivar un gasto fijo</strong> no lo elimina, solo lo marca como inactivo. 
+                    Los datos se conservan para consultas históricas.
+                </p>
             </div>
         </div>
     </div>
@@ -189,7 +207,7 @@ function actualizarDiaCargo() {
             const option = document.createElement('option');
             option.value = i;
             option.textContent = i;
-            if (i === 1) option.selected = true;
+            if (i == {{ gasto.dia_cargo }}) option.selected = true;
             diaCargo.appendChild(option);
         }
     } else if (frecuencia === 'trimestral') {
@@ -198,7 +216,7 @@ function actualizarDiaCargo() {
             const option = document.createElement('option');
             option.value = i;
             option.textContent = i;
-            if (i === 1) option.selected = true;
+            if (i == {{ gasto.dia_cargo }}) option.selected = true;
             diaCargo.appendChild(option);
         }
     } else if (frecuencia === 'anual') {
@@ -207,7 +225,7 @@ function actualizarDiaCargo() {
             const option = document.createElement('option');
             option.value = i;
             option.textContent = i;
-            if (i === 1) option.selected = true;
+            if (i == {{ gasto.dia_cargo }}) option.selected = true;
             diaCargo.appendChild(option);
         }
     }

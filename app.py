@@ -1602,7 +1602,28 @@ def economia():
     # Balance
     balance = total_ingresos - total_gastos
     
-    return render_template('economia/dashboard_mejorado.html',
+    # Calcular facturas pendientes
+    facturas_pendientes = FacturaProveedor.query.filter_by(estado='pendiente').count()
+    
+    # Calcular gastos pendientes (simplificado)
+    gastos_pendientes = 0  # Por ahora 0, se puede implementar lógica más compleja
+    
+    # Desglose de ingresos
+    ingresos_detalle = {
+        'cuotas': ingresos_cuotas,
+        'matriculas': ingresos_matriculas,
+        'clases_sueltas': ingresos_clases_sueltas,
+        'yogaterapia': 0  # Se puede calcular si hay datos de yogaterapia
+    }
+    
+    # Desglose de gastos
+    gastos_detalle = {
+        'gastos_mensuales': total_gastos,
+        'facturas': facturas_pendientes,
+        'gastos_fijos': 0  # Se puede calcular si hay gastos fijos
+    }
+    
+    return render_template('economia/dashboard_simple.html',
                          periodo=periodo,
                          año=año,
                          mes=mes,
@@ -1611,15 +1632,67 @@ def economia():
                          ingresos_cuotas=ingresos_cuotas,
                          ingresos_matriculas=ingresos_matriculas,
                          ingresos_clases_sueltas=ingresos_clases_sueltas,
+                         ingresos_total=total_ingresos,
                          total_ingresos=total_ingresos,
                          total_gastos=total_gastos,
-                         balance=balance)
+                         balance=balance,
+                         facturas_pendientes=facturas_pendientes,
+                         gastos_pendientes=gastos_pendientes,
+                         ingresos_detalle=ingresos_detalle,
+                         gastos_detalle=gastos_detalle)
 
 @app.route('/gastos-mensuales')
 def gastos_mensuales():
     """Vista de gastos mensuales"""
     gastos = GastoMensual.query.order_by(GastoMensual.fecha.desc()).all()
-    return render_template('gastos_mensuales.html', gastos=gastos)
+    
+    # Calcular ingresos del mes actual
+    hoy = date.today()
+    fecha_inicio = date(hoy.year, hoy.month, 1)
+    if hoy.month == 12:
+        fecha_fin = date(hoy.year + 1, 1, 1) - timedelta(days=1)
+    else:
+        fecha_fin = date(hoy.year, hoy.month + 1, 1) - timedelta(days=1)
+    
+    ingresos_mes = db.session.query(db.func.sum(Pago.monto)).filter(
+        Pago.fecha_creacion >= fecha_inicio,
+        Pago.fecha_creacion <= fecha_fin
+    ).scalar() or 0
+    
+    # Calcular gastos del mes actual
+    gastos_mes = db.session.query(db.func.sum(GastoMensual.importe)).filter(
+        GastoMensual.fecha >= fecha_inicio,
+        GastoMensual.fecha <= fecha_fin
+    ).scalar() or 0
+    
+    # Calcular balance del mes
+    balance_mes = ingresos_mes - gastos_mes
+    
+    return render_template('gastos_mensuales.html', gastos=gastos, ingresos_mes=ingresos_mes, gastos_mes=gastos_mes, balance_mes=balance_mes)
+
+@app.route('/agregar_gasto_mensual', methods=['POST'])
+def agregar_gasto_mensual():
+    """Agregar nuevo gasto mensual"""
+    try:
+        gasto = GastoMensual(
+            fecha=datetime.strptime(request.form.get('fecha'), '%Y-%m-%d').date(),
+            concepto=request.form.get('concepto'),
+            categoria=request.form.get('categoria'),
+            importe=float(request.form.get('importe')),
+            pagado='pagado' in request.form,
+            metodo_pago=request.form.get('metodo_pago', ''),
+            notas=request.form.get('notas', '')
+        )
+        
+        db.session.add(gasto)
+        db.session.commit()
+        flash('Gasto mensual agregado exitosamente', 'success')
+        return redirect(url_for('gastos_mensuales'))
+        
+    except Exception as e:
+        flash(f'Error al agregar gasto: {str(e)}', 'error')
+        db.session.rollback()
+        return redirect(url_for('gastos_mensuales'))
 
 @app.route('/proveedores')
 def proveedores():
@@ -1632,6 +1705,336 @@ def facturas():
     """Lista de facturas"""
     facturas = FacturaProveedor.query.order_by(FacturaProveedor.fecha_factura.desc()).all()
     return render_template('economia/facturas.html', facturas=facturas)
+
+@app.route('/facturas/nueva', methods=['GET', 'POST'])
+def nueva_factura():
+    """Crear nueva factura"""
+    if request.method == 'POST':
+        try:
+            # Obtener datos del formulario
+            numero_factura = request.form.get('numero_factura')
+            proveedor_id = request.form.get('proveedor_id')
+            categoria_id = request.form.get('categoria_id')
+            fecha_factura = datetime.strptime(request.form.get('fecha_factura'), '%Y-%m-%d').date()
+            fecha_vencimiento = datetime.strptime(request.form.get('fecha_vencimiento'), '%Y-%m-%d').date() if request.form.get('fecha_vencimiento') else None
+            importe_sin_iva = float(request.form.get('importe_sin_iva'))
+            iva = float(request.form.get('iva', 21.0))
+            descripcion = request.form.get('descripcion', '')
+            notas = request.form.get('notas', '')
+            
+            # Calcular importe total
+            importe_total = importe_sin_iva * (1 + iva / 100)
+            
+            # Crear factura
+            factura = FacturaProveedor(
+                numero_factura=numero_factura,
+                proveedor_id=proveedor_id,
+                categoria_id=categoria_id,
+                fecha_factura=fecha_factura,
+                fecha_vencimiento=fecha_vencimiento,
+                importe_sin_iva=importe_sin_iva,
+                iva=iva,
+                importe_total=importe_total,
+                descripcion=descripcion,
+                notas=notas
+            )
+            
+            db.session.add(factura)
+            db.session.commit()
+            flash('Factura creada exitosamente', 'success')
+            return redirect(url_for('facturas'))
+            
+        except Exception as e:
+            flash(f'Error al crear factura: {str(e)}', 'error')
+            db.session.rollback()
+    
+    # Obtener datos para el formulario
+    proveedores = Proveedor.query.filter_by(activo=True).all()
+    categorias = CategoriaGasto.query.filter_by(activo=True).all()
+    
+    return render_template('economia/nueva_factura.html', 
+                         proveedores=proveedores, 
+                         categorias=categorias)
+
+@app.route('/facturas/<int:factura_id>/editar', methods=['GET', 'POST'])
+def editar_factura(factura_id):
+    """Editar factura existente"""
+    factura = FacturaProveedor.query.get_or_404(factura_id)
+    
+    if request.method == 'POST':
+        try:
+            factura.numero_factura = request.form.get('numero_factura')
+            factura.proveedor_id = request.form.get('proveedor_id')
+            factura.categoria_id = request.form.get('categoria_id')
+            factura.fecha_factura = datetime.strptime(request.form.get('fecha_factura'), '%Y-%m-%d').date()
+            factura.fecha_vencimiento = datetime.strptime(request.form.get('fecha_vencimiento'), '%Y-%m-%d').date() if request.form.get('fecha_vencimiento') else None
+            factura.importe_sin_iva = float(request.form.get('importe_sin_iva'))
+            factura.iva = float(request.form.get('iva', 21.0))
+            factura.importe_total = factura.importe_sin_iva * (1 + factura.iva / 100)
+            factura.descripcion = request.form.get('descripcion', '')
+            factura.notas = request.form.get('notas', '')
+            factura.estado = request.form.get('estado', 'pendiente')
+            factura.metodo_pago = request.form.get('metodo_pago', '')
+            
+            if factura.estado == 'pagada' and not factura.fecha_pago:
+                factura.fecha_pago = date.today()
+            
+            db.session.commit()
+            flash('Factura actualizada exitosamente', 'success')
+            return redirect(url_for('facturas'))
+            
+        except Exception as e:
+            flash(f'Error al actualizar factura: {str(e)}', 'error')
+            db.session.rollback()
+    
+    proveedores = Proveedor.query.filter_by(activo=True).all()
+    categorias = CategoriaGasto.query.filter_by(activo=True).all()
+    
+    return render_template('economia/editar_factura.html', 
+                         factura=factura,
+                         proveedores=proveedores, 
+                         categorias=categorias)
+
+@app.route('/facturas/<int:factura_id>/marcar_pagada', methods=['POST'])
+def marcar_factura_pagada(factura_id):
+    """Marcar factura como pagada"""
+    try:
+        factura = FacturaProveedor.query.get_or_404(factura_id)
+        factura.estado = 'pagada'
+        factura.fecha_pago = date.today()
+        factura.metodo_pago = request.form.get('metodo_pago', 'transferencia')
+        
+        db.session.commit()
+        flash('Factura marcada como pagada', 'success')
+    except Exception as e:
+        flash(f'Error al marcar factura: {str(e)}', 'error')
+        db.session.rollback()
+    
+    return redirect(url_for('facturas'))
+
+@app.route('/facturas/<int:factura_id>/eliminar', methods=['POST'])
+def eliminar_factura(factura_id):
+    """Eliminar factura"""
+    try:
+        factura = FacturaProveedor.query.get_or_404(factura_id)
+        db.session.delete(factura)
+        db.session.commit()
+        flash('Factura eliminada exitosamente', 'success')
+    except Exception as e:
+        flash(f'Error al eliminar factura: {str(e)}', 'error')
+        db.session.rollback()
+    
+    return redirect(url_for('facturas'))
+
+@app.route('/gastos-fijos')
+def gastos_fijos():
+    """Lista de gastos fijos"""
+    gastos = GastoFijo.query.filter_by(activo=True).order_by(GastoFijo.nombre).all()
+    return render_template('economia/gastos_fijos.html', gastos=gastos)
+
+@app.route('/gastos-fijos/nuevo', methods=['GET', 'POST'])
+def nuevo_gasto_fijo():
+    """Crear nuevo gasto fijo"""
+    if request.method == 'POST':
+        try:
+            gasto = GastoFijo(
+                nombre=request.form.get('nombre'),
+                descripcion=request.form.get('descripcion', ''),
+                categoria_id=request.form.get('categoria_id'),
+                importe=float(request.form.get('importe')),
+                frecuencia=request.form.get('frecuencia', 'mensual'),
+                dia_cargo=int(request.form.get('dia_cargo', 1)),
+                fecha_inicio=datetime.strptime(request.form.get('fecha_inicio'), '%Y-%m-%d').date(),
+                fecha_fin=datetime.strptime(request.form.get('fecha_fin'), '%Y-%m-%d').date() if request.form.get('fecha_fin') else None,
+                notas=request.form.get('notas', '')
+            )
+            
+            db.session.add(gasto)
+            db.session.commit()
+            flash('Gasto fijo creado exitosamente', 'success')
+            return redirect(url_for('gastos_fijos'))
+            
+        except Exception as e:
+            flash(f'Error al crear gasto fijo: {str(e)}', 'error')
+            db.session.rollback()
+    
+    categorias = CategoriaGasto.query.filter_by(activo=True).all()
+    return render_template('economia/nuevo_gasto_fijo.html', categorias=categorias)
+
+@app.route('/gastos-fijos/<int:gasto_id>/editar', methods=['GET', 'POST'])
+def editar_gasto_fijo(gasto_id):
+    """Editar gasto fijo existente"""
+    gasto = GastoFijo.query.get_or_404(gasto_id)
+    
+    if request.method == 'POST':
+        try:
+            gasto.nombre = request.form.get('nombre')
+            gasto.descripcion = request.form.get('descripcion', '')
+            gasto.categoria_id = request.form.get('categoria_id')
+            gasto.importe = float(request.form.get('importe'))
+            gasto.frecuencia = request.form.get('frecuencia', 'mensual')
+            gasto.dia_cargo = int(request.form.get('dia_cargo', 1))
+            gasto.fecha_inicio = datetime.strptime(request.form.get('fecha_inicio'), '%Y-%m-%d').date()
+            gasto.fecha_fin = datetime.strptime(request.form.get('fecha_fin'), '%Y-%m-%d').date() if request.form.get('fecha_fin') else None
+            gasto.notas = request.form.get('notas', '')
+            gasto.activo = 'activo' in request.form
+            
+            db.session.commit()
+            flash('Gasto fijo actualizado exitosamente', 'success')
+            return redirect(url_for('gastos_fijos'))
+            
+        except Exception as e:
+            flash(f'Error al actualizar gasto fijo: {str(e)}', 'error')
+            db.session.rollback()
+    
+    categorias = CategoriaGasto.query.filter_by(activo=True).all()
+    return render_template('economia/editar_gasto_fijo.html', gasto=gasto, categorias=categorias)
+
+@app.route('/gastos-fijos/<int:gasto_id>/eliminar', methods=['POST'])
+def eliminar_gasto_fijo(gasto_id):
+    """Eliminar gasto fijo"""
+    try:
+        gasto = GastoFijo.query.get_or_404(gasto_id)
+        gasto.activo = False
+        db.session.commit()
+        flash('Gasto fijo desactivado exitosamente', 'success')
+    except Exception as e:
+        flash(f'Error al desactivar gasto fijo: {str(e)}', 'error')
+        db.session.rollback()
+    
+    return redirect(url_for('gastos_fijos'))
+
+@app.route('/proveedores/nuevo', methods=['GET', 'POST'])
+def nuevo_proveedor():
+    """Crear nuevo proveedor"""
+    if request.method == 'POST':
+        try:
+            proveedor = Proveedor(
+                nombre=request.form.get('nombre'),
+                cif_nif=request.form.get('cif_nif', ''),
+                direccion=request.form.get('direccion', ''),
+                telefono=request.form.get('telefono', ''),
+                email=request.form.get('email', ''),
+                contacto_principal=request.form.get('contacto_principal', ''),
+                notas=request.form.get('notas', '')
+            )
+            
+            db.session.add(proveedor)
+            db.session.commit()
+            flash('Proveedor creado exitosamente', 'success')
+            return redirect(url_for('proveedores'))
+            
+        except Exception as e:
+            flash(f'Error al crear proveedor: {str(e)}', 'error')
+            db.session.rollback()
+    
+    return render_template('economia/nuevo_proveedor.html')
+
+@app.route('/proveedores/<int:proveedor_id>/editar', methods=['GET', 'POST'])
+def editar_proveedor(proveedor_id):
+    """Editar proveedor existente"""
+    proveedor = Proveedor.query.get_or_404(proveedor_id)
+    
+    if request.method == 'POST':
+        try:
+            proveedor.nombre = request.form.get('nombre')
+            proveedor.cif_nif = request.form.get('cif_nif', '')
+            proveedor.direccion = request.form.get('direccion', '')
+            proveedor.telefono = request.form.get('telefono', '')
+            proveedor.email = request.form.get('email', '')
+            proveedor.contacto_principal = request.form.get('contacto_principal', '')
+            proveedor.notas = request.form.get('notas', '')
+            proveedor.activo = 'activo' in request.form
+            
+            db.session.commit()
+            flash('Proveedor actualizado exitosamente', 'success')
+            return redirect(url_for('proveedores'))
+            
+        except Exception as e:
+            flash(f'Error al actualizar proveedor: {str(e)}', 'error')
+            db.session.rollback()
+    
+    return render_template('economia/editar_proveedor.html', proveedor=proveedor)
+
+@app.route('/proveedores/<int:proveedor_id>/eliminar', methods=['POST'])
+def eliminar_proveedor(proveedor_id):
+    """Eliminar proveedor"""
+    try:
+        proveedor = Proveedor.query.get_or_404(proveedor_id)
+        proveedor.activo = False
+        db.session.commit()
+        flash('Proveedor desactivado exitosamente', 'success')
+    except Exception as e:
+        flash(f'Error al desactivar proveedor: {str(e)}', 'error')
+        db.session.rollback()
+    
+    return redirect(url_for('proveedores'))
+
+# RUTAS DE EXPORTACIÓN Y REPORTES
+
+@app.route('/exportar/<tipo>')
+def exportar_datos(tipo):
+    """Exportar datos a Excel"""
+    try:
+        if tipo == 'facturas':
+            facturas = FacturaProveedor.query.order_by(FacturaProveedor.fecha_factura.desc()).all()
+            return exportar_facturas_excel(facturas)
+        elif tipo == 'gastos-fijos':
+            gastos = GastoFijo.query.filter_by(activo=True).all()
+            return exportar_gastos_fijos_excel(gastos)
+        elif tipo == 'proveedores':
+            proveedores = Proveedor.query.filter_by(activo=True).all()
+            return exportar_proveedores_excel(proveedores)
+        elif tipo == 'ingresos':
+            return exportar_ingresos_excel()
+        else:
+            flash('Tipo de exportación no válido', 'error')
+            return redirect(url_for('economia'))
+    except Exception as e:
+        flash(f'Error al exportar datos: {str(e)}', 'error')
+        return redirect(url_for('economia'))
+
+@app.route('/reporte-contabilidad-pdf')
+def reporte_contabilidad_pdf():
+    """Generar reporte de contabilidad en PDF"""
+    try:
+        # Obtener parámetros
+        periodo = request.args.get('periodo', 'mes_actual')
+        año = int(request.args.get('año', date.today().year))
+        mes = int(request.args.get('mes', date.today().month))
+        
+        # Calcular fechas
+        if periodo == 'mes_actual':
+            fecha_inicio = date(año, mes, 1)
+            if mes == 12:
+                fecha_fin = date(año + 1, 1, 1) - timedelta(days=1)
+            else:
+                fecha_fin = date(año, mes + 1, 1) - timedelta(days=1)
+        elif periodo == 'año':
+            fecha_inicio = date(año, 1, 1)
+            fecha_fin = date(año, 12, 31)
+        else:
+            fecha_inicio = date(año, mes, 1)
+            fecha_fin = date(año, mes + 1, 1) - timedelta(days=1) if mes < 12 else date(año, 12, 31)
+        
+        # Obtener datos
+        facturas = FacturaProveedor.query.filter(
+            FacturaProveedor.fecha_factura >= fecha_inicio,
+            FacturaProveedor.fecha_factura <= fecha_fin
+        ).all()
+        
+        gastos_fijos = GastoFijo.query.filter_by(activo=True).all()
+        
+        ingresos = db.session.query(db.func.sum(Pago.monto)).filter(
+            Pago.fecha_creacion >= fecha_inicio,
+            Pago.fecha_creacion <= fecha_fin
+        ).scalar() or 0
+        
+        return generar_reporte_pdf(facturas, gastos_fijos, ingresos, fecha_inicio, fecha_fin)
+        
+    except Exception as e:
+        flash(f'Error al generar reporte PDF: {str(e)}', 'error')
+        return redirect(url_for('economia'))
 
 # RUTAS DE CONFIGURACIÓN
 
@@ -2237,6 +2640,320 @@ def calendario_seleccion_citas(alumno_id=None):
                          mes_actual=mes_actual,
                          año_actual=año_actual,
                          fecha_inicio_semana=fecha_inicio_semana)
+
+# FUNCIONES DE EXPORTACIÓN
+
+def exportar_facturas_excel(facturas):
+    """Exportar facturas a Excel"""
+    try:
+        import pandas as pd
+        from io import BytesIO
+        from flask import make_response
+        
+        data = []
+        for factura in facturas:
+            data.append({
+                'Número Factura': factura.numero_factura,
+                'Proveedor': factura.proveedor.nombre,
+                'Categoría': factura.categoria.nombre,
+                'Fecha Factura': factura.fecha_factura.strftime('%d/%m/%Y'),
+                'Fecha Vencimiento': factura.fecha_vencimiento.strftime('%d/%m/%Y') if factura.fecha_vencimiento else '',
+                'Importe sin IVA': factura.importe_sin_iva,
+                'IVA %': factura.iva,
+                'Importe Total': factura.importe_total,
+                'Estado': factura.estado.title(),
+                'Fecha Pago': factura.fecha_pago.strftime('%d/%m/%Y') if factura.fecha_pago else '',
+                'Método Pago': factura.metodo_pago or '',
+                'Descripción': factura.descripcion or '',
+                'Notas': factura.notas or ''
+            })
+        
+        df = pd.DataFrame(data)
+        
+        output = BytesIO()
+        with pd.ExcelWriter(output, engine='openpyxl') as writer:
+            df.to_excel(writer, sheet_name='Facturas', index=False)
+        
+        output.seek(0)
+        
+        response = make_response(output.getvalue())
+        response.headers['Content-Type'] = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        response.headers['Content-Disposition'] = f'attachment; filename=facturas_{date.today().strftime("%Y%m%d")}.xlsx'
+        
+        return response
+        
+    except ImportError:
+        flash('Error: pandas y openpyxl no están instalados. Instale con: pip install pandas openpyxl', 'error')
+        return redirect(url_for('facturas'))
+    except Exception as e:
+        flash(f'Error al exportar facturas: {str(e)}', 'error')
+        return redirect(url_for('facturas'))
+
+def exportar_gastos_fijos_excel(gastos):
+    """Exportar gastos fijos a Excel"""
+    try:
+        import pandas as pd
+        from io import BytesIO
+        from flask import make_response
+        
+        data = []
+        for gasto in gastos:
+            data.append({
+                'Nombre': gasto.nombre,
+                'Descripción': gasto.descripcion or '',
+                'Categoría': gasto.categoria.nombre,
+                'Importe': gasto.importe,
+                'Frecuencia': gasto.frecuencia.title(),
+                'Día de Cargo': gasto.dia_cargo,
+                'Fecha Inicio': gasto.fecha_inicio.strftime('%d/%m/%Y'),
+                'Fecha Fin': gasto.fecha_fin.strftime('%d/%m/%Y') if gasto.fecha_fin else '',
+                'Activo': 'Sí' if gasto.activo else 'No',
+                'Notas': gasto.notas or ''
+            })
+        
+        df = pd.DataFrame(data)
+        
+        output = BytesIO()
+        with pd.ExcelWriter(output, engine='openpyxl') as writer:
+            df.to_excel(writer, sheet_name='Gastos Fijos', index=False)
+        
+        output.seek(0)
+        
+        response = make_response(output.getvalue())
+        response.headers['Content-Type'] = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        response.headers['Content-Disposition'] = f'attachment; filename=gastos_fijos_{date.today().strftime("%Y%m%d")}.xlsx'
+        
+        return response
+        
+    except ImportError:
+        flash('Error: pandas y openpyxl no están instalados. Instale con: pip install pandas openpyxl', 'error')
+        return redirect(url_for('gastos_fijos'))
+    except Exception as e:
+        flash(f'Error al exportar gastos fijos: {str(e)}', 'error')
+        return redirect(url_for('gastos_fijos'))
+
+def exportar_proveedores_excel(proveedores):
+    """Exportar proveedores a Excel"""
+    try:
+        import pandas as pd
+        from io import BytesIO
+        from flask import make_response
+        
+        data = []
+        for proveedor in proveedores:
+            data.append({
+                'Nombre': proveedor.nombre,
+                'CIF/NIF': proveedor.cif_nif or '',
+                'Dirección': proveedor.direccion or '',
+                'Teléfono': proveedor.telefono or '',
+                'Email': proveedor.email or '',
+                'Contacto Principal': proveedor.contacto_principal or '',
+                'Activo': 'Sí' if proveedor.activo else 'No',
+                'Fecha Registro': proveedor.fecha_registro.strftime('%d/%m/%Y'),
+                'Notas': proveedor.notas or ''
+            })
+        
+        df = pd.DataFrame(data)
+        
+        output = BytesIO()
+        with pd.ExcelWriter(output, engine='openpyxl') as writer:
+            df.to_excel(writer, sheet_name='Proveedores', index=False)
+        
+        output.seek(0)
+        
+        response = make_response(output.getvalue())
+        response.headers['Content-Type'] = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        response.headers['Content-Disposition'] = f'attachment; filename=proveedores_{date.today().strftime("%Y%m%d")}.xlsx'
+        
+        return response
+        
+    except ImportError:
+        flash('Error: pandas y openpyxl no están instalados. Instale con: pip install pandas openpyxl', 'error')
+        return redirect(url_for('proveedores'))
+    except Exception as e:
+        flash(f'Error al exportar proveedores: {str(e)}', 'error')
+        return redirect(url_for('proveedores'))
+
+def exportar_ingresos_excel():
+    """Exportar ingresos a Excel"""
+    try:
+        import pandas as pd
+        from io import BytesIO
+        from flask import make_response
+        
+        # Obtener ingresos de los últimos 12 meses
+        fecha_inicio = date.today() - timedelta(days=365)
+        fecha_fin = date.today()
+        
+        pagos = Pago.query.filter(
+            Pago.fecha_creacion >= fecha_inicio,
+            Pago.fecha_creacion <= fecha_fin
+        ).order_by(Pago.fecha_creacion.desc()).all()
+        
+        data = []
+        for pago in pagos:
+            data.append({
+                'Fecha': pago.fecha_creacion.strftime('%d/%m/%Y'),
+                'Alumno': f"{pago.alumno.nombre} {pago.alumno.apellido}",
+                'Tipo Pago': pago.tipo_pago.title(),
+                'Mes/Año': pago.mes or f"{pago.año}" if pago.año else '',
+                'Fecha Clase': pago.fecha_clase.strftime('%d/%m/%Y') if pago.fecha_clase else '',
+                'Monto': pago.monto,
+                'Método Pago': pago.metodo_pago or '',
+                'Descripción': pago.descripcion or ''
+            })
+        
+        df = pd.DataFrame(data)
+        
+        output = BytesIO()
+        with pd.ExcelWriter(output, engine='openpyxl') as writer:
+            df.to_excel(writer, sheet_name='Ingresos', index=False)
+        
+        output.seek(0)
+        
+        response = make_response(output.getvalue())
+        response.headers['Content-Type'] = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        response.headers['Content-Disposition'] = f'attachment; filename=ingresos_{date.today().strftime("%Y%m%d")}.xlsx'
+        
+        return response
+        
+    except ImportError:
+        flash('Error: pandas y openpyxl no están instalados. Instale con: pip install pandas openpyxl', 'error')
+        return redirect(url_for('economia'))
+    except Exception as e:
+        flash(f'Error al exportar ingresos: {str(e)}', 'error')
+        return redirect(url_for('economia'))
+
+def generar_reporte_pdf(facturas, gastos_fijos, ingresos, fecha_inicio, fecha_fin):
+    """Generar reporte de contabilidad en PDF"""
+    try:
+        from reportlab.lib.pagesizes import letter, A4
+        from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+        from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+        from reportlab.lib import colors
+        from reportlab.lib.units import inch
+        from io import BytesIO
+        from flask import make_response
+        
+        buffer = BytesIO()
+        doc = SimpleDocTemplate(buffer, pagesize=A4)
+        story = []
+        
+        # Estilos
+        styles = getSampleStyleSheet()
+        title_style = ParagraphStyle(
+            'CustomTitle',
+            parent=styles['Heading1'],
+            fontSize=16,
+            spaceAfter=30,
+            alignment=1
+        )
+        
+        # Título
+        story.append(Paragraph("REPORTE DE CONTABILIDAD", title_style))
+        story.append(Paragraph(f"Período: {fecha_inicio.strftime('%d/%m/%Y')} - {fecha_fin.strftime('%d/%m/%Y')}", styles['Normal']))
+        story.append(Spacer(1, 20))
+        
+        # Resumen financiero
+        total_facturas = sum(f.importe_total for f in facturas)
+        total_gastos_fijos = sum(g.importe for g in gastos_fijos)
+        balance = ingresos - total_facturas - total_gastos_fijos
+        
+        resumen_data = [
+            ['Concepto', 'Importe (€)'],
+            ['Ingresos Totales', f"{ingresos:.2f}"],
+            ['Gastos en Facturas', f"{total_facturas:.2f}"],
+            ['Gastos Fijos', f"{total_gastos_fijos:.2f}"],
+            ['BALANCE', f"{balance:.2f}"]
+        ]
+        
+        resumen_table = Table(resumen_data)
+        resumen_table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, 0), 12),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+            ('BACKGROUND', (0, 1), (-1, -2), colors.beige),
+            ('BACKGROUND', (0, -1), (-1, -1), colors.lightblue),
+            ('FONTNAME', (0, -1), (-1, -1), 'Helvetica-Bold'),
+        ]))
+        
+        story.append(Paragraph("RESUMEN FINANCIERO", styles['Heading2']))
+        story.append(resumen_table)
+        story.append(Spacer(1, 20))
+        
+        # Facturas
+        if facturas:
+            story.append(Paragraph("FACTURAS DEL PERÍODO", styles['Heading2']))
+            facturas_data = [['Número', 'Proveedor', 'Fecha', 'Importe', 'Estado']]
+            for factura in facturas:
+                facturas_data.append([
+                    factura.numero_factura,
+                    factura.proveedor.nombre,
+                    factura.fecha_factura.strftime('%d/%m/%Y'),
+                    f"{factura.importe_total:.2f}",
+                    factura.estado.title()
+                ])
+            
+            facturas_table = Table(facturas_data)
+            facturas_table.setStyle(TableStyle([
+                ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+                ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+                ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+                ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                ('FONTSIZE', (0, 0), (-1, 0), 10),
+                ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+                ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+                ('GRID', (0, 0), (-1, -1), 1, colors.black)
+            ]))
+            
+            story.append(facturas_table)
+            story.append(Spacer(1, 20))
+        
+        # Gastos fijos
+        if gastos_fijos:
+            story.append(Paragraph("GASTOS FIJOS", styles['Heading2']))
+            gastos_data = [['Nombre', 'Categoría', 'Importe', 'Frecuencia']]
+            for gasto in gastos_fijos:
+                gastos_data.append([
+                    gasto.nombre,
+                    gasto.categoria.nombre,
+                    f"{gasto.importe:.2f}",
+                    gasto.frecuencia.title()
+                ])
+            
+            gastos_table = Table(gastos_data)
+            gastos_table.setStyle(TableStyle([
+                ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+                ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+                ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+                ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                ('FONTSIZE', (0, 0), (-1, 0), 10),
+                ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+                ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+                ('GRID', (0, 0), (-1, -1), 1, colors.black)
+            ]))
+            
+            story.append(gastos_table)
+        
+        doc.build(story)
+        
+        buffer.seek(0)
+        
+        response = make_response(buffer.getvalue())
+        response.headers['Content-Type'] = 'application/pdf'
+        response.headers['Content-Disposition'] = f'attachment; filename=reporte_contabilidad_{fecha_inicio.strftime("%Y%m%d")}_{fecha_fin.strftime("%Y%m%d")}.pdf'
+        
+        return response
+        
+    except ImportError:
+        flash('Error: reportlab no está instalado. Instale con: pip install reportlab', 'error')
+        return redirect(url_for('economia'))
+    except Exception as e:
+        flash(f'Error al generar reporte PDF: {str(e)}', 'error')
+        return redirect(url_for('economia'))
 
 # Initialize database and run app
 if __name__ == '__main__':

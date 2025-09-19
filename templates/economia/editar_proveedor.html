@@ -1,0 +1,158 @@
+{% extends "base.html" %}
+
+{% block title %}Editar Proveedor - Atma suddhi{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2><i class="fas fa-edit"></i> Editar Proveedor</h2>
+            <a href="{{ url_for('proveedores') }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Volver a Proveedores
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header bg-warning text-dark">
+                <h5 class="mb-0">
+                    <i class="fas fa-edit"></i> Editar {{ proveedor.nombre }}
+                </h5>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="nombre" class="form-label">Nombre de la Empresa *</label>
+                                <input type="text" class="form-control" id="nombre" name="nombre" 
+                                       value="{{ proveedor.nombre }}" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="cif_nif" class="form-label">CIF/NIF</label>
+                                <input type="text" class="form-control" id="cif_nif" name="cif_nif"
+                                       value="{{ proveedor.cif_nif or '' }}">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="direccion" class="form-label">Dirección</label>
+                        <textarea class="form-control" id="direccion" name="direccion" rows="2">{{ proveedor.direccion or '' }}</textarea>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="telefono" class="form-label">Teléfono</label>
+                                <input type="tel" class="form-control" id="telefono" name="telefono"
+                                       value="{{ proveedor.telefono or '' }}">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="email" class="form-label">Email</label>
+                                <input type="email" class="form-control" id="email" name="email"
+                                       value="{{ proveedor.email or '' }}">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="contacto_principal" class="form-label">Contacto Principal</label>
+                        <input type="text" class="form-control" id="contacto_principal" name="contacto_principal"
+                               value="{{ proveedor.contacto_principal or '' }}">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="notas" class="form-label">Notas</label>
+                        <textarea class="form-control" id="notas" name="notas" rows="3">{{ proveedor.notas or '' }}</textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="activo" name="activo" 
+                                   {% if proveedor.activo %}checked{% endif %}>
+                            <label class="form-check-label" for="activo">
+                                Proveedor activo
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="{{ url_for('proveedores') }}" class="btn btn-secondary me-md-2">Cancelar</a>
+                        <button type="submit" class="btn btn-warning">
+                            <i class="fas fa-save"></i> Actualizar Proveedor
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <h6 class="mb-0">
+                    <i class="fas fa-info-circle"></i> Estado Actual
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <strong>Estado:</strong>
+                    <span class="badge {% if proveedor.activo %}bg-success{% else %}bg-secondary{% endif %}">
+                        {% if proveedor.activo %}Activo{% else %}Inactivo{% endif %}
+                    </span>
+                </div>
+                <div class="mb-3">
+                    <strong>Fecha de Registro:</strong><br>
+                    <small class="text-muted">{{ proveedor.fecha_registro.strftime('%d/%m/%Y %H:%M') }}</small>
+                </div>
+                {% if proveedor.facturas %}
+                <div class="mb-3">
+                    <strong>Facturas Asociadas:</strong><br>
+                    <small class="text-muted">{{ proveedor.facturas|length }} factura(s)</small>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        {% if proveedor.facturas %}
+        <div class="card mt-3">
+            <div class="card-header bg-primary text-white">
+                <h6 class="mb-0">
+                    <i class="fas fa-file-invoice"></i> Facturas Recientes
+                </h6>
+            </div>
+            <div class="card-body">
+                {% for factura in proveedor.facturas[:3] %}
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <div>
+                        <small class="text-muted">#{{ factura.numero_factura }}</small><br>
+                        <small>{{ factura.fecha_factura.strftime('%d/%m/%Y') }}</small>
+                    </div>
+                    <div class="text-end">
+                        <strong>{{ "%.2f"|format(factura.importe_total) }}€</strong><br>
+                        <span class="badge {% if factura.estado == 'pagada' %}bg-success{% elif factura.esta_vencida() %}bg-danger{% else %}bg-warning{% endif %} badge-sm">
+                            {{ factura.estado.title() }}
+                        </span>
+                    </div>
+                </div>
+                {% if not loop.last %}<hr class="my-2">{% endif %}
+                {% endfor %}
+                {% if proveedor.facturas|length > 3 %}
+                <div class="text-center mt-2">
+                    <small class="text-muted">Y {{ proveedor.facturas|length - 3 }} más...</small>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
