@@ -218,13 +218,38 @@
                 </h5>
             </div>
             <div class="card-body">
-                <form method="POST" action="{{ url_for('guardar_configuracion') }}">
+                <form method="POST" action="{{ url_for('guardar_configuracion') }}" enctype="multipart/form-data">
                     <input type="hidden" name="seccion" value="centro">
+                    
+                    <!-- Logo del Centro -->
+                    <div class="mb-4">
+                        <label for="logo" class="form-label">Logo del Centro</label>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <input type="file" class="form-control" id="logo" name="logo" accept="image/*">
+                                <div class="form-text">Formatos soportados: JPG, PNG, SVG. Tamaño recomendado: 200x60px</div>
+                            </div>
+                            <div class="col-md-6">
+                                {% if config and config.logo_escuela %}
+                                    <div class="text-center">
+                                        <img src="{{ url_for('static', filename=config.logo_escuela) }}" 
+                                             alt="Logo actual" class="img-thumbnail" style="max-height: 60px;">
+                                        <div class="form-text">Logo actual</div>
+                                    </div>
+                                {% else %}
+                                    <div class="text-center text-muted">
+                                        <i class="fas fa-image fa-3x"></i>
+                                        <div class="form-text">No hay logo configurado</div>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
                     
                     <div class="mb-3">
                         <label for="nombre_centro" class="form-label">Nombre del Centro</label>
                         <input type="text" class="form-control" id="nombre_centro" 
-                               name="nombre_centro" value="{{ config.get('nombre_centro', 'Atma suddhi') }}">
+                               name="nombre_centro" value="{{ config.get('nombre_centro', 'ATMA SUDDHI') }}">
                     </div>
                     
                     <div class="mb-3">

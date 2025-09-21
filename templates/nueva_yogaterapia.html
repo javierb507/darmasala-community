@@ -275,46 +275,40 @@ document.addEventListener('DOMContentLoaded', function() {
         const horaFin = horaFinInput.value;
         
         if (fecha && horaInicio && horaFin) {
-            fetch(`/api/citas/${fecha}`)
-                .then(response => response.json())
-                .then(citas => {
-                    const horaInicioTime = new Date(`2000-01-01T${horaInicio}`);
-                    const horaFinTime = new Date(`2000-01-01T${horaFin}`);
-                    
-                    let conflicto = false;
-                    let mensajeConflicto = '';
-                    
-                    citas.forEach(cita => {
-                        const citaInicio = new Date(`2000-01-01T${cita.hora_inicio}`);
-                        const citaFin = new Date(`2000-01-01T${cita.hora_fin || cita.hora_inicio}`);
-                        
-                        if (horaInicioTime < citaFin && horaFinTime > citaInicio) {
-                            conflicto = true;
-                            mensajeConflicto = `⚠️ Conflicto: ${cita.alumno} (${cita.hora_inicio} - ${cita.hora_fin || 'Sin hora fin'})`;
-                        }
-                    });
-                    
-                    // Mostrar/ocultar alerta de conflicto
-                    let alertaConflicto = document.getElementById('alerta-conflicto');
-                    if (conflicto) {
-                        if (!alertaConflicto) {
-                            alertaConflicto = document.createElement('div');
-                            alertaConflicto.id = 'alerta-conflicto';
-                            alertaConflicto.className = 'alert alert-warning alert-dismissible fade show';
-                            alertaConflicto.innerHTML = `
-                                <i class="fas fa-exclamation-triangle"></i>
-                                <span id="mensaje-conflicto"></span>
-                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                            `;
-                            document.querySelector('.card-body').insertBefore(alertaConflicto, document.querySelector('form'));
-                        }
-                        document.getElementById('mensaje-conflicto').textContent = mensajeConflicto;
-                        alertaConflicto.style.display = 'block';
-                    } else if (alertaConflicto) {
-                        alertaConflicto.style.display = 'none';
-                    }
+            fetch('/api/verificar-conflicto', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    fecha: fecha,
+                    hora_inicio: horaInicio,
+                    hora_fin: horaFin
                 })
-                .catch(error => console.error('Error verificando conflictos:', error));
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Mostrar/ocultar alerta de conflicto
+                let alertaConflicto = document.getElementById('alerta-conflicto');
+                if (data.conflicto) {
+                    if (!alertaConflicto) {
+                        alertaConflicto = document.createElement('div');
+                        alertaConflicto.id = 'alerta-conflicto';
+                        alertaConflicto.className = 'alert alert-warning alert-dismissible fade show';
+                        alertaConflicto.innerHTML = `
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <span id="mensaje-conflicto"></span>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        `;
+                        document.querySelector('.card-body').insertBefore(alertaConflicto, document.querySelector('form'));
+                    }
+                    document.getElementById('mensaje-conflicto').textContent = data.mensaje;
+                    alertaConflicto.style.display = 'block';
+                } else if (alertaConflicto) {
+                    alertaConflicto.style.display = 'none';
+                }
+            })
+            .catch(error => console.error('Error verificando conflictos:', error));
         }
     }
     

@@ -1,6 +1,10 @@
-# 🧘‍♀️ Yoga School Management System
+# 🧘‍♀️ ATMA SUDDHI - Yoga School Management System
 
 Sistema completo de gestión para una escuela de yoga que incluye gestión de alumnos, pagos, citas individuales de yogaterapia, horarios semanales, calendario unificado y administración de clases.
+
+**Desarrollado por:** Javier Ballesteros para Atma Suddhi - Espacio de Yoga  
+**Licencia:** GNU GPL v3  
+**Versión:** 2.0.0
 
 ## 📋 Tabla de Contenidos
 
@@ -52,3 +56,32 @@ Sistema completo de gestión para una escuela de yoga que incluye gestión de al
 - Configuración de precios y duraciones
 - Categorías de gastos
 - Proveedores y facturación
+
+## 👨‍💻 Información del Autor
+
+**Desarrollador:** Javier Ballesteros  
+**Email:** javierb507@gmail.com  
+**Proyecto:** Desarrollado específicamente para Atma Suddhi - Espacio de Yoga  
+**Repositorio:** https://github.com/javierb507/yoga-school-management
+
+## 📄 Licencia
+
+Este proyecto está licenciado bajo la Licencia Pública General de GNU v3.0 (GPL-3.0).
+
+Para más información sobre la licencia, consulta el archivo [LICENSE](LICENSE) o visita: https://www.gnu.org/licenses/gpl-3.0.html
+
+## 🤝 Contribución
+
+Este proyecto fue desarrollado específicamente para Atma Suddhi, pero está disponible como software libre bajo licencia GPL v3. Si deseas contribuir o adaptar el sistema para tu propia escuela de yoga, por favor:
+
+1. Fork el repositorio
+2. Crea una rama para tu feature (`git checkout -b feature/nueva-funcionalidad`)
+3. Commit tus cambios (`git commit -am 'Agregar nueva funcionalidad'`)
+4. Push a la rama (`git push origin feature/nueva-funcionalidad`)
+5. Crea un Pull Request
+
+## 📞 Contacto
+
+Para consultas sobre el sistema o soporte técnico, contacta a:
+- **Javier Ballesteros** - javierb507@gmail.com
+- **Atma Suddhi** - Espacio de Yoga

@@ -1208,9 +1208,9 @@ def procesar_yogaterapia_general():
         # Verificar conflicto de horarios
         fecha_sesion = datetime.strptime(request.form['fecha_sesion'], '%Y-%m-%d').date()
         if hora_inicio and hora_fin:
-            conflicto, sesion_conflicto = verificar_conflicto_horario(fecha_sesion, hora_inicio, hora_fin)
+            conflicto, info_conflicto = verificar_conflicto_horario(fecha_sesion, hora_inicio, hora_fin)
             if conflicto:
-                flash(f'⚠️ Conflicto de horario detectado! Ya existe una cita de {sesion_conflicto.hora_inicio.strftime("%H:%M")} a {sesion_conflicto.hora_fin.strftime("%H:%M")} con {sesion_conflicto.alumno.nombre} {sesion_conflicto.alumno.apellido}', 'warning')
+                flash(f'⚠️ {info_conflicto["mensaje"]}', 'warning')
                 return redirect(url_for('nueva_yogaterapia'))
         
         sesion = SesionYogaterapia(
@@ -1380,12 +1380,23 @@ def obtener_citas_fecha(fecha):
     """API para obtener citas de una fecha específica (para el calendario)"""
     try:
         fecha_obj = datetime.strptime(fecha, '%Y-%m-%d').date()
+        dia_semana = fecha_obj.weekday()
+        
+        # Obtener sesiones de yogaterapia
         citas = SesionYogaterapia.query.filter(
             SesionYogaterapia.fecha_sesion == fecha_obj,
             SesionYogaterapia.hora_inicio.isnot(None)
         ).order_by(SesionYogaterapia.hora_inicio).all()
         
+        # Obtener horarios semanales para ese día
+        horarios_semanal = HorarioSemanal.query.filter(
+            HorarioSemanal.dia_semana == dia_semana,
+            HorarioSemanal.activo == True
+        ).all()
+        
         citas_data = []
+        
+        # Agregar sesiones de yogaterapia
         for cita in citas:
             citas_data.append({
                 'id': cita.id,
@@ -1394,12 +1405,117 @@ def obtener_citas_fecha(fecha):
                 'hora_fin': cita.hora_fin.strftime('%H:%M') if cita.hora_fin else None,
                 'duracion': cita.duracion_minutos,
                 'precio': cita.precio,
-                'pagado': cita.pagado
+                'pagado': cita.pagado,
+                'tipo': 'yogaterapia',
+                'color': '#8B5FBF'
             })
+        
+        # Agregar clases grupales
+        for horario in horarios_semanal:
+            citas_data.append({
+                'id': f"grupal_{horario.id}",
+                'alumno': horario.clase.nombre,
+                'hora_inicio': horario.hora_inicio.strftime('%H:%M'),
+                'hora_fin': horario.hora_fin.strftime('%H:%M'),
+                'duracion': horario.clase.duracion_minutos,
+                'precio': horario.clase.precio,
+                'pagado': True,
+                'tipo': 'clase_grupal',
+                'color': '#28a745'
+            })
+        
+        # Ordenar por hora de inicio
+        citas_data.sort(key=lambda x: x['hora_inicio'])
         
         return jsonify(citas_data)
     except ValueError:
         return jsonify({'error': 'Formato de fecha inválido'}), 400
+
+@app.route('/api/verificar-conflicto', methods=['POST'])
+def verificar_conflicto_api():
+    """API para verificar conflictos de horario en tiempo real"""
+    try:
+        data = request.get_json()
+        fecha = datetime.strptime(data['fecha'], '%Y-%m-%d').date()
+        hora_inicio = datetime.strptime(data['hora_inicio'], '%H:%M').time()
+        hora_fin = datetime.strptime(data['hora_fin'], '%H:%M').time()
+        sesion_id = data.get('sesion_id')
+        
+        conflicto, info_conflicto = verificar_conflicto_horario(fecha, hora_inicio, hora_fin, sesion_id)
+        
+        return jsonify({
+            'conflicto': conflicto,
+            'mensaje': info_conflicto['mensaje'] if conflicto else None,
+            'tipo': info_conflicto['tipo'] if conflicto else None
+        })
+    except Exception as e:
+        return jsonify({'error': str(e)}), 400
+
+@app.route('/yogaterapia/<int:sesion_id>/archivos/eliminar/<int:archivo_id>', methods=['POST'])
+def eliminar_archivo_yogaterapia(sesion_id, archivo_id):
+    """Eliminar un archivo de yogaterapia"""
+    try:
+        archivo = ArchivoYogaterapia.query.filter_by(
+            id=archivo_id, 
+            sesion_yogaterapia_id=sesion_id
+        ).first_or_404()
+        
+        # Eliminar archivo físico
+        if os.path.exists(archivo.ruta_archivo):
+            os.remove(archivo.ruta_archivo)
+        
+        # Eliminar registro de base de datos
+        db.session.delete(archivo)
+        db.session.commit()
+        
+        flash('Archivo eliminado correctamente', 'success')
+        return redirect(url_for('ver_sesion_yogaterapia', sesion_id=sesion_id))
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Error al eliminar archivo: {str(e)}', 'error')
+        return redirect(url_for('ver_sesion_yogaterapia', sesion_id=sesion_id))
+
+@app.route('/yogaterapia/<int:sesion_id>/archivos/agregar', methods=['POST'])
+def agregar_archivo_yogaterapia(sesion_id):
+    """Agregar archivos a una sesión de yogaterapia"""
+    try:
+        sesion = SesionYogaterapia.query.get_or_404(sesion_id)
+        
+        archivos = request.files.getlist('archivos')
+        archivos_agregados = 0
+        
+        for archivo in archivos:
+            if archivo and archivo.filename:
+                # Crear directorio para archivos de yogaterapia
+                upload_dir = os.path.join('uploads', 'yogaterapia', str(sesion.id))
+                os.makedirs(upload_dir, exist_ok=True)
+                
+                # Generar nombre único para el archivo
+                timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+                filename = f"{timestamp}_{archivo.filename}"
+                filepath = os.path.join(upload_dir, filename)
+                
+                # Guardar archivo
+                archivo.save(filepath)
+                
+                # Crear registro en base de datos
+                archivo_db = ArchivoYogaterapia(
+                    sesion_yogaterapia_id=sesion.id,
+                    nombre_archivo=archivo.filename,
+                    ruta_archivo=filepath,
+                    tipo_archivo=filename.split('.')[-1].lower() if '.' in filename else 'unknown',
+                    tamaño_bytes=os.path.getsize(filepath) if os.path.exists(filepath) else 0
+                )
+                db.session.add(archivo_db)
+                archivos_agregados += 1
+        
+        db.session.commit()
+        flash(f'{archivos_agregados} archivo(s) agregado(s) correctamente', 'success')
+        return redirect(url_for('ver_sesion_yogaterapia', sesion_id=sesion_id))
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Error al agregar archivos: {str(e)}', 'error')
+        return redirect(url_for('ver_sesion_yogaterapia', sesion_id=sesion_id))
 
 @app.route('/yogaterapia/<int:sesion_id>/eliminar', methods=['POST'])
 def eliminar_sesion_yogaterapia(sesion_id):
@@ -2048,6 +2164,34 @@ def configuracion():
 @app.route('/configuracion/guardar', methods=['POST'])
 def guardar_configuracion():
     try:
+        # Manejar subida de logo
+        if 'logo' in request.files:
+            logo_file = request.files['logo']
+            if logo_file and logo_file.filename:
+                # Crear directorio para logos
+                logo_dir = os.path.join('static', 'images')
+                os.makedirs(logo_dir, exist_ok=True)
+                
+                # Generar nombre único para el logo
+                timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+                filename = f"logo_{timestamp}.{logo_file.filename.split('.')[-1]}"
+                filepath = os.path.join(logo_dir, filename)
+                
+                # Guardar archivo
+                logo_file.save(filepath)
+                
+                # Actualizar configuración con la ruta del logo
+                config_logo = Configuracion.query.filter_by(clave='logo_escuela').first()
+                if config_logo:
+                    config_logo.valor = f"images/{filename}"
+                else:
+                    config_logo = Configuracion(
+                        clave='logo_escuela',
+                        valor=f"images/{filename}",
+                        descripcion='Logo de la escuela'
+                    )
+                    db.session.add(config_logo)
+        
         configuraciones = [
             # Tarifas
             ('precio_clase_suelta', request.form.get('precio_clase_suelta', '15.00'), 'Precio por clase suelta'),
@@ -2061,7 +2205,7 @@ def guardar_configuracion():
             ('precio_yogaterapia_pareja', request.form.get('precio_yogaterapia_pareja', '70.00'), 'Precio yogaterapia en pareja'),
             
             # Información de la escuela
-            ('nombre_escuela', request.form.get('nombre_escuela', 'Atma suddhi'), 'Nombre de la escuela'),
+            ('nombre_escuela', request.form.get('nombre_escuela', 'ATMA SUDDHI'), 'Nombre de la escuela'),
             ('direccion_escuela', request.form.get('direccion_escuela', ''), 'Dirección de la escuela'),
             ('telefono_escuela', request.form.get('telefono_escuela', ''), 'Teléfono de contacto'),
             ('email_escuela', request.form.get('email_escuela', ''), 'Email de contacto'),
@@ -2248,7 +2392,10 @@ def verificar_conflicto_horario(fecha, hora_inicio, hora_fin, sesion_id=None):
     if not hora_inicio or not hora_fin:
         return False, None
     
-    # Buscar sesiones en la misma fecha
+    # Obtener el día de la semana (0=Lunes, 6=Domingo)
+    dia_semana = fecha.weekday()
+    
+    # 1. Verificar conflictos con sesiones de yogaterapia existentes
     sesiones_existentes = SesionYogaterapia.query.filter(
         SesionYogaterapia.fecha_sesion == fecha,
         SesionYogaterapia.hora_inicio.isnot(None),
@@ -2262,7 +2409,26 @@ def verificar_conflicto_horario(fecha, hora_inicio, hora_fin, sesion_id=None):
     for sesion in sesiones_existentes:
         # Verificar si los horarios se solapan
         if (hora_inicio < sesion.hora_fin and hora_fin > sesion.hora_inicio):
-            return True, sesion
+            return True, {
+                'tipo': 'yogaterapia',
+                'sesion': sesion,
+                'mensaje': f'Ya existe una cita de yogaterapia de {sesion.hora_inicio.strftime("%H:%M")} a {sesion.hora_fin.strftime("%H:%M")} con {sesion.alumno.nombre} {sesion.alumno.apellido}'
+            }
+    
+    # 2. Verificar conflictos con clases grupales del horario semanal
+    horarios_semanal = HorarioSemanal.query.filter(
+        HorarioSemanal.dia_semana == dia_semana,
+        HorarioSemanal.activo == True
+    ).all()
+    
+    for horario in horarios_semanal:
+        # Verificar si los horarios se solapan
+        if (hora_inicio < horario.hora_fin and hora_fin > horario.hora_inicio):
+            return True, {
+                'tipo': 'clase_grupal',
+                'horario': horario,
+                'mensaje': f'Conflicto con clase grupal: {horario.clase.nombre} de {horario.hora_inicio.strftime("%H:%M")} a {horario.hora_fin.strftime("%H:%M")} ({horario.get_dia_display()})'
+            }
     
     return False, None
 

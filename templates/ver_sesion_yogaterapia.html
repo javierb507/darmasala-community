@@ -185,12 +185,15 @@
                 {% endif %}
 
                 <!-- Archivos adjuntos -->
-                {% if archivos %}
                 <div class="card mb-4">
-                    <div class="card-header bg-light">
+                    <div class="card-header bg-light d-flex justify-content-between align-items-center">
                         <h6 class="mb-0"><i class="fas fa-camera"></i> Archivos de la Sesión ({{ archivos|length }})</h6>
+                        <button class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#agregarArchivoModal">
+                            <i class="fas fa-plus"></i> Agregar Archivos
+                        </button>
                     </div>
                     <div class="card-body">
+                        {% if archivos %}
                         <div class="row">
                             {% for archivo in archivos %}
                             <div class="col-md-4 mb-3">
@@ -212,20 +215,33 @@
                                         <p class="card-text small text-muted">
                                             {{ (archivo.tamaño_bytes / 1024)|round(1) }} KB
                                         </p>
-                                        <a href="{{ url_for('uploaded_file', filename=archivo.ruta_archivo) }}" target="_blank" class="btn btn-sm btn-outline-primary me-1">
-                                            <i class="fas fa-external-link-alt"></i> Ver
-                                        </a>
-                                        <button class="btn btn-sm btn-outline-info" onclick="verArchivo('{{ url_for('uploaded_file', filename=archivo.ruta_archivo) }}', '{{ archivo.tipo_archivo }}')">
-                                            <i class="fas fa-eye"></i> Vista Previa
-                                        </button>
+                                        <div class="btn-group" role="group">
+                                            <a href="{{ url_for('uploaded_file', filename=archivo.ruta_archivo) }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                                <i class="fas fa-external-link-alt"></i> Ver
+                                            </a>
+                                            <button class="btn btn-sm btn-outline-info" onclick="verArchivo('{{ url_for('uploaded_file', filename=archivo.ruta_archivo) }}', '{{ archivo.tipo_archivo }}')">
+                                                <i class="fas fa-eye"></i> Vista Previa
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-danger" onclick="eliminarArchivo({{ archivo.id }})">
+                                                <i class="fas fa-trash"></i> Eliminar
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                             {% endfor %}
                         </div>
+                        {% else %}
+                        <div class="text-center text-muted py-4">
+                            <i class="fas fa-folder-open fa-3x mb-3"></i>
+                            <p>No hay archivos adjuntos a esta sesión</p>
+                            <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#agregarArchivoModal">
+                                <i class="fas fa-plus"></i> Agregar Primer Archivo
+                            </button>
+                        </div>
+                        {% endif %}
                     </div>
                 </div>
-                {% endif %}
 
                 <!-- Información de pago -->
                 {% if sesion.pagado %}
@@ -357,6 +373,43 @@ function verArchivo(url, tipo) {
     }
     
     modal.show();
-}
+    }
+    
+    function eliminarArchivo(archivoId) {
+        if (confirm('¿Estás seguro de que quieres eliminar este archivo?')) {
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '{{ url_for("eliminar_archivo_yogaterapia", sesion_id=sesion.id) }}/' + archivoId;
+            document.body.appendChild(form);
+            form.submit();
+        }
+    }
 </script>
+
+<!-- Modal para agregar archivos -->
+<div class="modal fade" id="agregarArchivoModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Agregar Archivos a la Sesión</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="{{ url_for('agregar_archivo_yogaterapia', sesion_id=sesion.id) }}" enctype="multipart/form-data">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="archivos" class="form-label">Seleccionar Archivos</label>
+                        <input type="file" class="form-control" id="archivos" name="archivos" multiple accept="image/*,video/*,audio/*,.pdf,.txt,.doc,.docx">
+                        <div class="form-text">Puedes seleccionar múltiples archivos. Formatos soportados: imágenes, videos, audio, PDF, documentos de texto.</div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-upload"></i> Subir Archivos
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 {% endblock %}
