@@ -41,7 +41,7 @@
                             </thead>
                             <tbody>
                                 {% for alumno in alumnos %}
-                                <tr>
+                                <tr class="clickable-row" data-href="{{ url_for('ver_alumno', alumno_id=alumno.id) }}" style="cursor: pointer;">
                                     <td>
                                         <div class="d-flex align-items-center">
                                             <div class="avatar-circle me-2">
@@ -236,6 +236,17 @@
     font-weight: 500;
 }
 
+.clickable-row:hover {
+    background-color: #f8f9fa !important;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: all 0.2s ease;
+}
+
+.clickable-row:hover td {
+    background-color: transparent !important;
+}
+
 .btn-group-vertical .btn {
     margin-bottom: 2px;
     width: 32px;
@@ -279,5 +290,22 @@ function reactivarAlumno(alumnoId) {
         });
     }
 }
+
+// Hacer las filas clickeables
+document.addEventListener('DOMContentLoaded', function() {
+    const rows = document.querySelectorAll('.clickable-row');
+    rows.forEach(row => {
+        row.addEventListener('click', function(e) {
+            // No redirigir si se hace click en un botón o enlace
+            if (e.target.closest('a, button')) {
+                return;
+            }
+            const href = this.getAttribute('data-href');
+            if (href) {
+                window.location.href = href;
+            }
+        });
+    });
+});
 </script>
 {% endblock %}

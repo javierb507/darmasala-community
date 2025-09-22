@@ -379,7 +379,7 @@ function verArchivo(url, tipo) {
         if (confirm('¿Estás seguro de que quieres eliminar este archivo?')) {
             const form = document.createElement('form');
             form.method = 'POST';
-            form.action = '{{ url_for("eliminar_archivo_yogaterapia", sesion_id=sesion.id) }}/' + archivoId;
+            form.action = '{{ url_for("eliminar_archivo_yogaterapia", sesion_id=sesion.id, archivo_id=0) }}'.replace('0', archivoId);
             document.body.appendChild(form);
             form.submit();
         }

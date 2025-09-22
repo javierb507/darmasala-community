@@ -1,7 +1,9 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, send_from_directory
+from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, send_from_directory, session
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import or_
 from datetime import datetime, date, timedelta
+from werkzeug.security import generate_password_hash, check_password_hash
+from functools import wraps
 import os
 
 # Initialize Flask app
@@ -11,7 +13,7 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'atma-suddhi-yoga-management-2025-secure-key')
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///yoga_school.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['UPLOAD_FOLDER'] = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'uploads')
+app.config['UPLOAD_FOLDER'] = os.path.dirname(os.path.abspath(__file__))
 
 # Initialize database
 db = SQLAlchemy(app)
@@ -56,6 +58,22 @@ class Usuario(db.Model):
     
     def can_manage_yogaterapia(self):
         return self.rol in ['admin', 'instructor']
+
+# Funciones de autenticación
+def login_required(f):
+    """Decorador para proteger rutas que requieren autenticación"""
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'user_id' not in session:
+            return redirect(url_for('login'))
+        return f(*args, **kwargs)
+    return decorated_function
+
+def get_current_user():
+    """Obtener el usuario actual de la sesión"""
+    if 'user_id' in session:
+        return Usuario.query.get(session['user_id'])
+    return None
 
 # Modelo de Alumno
 class Alumno(db.Model):
@@ -423,9 +441,44 @@ class ClasePersonal(db.Model):
     def __repr__(self):
         return f'<ClasePersonal {self.alumno.nombre} - {self.fecha_clase}>'
 
+# RUTAS DE AUTENTICACIÓN
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    """Página de login"""
+    if request.method == 'POST':
+        username = request.form.get('username')
+        password = request.form.get('password')
+        
+        user = Usuario.query.filter_by(username=username, activo=True).first()
+        
+        if user and check_password_hash(user.password_hash, password):
+            session['user_id'] = user.id
+            session['username'] = user.username
+            session['rol'] = user.rol
+            
+            # Actualizar último acceso
+            user.ultimo_acceso = datetime.utcnow()
+            db.session.commit()
+            
+            flash(f'¡Bienvenido, {user.nombre}!', 'success')
+            return redirect(url_for('index'))
+        else:
+            flash('Usuario o contraseña incorrectos', 'error')
+    
+    return render_template('auth/login.html')
+
+@app.route('/logout')
+def logout():
+    """Cerrar sesión"""
+    session.clear()
+    flash('Has cerrado sesión correctamente', 'info')
+    return redirect(url_for('login'))
+
 # RUTAS PRINCIPALES
 
 @app.route('/')
+@login_required
 def index():
     # Dashboard con próximas citas y estadísticas
     proximas_citas = obtener_proximas_citas(5)
@@ -441,6 +494,7 @@ def index():
                          today=datetime.now().date())
 
 @app.route('/alumnos')
+@login_required
 def alumnos():
     # Obtener parámetros de búsqueda y ordenación
     buscar = request.args.get('buscar', '').strip()
@@ -542,6 +596,7 @@ def alumnos():
                          current_year=current_year)
 
 @app.route('/alumnos/nuevo', methods=['GET', 'POST'])
+@login_required
 def nuevo_alumno():
     if request.method == 'POST':
         try:
@@ -571,6 +626,7 @@ def nuevo_alumno():
     return render_template('nuevo_alumno.html')
 
 @app.route('/alumnos/<int:alumno_id>')
+@login_required
 def ver_alumno(alumno_id):
     alumno = Alumno.query.get_or_404(alumno_id)
     pagos = Pago.query.filter_by(alumno_id=alumno_id).order_by(Pago.fecha_creacion.desc()).all()
@@ -592,10 +648,11 @@ def ver_alumno(alumno_id):
     asistencias_presentes = sum(1 for a in asistencias if a.presente)
     porcentaje_asistencia = round((asistencias_presentes / total_asistencias * 100), 1) if total_asistencias > 0 else 0
     
-    # Las sesiones de yogaterapia ya no están asociadas a alumnos específicos
-    sesiones_yogaterapia = []
+    # Obtener sesiones de yogaterapia del alumno
+    sesiones_yogaterapia = SesionYogaterapia.query.filter_by(alumno_id=alumno_id)\
+        .order_by(SesionYogaterapia.fecha_sesion.desc()).all()
     
-    return render_template('ver_alumno_compacto.html', 
+    return render_template('ver_alumno.html', 
                          alumno=alumno, 
                          pagos=pagos, 
                          matricula_year=matricula_year,
@@ -606,6 +663,7 @@ def ver_alumno(alumno_id):
                          sesiones_yogaterapia=sesiones_yogaterapia)
 
 @app.route('/alumnos/<int:alumno_id>/editar', methods=['GET', 'POST'])
+@login_required
 def editar_alumno(alumno_id):
     alumno = Alumno.query.get_or_404(alumno_id)
     
@@ -630,6 +688,7 @@ def editar_alumno(alumno_id):
     return render_template('editar_alumno.html', alumno=alumno)
 
 @app.route('/alumnos/<int:alumno_id>/eliminar', methods=['GET', 'POST'])
+@login_required
 def eliminar_alumno(alumno_id):
     alumno = Alumno.query.get_or_404(alumno_id)
     if request.method == 'POST':
@@ -648,6 +707,7 @@ def eliminar_alumno(alumno_id):
             return redirect(url_for('alumnos'))
 
 @app.route('/alumnos/<int:alumno_id>/reactivar', methods=['POST'])
+@login_required
 def reactivar_alumno(alumno_id):
     try:
         alumno = Alumno.query.get_or_404(alumno_id)
@@ -660,6 +720,7 @@ def reactivar_alumno(alumno_id):
 
 # Rutas para Pagos
 @app.route('/alumnos/<int:alumno_id>/pago', methods=['GET', 'POST'])
+@login_required
 def agregar_pago(alumno_id):
     alumno = Alumno.query.get_or_404(alumno_id)
 
@@ -764,6 +825,7 @@ def agregar_pago(alumno_id):
                          matricula_year_numeric=matricula_year_numeric)
 
 @app.route('/pagos/<int:pago_id>/editar', methods=['GET', 'POST'])
+@login_required
 def editar_pago(pago_id):
     """Editar un pago existente"""
     pago = Pago.query.get_or_404(pago_id)
@@ -843,6 +905,7 @@ def editar_pago(pago_id):
                          matricula_year_numeric=matricula_year_numeric)
 
 @app.route('/pagos/<int:pago_id>/eliminar', methods=['POST'])
+@login_required
 def eliminar_pago(pago_id):
     """Eliminar un pago"""
     try:
@@ -872,21 +935,25 @@ def eliminar_pago(pago_id):
 
 # Rutas para Clases y Horarios
 @app.route('/clases')
+@login_required
 def clases():
     clases = Clase.query.filter_by(activa=True).all()
     return render_template('clases.html', clases=clases)
 
 @app.route('/horarios')
+@login_required
 def horarios():
     horarios = HorarioSemanal.query.filter_by(activo=True).order_by(HorarioSemanal.dia_semana, HorarioSemanal.hora_inicio).all()
     return render_template('horarios.html', horarios=horarios)
 
 @app.route('/horarios/calendario')
+@login_required
 def horarios_calendario():
     horarios = HorarioSemanal.query.filter_by(activo=True).order_by(HorarioSemanal.dia_semana, HorarioSemanal.hora_inicio).all()
     return render_template('horarios_calendario.html', horarios=horarios)
 
 @app.route('/horarios/nuevo', methods=['GET', 'POST'])
+@login_required
 def nuevo_horario():
     """Crear nuevo horario semanal"""
     if request.method == 'POST':
@@ -911,6 +978,7 @@ def nuevo_horario():
     return render_template('nuevo_horario.html', clases=clases)
 
 @app.route('/horarios/<int:horario_id>/editar', methods=['GET', 'POST'])
+@login_required
 def editar_horario(horario_id):
     """Editar horario existente"""
     horario = HorarioSemanal.query.get_or_404(horario_id)
@@ -935,6 +1003,7 @@ def editar_horario(horario_id):
     return render_template('editar_horario.html', horario=horario, clases=clases)
 
 @app.route('/horarios/<int:horario_id>/eliminar')
+@login_required
 def eliminar_horario(horario_id):
     """Eliminar horario (desactivar)"""
     horario = HorarioSemanal.query.get_or_404(horario_id)
@@ -944,6 +1013,7 @@ def eliminar_horario(horario_id):
     return redirect(url_for('horarios'))
 
 @app.route('/calendario')
+@login_required
 def calendario_unificado():
     """Calendario unificado con actividades periódicas y citas individuales"""
     # Obtener parámetros de fecha
@@ -1035,6 +1105,7 @@ def calendario_semanal(año, mes):
                          vista='semana')
 
 @app.route('/calendario/anual')
+@login_required
 def calendario_anual():
     """Vista de calendario anual para agendar sesiones individuales"""
     año = request.args.get('año', datetime.now().year, type=int)
@@ -1094,6 +1165,7 @@ def calendario_anual():
                          today=today)
 
 @app.route('/horarios/historico')
+@login_required
 def horarios_historico():
     """Vista del histórico de horarios y cambios"""
     # Obtener parámetros de filtro
@@ -1120,6 +1192,7 @@ def horarios_historico():
                          clase_id=clase_id)
 
 @app.route('/asistencias/historico')
+@login_required
 def asistencias_historico():
     """Vista del histórico de asistencias por clase"""
     # Obtener parámetros de filtro
@@ -1179,18 +1252,21 @@ def asistencias_historico():
 
 # Rutas para Yogaterapia
 @app.route('/yogaterapia')
+@login_required
 def yogaterapia():
     """Página principal de yogaterapia (sesiones de yogaterapia)"""
     sesiones = SesionYogaterapia.query.order_by(SesionYogaterapia.fecha_sesion.desc()).all()
     return render_template('yogaterapia.html', sesiones=sesiones)
 
 @app.route('/yogaterapia/nueva')
+@login_required
 def nueva_yogaterapia():
     """Formulario para nueva sesión de yogaterapia"""
     alumnos = Alumno.query.filter_by(activo=True).order_by(Alumno.nombre, Alumno.apellido).all()
     return render_template('nueva_yogaterapia.html', alumnos=alumnos)
 
 @app.route('/yogaterapia/procesar', methods=['POST'])
+@login_required
 def procesar_yogaterapia_general():
     """Procesar nueva sesión de yogaterapia general"""
     try:
@@ -1261,7 +1337,7 @@ def procesar_yogaterapia_general():
                 archivo_db = ArchivoYogaterapia(
                     sesion_yogaterapia_id=sesion.id,
                     nombre_archivo=archivo.filename,
-                    ruta_archivo=filepath,
+                    ruta_archivo=f'yogaterapia/{sesion.id}/{filename}',
                     tipo_archivo=filename.split('.')[-1].lower() if '.' in filename else 'unknown',
                     tamaño_bytes=os.path.getsize(filepath) if os.path.exists(filepath) else 0
                 )
@@ -1289,6 +1365,7 @@ def procesar_yogaterapia_general():
         return redirect(url_for('nueva_yogaterapia'))
 
 @app.route('/yogaterapia/<int:sesion_id>')
+@login_required
 def ver_sesion_yogaterapia(sesion_id):
     """Ver detalles de una sesión de yogaterapia"""
     sesion = SesionYogaterapia.query.get_or_404(sesion_id)
@@ -1296,6 +1373,7 @@ def ver_sesion_yogaterapia(sesion_id):
     return render_template('ver_sesion_yogaterapia.html', sesion=sesion, archivos=archivos)
 
 @app.route('/yogaterapia/<int:sesion_id>/editar', methods=['GET', 'POST'])
+@login_required
 def editar_sesion_yogaterapia(sesion_id):
     """Editar una sesión de yogaterapia"""
     sesion = SesionYogaterapia.query.get_or_404(sesion_id)
@@ -1358,7 +1436,7 @@ def editar_sesion_yogaterapia(sesion_id):
                     archivo_db = ArchivoYogaterapia(
                         sesion_yogaterapia_id=sesion.id,
                         nombre_archivo=archivo.filename,
-                        ruta_archivo=filepath,
+                        ruta_archivo=f'yogaterapia/{sesion.id}/{filename}',
                         tipo_archivo=filename.split('.')[-1].lower() if '.' in filename else 'unknown',
                         tamaño_bytes=os.path.getsize(filepath) if os.path.exists(filepath) else 0
                     )
@@ -1376,6 +1454,7 @@ def editar_sesion_yogaterapia(sesion_id):
     return render_template('editar_sesion_yogaterapia.html', sesion=sesion, archivos=archivos)
 
 @app.route('/api/citas/<fecha>')
+@login_required
 def obtener_citas_fecha(fecha):
     """API para obtener citas de una fecha específica (para el calendario)"""
     try:
@@ -1432,6 +1511,7 @@ def obtener_citas_fecha(fecha):
         return jsonify({'error': 'Formato de fecha inválido'}), 400
 
 @app.route('/api/verificar-conflicto', methods=['POST'])
+@login_required
 def verificar_conflicto_api():
     """API para verificar conflictos de horario en tiempo real"""
     try:
@@ -1452,6 +1532,7 @@ def verificar_conflicto_api():
         return jsonify({'error': str(e)}), 400
 
 @app.route('/yogaterapia/<int:sesion_id>/archivos/eliminar/<int:archivo_id>', methods=['POST'])
+@login_required
 def eliminar_archivo_yogaterapia(sesion_id, archivo_id):
     """Eliminar un archivo de yogaterapia"""
     try:
@@ -1476,6 +1557,7 @@ def eliminar_archivo_yogaterapia(sesion_id, archivo_id):
         return redirect(url_for('ver_sesion_yogaterapia', sesion_id=sesion_id))
 
 @app.route('/yogaterapia/<int:sesion_id>/archivos/agregar', methods=['POST'])
+@login_required
 def agregar_archivo_yogaterapia(sesion_id):
     """Agregar archivos a una sesión de yogaterapia"""
     try:
@@ -1502,7 +1584,7 @@ def agregar_archivo_yogaterapia(sesion_id):
                 archivo_db = ArchivoYogaterapia(
                     sesion_yogaterapia_id=sesion.id,
                     nombre_archivo=archivo.filename,
-                    ruta_archivo=filepath,
+                    ruta_archivo=f'yogaterapia/{sesion.id}/{filename}',
                     tipo_archivo=filename.split('.')[-1].lower() if '.' in filename else 'unknown',
                     tamaño_bytes=os.path.getsize(filepath) if os.path.exists(filepath) else 0
                 )
@@ -1518,6 +1600,7 @@ def agregar_archivo_yogaterapia(sesion_id):
         return redirect(url_for('ver_sesion_yogaterapia', sesion_id=sesion_id))
 
 @app.route('/yogaterapia/<int:sesion_id>/eliminar', methods=['POST'])
+@login_required
 def eliminar_sesion_yogaterapia(sesion_id):
     """Eliminar una sesión de yogaterapia"""
     sesion = SesionYogaterapia.query.get_or_404(sesion_id)
@@ -1544,6 +1627,7 @@ def eliminar_sesion_yogaterapia(sesion_id):
         return redirect(url_for('yogaterapia'))
 
 @app.route('/yogaterapia/<int:sesion_id>/marcar_pagado', methods=['POST'])
+@login_required
 def marcar_sesion_pagada(sesion_id):
     """Marcar una sesión como pagada"""
     sesion = SesionYogaterapia.query.get_or_404(sesion_id)
@@ -1566,6 +1650,7 @@ def marcar_sesion_pagada(sesion_id):
     return redirect(url_for('yogaterapia'))
 
 @app.route('/alumnos/<int:alumno_id>/yogaterapia/nueva', methods=['GET', 'POST'])
+@login_required
 def nueva_yogaterapia_alumno(alumno_id):
     alumno = Alumno.query.get_or_404(alumno_id)
     
@@ -1627,7 +1712,7 @@ def nueva_yogaterapia_alumno(alumno_id):
                     archivo_db = ArchivoYogaterapia(
                         sesion_yogaterapia_id=sesion.id,
                         nombre_archivo=archivo.filename,
-                        ruta_archivo=filepath,
+                        ruta_archivo=f'yogaterapia/{sesion.id}/{filename}',
                         tipo_archivo=filename.split('.')[-1].lower() if '.' in filename else 'unknown',
                         tamaño_bytes=os.path.getsize(filepath) if os.path.exists(filepath) else 0
                     )
@@ -1659,6 +1744,7 @@ def nueva_yogaterapia_alumno(alumno_id):
 # RUTAS PARA GESTIÓN ECONÓMICA
 
 @app.route('/economia')
+@login_required
 def economia():
     """Dashboard principal de contabilidad con períodos"""
     # Obtener parámetros de período
@@ -1758,6 +1844,7 @@ def economia():
                          gastos_detalle=gastos_detalle)
 
 @app.route('/gastos-mensuales')
+@login_required
 def gastos_mensuales():
     """Vista de gastos mensuales"""
     gastos = GastoMensual.query.order_by(GastoMensual.fecha.desc()).all()
@@ -1787,6 +1874,7 @@ def gastos_mensuales():
     return render_template('gastos_mensuales.html', gastos=gastos, ingresos_mes=ingresos_mes, gastos_mes=gastos_mes, balance_mes=balance_mes)
 
 @app.route('/agregar_gasto_mensual', methods=['POST'])
+@login_required
 def agregar_gasto_mensual():
     """Agregar nuevo gasto mensual"""
     try:
@@ -1811,18 +1899,21 @@ def agregar_gasto_mensual():
         return redirect(url_for('gastos_mensuales'))
 
 @app.route('/proveedores')
+@login_required
 def proveedores():
     """Lista de proveedores"""
     proveedores = Proveedor.query.filter_by(activo=True).all()
     return render_template('economia/proveedores.html', proveedores=proveedores)
 
 @app.route('/facturas')
+@login_required
 def facturas():
     """Lista de facturas"""
     facturas = FacturaProveedor.query.order_by(FacturaProveedor.fecha_factura.desc()).all()
     return render_template('economia/facturas.html', facturas=facturas)
 
 @app.route('/facturas/nueva', methods=['GET', 'POST'])
+@login_required
 def nueva_factura():
     """Crear nueva factura"""
     if request.method == 'POST':
@@ -1873,6 +1964,7 @@ def nueva_factura():
                          categorias=categorias)
 
 @app.route('/facturas/<int:factura_id>/editar', methods=['GET', 'POST'])
+@login_required
 def editar_factura(factura_id):
     """Editar factura existente"""
     factura = FacturaProveedor.query.get_or_404(factura_id)
@@ -1912,6 +2004,7 @@ def editar_factura(factura_id):
                          categorias=categorias)
 
 @app.route('/facturas/<int:factura_id>/marcar_pagada', methods=['POST'])
+@login_required
 def marcar_factura_pagada(factura_id):
     """Marcar factura como pagada"""
     try:
@@ -1929,6 +2022,7 @@ def marcar_factura_pagada(factura_id):
     return redirect(url_for('facturas'))
 
 @app.route('/facturas/<int:factura_id>/eliminar', methods=['POST'])
+@login_required
 def eliminar_factura(factura_id):
     """Eliminar factura"""
     try:
@@ -1943,12 +2037,14 @@ def eliminar_factura(factura_id):
     return redirect(url_for('facturas'))
 
 @app.route('/gastos-fijos')
+@login_required
 def gastos_fijos():
     """Lista de gastos fijos"""
     gastos = GastoFijo.query.filter_by(activo=True).order_by(GastoFijo.nombre).all()
     return render_template('economia/gastos_fijos.html', gastos=gastos)
 
 @app.route('/gastos-fijos/nuevo', methods=['GET', 'POST'])
+@login_required
 def nuevo_gasto_fijo():
     """Crear nuevo gasto fijo"""
     if request.method == 'POST':
@@ -1975,9 +2071,11 @@ def nuevo_gasto_fijo():
             db.session.rollback()
     
     categorias = CategoriaGasto.query.filter_by(activo=True).all()
-    return render_template('economia/nuevo_gasto_fijo.html', categorias=categorias)
+    fecha_hoy = date.today()
+    return render_template('economia/nuevo_gasto_fijo.html', categorias=categorias, fecha_hoy=fecha_hoy)
 
 @app.route('/gastos-fijos/<int:gasto_id>/editar', methods=['GET', 'POST'])
+@login_required
 def editar_gasto_fijo(gasto_id):
     """Editar gasto fijo existente"""
     gasto = GastoFijo.query.get_or_404(gasto_id)
@@ -2007,6 +2105,7 @@ def editar_gasto_fijo(gasto_id):
     return render_template('economia/editar_gasto_fijo.html', gasto=gasto, categorias=categorias)
 
 @app.route('/gastos-fijos/<int:gasto_id>/eliminar', methods=['POST'])
+@login_required
 def eliminar_gasto_fijo(gasto_id):
     """Eliminar gasto fijo"""
     try:
@@ -2021,6 +2120,7 @@ def eliminar_gasto_fijo(gasto_id):
     return redirect(url_for('gastos_fijos'))
 
 @app.route('/proveedores/nuevo', methods=['GET', 'POST'])
+@login_required
 def nuevo_proveedor():
     """Crear nuevo proveedor"""
     if request.method == 'POST':
@@ -2047,6 +2147,7 @@ def nuevo_proveedor():
     return render_template('economia/nuevo_proveedor.html')
 
 @app.route('/proveedores/<int:proveedor_id>/editar', methods=['GET', 'POST'])
+@login_required
 def editar_proveedor(proveedor_id):
     """Editar proveedor existente"""
     proveedor = Proveedor.query.get_or_404(proveedor_id)
@@ -2073,6 +2174,7 @@ def editar_proveedor(proveedor_id):
     return render_template('economia/editar_proveedor.html', proveedor=proveedor)
 
 @app.route('/proveedores/<int:proveedor_id>/eliminar', methods=['POST'])
+@login_required
 def eliminar_proveedor(proveedor_id):
     """Eliminar proveedor"""
     try:
@@ -2089,6 +2191,7 @@ def eliminar_proveedor(proveedor_id):
 # RUTAS DE EXPORTACIÓN Y REPORTES
 
 @app.route('/exportar/<tipo>')
+@login_required
 def exportar_datos(tipo):
     """Exportar datos a Excel"""
     try:
@@ -2111,6 +2214,7 @@ def exportar_datos(tipo):
         return redirect(url_for('economia'))
 
 @app.route('/reporte-contabilidad-pdf')
+@login_required
 def reporte_contabilidad_pdf():
     """Generar reporte de contabilidad en PDF"""
     try:
@@ -2155,6 +2259,7 @@ def reporte_contabilidad_pdf():
 # RUTAS DE CONFIGURACIÓN
 
 @app.route('/configuracion')
+@login_required
 def configuracion():
     configuraciones = Configuracion.query.all()
     config_dict = {config.clave: config.valor for config in configuraciones}
@@ -2162,6 +2267,7 @@ def configuracion():
     return render_template('configuracion.html', config=config_dict, clases=clases)
 
 @app.route('/configuracion/guardar', methods=['POST'])
+@login_required
 def guardar_configuracion():
     try:
         # Manejar subida de logo
@@ -2246,12 +2352,14 @@ def guardar_configuracion():
 # RUTAS DE GESTIÓN DE TIPOS DE CLASE
 
 @app.route('/configuracion/tipos-clase')
+@login_required
 def tipos_clase():
     """Vista de gestión de tipos de clase"""
     tipos = TipoClase.query.order_by(TipoClase.orden, TipoClase.nombre).all()
     return render_template('configuracion/tipos_clase.html', tipos=tipos)
 
 @app.route('/configuracion/tipos-clase/nuevo', methods=['GET', 'POST'])
+@login_required
 def nuevo_tipo_clase():
     """Crear nuevo tipo de clase"""
     if request.method == 'POST':
@@ -2276,6 +2384,7 @@ def nuevo_tipo_clase():
     return render_template('configuracion/nuevo_tipo_clase.html')
 
 @app.route('/configuracion/tipos-clase/<int:tipo_id>/editar', methods=['GET', 'POST'])
+@login_required
 def editar_tipo_clase(tipo_id):
     """Editar tipo de clase existente"""
     tipo = TipoClase.query.get_or_404(tipo_id)
@@ -2300,6 +2409,7 @@ def editar_tipo_clase(tipo_id):
     return render_template('configuracion/editar_tipo_clase.html', tipo=tipo)
 
 @app.route('/configuracion/tipos-clase/<int:tipo_id>/toggle', methods=['POST'])
+@login_required
 def toggle_tipo_clase(tipo_id):
     """Activar/desactivar tipo de clase"""
     try:
@@ -2316,11 +2426,13 @@ def toggle_tipo_clase(tipo_id):
 # RUTAS DE BACKUP Y EXPORTACIÓN
 
 @app.route('/backup')
+@login_required
 def backup():
     """Página de gestión de backups"""
     return render_template('backup.html')
 
 @app.route('/backup/crear', methods=['POST'])
+@login_required
 def crear_backup():
     """Crear backup de la base de datos"""
     try:
@@ -2348,6 +2460,7 @@ def crear_backup():
     return redirect(url_for('backup'))
 
 @app.route('/backup/restaurar', methods=['POST'])
+@login_required
 def restaurar_backup():
     """Restaurar backup de la base de datos"""
     try:
@@ -2381,6 +2494,7 @@ def restaurar_backup():
     return redirect(url_for('backup'))
 
 @app.route('/exportar')
+@login_required
 def exportar():
     """Página principal de exportación"""
     return render_template('exportar.html')
@@ -2500,6 +2614,7 @@ def inicializar_categorias_gastos():
 # RUTAS API
 
 @app.route('/api/stats')
+@login_required
 def api_stats():
     """API para obtener estadísticas del sistema"""
     try:
@@ -2516,6 +2631,7 @@ def api_stats():
         return jsonify({'success': False, 'error': str(e)}), 500
 
 @app.route('/api/clases')
+@login_required
 def api_clases():
     """API para obtener todas las clases"""
     try:
@@ -2550,6 +2666,7 @@ def api_clases():
         return jsonify({'success': False, 'error': str(e)}), 500
 
 @app.route('/api/clases/<int:clase_id>/toggle', methods=['POST'])
+@login_required
 def api_toggle_clase(clase_id):
     """API para activar/desactivar una clase"""
     try:
@@ -2566,6 +2683,7 @@ def api_toggle_clase(clase_id):
         return jsonify({'success': False, 'error': str(e)}), 500
 
 @app.route('/api/backup', methods=['POST'])
+@login_required
 def api_backup():
     """API para crear backup de la base de datos"""
     try:
@@ -2590,6 +2708,7 @@ def api_backup():
 # RUTAS DE GESTIÓN DE CLASES
 
 @app.route('/configuracion/clases/nueva', methods=['GET', 'POST'])
+@login_required
 def nueva_clase():
     """Crear nueva clase"""
     if request.method == 'POST':
@@ -2614,6 +2733,7 @@ def nueva_clase():
     return render_template('configuracion/nueva_clase.html')
 
 @app.route('/configuracion/clases/<int:clase_id>/eliminar')
+@login_required
 def eliminar_clase(clase_id):
     """Eliminar clase (desactivar)"""
     clase = Clase.query.get_or_404(clase_id)
@@ -2623,6 +2743,7 @@ def eliminar_clase(clase_id):
     return redirect(url_for('configuracion'))
 
 @app.route('/configuracion/clases/<int:clase_id>/editar', methods=['GET', 'POST'])
+@login_required
 def editar_clase(clase_id):
     """Editar clase existente"""
     clase = Clase.query.get_or_404(clase_id)
@@ -2649,12 +2770,14 @@ def editar_clase(clase_id):
 # RUTAS PARA GESTIÓN DE USUARIOS
 
 @app.route('/usuarios')
+@login_required
 def usuarios():
     """Lista de usuarios del sistema"""
     usuarios = Usuario.query.order_by(Usuario.fecha_creacion.desc()).all()
     return render_template('usuarios.html', usuarios=usuarios)
 
 @app.route('/usuarios/nuevo', methods=['GET', 'POST'])
+@login_required
 def nuevo_usuario():
     """Crear nuevo usuario"""
     if request.method == 'POST':
@@ -2693,12 +2816,14 @@ def nuevo_usuario():
     return render_template('nuevo_usuario.html')
 
 @app.route('/usuarios/<int:usuario_id>')
+@login_required
 def ver_usuario(usuario_id):
     """Ver detalles de un usuario"""
     usuario = Usuario.query.get_or_404(usuario_id)
     return render_template('ver_usuario.html', usuario=usuario)
 
 @app.route('/usuarios/<int:usuario_id>/editar', methods=['GET', 'POST'])
+@login_required
 def editar_usuario(usuario_id):
     """Editar usuario"""
     usuario = Usuario.query.get_or_404(usuario_id)
@@ -2748,6 +2873,7 @@ def editar_usuario(usuario_id):
     return render_template('editar_usuario.html', usuario=usuario)
 
 @app.route('/usuarios/<int:usuario_id>/eliminar', methods=['POST'])
+@login_required
 def eliminar_usuario(usuario_id):
     """Eliminar usuario (desactivar)"""
     usuario = Usuario.query.get_or_404(usuario_id)
@@ -2763,6 +2889,7 @@ def eliminar_usuario(usuario_id):
     return redirect(url_for('usuarios'))
 
 @app.route('/usuarios/<int:usuario_id>/reactivar', methods=['POST'])
+@login_required
 def reactivar_usuario(usuario_id):
     """Reactivar usuario"""
     usuario = Usuario.query.get_or_404(usuario_id)
@@ -2786,6 +2913,7 @@ def uploaded_file(filename):
 # Ruta para calendario de selección de citas
 @app.route('/calendario_seleccion_citas')
 @app.route('/calendario_seleccion_citas/<int:alumno_id>')
+@login_required
 def calendario_seleccion_citas(alumno_id=None):
     """Mostrar calendario interactivo para seleccionar fecha y hora de cita"""
     alumno = None
@@ -3131,17 +3259,25 @@ if __name__ == '__main__':
         # Crear usuario administrador por defecto si no existe
         admin_existente = Usuario.query.filter_by(username='admin').first()
         if not admin_existente:
-            import hashlib
             admin = Usuario(
                 username='admin',
                 email='admin@atmasuddhi.es',
-                password_hash=hashlib.sha256('admin123'.encode()).hexdigest(),
+                password_hash=generate_password_hash('AtmaSuddhi74'),
                 nombre='Administrador',
                 apellido='Sistema',
                 rol='admin'
             )
             db.session.add(admin)
             db.session.commit()
-            print("Usuario administrador creado: admin / admin123")
+            print("Usuario administrador creado: admin / AtmaSuddhi74")
+    
+    @app.context_processor
+    def inject_config():
+        """Inyectar configuración en todos los templates"""
+        config = {}
+        configuraciones = Configuracion.query.all()
+        for conf in configuraciones:
+            config[conf.clave] = conf.valor
+        return dict(config=config)
     
     app.run(debug=True, port=5000)
