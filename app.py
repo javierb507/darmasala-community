@@ -6,14 +6,27 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
 import os
 
+# Configurar driver MySQL para producción
+if os.environ.get('FLASK_ENV') == 'production':
+    import pymysql
+    pymysql.install_as_MySQLdb()
+
 # Initialize Flask app
 app = Flask(__name__)
 
 # Configuration
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'atma-suddhi-yoga-management-2025-secure-key')
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///yoga_school.db'
+
+# Configuración de base de datos para producción
+if os.environ.get('FLASK_ENV') == 'production':
+    # Para Hostinger con MySQL
+    app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'mysql://usuario:password@localhost/nombre_bd')
+else:
+    # Para desarrollo local
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///yoga_school.db'
+
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['UPLOAD_FOLDER'] = os.path.dirname(os.path.abspath(__file__))
+app.config['UPLOAD_FOLDER'] = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'uploads')
 
 # Initialize database
 db = SQLAlchemy(app)
@@ -74,6 +87,36 @@ def get_current_user():
     if 'user_id' in session:
         return Usuario.query.get(session['user_id'])
     return None
+
+def obtener_sutra_semanal():
+    """Obtener el sutra de la semana actual"""
+    # Obtener el número de semana del año
+    from datetime import datetime
+    semana_actual = datetime.now().isocalendar()[1]
+    
+    # Obtener el sutra correspondiente a esta semana
+    total_sutras = Sutra.query.count()
+    if total_sutras == 0:
+        return None
+    
+    # Usar el número de semana para seleccionar un sutra
+    indice_sutra = (semana_actual - 1) % total_sutras
+    sutra = Sutra.query.offset(indice_sutra).first()
+    
+    if sutra:
+        # Formatear el número del sutra como I.1, I.2, etc.
+        if '.' in str(sutra.numero):
+            # Si ya tiene formato I.1, mantenerlo
+            sutra.numero_formateado = sutra.numero
+        else:
+            # Si es solo un número, formatearlo como I.X
+            try:
+                num = int(sutra.numero)
+                sutra.numero_formateado = f"I.{num}"
+            except:
+                sutra.numero_formateado = sutra.numero
+    
+    return sutra
 
 # Modelo de Alumno
 class Alumno(db.Model):
@@ -441,6 +484,19 @@ class ClasePersonal(db.Model):
     def __repr__(self):
         return f'<ClasePersonal {self.alumno.nombre} - {self.fecha_clase}>'
 
+# Modelo de Sutra
+class Sutra(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    numero = db.Column(db.String(20), nullable=False)  # I.1, I.2, etc.
+    sanscrito = db.Column(db.Text, nullable=False)  # Texto en sánscrito
+    transliteracion = db.Column(db.Text, nullable=False)  # Transliteración
+    traduccion = db.Column(db.Text, nullable=False)  # Traducción al español
+    libro = db.Column(db.String(50), nullable=False)  # Samadhi Pada, Sadhana Pada, etc.
+    fecha_creacion = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    def __repr__(self):
+        return f'<Sutra {self.numero}: {self.traduccion[:50]}...>'
+
 # RUTAS DE AUTENTICACIÓN
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -466,7 +522,9 @@ def login():
         else:
             flash('Usuario o contraseña incorrectos', 'error')
     
-    return render_template('auth/login.html')
+    # Obtener sutra semanal para mostrar en login
+    sutra_semanal = obtener_sutra_semanal()
+    return render_template('auth/login.html', sutra_semanal=sutra_semanal)
 
 @app.route('/logout')
 def logout():
@@ -487,10 +545,14 @@ def index():
         SesionYogaterapia.fecha_sesion == datetime.now().date()
     ).count()
     
+    # Sutra semanal
+    sutra_semanal = obtener_sutra_semanal()
+    
     return render_template('index.html', 
                          proximas_citas=proximas_citas,
                          total_alumnos=total_alumnos,
                          total_sesiones_hoy=total_sesiones_hoy,
+                         sutra_semanal=sutra_semanal,
                          today=datetime.now().date())
 
 @app.route('/alumnos')
