@@ -180,12 +180,21 @@ def crear_clases_completas():
     
     clases = []
     for clase_data in clases_data:
-        clase = Clase(**clase_data)
-        db.session.add(clase)
-        clases.append(clase)
+        # Verificar si la clase ya existe
+        clase_existente = Clase.query.filter_by(nombre=clase_data['nombre']).first()
+        if clase_existente:
+            # Actualizar clase existente
+            for key, value in clase_data.items():
+                setattr(clase_existente, key, value)
+            clases.append(clase_existente)
+        else:
+            # Crear nueva clase
+            clase = Clase(**clase_data)
+            db.session.add(clase)
+            clases.append(clase)
     
     db.session.commit()
-    print(f"✅ {len(clases)} clases creadas")
+    print(f"✅ {len(clases)} clases procesadas (creadas/actualizadas)")
     return clases
 
 def crear_horarios_semanales(clases):
