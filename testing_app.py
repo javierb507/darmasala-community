@@ -273,16 +273,73 @@ def crear_alumnos_diversos():
     nombres_m = ['Carlos', 'Miguel', 'Antonio', 'José', 'Francisco', 'David', 'Juan', 'Pedro', 'Luis', 'Alejandro', 'Rafael', 'Fernando']
     apellidos = ['García', 'Rodríguez', 'González', 'Fernández', 'López', 'Martínez', 'Sánchez', 'Pérez', 'Gómez', 'Martín', 'Jiménez', 'Ruiz', 'Hernández', 'Díaz', 'Moreno']
     
+    ciudades_madrid = ['Madrid', 'Alcalá de Henares', 'Getafe', 'Móstoles', 'Fuenlabrada', 'Leganés', 'Alcorcón', 'Parla', 'Torrejón de Ardoz', 'Alcobendas', 'Las Rozas', 'Pozuelo de Alarcón', 'San Sebastián de los Reyes', 'Rivas-Vaciamadrid', 'Majadahonda']
+    
+    medicamentos_comunes = [
+        'Ninguno',
+        'Ibuprofeno ocasional',
+        'Paracetamol para dolores',
+        'Omeprazol para el estómago',
+        'Antihistamínicos para alergia',
+        'Vitamina D',
+        'Magnesio',
+        'Suplemento de hierro',
+        'Antidepresivos',
+        'Anticonceptivos orales',
+        'Medicación para la tensión',
+        'Medicación para tiroides'
+    ]
+    
+    alergias_comunes = [
+        'Ninguna',
+        'Polen',
+        'Ácaros del polvo',
+        'Frutos secos',
+        'Látex',
+        'Medicamentos (aspirina)',
+        'Pelo de animales',
+        'Mariscos',
+        'Níquel',
+        'Perfumes y productos químicos'
+    ]
+    
+    estados_fisicos = [
+        'Buena forma física general',
+        'Sedentario, empezando actividad física',
+        'Forma física regular, practica deporte ocasionalmente',
+        'Muy activo, practica varios deportes',
+        'En recuperación de lesión',
+        'Problemas de espalda recurrentes',
+        'Artritis leve en articulaciones',
+        'Fibromialgia controlada',
+        'Estrés y tensión muscular',
+        'Embarazada (segundo trimestre)',
+        'Postparto reciente',
+        'Menopausia con sofocos',
+        'Hipertensión controlada',
+        'Ansiedad y estrés laboral',
+        'Insomnio frecuente'
+    ]
+    
     current_year = date.today().year
     current_month = date.today().month
     
     alumnos = []
+    
+    # Función auxiliar para generar IBAN español
+    def generar_iban_espanol():
+        banco = random.randint(1000, 9999)
+        sucursal = random.randint(1000, 9999)
+        dc = random.randint(10, 99)
+        cuenta = random.randint(1000000000, 9999999999)
+        return f"ES{dc:02d} {banco:04d} {sucursal:04d} {dc:02d} {cuenta:010d}"
     
     # 1. Alumnos AL CORRIENTE (8 alumnos)
     for i in range(8):
         nombre = random.choice(nombres_f + nombres_m)
         apellido = random.choice(apellidos)
         tipo_cuota = random.choice(['1_clase_semanal', '2_clases_semanal', 'plana'])
+        ciudad = random.choice(ciudades_madrid)
         
         alumno = Alumno(
             nombre=nombre,
@@ -291,7 +348,14 @@ def crear_alumnos_diversos():
             telefono=f"6{random.randint(10000000, 99999999)}",
             fecha_nacimiento=date(1960 + random.randint(0, 40), random.randint(1, 12), random.randint(1, 28)),
             direccion=f"Calle {random.choice(['Mayor', 'Real', 'Nueva', 'Vieja', 'Principal'])} {random.randint(1, 100)}",
-            condiciones_medicas=random.choice(['Ninguna', 'Hipertensión leve', 'Problemas de espalda', '']),
+            ciudad=ciudad,
+            codigo_postal=f"{random.randint(28000, 28999):05d}",
+            pais='España',
+            numero_cuenta=generar_iban_espanol(),
+            condiciones_medicas=random.choice(['Ninguna', 'Hipertensión leve', 'Problemas de espalda', 'Artritis leve', 'Diabetes tipo 2 controlada']),
+            medicamentos=random.choice(medicamentos_comunes),
+            alergias=random.choice(alergias_comunes),
+            estado_fisico=random.choice(estados_fisicos),
             tipo_cuota=tipo_cuota,
             matricula_pagada=True,
             fecha_matricula=date(current_year, 1, random.randint(1, 28)),
@@ -305,6 +369,7 @@ def crear_alumnos_diversos():
         nombre = random.choice(nombres_f)
         apellido = random.choice(apellidos)
         tipo_cuota = random.choice(['1_clase_bimensual', '2_clases_bimensual'])
+        ciudad = random.choice(ciudades_madrid)
         
         alumno = Alumno(
             nombre=nombre,
@@ -313,6 +378,14 @@ def crear_alumnos_diversos():
             telefono=f"6{random.randint(10000000, 99999999)}",
             fecha_nacimiento=date(1965 + random.randint(0, 35), random.randint(1, 12), random.randint(1, 28)),
             direccion=f"Avenida {random.choice(['Constitución', 'España', 'Libertad'])} {random.randint(1, 50)}",
+            ciudad=ciudad,
+            codigo_postal=f"{random.randint(28000, 28999):05d}",
+            pais='España',
+            numero_cuenta=generar_iban_espanol(),
+            condiciones_medicas=random.choice(['Fibromialgia', 'Artritis reumatoide', 'Ninguna', 'Problemas cervicales']),
+            medicamentos=random.choice(medicamentos_comunes),
+            alergias=random.choice(alergias_comunes),
+            estado_fisico=random.choice(estados_fisicos),
             tipo_cuota=tipo_cuota,
             matricula_pagada=True,
             fecha_matricula=date(current_year, 1, random.randint(1, 28)),
@@ -327,6 +400,7 @@ def crear_alumnos_diversos():
         apellido = random.choice(apellidos)
         tipo_cuota = random.choice(['1_clase_semanal', '2_clases_semanal'])
         matricula_pagada = random.choice([True, False])
+        ciudad = random.choice(ciudades_madrid)
         
         alumno = Alumno(
             nombre=nombre,
@@ -335,6 +409,14 @@ def crear_alumnos_diversos():
             telefono=f"6{random.randint(10000000, 99999999)}",
             fecha_nacimiento=date(1970 + random.randint(0, 30), random.randint(1, 12), random.randint(1, 28)),
             direccion=f"Plaza {random.choice(['Mayor', 'España', 'Constitución'])} {random.randint(1, 20)}",
+            ciudad=ciudad,
+            codigo_postal=f"{random.randint(28000, 28999):05d}",
+            pais='España',
+            numero_cuenta=generar_iban_espanol() if random.choice([True, False]) else None,  # Algunos sin cuenta
+            condiciones_medicas=random.choice(['Estrés crónico', 'Insomnio', 'Ninguna', 'Ansiedad', 'Depresión leve']),
+            medicamentos=random.choice(medicamentos_comunes),
+            alergias=random.choice(alergias_comunes),
+            estado_fisico=random.choice(estados_fisicos),
             tipo_cuota=tipo_cuota,
             matricula_pagada=matricula_pagada,
             fecha_matricula=date(current_year, 1, random.randint(1, 28)) if matricula_pagada else None,
@@ -347,6 +429,7 @@ def crear_alumnos_diversos():
     for i in range(2):
         nombre = random.choice(nombres_f)
         apellido = random.choice(apellidos)
+        ciudad = random.choice(ciudades_madrid)
         
         alumno = Alumno(
             nombre=nombre,
@@ -355,6 +438,14 @@ def crear_alumnos_diversos():
             telefono=f"6{random.randint(10000000, 99999999)}",
             fecha_nacimiento=date(1975 + random.randint(0, 25), random.randint(1, 12), random.randint(1, 28)),
             direccion=f"Calle {random.choice(['Olmo', 'Roble', 'Pino'])} {random.randint(1, 30)}",
+            ciudad=ciudad,
+            codigo_postal=f"{random.randint(28000, 28999):05d}",
+            pais='España',
+            numero_cuenta=generar_iban_espanol(),
+            condiciones_medicas=random.choice(['Lesión de rodilla antigua', 'Problemas de espalda crónicos', 'Fibromialgia']),
+            medicamentos=random.choice(medicamentos_comunes),
+            alergias=random.choice(alergias_comunes),
+            estado_fisico=random.choice(['En recuperación de lesión', 'Inactivo por trabajo', 'Problemas de salud temporales']),
             tipo_cuota=random.choice(['1_clase_semanal', '2_clases_semanal']),
             matricula_pagada=True,
             fecha_matricula=date(current_year, 1, 15),
@@ -371,6 +462,14 @@ def crear_alumnos_diversos():
         telefono="600000000",
         fecha_nacimiento=date(1980, 5, 15),
         direccion="Calle Desactivada 1",
+        ciudad="Madrid",
+        codigo_postal="28001",
+        pais="España",
+        numero_cuenta=None,
+        condiciones_medicas="Ninguna",
+        medicamentos="Ninguno",
+        alergias="Ninguna",
+        estado_fisico="Desconocido",
         tipo_cuota='1_clase_semanal',
         matricula_pagada=False,
         activo=False

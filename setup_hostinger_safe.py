@@ -46,6 +46,14 @@ def main():
             print("🏗️ Verificando estructura de tablas...")
             crear_tablas()
             
+            # Ejecutar migración de campos de alumno si es necesario
+            print("🔄 Verificando migración de campos de alumno...")
+            try:
+                from migrate_alumno_fields import migrar_campos_alumno
+                migrar_campos_alumno()
+            except Exception as e:
+                print(f"⚠️ Migración no necesaria o ya aplicada: {e}")
+            
             print("👤 Verificando usuario administrador...")
             crear_usuario_admin()
             

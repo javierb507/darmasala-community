@@ -54,6 +54,22 @@
                                 <td>{{ alumno.direccion or 'No proporcionado' }}</td>
                             </tr>
                             <tr>
+                                <td><strong>Ciudad:</strong></td>
+                                <td>{{ alumno.ciudad or 'No proporcionado' }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Código Postal:</strong></td>
+                                <td>{{ alumno.codigo_postal or 'No proporcionado' }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>País:</strong></td>
+                                <td>{{ alumno.pais or 'No proporcionado' }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Número de Cuenta:</strong></td>
+                                <td>{{ alumno.numero_cuenta or 'No proporcionado' }}</td>
+                            </tr>
+                            <tr>
                                 <td><strong>Tipo de Cuota:</strong></td>
                                 <td><span class="badge bg-info">{{ alumno.get_tipo_cuota_display() }} - €{{ "%.2f"|format(alumno.get_precio_cuota()) }}</span></td>
                             </tr>
@@ -81,15 +97,54 @@
                     </div>
                 </div>
                 
-                {% if alumno.condiciones_medicas %}
+                <!-- Información Médica y Física -->
                 <div class="mt-4">
-                    <h6>Condiciones Médicas</h6>
-                    <div class="alert alert-warning">
-                        <i class="fas fa-exclamation-triangle"></i>
-                        {{ alumno.condiciones_medicas }}
+                    <h6>Información Médica y Física</h6>
+                    <div class="row">
+                        <div class="col-md-6">
+                            {% if alumno.condiciones_medicas and alumno.condiciones_medicas != 'Ninguna' %}
+                            <div class="mb-3">
+                                <strong>Condiciones Médicas:</strong>
+                                <div class="alert alert-warning">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                    {{ alumno.condiciones_medicas }}
+                                </div>
+                            </div>
+                            {% endif %}
+                            
+                            {% if alumno.medicamentos and alumno.medicamentos != 'Ninguno' %}
+                            <div class="mb-3">
+                                <strong>Medicamentos:</strong>
+                                <div class="alert alert-info">
+                                    <i class="fas fa-pills"></i>
+                                    {{ alumno.medicamentos }}
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            {% if alumno.alergias and alumno.alergias != 'Ninguna' %}
+                            <div class="mb-3">
+                                <strong>Alergias:</strong>
+                                <div class="alert alert-danger">
+                                    <i class="fas fa-allergies"></i>
+                                    {{ alumno.alergias }}
+                                </div>
+                            </div>
+                            {% endif %}
+                            
+                            {% if alumno.estado_fisico %}
+                            <div class="mb-3">
+                                <strong>Estado Físico:</strong>
+                                <div class="alert alert-secondary">
+                                    <i class="fas fa-heartbeat"></i>
+                                    {{ alumno.estado_fisico }}
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
                     </div>
                 </div>
-                {% endif %}
             </div>
         </div>
         
