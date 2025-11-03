@@ -54,12 +54,27 @@
                                 <div class="mb-3">
                                     <label for="tipo_cuota" class="form-label">Tipo de Cuota</label>
                                     <select class="form-select" id="tipo_cuota" name="tipo_cuota">
-                                        <option value="1_clase_semanal" {{ 'selected' if alumno.tipo_cuota == '1_clase_semanal' else '' }}>1 clase por semana (40€)</option>
-                                        <option value="2_clases_semanal" {{ 'selected' if alumno.tipo_cuota == '2_clases_semanal' else '' }}>2 clases por semana (70€)</option>
-                                        <option value="plana" {{ 'selected' if alumno.tipo_cuota == 'plana' else '' }}>Tarifa plana (90€)</option>
-                                        <option value="1_clase_bimensual" {{ 'selected' if alumno.tipo_cuota == '1_clase_bimensual' else '' }}>1 clase bimensual (75€)</option>
-                                        <option value="2_clases_bimensual" {{ 'selected' if alumno.tipo_cuota == '2_clases_bimensual' else '' }}>2 clases bimensual (135€)</option>
+                                        <option value="pendiente" {{ 'selected' if alumno.tipo_cuota == 'pendiente' else '' }}>Pendiente de asignación</option>
+                                        {% if tipos_clase %}
+                                            {% for tipo in tipos_clase %}
+                                                <option value="{{ tipo.codigo }}" {{ 'selected' if alumno.tipo_cuota == tipo.codigo else '' }}>
+                                                    {{ tipo.nombre }} ({{ tipo.get_precio_display() }})
+                                                </option>
+                                            {% endfor %}
+                                        {% else %}
+                                            <!-- Fallback si no hay tipos configurados -->
+                                            <option value="clase_suelta" {{ 'selected' if alumno.tipo_cuota == 'clase_suelta' else '' }}>Clase suelta (15€/clase)</option>
+                                            <option value="1_clase_semanal" {{ 'selected' if alumno.tipo_cuota == '1_clase_semanal' else '' }}>1 clase por semana (40€/mes)</option>
+                                            <option value="2_clases_semanal" {{ 'selected' if alumno.tipo_cuota == '2_clases_semanal' else '' }}>2 clases por semana (70€/mes)</option>
+                                            <option value="plana" {{ 'selected' if alumno.tipo_cuota == 'plana' else '' }}>Tarifa plana (90€/mes)</option>
+                                            <option value="1_clase_bimensual" {{ 'selected' if alumno.tipo_cuota == '1_clase_bimensual' else '' }}>1 clase bimensual (75€/bimestre)</option>
+                                            <option value="2_clases_bimensual" {{ 'selected' if alumno.tipo_cuota == '2_clases_bimensual' else '' }}>2 clases bimensual (135€/bimestre)</option>
+                                        {% endif %}
                                     </select>
+                                    <small class="form-text text-muted">
+                                        <i class="fas fa-info-circle"></i> 
+                                        Selecciona "Pendiente" si aún no has decidido el tipo de cuota.
+                                    </small>
                                 </div>
                             </div>
                         </div>

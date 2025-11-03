@@ -1,0 +1,217 @@
+{% extends "base.html" %}
+
+{% block title %}Gestión de Clases - Configuración{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <h2><i class="fas fa-dumbbell text-primary"></i> Gestión de Clases</h2>
+                <div>
+                    <a href="{{ url_for('configuracion') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left"></i> Volver a Configuración
+                    </a>
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#nuevaClaseModal">
+                        <i class="fas fa-plus"></i> Nueva Clase
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lista de Clases -->
+    <div class="row">
+        {% for item in clases_con_horarios %}
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card h-100" style="border-left: 5px solid {{ item.clase.color }}">
+                <div class="card-header" style="background: linear-gradient(135deg, {{ item.clase.color }}22, {{ item.clase.color }}11)">
+                    <h5 class="mb-0 d-flex justify-content-between align-items-center">
+                        <span style="color: {{ item.clase.color }}">
+                            <i class="fas fa-circle me-2"></i>{{ item.clase.nombre }}
+                        </span>
+                        <div class="dropdown">
+                            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown">
+                                <i class="fas fa-ellipsis-v"></i>
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="{{ url_for('editar_clase_config', clase_id=item.clase.id) }}">
+                                    <i class="fas fa-edit"></i> Editar
+                                </a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item text-danger" href="#" onclick="confirmarEliminar({{ item.clase.id }}, '{{ item.clase.nombre }}')">
+                                    <i class="fas fa-trash"></i> Eliminar
+                                </a></li>
+                            </ul>
+                        </div>
+                    </h5>
+                </div>
+                
+                <div class="card-body">
+                    <!-- Información básica -->
+                    <div class="mb-3">
+                        <small class="text-muted">Descripción:</small>
+                        <p class="mb-2">{{ item.clase.descripcion or 'Sin descripción' }}</p>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-6">
+                            <small class="text-muted">Precio:</small>
+                            <p class="mb-0"><strong>{{ "%.2f"|format(item.clase.precio) }}€</strong></p>
+                        </div>
+                        <div class="col-6">
+                            <small class="text-muted">Duración:</small>
+                            <p class="mb-0">{{ item.clase.duracion_minutos }} min</p>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-6">
+                            <small class="text-muted">Nivel:</small>
+                            <p class="mb-0">{{ item.clase.nivel.title() }}</p>
+                        </div>
+                        <div class="col-6">
+                            <small class="text-muted">Capacidad:</small>
+                            <p class="mb-0">{{ item.clase.capacidad_maxima }} personas</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Horarios periódicos -->
+                    <div class="mb-3">
+                        <small class="text-muted">Horarios Periódicos:</small>
+                        {% if item.horarios %}
+                        <div class="mt-2">
+                            {% for horario in item.horarios %}
+                            <div class="badge bg-secondary me-1 mb-1">
+                                {{ horario.get_dia_display() }} 
+                                {{ horario.hora_inicio.strftime('%H:%M') }}-{{ horario.hora_fin.strftime('%H:%M') }}
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <p class="text-muted small mb-0">Sin horarios configurados</p>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="card-footer bg-light">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <small class="text-muted">
+                            <i class="fas fa-calendar"></i> 
+                            {{ item.horarios|length }} horario{{ 's' if item.horarios|length != 1 else '' }}
+                        </small>
+                        <a href="{{ url_for('editar_clase_config', clase_id=item.clase.id) }}" class="btn btn-sm btn-primary">
+                            <i class="fas fa-edit"></i> Configurar
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+        
+        {% if not clases_con_horarios %}
+        <div class="col-12">
+            <div class="text-center py-5">
+                <i class="fas fa-dumbbell fa-3x text-muted mb-3"></i>
+                <h4 class="text-muted">No hay clases configuradas</h4>
+                <p class="text-muted">Crea tu primera clase para comenzar</p>
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#nuevaClaseModal">
+                    <i class="fas fa-plus"></i> Crear Primera Clase
+                </button>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Modal Nueva Clase -->
+<div class="modal fade" id="nuevaClaseModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-plus"></i> Nueva Clase</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="{{ url_for('nueva_clase') }}">
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div class="mb-3">
+                                <label for="nombre" class="form-label">Nombre de la Clase *</label>
+                                <input type="text" class="form-control" id="nombre" name="nombre" required>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="color" class="form-label">Color</label>
+                                <input type="color" class="form-control" id="color" name="color" value="#007bff">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="descripcion" class="form-label">Descripción</label>
+                        <textarea class="form-control" id="descripcion" name="descripcion" rows="3"></textarea>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="precio" class="form-label">Precio (€)</label>
+                                <input type="number" class="form-control" id="precio" name="precio" step="0.01" min="0" value="15.00">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="duracion_minutos" class="form-label">Duración (min)</label>
+                                <input type="number" class="form-control" id="duracion_minutos" name="duracion_minutos" min="15" max="180" value="75">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="capacidad_maxima" class="form-label">Capacidad Máxima</label>
+                                <input type="number" class="form-control" id="capacidad_maxima" name="capacidad_maxima" min="1" max="50" value="15">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="nivel" class="form-label">Nivel</label>
+                        <select class="form-select" id="nivel" name="nivel">
+                            <option value="todos">Todos los niveles</option>
+                            <option value="principiante">Principiante</option>
+                            <option value="intermedio">Intermedio</option>
+                            <option value="avanzado">Avanzado</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Crear Clase
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+function confirmarEliminar(claseId, nombreClase) {
+    if (confirm(`¿Estás seguro de que deseas eliminar la clase "${nombreClase}"?\n\nEsto también eliminará todos sus horarios asociados.`)) {
+        // Implementar eliminación
+        fetch(`/configuracion/clases/${claseId}/eliminar`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        }).then(() => {
+            location.reload();
+        }).catch(error => {
+            alert('Error al eliminar la clase');
+        });
+    }
+}
+</script>
+{% endblock %}

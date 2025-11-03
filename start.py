@@ -7,6 +7,13 @@ if __name__ == '__main__':
     print("🧘‍♀️ Iniciando Atma Suddhi...")
     
     try:
+        # Generar información de versión
+        try:
+            from version_info import save_version_info
+            save_version_info()
+        except:
+            pass  # No es crítico si falla
+        
         from app import app, db, inicializar_clases
         
         with app.app_context():

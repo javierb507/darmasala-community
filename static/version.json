@@ -1,0 +1,14 @@
+{
+  "version": "1.0.0",
+  "build_date": "2025-11-03 15:59:16",
+  "git_info": {
+    "commit_hash": "bfd96e3",
+    "commit_date": "2025-09-30 16:02:47",
+    "commit_message": "✨ Ampliar modelo Alumno con información completa",
+    "branch": "main",
+    "remote_url": "https://github.com/javierb507/yoga-school-management.git",
+    "available": true
+  },
+  "app_name": "Atma Suddhi",
+  "description": "Sistema de Gestión de Escuela de Yoga"
+}

@@ -18,7 +18,7 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from app import (
     app, db, Usuario, Alumno, Pago, SesionYogaterapia, HorarioSemanal, 
     Clase, Asistencia, CategoriaGasto, Proveedor, GastoFijo, 
-    FacturaProveedor, GastoMensual, Sutra
+    FacturaProveedor, GastoMensual, Sutra, TipoClase, EventoCalendario, AsistenciaEvento
 )
 
 def limpiar_base_datos():
@@ -31,6 +31,8 @@ def limpiar_base_datos():
         db.session.execute(text('PRAGMA foreign_keys = OFF'))
         
         # Eliminar datos en orden
+        AsistenciaEvento.query.delete()
+        EventoCalendario.query.delete()
         Asistencia.query.delete()
         SesionYogaterapia.query.delete()
         Pago.query.delete()
@@ -41,6 +43,7 @@ def limpiar_base_datos():
         CategoriaGasto.query.delete()
         HorarioSemanal.query.delete()
         Clase.query.delete()
+        TipoClase.query.delete()
         Alumno.query.delete()
         Usuario.query.delete()
         Sutra.query.delete()
@@ -91,13 +94,222 @@ def crear_usuario_admin():
     print("   👤 Usuario: admin")
     print("   🔑 Contraseña: AtmaSuddhi74")
 
+def crear_eventos_calendario():
+    """Crear eventos del calendario unificado basados en horarios semanales"""
+    print("📅 Creando eventos del calendario unificado...")
+    
+    # Obtener horarios semanales activos
+    horarios = HorarioSemanal.query.filter_by(activo=True).all()
+    eventos_creados = 0
+    
+    # Generar eventos para los próximos 3 meses
+    fecha_inicio = date.today()
+    fecha_fin = fecha_inicio + timedelta(days=90)
+    
+    for horario in horarios:
+        # Generar eventos recurrentes para cada horario semanal
+        fecha_actual = fecha_inicio
+        
+        while fecha_actual <= fecha_fin:
+            # Verificar si la fecha corresponde al día de la semana del horario
+            if fecha_actual.weekday() == horario.dia_semana:
+                # Verificar si ya existe un evento para esta fecha y horario
+                evento_existente = EventoCalendario.query.filter_by(
+                    fecha=fecha_actual,
+                    hora_inicio=horario.hora_inicio,
+                    hora_fin=horario.hora_fin,
+                    horario_semanal_id=horario.id
+                ).first()
+                
+                if not evento_existente:
+                    evento = EventoCalendario(
+                        titulo=f"{horario.clase.nombre}",
+                        descripcion=horario.clase.descripcion or f"Clase de {horario.clase.nombre}",
+                        fecha=fecha_actual,
+                        hora_inicio=horario.hora_inicio,
+                        hora_fin=horario.hora_fin,
+                        tipo_evento='clase_grupal',
+                        es_recurrente=True,
+                        patron_recurrencia='semanal',
+                        dias_semana=str(horario.dia_semana),
+                        clase_id=horario.clase_id,
+                        horario_semanal_id=horario.id,
+                        instructor=horario.instructor,
+                        capacidad_maxima=horario.clase.capacidad_maxima,
+                        precio=horario.clase.precio,
+                        color=horario.clase.color,
+                        activo=True
+                    )
+                    db.session.add(evento)
+                    eventos_creados += 1
+            
+            fecha_actual += timedelta(days=1)
+    
+    # Crear algunos eventos especiales de ejemplo
+    eventos_especiales = [
+        {
+            'titulo': 'Taller de Meditación Avanzada',
+            'descripcion': 'Taller especial de meditación para practicantes avanzados',
+            'fecha': date.today() + timedelta(days=14),
+            'hora_inicio': time(10, 0),
+            'hora_fin': time(12, 0),
+            'tipo_evento': 'evento_especial',
+            'instructor': 'Minouche',
+            'capacidad_maxima': 8,
+            'precio': 25.0,
+            'color': '#9c27b0'
+        },
+        {
+            'titulo': 'Sesión de Yoga en el Parque',
+            'descripcion': 'Práctica de yoga al aire libre (sujeto a condiciones climáticas)',
+            'fecha': date.today() + timedelta(days=21),
+            'hora_inicio': time(9, 0),
+            'hora_fin': time(10, 30),
+            'tipo_evento': 'evento_especial',
+            'instructor': 'Minouche',
+            'capacidad_maxima': 15,
+            'precio': 12.0,
+            'color': '#4caf50'
+        }
+    ]
+    
+    for evento_data in eventos_especiales:
+        evento = EventoCalendario(**evento_data)
+        db.session.add(evento)
+        eventos_creados += 1
+    
+    db.session.commit()
+    print(f"✅ {eventos_creados} eventos de calendario creados")
+    return eventos_creados
+
+def crear_tipos_clase():
+    """Crear tipos de clase configurables"""
+    print("🏷️ Creando tipos de clase...")
+    
+    tipos_data = [
+        {
+            'codigo': 'pendiente',
+            'nombre': 'Pendiente de asignación',
+            'descripcion': 'Alumno registrado pero aún sin tipo de cuota definido',
+            'precio': 0.00,
+            'frecuencia': 'mensual',
+            'orden': 0,
+            'color': '#6c757d',
+            'activo': True
+        },
+        {
+            'codigo': 'clase_suelta',
+            'nombre': 'Clase suelta',
+            'descripcion': 'Pago por clase individual. Ideal para probar o asistencia esporádica',
+            'precio': 15.00,
+            'frecuencia': 'por_clase',
+            'orden': 1,
+            'color': '#17a2b8',
+            'activo': True
+        },
+        {
+            'codigo': '1_clase_semanal',
+            'nombre': '1 clase por semana',
+            'descripcion': 'Una clase semanal fija. Ideal para principiantes',
+            'precio': 40.00,
+            'frecuencia': 'mensual',
+            'orden': 2,
+            'color': '#28a745',
+            'activo': True
+        },
+        {
+            'codigo': '2_clases_semanal',
+            'nombre': '2 clases por semana',
+            'descripcion': 'Dos clases semanales. Práctica regular recomendada',
+            'precio': 70.00,
+            'frecuencia': 'mensual',
+            'orden': 3,
+            'color': '#ffc107',
+            'activo': True
+        },
+        {
+            'codigo': 'plana',
+            'nombre': 'Tarifa plana',
+            'descripcion': 'Acceso ilimitado a todas las clases del mes',
+            'precio': 90.00,
+            'frecuencia': 'mensual',
+            'orden': 4,
+            'color': '#dc3545',
+            'activo': True
+        },
+        {
+            'codigo': '1_clase_bimensual',
+            'nombre': '1 clase bimensual',
+            'descripcion': 'Una clase por semana pagada cada dos meses',
+            'precio': 75.00,
+            'frecuencia': 'bimensual',
+            'orden': 5,
+            'color': '#6f42c1',
+            'activo': True
+        },
+        {
+            'codigo': '2_clases_bimensual',
+            'nombre': '2 clases bimensual',
+            'descripcion': 'Dos clases por semana pagadas cada dos meses',
+            'precio': 135.00,
+            'frecuencia': 'bimensual',
+            'orden': 6,
+            'color': '#e83e8c',
+            'activo': True
+        },
+        {
+            'codigo': 'yogaterapia_individual',
+            'nombre': 'Yogaterapia individual',
+            'descripcion': 'Sesiones personalizadas de yogaterapia individual',
+            'precio': 50.00,
+            'frecuencia': 'por_clase',
+            'orden': 7,
+            'color': '#fd7e14',
+            'activo': True
+        },
+        {
+            'codigo': 'yogaterapia_pareja',
+            'nombre': 'Yogaterapia en pareja',
+            'descripcion': 'Sesiones de yogaterapia para dos personas',
+            'precio': 70.00,
+            'frecuencia': 'por_clase',
+            'orden': 8,
+            'color': '#20c997',
+            'activo': True
+        }
+    ]
+    
+    try:
+        tipos_creados = []
+        for tipo_data in tipos_data:
+            # Verificar si ya existe
+            tipo_existente = TipoClase.query.filter_by(codigo=tipo_data['codigo']).first()
+            if tipo_existente:
+                # Actualizar datos existentes
+                for key, value in tipo_data.items():
+                    setattr(tipo_existente, key, value)
+                tipos_creados.append(tipo_existente)
+            else:
+                # Crear nuevo tipo
+                tipo = TipoClase(**tipo_data)
+                db.session.add(tipo)
+                tipos_creados.append(tipo)
+        
+        db.session.commit()
+        print(f"✅ {len(tipos_creados)} tipos de clase procesados (creados/actualizados)")
+        return tipos_creados
+    except Exception as e:
+        print(f"❌ Error al crear tipos de clase: {e}")
+        db.session.rollback()
+        return []
+
 def crear_clases_completas():
     """Crear clases completas con todos los detalles"""
     print("📚 Creando clases completas...")
     
     clases_data = [
         {
-            'nombre': 'Yoga integral', 
+            'nombre': 'Yoga Integral', 
             'descripcion': 'Práctica completa de yoga que integra posturas, respiración y meditación',
             'precio': 15.00,
             'color': '#007bff',
@@ -107,73 +319,33 @@ def crear_clases_completas():
             'activa': True
         },
         {
-            'nombre': 'Yoga menopausia', 
-            'descripcion': 'Clase especializada para mujeres en etapa de menopausia',
+            'nombre': 'Yoga Embarazadas', 
+            'descripcion': 'Yoga prenatal seguro y beneficioso para futuras mamás',
             'precio': 15.00,
-            'color': '#e91e63',
-            'nivel': 'todos',
-            'duracion_minutos': 75,
-            'capacidad_maxima': 12,
+            'color': '#28a745',
+            'nivel': 'principiante',
+            'duracion_minutos': 60,
+            'capacidad_maxima': 10,
             'activa': True
         },
         {
-            'nombre': 'Yoga embarazadas', 
-            'descripcion': 'Yoga adaptado para mujeres embarazadas',
+            'nombre': 'Yoga Menopausia', 
+            'descripcion': 'Yoga específicamente diseñado para mujeres en etapa de menopausia',
             'precio': 15.00,
-            'color': '#ff9800',
+            'color': '#dc3545',
             'nivel': 'principiante',
             'duracion_minutos': 60,
-            'capacidad_maxima': 8,
+            'capacidad_maxima': 12,
             'activa': True
         },
         {
             'nombre': 'Meditación', 
-            'descripcion': 'Práctica de meditación y mindfulness',
+            'descripcion': 'Sesiones de meditación guiada y mindfulness',
             'precio': 12.00,
-            'color': '#9c27b0',
+            'color': '#6f42c1',
             'nivel': 'todos',
             'duracion_minutos': 45,
             'capacidad_maxima': 20,
-            'activa': True
-        },
-        {
-            'nombre': 'Hatha Yoga', 
-            'descripcion': 'Yoga clásico con posturas estáticas',
-            'precio': 15.00,
-            'color': '#DDA0DD',
-            'nivel': 'intermedio',
-            'duracion_minutos': 75,
-            'capacidad_maxima': 15,
-            'activa': True
-        },
-        {
-            'nombre': 'Vinyasa Flow', 
-            'descripcion': 'Yoga dinámico con transiciones fluidas',
-            'precio': 18.00,
-            'color': '#98D8C8',
-            'nivel': 'intermedio',
-            'duracion_minutos': 75,
-            'capacidad_maxima': 12,
-            'activa': True
-        },
-        {
-            'nombre': 'Yin Yoga', 
-            'descripcion': 'Yoga restaurativo con posturas largas',
-            'precio': 16.00,
-            'color': '#F7DC6F',
-            'nivel': 'todos',
-            'duracion_minutos': 90,
-            'capacidad_maxima': 15,
-            'activa': True
-        },
-        {
-            'nombre': 'Yogaterapia', 
-            'descripcion': 'Sesión individual de yogaterapia personalizada',
-            'precio': 45.00,
-            'color': '#FFEAA7',
-            'nivel': 'todos',
-            'duracion_minutos': 60,
-            'capacidad_maxima': 1,
             'activa': True
         }
     ]
@@ -206,44 +378,28 @@ def crear_horarios_semanales(clases):
     
     horarios_data = [
         # Lunes (0)
-        {'clase': 'Hatha Yoga', 'dia_semana': 0, 'hora_inicio': '09:00', 'hora_fin': '10:15'},
-        {'clase': 'Yoga menopausia', 'dia_semana': 0, 'hora_inicio': '10:30', 'hora_fin': '11:45'},
-        {'clase': 'Yoga integral', 'dia_semana': 0, 'hora_inicio': '18:00', 'hora_fin': '19:15'},
-        {'clase': 'Vinyasa Flow', 'dia_semana': 0, 'hora_inicio': '19:30', 'hora_fin': '20:45'},
+        {'clase': 'Yoga Integral', 'dia_semana': 0, 'hora_inicio': '09:30', 'hora_fin': '10:45'},
+        {'clase': 'Yoga Menopausia', 'dia_semana': 0, 'hora_inicio': '18:00', 'hora_fin': '19:00'},
         
         # Martes (1)
-        {'clase': 'Yoga embarazadas', 'dia_semana': 1, 'hora_inicio': '09:00', 'hora_fin': '10:00'},
-        {'clase': 'Meditación', 'dia_semana': 1, 'hora_inicio': '10:15', 'hora_fin': '11:00'},
-        {'clase': 'Yoga integral', 'dia_semana': 1, 'hora_inicio': '18:00', 'hora_fin': '19:15'},
-        {'clase': 'Yin Yoga', 'dia_semana': 1, 'hora_inicio': '19:30', 'hora_fin': '21:00'},
+        {'clase': 'Yoga Embarazadas', 'dia_semana': 1, 'hora_inicio': '10:00', 'hora_fin': '11:00'},
+        {'clase': 'Meditación', 'dia_semana': 1, 'hora_inicio': '19:00', 'hora_fin': '19:45'},
         
         # Miércoles (2)
-        {'clase': 'Hatha Yoga', 'dia_semana': 2, 'hora_inicio': '09:00', 'hora_fin': '10:15'},
-        {'clase': 'Yoga menopausia', 'dia_semana': 2, 'hora_inicio': '10:30', 'hora_fin': '11:45'},
-        {'clase': 'Vinyasa Flow', 'dia_semana': 2, 'hora_inicio': '18:00', 'hora_fin': '19:15'},
-        {'clase': 'Yoga integral', 'dia_semana': 2, 'hora_inicio': '19:30', 'hora_fin': '20:45'},
+        {'clase': 'Yoga Integral', 'dia_semana': 2, 'hora_inicio': '09:30', 'hora_fin': '10:45'},
+        {'clase': 'Yoga Menopausia', 'dia_semana': 2, 'hora_inicio': '18:00', 'hora_fin': '19:00'},
         
         # Jueves (3)
-        {'clase': 'Yoga embarazadas', 'dia_semana': 3, 'hora_inicio': '09:00', 'hora_fin': '10:00'},
-        {'clase': 'Meditación', 'dia_semana': 3, 'hora_inicio': '10:15', 'hora_fin': '11:00'},
-        {'clase': 'Yoga integral', 'dia_semana': 3, 'hora_inicio': '18:00', 'hora_fin': '19:15'},
-        {'clase': 'Yin Yoga', 'dia_semana': 3, 'hora_inicio': '19:30', 'hora_fin': '21:00'},
+        {'clase': 'Yoga Embarazadas', 'dia_semana': 3, 'hora_inicio': '10:00', 'hora_fin': '11:00'},
+        {'clase': 'Meditación', 'dia_semana': 3, 'hora_inicio': '19:00', 'hora_fin': '19:45'},
         
         # Viernes (4)
-        {'clase': 'Hatha Yoga', 'dia_semana': 4, 'hora_inicio': '09:00', 'hora_fin': '10:15'},
-        {'clase': 'Vinyasa Flow', 'dia_semana': 4, 'hora_inicio': '10:30', 'hora_fin': '11:45'},
-        {'clase': 'Yoga integral', 'dia_semana': 4, 'hora_inicio': '18:00', 'hora_fin': '19:15'},
-        {'clase': 'Yoga menopausia', 'dia_semana': 4, 'hora_inicio': '19:30', 'hora_fin': '20:45'},
+        {'clase': 'Yoga Integral', 'dia_semana': 4, 'hora_inicio': '10:00', 'hora_fin': '11:15'},
+        {'clase': 'Yoga Integral', 'dia_semana': 4, 'hora_inicio': '18:30', 'hora_fin': '19:45'},
         
         # Sábado (5)
-        {'clase': 'Yoga integral', 'dia_semana': 5, 'hora_inicio': '10:00', 'hora_fin': '11:15'},
-        {'clase': 'Vinyasa Flow', 'dia_semana': 5, 'hora_inicio': '11:30', 'hora_fin': '12:45'},
-        {'clase': 'Yin Yoga', 'dia_semana': 5, 'hora_inicio': '17:00', 'hora_fin': '18:30'},
-        
-        # Domingo (6)
-        {'clase': 'Hatha Yoga', 'dia_semana': 6, 'hora_inicio': '10:00', 'hora_fin': '11:15'},
-        {'clase': 'Meditación', 'dia_semana': 6, 'hora_inicio': '11:30', 'hora_fin': '12:15'},
-        {'clase': 'Yoga integral', 'dia_semana': 6, 'hora_inicio': '17:00', 'hora_fin': '18:15'}
+        {'clase': 'Yoga Integral', 'dia_semana': 5, 'hora_inicio': '10:00', 'hora_fin': '11:15'},
+        {'clase': 'Meditación', 'dia_semana': 5, 'hora_inicio': '11:30', 'hora_fin': '12:15'},
     ]
     
     horarios = []
@@ -321,6 +477,29 @@ def crear_alumnos_diversos():
         'Insomnio frecuente'
     ]
     
+    motivaciones = [
+        'Reducir el estrés del trabajo y encontrar paz interior',
+        'Mejorar la flexibilidad y fortaleza del cuerpo',
+        'Aliviar dolores de espalda y mejorar la postura',
+        'Encontrar un momento de tranquilidad en el día',
+        'Complementar otros deportes con flexibilidad',
+        'Gestionar la ansiedad de forma natural',
+        'Conectar con mi cuerpo durante el embarazo',
+        'Recuperarme físicamente después del parto',
+        'Encontrar equilibrio en la menopausia',
+        'Socializar y conocer gente con intereses similares',
+        'Desarrollar disciplina mental y concentración',
+        'Mejorar la calidad del sueño',
+        'Explorar la espiritualidad y mindfulness',
+        'Rehabilitación después de una lesión',
+        'Mantenerme activa de forma suave',
+        'Liberar tensiones emocionales acumuladas',
+        'Aprender técnicas de respiración para la vida diaria',
+        'Complementar tratamiento médico de forma holística',
+        'Encontrar una actividad que pueda hacer toda la vida',
+        'Mejorar mi relación conmigo misma'
+    ]
+    
     current_year = date.today().year
     current_month = date.today().month
     
@@ -356,6 +535,7 @@ def crear_alumnos_diversos():
             medicamentos=random.choice(medicamentos_comunes),
             alergias=random.choice(alergias_comunes),
             estado_fisico=random.choice(estados_fisicos),
+            motivacion=random.choice(motivaciones),
             tipo_cuota=tipo_cuota,
             matricula_pagada=True,
             fecha_matricula=date(current_year, 1, random.randint(1, 28)),
@@ -386,6 +566,7 @@ def crear_alumnos_diversos():
             medicamentos=random.choice(medicamentos_comunes),
             alergias=random.choice(alergias_comunes),
             estado_fisico=random.choice(estados_fisicos),
+            motivacion=random.choice(motivaciones),
             tipo_cuota=tipo_cuota,
             matricula_pagada=True,
             fecha_matricula=date(current_year, 1, random.randint(1, 28)),
@@ -417,6 +598,7 @@ def crear_alumnos_diversos():
             medicamentos=random.choice(medicamentos_comunes),
             alergias=random.choice(alergias_comunes),
             estado_fisico=random.choice(estados_fisicos),
+            motivacion=random.choice(motivaciones),
             tipo_cuota=tipo_cuota,
             matricula_pagada=matricula_pagada,
             fecha_matricula=date(current_year, 1, random.randint(1, 28)) if matricula_pagada else None,
@@ -470,6 +652,7 @@ def crear_alumnos_diversos():
         medicamentos="Ninguno",
         alergias="Ninguna",
         estado_fisico="Desconocido",
+        motivacion="No especificado",
         tipo_cuota='1_clase_semanal',
         matricula_pagada=False,
         activo=False
@@ -477,8 +660,44 @@ def crear_alumnos_diversos():
     db.session.add(alumno_desactivado)
     alumnos.append(alumno_desactivado)
     
+    # 6. Alumnos PENDIENTES (3 alumnos - solo datos recogidos, sin tipo de cuota definido)
+    for i in range(3):
+        nombre = random.choice(nombres_f + nombres_m)
+        apellido = random.choice(apellidos)
+        ciudad = random.choice(ciudades_madrid)
+        
+        alumno = Alumno(
+            nombre=nombre,
+            apellido=apellido,
+            email=f"{nombre.lower()}.{apellido.lower()}{i+40}@email.com",
+            telefono=f"6{random.randint(10000000, 99999999)}",
+            fecha_nacimiento=date(1970 + random.randint(0, 30), random.randint(1, 12), random.randint(1, 28)),
+            direccion=f"Calle {random.choice(['Esperanza', 'Libertad', 'Paz'])} {random.randint(1, 50)}",
+            ciudad=ciudad,
+            codigo_postal=f"{random.randint(28000, 28999):05d}",
+            pais='España',
+            numero_cuenta=None,  # Aún no proporcionado
+            condiciones_medicas=random.choice(['Por determinar', 'Pendiente de evaluación', 'Sin especificar']),
+            medicamentos=random.choice(['Por confirmar', 'Pendiente de consulta', 'Sin especificar']),
+            alergias=random.choice(['Por determinar', 'Pendiente de consulta', 'Sin especificar']),
+            estado_fisico=random.choice(['Pendiente de evaluación', 'A determinar en primera clase', 'Sin especificar']),
+            motivacion=random.choice([
+                'Interesado en empezar yoga pero aún evaluando opciones',
+                'Recomendado por un amigo, quiere saber más antes de decidir',
+                'Ha hecho una clase de prueba, pensando en el tipo de cuota',
+                'Esperando a resolver horarios laborales para decidir frecuencia',
+                'Quiere probar diferentes tipos de clase antes de comprometerse'
+            ]),
+            tipo_cuota='pendiente',  # Estado pendiente
+            matricula_pagada=False,
+            fecha_matricula=None,
+            activo=True
+        )
+        db.session.add(alumno)
+        alumnos.append(alumno)
+    
     db.session.commit()
-    print(f"✅ {len(alumnos)} alumnos creados")
+    print(f"✅ {len(alumnos)} alumnos creados (incluyendo 3 con estado pendiente)")
     return alumnos
 
 def crear_pagos_realistas(alumnos):
@@ -1129,6 +1348,14 @@ def main():
     print("="*70)
     
     try:
+        # Generar información de versión
+        print("📊 Generando información de versión...")
+        try:
+            from version_info import save_version_info
+            save_version_info()
+        except Exception as e:
+            print(f"⚠️ No se pudo generar info de versión: {e}")
+        
         with app.app_context():
             print("🚀 Iniciando proceso de carga...")
             
@@ -1138,8 +1365,10 @@ def main():
             
             # 2. Crear datos básicos
             crear_usuario_admin()
+            crear_tipos_clase()
             clases = crear_clases_completas()
             horarios = crear_horarios_semanales(clases)
+            crear_eventos_calendario()
             
             # 3. Crear alumnos y pagos
             alumnos = crear_alumnos_diversos()

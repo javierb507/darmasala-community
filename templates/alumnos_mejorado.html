@@ -81,8 +81,8 @@
             <div class="card-body">
                 <div class="d-flex justify-content-between">
                     <div>
-                        <h4>{{ alumnos|selectattr('inactivo_temporal')|list|length }}</h4>
-                        <p class="mb-0">Sin Actividad</p>
+                        <h4>{{ alumnos|selectattr('tipo_cuota', 'equalto', 'pendiente')|list|length }}</h4>
+                        <p class="mb-0">Pendientes</p>
                     </div>
                     <i class="fas fa-user-clock fa-2x"></i>
                 </div>
@@ -177,9 +177,17 @@
                                         {% endif %}
                                     </td>
                                     <td>
-                                        <span class="badge bg-info">{{ alumno.get_tipo_cuota_display() }}</span>
-                                        <br>
-                                        <small class="text-muted">{{ "%.2f"|format(alumno.get_precio_cuota()) }}€</small>
+                                        {% if alumno.tipo_cuota == 'pendiente' %}
+                                            <span class="badge bg-warning text-dark">
+                                                <i class="fas fa-clock"></i> {{ alumno.get_tipo_cuota_display() }}
+                                            </span>
+                                            <br>
+                                            <small class="text-muted">Por asignar</small>
+                                        {% else %}
+                                            <span class="badge bg-info">{{ alumno.get_tipo_cuota_display() }}</span>
+                                            <br>
+                                            <small class="text-muted">{{ "%.2f"|format(alumno.get_precio_cuota()) }}€</small>
+                                        {% endif %}
                                     </td>
                                     <td>
                                         <!-- Estado de matrícula -->

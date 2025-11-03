@@ -26,7 +26,8 @@ def migrar_campos_alumno():
                 "ALTER TABLE alumno ADD COLUMN numero_cuenta VARCHAR(34)",
                 "ALTER TABLE alumno ADD COLUMN medicamentos TEXT",
                 "ALTER TABLE alumno ADD COLUMN alergias TEXT", 
-                "ALTER TABLE alumno ADD COLUMN estado_fisico TEXT"
+                "ALTER TABLE alumno ADD COLUMN estado_fisico TEXT",
+                "ALTER TABLE alumno ADD COLUMN motivacion TEXT"
             ]
             
             for campo in nuevos_campos:

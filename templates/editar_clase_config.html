@@ -1,0 +1,222 @@
+{% extends "base.html" %}
+
+{% block title %}Editar {{ clase.nombre }} - Configuración{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <h2 style="color: {{ clase.color }}">
+                    <i class="fas fa-edit"></i> Editar {{ clase.nombre }}
+                </h2>
+                <a href="{{ url_for('configuracion_clases') }}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left"></i> Volver a Clases
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <form method="POST">
+        <div class="row">
+            <!-- Información básica de la clase -->
+            <div class="col-lg-6">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-info-circle"></i> Información Básica</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <div class="mb-3">
+                                    <label for="nombre" class="form-label">Nombre de la Clase *</label>
+                                    <input type="text" class="form-control" id="nombre" name="nombre" 
+                                           value="{{ clase.nombre }}" required>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="color" class="form-label">Color</label>
+                                    <input type="color" class="form-control" id="color" name="color" 
+                                           value="{{ clase.color }}">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="descripcion" class="form-label">Descripción</label>
+                            <textarea class="form-control" id="descripcion" name="descripcion" rows="3">{{ clase.descripcion or '' }}</textarea>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="precio" class="form-label">Precio (€)</label>
+                                    <input type="number" class="form-control" id="precio" name="precio" 
+                                           step="0.01" min="0" value="{{ clase.precio }}">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="duracion_minutos" class="form-label">Duración (min)</label>
+                                    <input type="number" class="form-control" id="duracion_minutos" name="duracion_minutos" 
+                                           min="15" max="180" value="{{ clase.duracion_minutos }}">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="capacidad_maxima" class="form-label">Capacidad Máxima</label>
+                                    <input type="number" class="form-control" id="capacidad_maxima" name="capacidad_maxima" 
+                                           min="1" max="50" value="{{ clase.capacidad_maxima }}">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="nivel" class="form-label">Nivel</label>
+                            <select class="form-select" id="nivel" name="nivel">
+                                <option value="todos" {{ 'selected' if clase.nivel == 'todos' else '' }}>Todos los niveles</option>
+                                <option value="principiante" {{ 'selected' if clase.nivel == 'principiante' else '' }}>Principiante</option>
+                                <option value="intermedio" {{ 'selected' if clase.nivel == 'intermedio' else '' }}>Intermedio</option>
+                                <option value="avanzado" {{ 'selected' if clase.nivel == 'avanzado' else '' }}>Avanzado</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Horarios periódicos -->
+            <div class="col-lg-6">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-clock"></i> Horarios Periódicos</h5>
+                        <small class="text-muted">Configura cuándo se imparte esta clase semanalmente</small>
+                    </div>
+                    <div class="card-body">
+                        <!-- Días de la semana -->
+                        <div class="mb-4">
+                            <label class="form-label">Días de la Semana</label>
+                            <div class="row">
+                                {% set dias = [
+                                    (0, 'Lunes'),
+                                    (1, 'Martes'),
+                                    (2, 'Miércoles'),
+                                    (3, 'Jueves'),
+                                    (4, 'Viernes'),
+                                    (5, 'Sábado'),
+                                    (6, 'Domingo')
+                                ] %}
+                                {% for dia_num, dia_nombre in dias %}
+                                <div class="col-md-6 col-lg-12 col-xl-6">
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="checkbox" 
+                                               id="dia_{{ dia_num }}" name="dias_semana" value="{{ dia_num }}"
+                                               {{ 'checked' if horarios and horarios|selectattr('dia_semana', 'equalto', dia_num)|list else '' }}>
+                                        <label class="form-check-label" for="dia_{{ dia_num }}">
+                                            {{ dia_nombre }}
+                                        </label>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        
+                        <!-- Horarios -->
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="hora_inicio" class="form-label">Hora Inicio</label>
+                                    <input type="time" class="form-control" id="hora_inicio" name="hora_inicio" 
+                                           value="{{ horarios[0].hora_inicio.strftime('%H:%M') if horarios else '19:00' }}">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="hora_fin" class="form-label">Hora Fin</label>
+                                    <input type="time" class="form-control" id="hora_fin" name="hora_fin" 
+                                           value="{{ horarios[0].hora_fin.strftime('%H:%M') if horarios else '20:15' }}">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="instructor" class="form-label">Instructor</label>
+                            <input type="text" class="form-control" id="instructor" name="instructor" 
+                                   value="{{ horarios[0].instructor if horarios else 'Minouche' }}">
+                        </div>
+                        
+                        <!-- Vista previa de horarios actuales -->
+                        {% if horarios %}
+                        <div class="mt-4">
+                            <h6 class="text-muted">Horarios Actuales:</h6>
+                            {% for horario in horarios %}
+                            <div class="badge bg-secondary me-1 mb-1">
+                                {{ horario.get_dia_display() }} 
+                                {{ horario.hora_inicio.strftime('%H:%M') }}-{{ horario.hora_fin.strftime('%H:%M') }}
+                                ({{ horario.instructor }})
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                        
+                        <div class="alert alert-info mt-3">
+                            <i class="fas fa-info-circle"></i>
+                            <strong>Importante:</strong> Los cambios en los horarios se reflejarán automáticamente en el calendario compartido.
+                            Se generarán nuevos eventos para los próximos 90 días.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Botones de acción -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <button type="button" class="btn btn-secondary me-2" onclick="history.back()">
+                            <i class="fas fa-times"></i> Cancelar
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Guardar Cambios y Actualizar Calendario
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+// Validación de horarios
+document.querySelector('form').addEventListener('submit', function(e) {
+    const diasSeleccionados = document.querySelectorAll('input[name="dias_semana"]:checked');
+    const horaInicio = document.getElementById('hora_inicio').value;
+    const horaFin = document.getElementById('hora_fin').value;
+    
+    if (diasSeleccionados.length === 0) {
+        e.preventDefault();
+        alert('Debes seleccionar al menos un día de la semana');
+        return;
+    }
+    
+    if (horaInicio >= horaFin) {
+        e.preventDefault();
+        alert('La hora de inicio debe ser anterior a la hora de fin');
+        return;
+    }
+    
+    // Confirmar cambios
+    if (!confirm('¿Estás seguro de guardar los cambios?\n\nEsto actualizará automáticamente el calendario compartido con los nuevos horarios.')) {
+        e.preventDefault();
+    }
+});
+
+// Preview del color en tiempo real
+document.getElementById('color').addEventListener('change', function() {
+    const color = this.value;
+    document.querySelector('h2').style.color = color;
+});
+</script>
+{% endblock %}

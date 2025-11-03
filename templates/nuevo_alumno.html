@@ -53,12 +53,27 @@
                                 <div class="mb-3">
                                     <label for="tipo_cuota" class="form-label">Tipo de Cuota</label>
                                     <select class="form-select" id="tipo_cuota" name="tipo_cuota">
-                                        <option value="1_clase_semanal">1 clase por semana (40€)</option>
-                                        <option value="2_clases_semanal">2 clases por semana (70€)</option>
-                                        <option value="plana">Tarifa plana (90€)</option>
-                                        <option value="1_clase_bimensual">1 clase bimensual (75€)</option>
-                                        <option value="2_clases_bimensual">2 clases bimensual (135€)</option>
+                                        <option value="pendiente" selected>Pendiente de asignación</option>
+                                        {% if tipos_clase %}
+                                            {% for tipo in tipos_clase %}
+                                                <option value="{{ tipo.codigo }}">
+                                                    {{ tipo.nombre }} ({{ tipo.get_precio_display() }})
+                                                </option>
+                                            {% endfor %}
+                                        {% else %}
+                                            <!-- Fallback si no hay tipos configurados -->
+                                            <option value="clase_suelta">Clase suelta (15€/clase)</option>
+                                            <option value="1_clase_semanal">1 clase por semana (40€/mes)</option>
+                                            <option value="2_clases_semanal">2 clases por semana (70€/mes)</option>
+                                            <option value="plana">Tarifa plana (90€/mes)</option>
+                                            <option value="1_clase_bimensual">1 clase bimensual (75€/bimestre)</option>
+                                            <option value="2_clases_bimensual">2 clases bimensual (135€/bimestre)</option>
+                                        {% endif %}
                                     </select>
+                                    <small class="form-text text-muted">
+                                        <i class="fas fa-info-circle"></i> 
+                                        Puedes dejar "Pendiente" si aún no has decidido el tipo de cuota y asignarlo más tarde.
+                                    </small>
                                 </div>
                             </div>
                         </div>
@@ -125,6 +140,11 @@
                                     <textarea class="form-control" id="estado_fisico" name="estado_fisico" rows="2" placeholder="Ej: Buena forma física, sedentario, en recuperación..."></textarea>
                                 </div>
                             </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="motivacion" class="form-label">Motivación para practicar yoga</label>
+                            <textarea class="form-control" id="motivacion" name="motivacion" rows="3" placeholder="Ej: Reducir el estrés, mejorar flexibilidad, encontrar paz interior..."></textarea>
                         </div>
                         
                         <div class="mb-3">
