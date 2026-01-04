@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test API Calendario</title>
+    <style>
+        body { font-family: monospace; padding: 20px; }
+        .section { margin: 20px 0; padding: 10px; border: 1px solid #ccc; }
+        .error { color: red; }
+        .success { color: green; }
+        pre { background: #f5f5f5; padding: 10px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>Test API Calendario - Debug</h1>
+
+    <div class="section">
+        <h2>1. Test Básico (sin fechas)</h2>
+        <button onclick="testSinFechas()">Ejecutar Test</button>
+        <pre id="result1"></pre>
+    </div>
+
+    <div class="section">
+        <h2>2. Test con Fechas (formato FullCalendar)</h2>
+        <button onclick="testConFechas()">Ejecutar Test</button>
+        <pre id="result2"></pre>
+    </div>
+
+    <div class="section">
+        <h2>3. Test Directo URL</h2>
+        <p>URL generada: <span id="url3"></span></p>
+        <button onclick="testDirecto()">Ejecutar Test</button>
+        <pre id="result3"></pre>
+    </div>
+
+    <div class="section">
+        <h2>4. Logs de Consola</h2>
+        <p>Abre las DevTools (F12) y mira la pestaña Console para ver todos los logs</p>
+    </div>
+
+    <script>
+        function log(elementId, message, isError = false) {
+            const el = document.getElementById(elementId);
+            const className = isError ? 'error' : 'success';
+            el.innerHTML += `<div class="${className}">${message}</div>`;
+        }
+
+        async function testSinFechas() {
+            const resultEl = document.getElementById('result1');
+            resultEl.innerHTML = 'Ejecutando...\n';
+
+            try {
+                console.log('=== TEST 1: Sin fechas ===');
+                const response = await fetch('/api/calendario/eventos');
+                console.log('Response status:', response.status);
+                console.log('Response headers:', [...response.headers.entries()]);
+
+                const text = await response.text();
+                console.log('Response text (first 500 chars):', text.substring(0, 500));
+
+                if (response.ok) {
+                    const data = JSON.parse(text);
+                    log('result1', `✓ SUCCESS: ${data.length} eventos recibidos`);
+                    log('result1', JSON.stringify(data.slice(0, 2), null, 2));
+                } else {
+                    log('result1', `✗ ERROR ${response.status}`, true);
+                    log('result1', text, true);
+                }
+            } catch (error) {
+                console.error('Error en test 1:', error);
+                log('result1', `✗ EXCEPTION: ${error.message}`, true);
+                log('result1', error.stack, true);
+            }
+        }
+
+        async function testConFechas() {
+            const resultEl = document.getElementById('result2');
+            resultEl.innerHTML = 'Ejecutando...\n';
+
+            try {
+                const start = '2025-12-29T00:00:00+01:00';
+                const end = '2026-01-05T00:00:00+01:00';
+                const url = `/api/calendario/eventos?start=${encodeURIComponent(start)}&end=${encodeURIComponent(end)}`;
+
+                console.log('=== TEST 2: Con fechas ===');
+                console.log('Start:', start);
+                console.log('End:', end);
+                console.log('URL:', url);
+
+                const response = await fetch(url);
+                console.log('Response status:', response.status);
+                console.log('Response headers:', [...response.headers.entries()]);
+
+                const text = await response.text();
+                console.log('Response text (first 1000 chars):', text.substring(0, 1000));
+
+                if (response.ok) {
+                    const data = JSON.parse(text);
+                    log('result2', `✓ SUCCESS: ${data.length} eventos recibidos`);
+                    log('result2', JSON.stringify(data.slice(0, 2), null, 2));
+                } else {
+                    log('result2', `✗ ERROR ${response.status}`, true);
+                    log('result2', text, true);
+                }
+            } catch (error) {
+                console.error('Error en test 2:', error);
+                log('result2', `✗ EXCEPTION: ${error.message}`, true);
+                log('result2', error.stack, true);
+            }
+        }
+
+        async function testDirecto() {
+            const resultEl = document.getElementById('result3');
+            resultEl.innerHTML = 'Ejecutando...\n';
+
+            try {
+                // Exactamente como lo envía FullCalendar
+                const start = '2025-12-29T00:00:00+01:00';
+                const end = '2026-01-05T00:00:00+01:00';
+                const url = `/api/calendario/eventos?start=${start}&end=${end}`;
+
+                document.getElementById('url3').textContent = url;
+
+                console.log('=== TEST 3: URL Directa (sin encodear) ===');
+                console.log('URL completa:', url);
+
+                const response = await fetch(url);
+                console.log('Response status:', response.status);
+                console.log('Response headers:', [...response.headers.entries()]);
+
+                const text = await response.text();
+                console.log('Response text (first 1000 chars):', text.substring(0, 1000));
+
+                if (response.ok) {
+                    const data = JSON.parse(text);
+                    log('result3', `✓ SUCCESS: ${data.length} eventos recibidos`);
+                    log('result3', JSON.stringify(data.slice(0, 2), null, 2));
+                } else {
+                    log('result3', `✗ ERROR ${response.status}`, true);
+                    log('result3', text, true);
+                }
+            } catch (error) {
+                console.error('Error en test 3:', error);
+                log('result3', `✗ EXCEPTION: ${error.message}`, true);
+                log('result3', error.stack, true);
+            }
+        }
+
+        // Auto-ejecutar tests al cargar
+        window.addEventListener('DOMContentLoaded', () => {
+            console.log('Página de debug cargada. Haz clic en los botones para ejecutar tests.');
+        });
+    </script>
+</body>
+</html>

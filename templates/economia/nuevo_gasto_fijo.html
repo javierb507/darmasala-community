@@ -4,247 +4,146 @@
 
 {% block content %}
 <div class="row">
-    <div class="col-12">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2><i class="fas fa-calendar-plus"></i> Nuevo Gasto Fijo</h2>
-            <a href="{{ url_for('gastos_fijos') }}" class="btn btn-secondary">
-                <i class="fas fa-arrow-left"></i> Volver a Gastos Fijos
-            </a>
-        </div>
-    </div>
-</div>
-
-<div class="row">
-    <div class="col-md-8">
+    <div class="col-md-8 mx-auto">
         <div class="card">
-            <div class="card-header bg-success text-white">
-                <h5 class="mb-0">
-                    <i class="fas fa-plus"></i> Datos del Gasto Fijo
-                </h5>
+            <div class="card-header bg-primary text-white">
+                <h4><i class="fas fa-sync-alt"></i> Crear Nuevo Gasto Fijo (Recurrente)</h4>
             </div>
             <div class="card-body">
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i>
+                    Un gasto fijo es un gasto recurrente que se repite mensual, trimestral o anualmente.
+                    Ejemplos: alquiler, suministros, seguros, cuota de autónomo.
+                </div>
+
                 <form method="POST">
+                    <h5 class="border-bottom pb-2 mb-3">Datos del Gasto</h5>
+
+                    <div class="mb-3">
+                        <label for="nombre" class="form-label">Nombre del Gasto *</label>
+                        <input type="text" class="form-control" id="nombre" name="nombre"
+                               placeholder="Ej: Alquiler del local" required>
+                    </div>
+
                     <div class="row">
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label for="nombre" class="form-label">Nombre del Gasto *</label>
-                                <input type="text" class="form-control" id="nombre" name="nombre" required
-                                       placeholder="Ej: Alquiler del local">
-                            </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="proveedor_id" class="form-label">Proveedor</label>
+                            <select class="form-select" id="proveedor_id" name="proveedor_id">
+                                <option value="">Sin proveedor específico</option>
+                                {% for proveedor in proveedores %}
+                                <option value="{{ proveedor.id }}">{{ proveedor.nombre }}</option>
+                                {% endfor %}
+                            </select>
+                            <small class="form-text text-muted">
+                                <a href="{{ url_for('nuevo_proveedor') }}" target="_blank">
+                                    <i class="fas fa-plus"></i> Crear nuevo proveedor
+                                </a>
+                            </small>
                         </div>
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label for="categoria_id" class="form-label">Categoría *</label>
-                                <select class="form-select" id="categoria_id" name="categoria_id" required>
-                                    <option value="">Seleccionar categoría...</option>
-                                    {% for categoria in categorias %}
-                                    <option value="{{ categoria.id }}">{{ categoria.nombre }}</option>
-                                    {% endfor %}
-                                </select>
-                            </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="categoria_id" class="form-label">Categoría *</label>
+                            <select class="form-select" id="categoria_id" name="categoria_id" required>
+                                <option value="">Seleccione una categoría...</option>
+                                {% for categoria in categorias %}
+                                <option value="{{ categoria.id }}">{{ categoria.nombre }}</option>
+                                {% endfor %}
+                            </select>
                         </div>
                     </div>
 
                     <div class="mb-3">
                         <label for="descripcion" class="form-label">Descripción</label>
                         <textarea class="form-control" id="descripcion" name="descripcion" rows="2"
-                                  placeholder="Descripción detallada del gasto..."></textarea>
+                                  placeholder="Descripción adicional del gasto"></textarea>
                     </div>
 
+                    <h5 class="border-bottom pb-2 mb-3 mt-4">Periodicidad</h5>
+
                     <div class="row">
-                        <div class="col-md-4">
-                            <div class="mb-3">
-                                <label for="importe" class="form-label">Importe (€) *</label>
-                                <input type="number" class="form-control" id="importe" name="importe" 
-                                       step="0.01" min="0" required placeholder="0.00">
+                        <div class="col-md-4 mb-3">
+                            <label for="importe" class="form-label">Importe *</label>
+                            <div class="input-group">
+                                <span class="input-group-text">€</span>
+                                <input type="number" class="form-control" id="importe" name="importe"
+                                       step="0.01" min="0" required>
                             </div>
                         </div>
-                        <div class="col-md-4">
-                            <div class="mb-3">
-                                <label for="frecuencia" class="form-label">Frecuencia *</label>
-                                <select class="form-select" id="frecuencia" name="frecuencia" required onchange="actualizarDiaCargo()">
-                                    <option value="mensual">Mensual</option>
-                                    <option value="trimestral">Trimestral</option>
-                                    <option value="anual">Anual</option>
-                                </select>
-                            </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="frecuencia" class="form-label">Frecuencia *</label>
+                            <select class="form-select" id="frecuencia" name="frecuencia" required onchange="updateEstimatedCost()">
+                                <option value="mensual">Mensual</option>
+                                <option value="trimestral">Trimestral</option>
+                                <option value="anual">Anual</option>
+                            </select>
                         </div>
-                        <div class="col-md-4">
-                            <div class="mb-3">
-                                <label for="dia_cargo" class="form-label">Día de Cargo</label>
-                                <select class="form-select" id="dia_cargo" name="dia_cargo">
-                                    {% for i in range(1, 32) %}
-                                    <option value="{{ i }}" {% if i == 1 %}selected{% endif %}>{{ i }}</option>
-                                    {% endfor %}
-                                </select>
-                            </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="dia_cargo" class="form-label">Día de Cargo</label>
+                            <input type="number" class="form-control" id="dia_cargo" name="dia_cargo"
+                                   min="1" max="31" value="1">
+                            <small class="form-text text-muted">Día del mes (1-31)</small>
                         </div>
                     </div>
 
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label for="fecha_inicio" class="form-label">Fecha de Inicio *</label>
-                                <input type="date" class="form-control" id="fecha_inicio" name="fecha_inicio" 
-                                       value="{{ fecha_hoy.strftime('%Y-%m-%d') }}" required>
-                            </div>
+                    <div class="card bg-light mb-3">
+                        <div class="card-body">
+                            <h6>Coste Anual Estimado:</h6>
+                            <h3 id="coste_anual">€0.00</h3>
                         </div>
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label for="fecha_fin" class="form-label">Fecha de Fin (Opcional)</label>
-                                <input type="date" class="form-control" id="fecha_fin" name="fecha_fin"
-                                       placeholder="Dejar vacío para gasto indefinido">
-                            </div>
+                    </div>
+
+                    <h5 class="border-bottom pb-2 mb-3 mt-4">Periodo de Vigencia</h5>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="fecha_inicio" class="form-label">Fecha de Inicio *</label>
+                            <input type="date" class="form-control" id="fecha_inicio" name="fecha_inicio"
+                                   value="{{ fecha_hoy }}" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="fecha_fin" class="form-label">Fecha de Fin (Opcional)</label>
+                            <input type="date" class="form-control" id="fecha_fin" name="fecha_fin">
+                            <small class="form-text text-muted">Dejar vacío si no tiene fecha de fin</small>
                         </div>
                     </div>
 
                     <div class="mb-3">
                         <label for="notas" class="form-label">Notas</label>
                         <textarea class="form-control" id="notas" name="notas" rows="2"
-                                  placeholder="Notas adicionales sobre el gasto..."></textarea>
+                                  placeholder="Notas adicionales, condiciones, etc."></textarea>
                     </div>
 
-                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                        <a href="{{ url_for('gastos_fijos') }}" class="btn btn-secondary me-md-2">Cancelar</a>
-                        <button type="submit" class="btn btn-success">
-                            <i class="fas fa-save"></i> Guardar Gasto Fijo
+                    <div class="d-flex justify-content-between mt-4">
+                        <a href="{{ url_for('gastos_fijos') }}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Cancelar
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Crear Gasto Fijo
                         </button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
-
-    <div class="col-md-4">
-        <div class="card">
-            <div class="card-header bg-info text-white">
-                <h6 class="mb-0">
-                    <i class="fas fa-info-circle"></i> Información
-                </h6>
-            </div>
-            <div class="card-body">
-                <p class="small text-muted">
-                    <strong>Frecuencia:</strong> Define cada cuánto se repite el gasto.
-                </p>
-                <p class="small text-muted">
-                    <strong>Día de Cargo:</strong> Día del mes en que se realiza el pago.
-                </p>
-                <p class="small text-muted">
-                    <strong>Fecha de Fin:</strong> Opcional. Dejar vacío para gasto indefinido.
-                </p>
-            </div>
-        </div>
-
-        <div class="card mt-3">
-            <div class="card-header bg-warning text-dark">
-                <h6 class="mb-0">
-                    <i class="fas fa-lightbulb"></i> Gastos Fijos Comunes
-                </h6>
-            </div>
-            <div class="card-body">
-                <ul class="list-unstyled small">
-                    <li><i class="fas fa-home text-primary"></i> <strong>Alquiler:</strong> Local, equipos</li>
-                    <li><i class="fas fa-bolt text-warning"></i> <strong>Suministros:</strong> Luz, agua, gas</li>
-                    <li><i class="fas fa-phone text-info"></i> <strong>Telecomunicaciones:</strong> Internet, teléfono</li>
-                    <li><i class="fas fa-shield-alt text-success"></i> <strong>Seguros:</strong> Responsabilidad civil</li>
-                    <li><i class="fas fa-tools text-secondary"></i> <strong>Mantenimiento:</strong> Limpieza, reparaciones</li>
-                    <li><i class="fas fa-graduation-cap text-purple"></i> <strong>Formación:</strong> Cursos, certificaciones</li>
-                </ul>
-            </div>
-        </div>
-
-        <div class="card mt-3">
-            <div class="card-header bg-success text-white">
-                <h6 class="mb-0">
-                    <i class="fas fa-calculator"></i> Cálculo Estimado
-                </h6>
-            </div>
-            <div class="card-body">
-                <div class="row text-center">
-                    <div class="col-6">
-                        <small class="text-muted">Mensual</small>
-                        <div id="costo_mensual" class="h5 mb-0 text-primary">0.00€</div>
-                    </div>
-                    <div class="col-6">
-                        <small class="text-muted">Anual</small>
-                        <div id="costo_anual" class="h5 mb-0 text-success">0.00€</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
 </div>
 
 <script>
-function actualizarDiaCargo() {
-    const frecuencia = document.getElementById('frecuencia').value;
-    const diaCargo = document.getElementById('dia_cargo');
-    
-    // Limpiar opciones
-    diaCargo.innerHTML = '';
-    
-    if (frecuencia === 'mensual') {
-        // Días 1-31 para gastos mensuales
-        for (let i = 1; i <= 31; i++) {
-            const option = document.createElement('option');
-            option.value = i;
-            option.textContent = i;
-            if (i === 1) option.selected = true;
-            diaCargo.appendChild(option);
-        }
-    } else if (frecuencia === 'trimestral') {
-        // Días 1-31 para gastos trimestrales
-        for (let i = 1; i <= 31; i++) {
-            const option = document.createElement('option');
-            option.value = i;
-            option.textContent = i;
-            if (i === 1) option.selected = true;
-            diaCargo.appendChild(option);
-        }
-    } else if (frecuencia === 'anual') {
-        // Días 1-31 para gastos anuales
-        for (let i = 1; i <= 31; i++) {
-            const option = document.createElement('option');
-            option.value = i;
-            option.textContent = i;
-            if (i === 1) option.selected = true;
-            diaCargo.appendChild(option);
-        }
-    }
-    
-    calcularCostos();
-}
-
-function calcularCostos() {
+function updateEstimatedCost() {
     const importe = parseFloat(document.getElementById('importe').value) || 0;
     const frecuencia = document.getElementById('frecuencia').value;
-    
-    let costoMensual = 0;
-    let costoAnual = 0;
-    
+
+    let costeAnual = 0;
     if (frecuencia === 'mensual') {
-        costoMensual = importe;
-        costoAnual = importe * 12;
+        costeAnual = importe * 12;
     } else if (frecuencia === 'trimestral') {
-        costoMensual = importe / 3;
-        costoAnual = importe * 4;
+        costeAnual = importe * 4;
     } else if (frecuencia === 'anual') {
-        costoMensual = importe / 12;
-        costoAnual = importe;
+        costeAnual = importe;
     }
-    
-    document.getElementById('costo_mensual').textContent = costoMensual.toFixed(2) + '€';
-    document.getElementById('costo_anual').textContent = costoAnual.toFixed(2) + '€';
+
+    document.getElementById('coste_anual').textContent = `€${costeAnual.toFixed(2)}`;
 }
 
-// Event listeners
-document.getElementById('importe').addEventListener('input', calcularCostos);
-document.getElementById('frecuencia').addEventListener('change', actualizarDiaCargo);
-
-// Calcular al cargar la página
-document.addEventListener('DOMContentLoaded', function() {
-    actualizarDiaCargo();
-    calcularCostos();
-});
+document.getElementById('importe').addEventListener('input', updateEstimatedCost);
+document.addEventListener('DOMContentLoaded', updateEstimatedCost);
 </script>
 {% endblock %}

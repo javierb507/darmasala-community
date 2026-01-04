@@ -15,46 +15,101 @@
         </div>
     </div>
 
-    <!-- Sutra Semanal -->
-    {% if sutra_semanal %}
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="card border-0 shadow-sm sutra-card">
-                <div class="card-body p-3">
-                    <div class="row align-items-center">
-                        <div class="col-md-1 text-center">
-                            <div class="sutra-icon">
-                                <i class="fas fa-om text-primary" style="font-size: 2rem;"></i>
-                            </div>
-                        </div>
-                        <div class="col-md-11">
-                            <div class="sutra-content">
-                                <div class="d-flex justify-content-between align-items-center mb-2">
-                                    <h5 class="text-primary mb-0">
-                                        <i class="fas fa-quote-left me-1"></i>
-                                        Sutra de la Semana
-                                    </h5>
-                                    <span class="badge bg-primary sutra-number">{{ sutra_semanal.numero_formateado }}</span>
-                                </div>
-                                
-                                <div class="sutra-texts">
-                                    <!-- Sánscrito -->
-                                    <div class="sanskrit-text mb-2">
-                                        {{ sutra_semanal.sanscrito }}
-                                    </div>
-                                    
-                                    <!-- Transliteración -->
-                                    <div class="transliteration mb-2">
-                                        {{ sutra_semanal.transliteracion }}
-                                    </div>
-                                    
-                                    <!-- Traducción -->
-                                    <div class="translation">
-                                        {{ sutra_semanal.traduccion }}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+<div class="row">
+    <div class="col-md-4">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="fas fa-users fa-3x text-primary mb-3"></i>
+                <h5 class="card-title">Alumnos</h5>
+                <p class="card-text">Gestionar registros e información de alumnos</p>
+                <a href="{{ url_for('alumnos') }}" class="btn btn-primary">
+                    <i class="fas fa-eye"></i> Ver Alumnos
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="fas fa-user-plus fa-3x text-success mb-3"></i>
+                <h5 class="card-title">Nuevo Alumno</h5>
+                <p class="card-text">Registrar un nuevo alumno</p>
+                <a href="{{ url_for('nuevo_alumno') }}" class="btn btn-success">
+                    <i class="fas fa-plus"></i> Agregar Alumno
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="fas fa-calendar-alt fa-3x text-info mb-3"></i>
+                <h5 class="card-title">Horarios</h5>
+                <p class="card-text">Configurar horarios semanales de clases</p>
+                <a href="{{ url_for('horarios') }}" class="btn btn-info">
+                    <i class="fas fa-calendar"></i> Ver Horarios
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-4">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="fas fa-clipboard-check fa-3x text-warning mb-3"></i>
+                <h5 class="card-title">Asistencias</h5>
+                <p class="card-text">Registrar asistencias a las clases</p>
+                <a href="{{ url_for('calendario') }}" class="btn btn-warning">
+                    <i class="fas fa-clipboard-check"></i> Ver Asistencias
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="fas fa-chart-bar fa-3x text-primary mb-3"></i>
+                <h5 class="card-title">Reportes</h5>
+                <p class="card-text">Consultar asistencias y estadísticas</p>
+                <a href="{{ url_for('reporte_asistencia') }}" class="btn btn-primary">
+                    <i class="fas fa-chart-bar"></i> Ver Reportes
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="fas fa-plus-circle fa-3x text-success mb-3"></i>
+                <h5 class="card-title">Registrar Asistencia</h5>
+                <p class="card-text">Marcar asistencia después de cada clase</p>
+                <a href="{{ url_for('registrar_asistencia') }}" class="btn btn-success">
+                    <i class="fas fa-plus"></i> Registrar
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-info-circle"></i> Información del Sistema
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Base de Datos</h6>
+                        <p class="text-muted">SQLite - No requiere instalación, perfecto para laptops con recursos limitados</p>
                     </div>
                 </div>
             </div>

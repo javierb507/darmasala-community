@@ -4,221 +4,164 @@
 
 {% block content %}
 <div class="row">
-    <div class="col-12">
+    <div class="col-md-12">
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2><i class="fas fa-calendar-alt"></i> Gastos Fijos</h2>
-            <div class="btn-group">
-                <a href="{{ url_for('nuevo_gasto_fijo') }}" class="btn btn-success">
+            <h2><i class="fas fa-sync-alt"></i> Gastos Fijos (Recurrentes)</h2>
+            <div>
+                <a href="{{ url_for('nuevo_gasto_fijo') }}" class="btn btn-primary">
                     <i class="fas fa-plus"></i> Nuevo Gasto Fijo
                 </a>
-                <a href="{{ url_for('economia') }}" class="btn btn-secondary">
-                    <i class="fas fa-arrow-left"></i> Volver a Economía
+                <a href="{{ url_for('economia') }}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left"></i> Volver
                 </a>
             </div>
         </div>
-    </div>
-</div>
 
-<div class="row">
-    <div class="col-12">
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle"></i>
+            <strong>¿Qué son los gastos fijos?</strong>
+            Son gastos recurrentes y predecibles que se repiten mensual, trimestral o anualmente.
+            Ejemplos: alquiler del local, suministros (luz, agua, gas), seguros, cuotas de autónomo, etc.
+        </div>
+
+        {% if gastos %}
+        <!-- Resumen -->
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <div class="card bg-primary text-white">
+                    <div class="card-body">
+                        <h6>Total Mensual</h6>
+                        <h3>
+                            €{{ "%.2f"|format(gastos|sum(attribute='importe') if gastos[0].frecuencia == 'mensual' else
+                                              (gastos|selectattr('frecuencia', 'equalto', 'mensual')|sum(attribute='importe') or 0) +
+                                              (gastos|selectattr('frecuencia', 'equalto', 'trimestral')|sum(attribute='importe') or 0) / 3 +
+                                              (gastos|selectattr('frecuencia', 'equalto', 'anual')|sum(attribute='importe') or 0) / 12) }}
+                        </h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card bg-success text-white">
+                    <div class="card-body">
+                        <h6>Total Anual Estimado</h6>
+                        <h3>
+                            €{{ "%.2f"|format((gastos|selectattr('frecuencia', 'equalto', 'mensual')|sum(attribute='importe') or 0) * 12 +
+                                              (gastos|selectattr('frecuencia', 'equalto', 'trimestral')|sum(attribute='importe') or 0) * 4 +
+                                              (gastos|selectattr('frecuencia', 'equalto', 'anual')|sum(attribute='importe') or 0)) }}
+                        </h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card bg-info text-white">
+                    <div class="card-body">
+                        <h6>Gastos Activos</h6>
+                        <h3>{{ gastos|length }}</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabla de gastos fijos -->
         <div class="card">
             <div class="card-header">
-                <h5 class="mb-0">Lista de Gastos Fijos</h5>
+                <h5 class="mb-0"><i class="fas fa-list"></i> Listado de Gastos Fijos</h5>
             </div>
             <div class="card-body">
-                {% if gastos %}
-                    <div class="table-responsive">
-                        <table class="table table-striped table-hover">
-                            <thead class="table-dark">
-                                <tr>
-                                    <th>Nombre</th>
-                                    <th>Categoría</th>
-                                    <th>Importe</th>
-                                    <th>Frecuencia</th>
-                                    <th>Día de Cargo</th>
-                                    <th>Período</th>
-                                    <th>Estado</th>
-                                    <th>Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for gasto in gastos %}
-                                <tr>
-                                    <td>
-                                        <div class="d-flex align-items-center">
-                                            <div class="gasto-icon me-2">
-                                                <i class="fas fa-calendar-check"></i>
-                                            </div>
-                                            <div>
-                                                <strong>{{ gasto.nombre }}</strong>
-                                                {% if gasto.descripcion %}
-                                                <br>
-                                                <small class="text-muted">{{ gasto.descripcion }}</small>
-                                                {% endif %}
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <span class="badge" style="background-color: {{ gasto.categoria.color }};">
-                                            {{ gasto.categoria.nombre }}
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <strong>{{ "%.2f"|format(gasto.importe) }}€</strong>
-                                    </td>
-                                    <td>
-                                        <span class="badge bg-info">
-                                            {{ gasto.frecuencia.title() }}
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <span class="badge bg-secondary">
-                                            Día {{ gasto.dia_cargo }}
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <small>
-                                            Desde: {{ gasto.fecha_inicio.strftime('%d/%m/%Y') }}<br>
-                                            {% if gasto.fecha_fin %}
-                                            Hasta: {{ gasto.fecha_fin.strftime('%d/%m/%Y') }}
-                                            {% else %}
-                                            <span class="text-success">Indefinido</span>
-                                            {% endif %}
-                                        </small>
-                                    </td>
-                                    <td>
-                                        <span class="badge {% if gasto.activo %}bg-success{% else %}bg-secondary{% endif %}">
-                                            {% if gasto.activo %}Activo{% else %}Inactivo{% endif %}
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <div class="btn-group-vertical btn-group-sm" role="group">
-                                            <a href="{{ url_for('editar_gasto_fijo', gasto_id=gasto.id) }}" 
-                                               class="btn btn-outline-warning btn-sm" 
-                                               title="Editar">
-                                                <i class="fas fa-edit"></i>
-                                            </a>
-                                            <button class="btn btn-outline-danger btn-sm" 
-                                                    title="Desactivar"
-                                                    onclick="desactivarGasto({{ gasto.id }}, '{{ gasto.nombre }}')">
-                                                <i class="fas fa-trash"></i>
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Proveedor</th>
+                                <th>Categoría</th>
+                                <th>Importe</th>
+                                <th>Frecuencia</th>
+                                <th>Día Cargo</th>
+                                <th>Anual Estimado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for gasto in gastos %}
+                            <tr>
+                                <td>
+                                    <strong>{{ gasto.nombre }}</strong>
+                                    {% if gasto.descripcion %}
+                                    <br><small class="text-muted">{{ gasto.descripcion[:50] }}{% if gasto.descripcion|length > 50 %}...{% endif %}</small>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if gasto.proveedor %}
+                                        {{ gasto.proveedor.nombre }}
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <span class="badge" style="background-color: {{ gasto.categoria.color }}">
+                                        {{ gasto.categoria.nombre }}
+                                    </span>
+                                </td>
+                                <td><strong>€{{ "%.2f"|format(gasto.importe) }}</strong></td>
+                                <td>
+                                    {% if gasto.frecuencia == 'mensual' %}
+                                        <span class="badge bg-primary">Mensual</span>
+                                    {% elif gasto.frecuencia == 'trimestral' %}
+                                        <span class="badge bg-info">Trimestral</span>
+                                    {% elif gasto.frecuencia == 'anual' %}
+                                        <span class="badge bg-success">Anual</span>
+                                    {% endif %}
+                                </td>
+                                <td>Día {{ gasto.dia_cargo }}</td>
+                                <td>
+                                    <strong>€{{ "%.2f"|format(gasto.get_importe_anual()) }}</strong>
+                                </td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-primary" title="Ver detalles">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-secondary" title="Editar">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="card">
+            <div class="card-body text-center py-5">
+                <i class="fas fa-sync-alt fa-4x text-muted mb-3"></i>
+                <h4 class="text-muted">No hay gastos fijos registrados</h4>
+                <p class="text-muted mb-4">
+                    Los gastos fijos son gastos recurrentes como alquiler, suministros, seguros, etc.<br>
+                    Una vez configurados, se pueden controlar fácilmente mes a mes.
+                </p>
+                <a href="{{ url_for('nuevo_gasto_fijo') }}" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Crear Primer Gasto Fijo
+                </a>
+            </div>
+        </div>
+        {% endif %}
 
-                    <!-- Resumen de gastos fijos -->
-                    <div class="row mt-4">
-                        <div class="col-md-6">
-                            <div class="card bg-light">
-                                <div class="card-body">
-                                    <h6 class="card-title">
-                                        <i class="fas fa-calculator"></i> Resumen Mensual
-                                    </h6>
-                                    <div class="row text-center">
-                                        <div class="col-6">
-                                            <small class="text-muted">Gastos Activos</small>
-                                            <div class="h5 mb-0 text-success">
-                                                {{ "%.2f"|format(gastos | selectattr('activo') | map(attribute='importe') | sum) }}€
-                                            </div>
-                                        </div>
-                                        <div class="col-6">
-                                            <small class="text-muted">Total Anual</small>
-                                            <div class="h5 mb-0 text-primary">
-                                                {{ "%.2f"|format((gastos | selectattr('activo') | map(attribute='importe') | sum) * 12) }}€
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="card bg-light">
-                                <div class="card-body">
-                                    <h6 class="card-title">
-                                        <i class="fas fa-chart-pie"></i> Por Frecuencia
-                                    </h6>
-                                    <div class="row text-center">
-                                        <div class="col-4">
-                                            <small class="text-muted">Mensual</small>
-                                            <div class="h6 mb-0">
-                                                {{ gastos | selectattr('frecuencia', 'equalto', 'mensual') | selectattr('activo') | list | length }}
-                                            </div>
-                                        </div>
-                                        <div class="col-4">
-                                            <small class="text-muted">Trimestral</small>
-                                            <div class="h6 mb-0">
-                                                {{ gastos | selectattr('frecuencia', 'equalto', 'trimestral') | selectattr('activo') | list | length }}
-                                            </div>
-                                        </div>
-                                        <div class="col-4">
-                                            <small class="text-muted">Anual</small>
-                                            <div class="h6 mb-0">
-                                                {{ gastos | selectattr('frecuencia', 'equalto', 'anual') | selectattr('activo') | list | length }}
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                {% else %}
-                    <div class="text-center py-5">
-                        <i class="fas fa-calendar-alt fa-5x text-muted mb-3"></i>
-                        <h3 class="text-muted">No hay gastos fijos registrados</h3>
-                        <p class="text-muted">Comienza agregando tus gastos fijos para un mejor control económico.</p>
-                        <a href="{{ url_for('nuevo_gasto_fijo') }}" class="btn btn-success">
-                            <i class="fas fa-plus"></i> Agregar Primer Gasto Fijo
-                        </a>
-                    </div>
-                {% endif %}
+        <!-- Información adicional -->
+        <div class="card mt-4">
+            <div class="card-header bg-light">
+                <h6 class="mb-0"><i class="fas fa-lightbulb"></i> Consejos</h6>
+            </div>
+            <div class="card-body">
+                <ul class="mb-0">
+                    <li><strong>Gastos Fijos:</strong> Son predecibles y se repiten regularmente (alquiler, luz, agua, seguros, cuota de autónomo)</li>
+                    <li><strong>Gastos Variables:</strong> Son ocasionales y no predecibles (compra de material, formaciones, reparaciones)</li>
+                    <li><strong>Ventaja:</strong> Conociendo tus gastos fijos mensuales puedes calcular fácilmente el punto de equilibrio de tu negocio</li>
+                    <li><strong>Recomendación:</strong> Revisa tus gastos fijos cada 6 meses para optimizar costes</li>
+                </ul>
             </div>
         </div>
     </div>
 </div>
-
-<style>
-.gasto-icon {
-    width: 40px;
-    height: 40px;
-    border-radius: 8px;
-    background: linear-gradient(135deg, #28a745, #20c997);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-size: 16px;
-}
-
-.table td {
-    vertical-align: middle;
-}
-
-.btn-group-vertical .btn {
-    margin-bottom: 2px;
-    width: 32px;
-    height: 32px;
-    padding: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-</style>
-
-<script>
-function desactivarGasto(gastoId, nombreGasto) {
-    if (confirm(`¿Estás seguro de que quieres desactivar el gasto fijo "${nombreGasto}"?\n\nSe marcará como inactivo pero no se eliminará.`)) {
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = `/gastos-fijos/${gastoId}/eliminar`;
-        
-        document.body.appendChild(form);
-        form.submit();
-    }
-}
-</script>
 {% endblock %}

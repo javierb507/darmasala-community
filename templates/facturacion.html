@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+
+{% block title %}Facturación - Atma suddhi{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2><i class="fas fa-file-invoice"></i> Facturación</h2>
+            <div>
+                <a href="{{ url_for('nueva_factura_emitida') }}" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Nueva Factura
+                </a>
+                <a href="{{ url_for('clientes_facturacion') }}" class="btn btn-outline-secondary">
+                    <i class="fas fa-users"></i> Clientes
+                </a>
+                <a href="{{ url_for('configuracion_fiscal') }}" class="btn btn-outline-info">
+                    <i class="fas fa-cog"></i> Configuración Fiscal
+                </a>
+            </div>
+        </div>
+
+        {% if not config_fiscal or not config_fiscal.nif or config_fiscal.nif == '12345678Z' %}
+        <div class="alert alert-warning">
+            <i class="fas fa-exclamation-triangle"></i>
+            <strong>Atención:</strong> Debe completar la <a href="{{ url_for('configuracion_fiscal') }}">configuración fiscal</a> con los datos reales de su negocio antes de emitir facturas.
+        </div>
+        {% endif %}
+
+        <!-- Estadísticas -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card text-white bg-primary">
+                    <div class="card-body">
+                        <h5 class="card-title"><i class="fas fa-euro-sign"></i> Total Facturado ({{ current_year }})</h5>
+                        <h3>€{{ "%.2f"|format(total_facturado) }}</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-white bg-success">
+                    <div class="card-body">
+                        <h5 class="card-title"><i class="fas fa-check-circle"></i> Facturas Pagadas</h5>
+                        <h3>{{ facturas_pagadas }}</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-white bg-warning">
+                    <div class="card-body">
+                        <h5 class="card-title"><i class="fas fa-clock"></i> Facturas Pendientes</h5>
+                        <h3>{{ facturas_pendientes }}</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-white bg-info">
+                    <div class="card-body">
+                        <h5 class="card-title"><i class="fas fa-calendar-alt"></i> Año Fiscal</h5>
+                        <h3>{{ current_year }}</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Listado de Facturas Recientes -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-list"></i> Facturas Recientes</h5>
+            </div>
+            <div class="card-body">
+                {% if facturas %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Número</th>
+                                <th>Fecha</th>
+                                <th>Cliente</th>
+                                <th>Base Imponible</th>
+                                <th>IVA</th>
+                                <th>Retención</th>
+                                <th>Total</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for factura in facturas %}
+                            <tr>
+                                <td><strong>{{ factura.numero_completo }}</strong></td>
+                                <td>{{ factura.fecha_emision.strftime('%d/%m/%Y') }}</td>
+                                <td>{{ factura.cliente.nombre }}</td>
+                                <td>€{{ "%.2f"|format(factura.base_imponible) }}</td>
+                                <td>
+                                    {% if factura.exenta_iva %}
+                                        <span class="badge bg-secondary">Exento</span>
+                                    {% else %}
+                                        €{{ "%.2f"|format(factura.cuota_iva) }}
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if factura.cuota_retencion > 0 %}
+                                        -€{{ "%.2f"|format(factura.cuota_retencion) }}
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </td>
+                                <td><strong>€{{ "%.2f"|format(factura.total) }}</strong></td>
+                                <td>
+                                    {% if factura.estado == 'emitida' %}
+                                        <span class="badge bg-warning">Emitida</span>
+                                    {% elif factura.estado == 'pagada' %}
+                                        <span class="badge bg-success">Pagada</span>
+                                    {% elif factura.estado == 'anulada' %}
+                                        <span class="badge bg-danger">Anulada</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a href="{{ url_for('ver_factura_emitida', factura_id=factura.id) }}" class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-eye"></i> Ver
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-file-invoice fa-4x text-muted mb-3"></i>
+                    <p class="text-muted">No hay facturas emitidas aún.</p>
+                    <a href="{{ url_for('nueva_factura_emitida') }}" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Emitir Primera Factura
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

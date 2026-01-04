@@ -135,13 +135,18 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('alumnos') }}">
-                            <i class="fas fa-users"></i> Alumnos
+                        <a class="nav-link" href="{{ url_for('calendario') }}">
+                            <i class="fas fa-calendar"></i> Calendario
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('calendario_unificado') }}">
-                            <i class="fas fa-calendar-alt"></i> Calendario
+                        <a class="nav-link" href="{{ url_for('horarios') }}">
+                            <i class="fas fa-clock"></i> Horarios
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('calendario') }}">
+                            <i class="fas fa-clipboard-check"></i> Asistencias
                         </a>
                     </li>
                     <li class="nav-item dropdown">
@@ -169,46 +174,21 @@
                             <i class="fas fa-user-md"></i> Yogaterapia
                         </a>
                     </li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                            <i class="fas fa-cog"></i> Configuración
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="{{ url_for('configuracion') }}">
-                                <i class="fas fa-home"></i> Panel General
-                            </a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="{{ url_for('clases') }}">
-                                <i class="fas fa-dumbbell"></i> Gestión de Clases
-                            </a></li>
-                            <li><a class="dropdown-item" href="{{ url_for('horarios') }}">
-                                <i class="fas fa-clock"></i> Horarios Periódicos
-                            </a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="{{ url_for('backup') }}">
-                                <i class="fas fa-database"></i> Backup
-                            </a></li>
-                            <li><a class="dropdown-item" href="{{ url_for('exportar') }}">
-                                <i class="fas fa-download"></i> Exportar
-                            </a></li>
-                        </ul>
-                    </li>
-                    
-                    <!-- Información del usuario -->
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                            <i class="fas fa-user-circle"></i> {{ session.username or 'Usuario' }}
-                        </a>
-                        <ul class="dropdown-menu dropdown-menu-end">
-                            <li><a class="dropdown-item" href="{{ url_for('configuracion') }}">
-                                <i class="fas fa-user-cog"></i> Mi Perfil
-                            </a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="{{ url_for('logout') }}">
-                                <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
-                            </a></li>
-                        </ul>
-                    </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('economia') }}">
+                                <i class="fas fa-chart-line"></i> Gestión Económica
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('configuracion') }}">
+                                <i class="fas fa-cog"></i> Configuración
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="http://atmasuddhi.es" target="_blank">
+                                <i class="fas fa-external-link-alt"></i> Web Atma suddhi
+                            </a>
+                        </li>
                 </ul>
             </div>
         </div>

@@ -1,0 +1,31 @@
+{% macro render_payment_calendar(alumno, calendario, current_year) %}
+{# Macro para renderizar el calendario de pagos de un alumno #}
+<div class="payment-status">
+    <!-- Estado de Matrícula -->
+    <div class="mb-2">
+        {% set año_academico_formato = calendario.get_año_academico_formato() %}
+        {% if calendario.verificar_matricula_vigente(alumno.fecha_matricula) and alumno.matricula_pagada %}
+            <span class="badge bg-success">
+                <i class="fas fa-check"></i> Matrícula {{ año_academico_formato }}
+            </span>
+        {% else %}
+            <span class="badge bg-warning">
+                <i class="fas fa-exclamation"></i> Matrícula {{ año_academico_formato }} Pendiente
+            </span>
+        {% endif %}
+    </div>
+
+    <!-- Estado de Pagos Mensuales/Bimensuales -->
+    <div class="monthly-payments">
+        {% set es_bimensual = alumno.tipo_cuota.endswith('_bimensual') %}
+        {% set periodos = calendario.generar_periodos_con_pagos(es_bimensual, alumno.pagos) %}
+
+        {% for periodo in periodos %}
+            <span class="badge {{ periodo.clase_css }} text-white me-1 mb-1"
+                  title="{{ periodo.tooltip }}">
+                {{ periodo.nombre_corto }}
+            </span>
+        {% endfor %}
+    </div>
+</div>
+{% endmacro %}

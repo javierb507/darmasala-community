@@ -41,67 +41,53 @@
                                 </div>
                             </div>
                         </div>
-                        
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="fecha_nacimiento" class="form-label">Fecha de Nacimiento</label>
-                                    <input type="date" class="form-control" id="fecha_nacimiento" name="fecha_nacimiento">
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="tipo_cuota" class="form-label">Tipo de Cuota</label>
-                                    <select class="form-select" id="tipo_cuota" name="tipo_cuota">
-                                        <option value="pendiente" selected>Pendiente de asignación</option>
-                                        {% if tipos_clase %}
-                                            {% for tipo in tipos_clase %}
-                                                <option value="{{ tipo.codigo }}">
-                                                    {{ tipo.nombre }} ({{ tipo.get_precio_display() }})
-                                                </option>
-                                            {% endfor %}
-                                        {% else %}
-                                            <!-- Fallback si no hay tipos configurados -->
-                                            <option value="clase_suelta">Clase suelta (15€/clase)</option>
-                                            <option value="1_clase_semanal">1 clase por semana (40€/mes)</option>
-                                            <option value="2_clases_semanal">2 clases por semana (70€/mes)</option>
-                                            <option value="plana">Tarifa plana (90€/mes)</option>
-                                            <option value="1_clase_bimensual">1 clase bimensual (75€/bimestre)</option>
-                                            <option value="2_clases_bimensual">2 clases bimensual (135€/bimestre)</option>
-                                        {% endif %}
-                                    </select>
-                                    <small class="form-text text-muted">
-                                        <i class="fas fa-info-circle"></i> 
-                                        Puedes dejar "Pendiente" si aún no has decidido el tipo de cuota y asignarlo más tarde.
-                                    </small>
-                                </div>
-                            </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="dni" class="form-label">DNI/NIE</label>
+                            <input type="text" class="form-control" id="dni" name="dni" placeholder="12345678A">
                         </div>
-                        
-                        <div class="mb-3">
-                            <label for="direccion" class="form-label">Dirección</label>
-                            <textarea class="form-control" id="direccion" name="direccion" rows="2"></textarea>
+                        <div class="col-md-6 mb-3">
+                            <label for="email" class="form-label">Email *</label>
+                            <input type="email" class="form-control" id="email" name="email" required>
                         </div>
-                        
-                        <div class="row">
-                            <div class="col-md-4">
-                                <div class="mb-3">
-                                    <label for="ciudad" class="form-label">Ciudad</label>
-                                    <input type="text" class="form-control" id="ciudad" name="ciudad" value="Madrid">
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="mb-3">
-                                    <label for="codigo_postal" class="form-label">Código Postal</label>
-                                    <input type="text" class="form-control" id="codigo_postal" name="codigo_postal" placeholder="28001">
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="mb-3">
-                                    <label for="pais" class="form-label">País</label>
-                                    <input type="text" class="form-control" id="pais" name="pais" value="España">
-                                </div>
-                            </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="telefono" class="form-label">Teléfono</label>
+                            <input type="tel" class="form-control" id="telefono" name="telefono">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="fecha_nacimiento" class="form-label">Fecha de Nacimiento</label>
+                            <input type="date" class="form-control" id="fecha_nacimiento" name="fecha_nacimiento">
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="direccion" class="form-label">Dirección</label>
+                        <textarea class="form-control" id="direccion" name="direccion" rows="3"></textarea>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="tipo_cuota" class="form-label">Tipo de Cuota *</label>
+                        <select class="form-select" id="tipo_cuota" name="tipo_cuota" required>
+                            <option value="clase_suelta">Clase suelta - €15.00</option>
+                            <option value="1_clase_semanal">1 clase por semana - €40.00</option>
+                            <option value="2_clases_semanal">2 clases por semana - €70.00</option>
+                            <option value="plana">Tarifa plana - €90.00</option>
+                            <option value="1_clase_bimensual">1 clase bimensual - €75.00</option>
+                            <option value="2_clases_bimensual">2 clases bimensual - €135.00</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="matricula_pagada" name="matricula_pagada">
+                            <label class="form-check-label" for="matricula_pagada">
+                                <strong>Matrícula pagada</strong>
+                            </label>
                         </div>
                         
                         <div class="mb-3">

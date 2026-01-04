@@ -1,0 +1,302 @@
+{% extends "base.html" %}
+
+{% block title %}Nueva Factura - Atma suddhi{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-10 mx-auto">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h4><i class="fas fa-file-invoice"></i> Emitir Nueva Factura</h4>
+            </div>
+            <div class="card-body">
+                {% if not config_fiscal or not config_fiscal.nif or config_fiscal.nif == '12345678Z' %}
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <strong>Atención:</strong> Debe completar la <a href="{{ url_for('configuracion_fiscal') }}">configuración fiscal</a> con los datos reales de su negocio antes de emitir facturas.
+                </div>
+                {% endif %}
+
+                <form method="POST" id="facturaForm">
+                    <h5 class="border-bottom pb-2 mb-3">Datos Generales</h5>
+
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label for="cliente_id" class="form-label">Cliente *</label>
+                            <select class="form-select" id="cliente_id" name="cliente_id" required>
+                                <option value="">Seleccione un cliente...</option>
+                                {% for cliente in clientes %}
+                                <option value="{{ cliente.id }}" data-tipo="{{ cliente.tipo_cliente }}">
+                                    {{ cliente.nombre }} ({{ cliente.nif_cif }})
+                                </option>
+                                {% endfor %}
+                            </select>
+                            <small class="form-text text-muted">
+                                <a href="{{ url_for('nuevo_cliente') }}" target="_blank">
+                                    <i class="fas fa-plus"></i> Crear nuevo cliente
+                                </a>
+                            </small>
+                        </div>
+                        <div class="col-md-2 mb-3">
+                            <label for="serie" class="form-label">Serie *</label>
+                            <input type="text" class="form-control" id="serie" name="serie"
+                                   value="{{ config_fiscal.serie_factura_default if config_fiscal else 'A' }}"
+                                   required maxlength="10">
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label for="fecha_emision" class="form-label">Fecha Emisión *</label>
+                            <input type="date" class="form-control" id="fecha_emision" name="fecha_emision"
+                                   value="{{ fecha_hoy }}" required>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label for="fecha_prestacion" class="form-label">Fecha Prestación *</label>
+                            <input type="date" class="form-control" id="fecha_prestacion" name="fecha_prestacion"
+                                   value="{{ fecha_hoy }}" required>
+                        </div>
+                    </div>
+
+                    <h5 class="border-bottom pb-2 mb-3 mt-4">Líneas de Factura</h5>
+
+                    <div id="lineasContainer">
+                        <!-- Las líneas se agregarán aquí dinámicamente -->
+                    </div>
+
+                    <button type="button" class="btn btn-outline-primary btn-sm mb-3" onclick="agregarLinea()">
+                        <i class="fas fa-plus"></i> Agregar Línea
+                    </button>
+
+                    {% if tarifas %}
+                    <div class="mb-3">
+                        <label class="form-label">Tarifas Rápidas:</label><br>
+                        {% for tarifa in tarifas %}
+                        <button type="button" class="btn btn-outline-info btn-sm me-1 mb-1"
+                                onclick="agregarLineaDesdeTarifa('{{ tarifa.nombre }}', {{ tarifa.precio }})">
+                            {{ tarifa.nombre }} (€{{ "%.2f"|format(tarifa.precio) }})
+                        </button>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    <h5 class="border-bottom pb-2 mb-3 mt-4">Impuestos y Retenciones</h5>
+
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="exenta_iva" name="exenta_iva"
+                                       {% if config_fiscal and config_fiscal.exento_iva %}checked{% endif %}
+                                       onchange="toggleIVA()">
+                                <label class="form-check-label" for="exenta_iva">
+                                    <strong>Exenta de IVA</strong>
+                                </label>
+                            </div>
+                            {% if config_fiscal and config_fiscal.texto_exencion_iva %}
+                            <small class="form-text text-muted">{{ config_fiscal.texto_exencion_iva }}</small>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="tipo_iva" class="form-label">Tipo IVA (%)</label>
+                            <select class="form-select" id="tipo_iva" name="tipo_iva" onchange="calcularTotales()">
+                                <option value="0">0% (Exento)</option>
+                                <option value="4">4% (Superreducido)</option>
+                                <option value="10">10% (Reducido)</option>
+                                <option value="21">21% (General)</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="tipo_retencion" class="form-label">IRPF Retención (%)</label>
+                            <select class="form-select" id="tipo_retencion" name="tipo_retencion" onchange="calcularTotales()">
+                                <option value="0">0% (Sin retención)</option>
+                                <option value="7" {% if config_fiscal and config_fiscal.tipo_retencion_default == 7 %}selected{% endif %}>7% (Profesionales)</option>
+                                <option value="15" {% if config_fiscal and config_fiscal.tipo_retencion_default == 15 %}selected{% endif %}>15% (Actividades)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="observaciones" class="form-label">Observaciones</label>
+                        <textarea class="form-control" id="observaciones" name="observaciones" rows="2"></textarea>
+                    </div>
+
+                    <h5 class="border-bottom pb-2 mb-3 mt-4">Resumen</h5>
+
+                    <div class="card bg-light">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <table class="table table-sm">
+                                        <tr>
+                                            <td><strong>Base Imponible:</strong></td>
+                                            <td class="text-end"><span id="baseImponible">€0.00</span></td>
+                                        </tr>
+                                        <tr id="rowIVA">
+                                            <td>IVA (<span id="porcentajeIVA">21</span>%):</td>
+                                            <td class="text-end"><span id="cuotaIVA">€0.00</span></td>
+                                        </tr>
+                                        <tr id="rowRetencion">
+                                            <td>IRPF Retención (<span id="porcentajeRetencion">7</span>%):</td>
+                                            <td class="text-end text-danger">-<span id="cuotaRetencion">€0.00</span></td>
+                                        </tr>
+                                        <tr class="border-top">
+                                            <td><strong>TOTAL:</strong></td>
+                                            <td class="text-end"><h4 class="mb-0"><span id="totalFactura">€0.00</span></h4></td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <input type="hidden" id="lineas_count" name="lineas_count" value="0">
+
+                    <div class="d-flex justify-content-between mt-4">
+                        <a href="{{ url_for('facturacion') }}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Cancelar
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Emitir Factura
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let lineasCount = 0;
+
+function agregarLinea(descripcion = '', cantidad = 1, precio = 0) {
+    const container = document.getElementById('lineasContainer');
+    const lineaDiv = document.createElement('div');
+    lineaDiv.className = 'row mb-2 linea-factura';
+    lineaDiv.id = `linea_${lineasCount}`;
+
+    lineaDiv.innerHTML = `
+        <div class="col-md-5">
+            <input type="text" class="form-control" name="linea_${lineasCount}_descripcion"
+                   placeholder="Descripción del servicio/producto" value="${descripcion}" required>
+        </div>
+        <div class="col-md-2">
+            <input type="number" class="form-control" name="linea_${lineasCount}_cantidad"
+                   placeholder="Cantidad" value="${cantidad}" step="0.01" min="0.01"
+                   onchange="calcularTotales()" required>
+        </div>
+        <div class="col-md-2">
+            <input type="number" class="form-control" name="linea_${lineasCount}_precio"
+                   placeholder="Precio €" value="${precio}" step="0.01" min="0"
+                   onchange="calcularTotales()" required>
+        </div>
+        <div class="col-md-2">
+            <input type="text" class="form-control bg-light" readonly
+                   id="linea_${lineasCount}_subtotal" value="€0.00">
+        </div>
+        <div class="col-md-1">
+            <button type="button" class="btn btn-sm btn-outline-danger" onclick="eliminarLinea(${lineasCount})">
+                <i class="fas fa-trash"></i>
+            </button>
+        </div>
+    `;
+
+    container.appendChild(lineaDiv);
+    lineasCount++;
+    document.getElementById('lineas_count').value = lineasCount;
+
+    calcularTotales();
+}
+
+function agregarLineaDesdeTarifa(nombre, precio) {
+    agregarLinea(nombre, 1, precio);
+}
+
+function eliminarLinea(index) {
+    const linea = document.getElementById(`linea_${index}`);
+    if (linea) {
+        linea.remove();
+        calcularTotales();
+    }
+}
+
+function calcularTotales() {
+    let baseImponible = 0;
+
+    // Calcular subtotales de cada línea
+    for (let i = 0; i < lineasCount; i++) {
+        const cantidadInput = document.querySelector(`input[name="linea_${i}_cantidad"]`);
+        const precioInput = document.querySelector(`input[name="linea_${i}_precio"]`);
+        const subtotalInput = document.getElementById(`linea_${i}_subtotal`);
+
+        if (cantidadInput && precioInput && subtotalInput) {
+            const cantidad = parseFloat(cantidadInput.value) || 0;
+            const precio = parseFloat(precioInput.value) || 0;
+            const subtotal = cantidad * precio;
+            subtotalInput.value = `€${subtotal.toFixed(2)}`;
+            baseImponible += subtotal;
+        }
+    }
+
+    // Mostrar base imponible
+    document.getElementById('baseImponible').textContent = `€${baseImponible.toFixed(2)}`;
+
+    // Calcular IVA
+    const exentaIVA = document.getElementById('exenta_iva').checked;
+    const tipoIVA = parseFloat(document.getElementById('tipo_iva').value) || 0;
+    const cuotaIVA = exentaIVA ? 0 : (baseImponible * tipoIVA / 100);
+
+    document.getElementById('porcentajeIVA').textContent = tipoIVA;
+    document.getElementById('cuotaIVA').textContent = `€${cuotaIVA.toFixed(2)}`;
+    document.getElementById('rowIVA').style.display = exentaIVA ? 'none' : 'table-row';
+
+    // Calcular retención IRPF
+    const tipoRetencion = parseFloat(document.getElementById('tipo_retencion').value) || 0;
+    const cuotaRetencion = baseImponible * tipoRetencion / 100;
+
+    document.getElementById('porcentajeRetencion').textContent = tipoRetencion;
+    document.getElementById('cuotaRetencion').textContent = `€${cuotaRetencion.toFixed(2)}`;
+    document.getElementById('rowRetencion').style.display = tipoRetencion > 0 ? 'table-row' : 'none';
+
+    // Calcular total
+    const total = baseImponible + cuotaIVA - cuotaRetencion;
+    document.getElementById('totalFactura').textContent = `€${total.toFixed(2)}`;
+}
+
+function toggleIVA() {
+    const exentaIVA = document.getElementById('exenta_iva').checked;
+    const tipoIVASelect = document.getElementById('tipo_iva');
+
+    if (exentaIVA) {
+        tipoIVASelect.value = '0';
+        tipoIVASelect.disabled = true;
+    } else {
+        tipoIVASelect.disabled = false;
+        tipoIVASelect.value = '21';
+    }
+
+    calcularTotales();
+}
+
+// Configurar retención automática según tipo de cliente
+document.getElementById('cliente_id').addEventListener('change', function() {
+    const selectedOption = this.options[this.selectedIndex];
+    const tipoCliente = selectedOption.dataset.tipo;
+    const retencionSelect = document.getElementById('tipo_retencion');
+
+    if (tipoCliente === 'empresa' || tipoCliente === 'autonomo') {
+        {% if config_fiscal and config_fiscal.tipo_retencion_default %}
+        retencionSelect.value = '{{ config_fiscal.tipo_retencion_default }}';
+        {% else %}
+        retencionSelect.value = '7';
+        {% endif %}
+    } else {
+        retencionSelect.value = '0';
+    }
+
+    calcularTotales();
+});
+
+// Agregar primera línea al cargar
+document.addEventListener('DOMContentLoaded', function() {
+    agregarLinea();
+    toggleIVA();
+});
+</script>
+{% endblock %}

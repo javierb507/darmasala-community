@@ -3,15 +3,332 @@
 {% block title %}Configuración - Atma Suddhi{% endblock %}
 
 {% block content %}
-<div class="container-fluid">
-    <!-- Header -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center">
-                <h2><i class="fas fa-cog text-primary"></i> Configuración del Centro</h2>
-                <a href="{{ url_for('index') }}" class="btn btn-outline-secondary">
-                    <i class="fas fa-arrow-left"></i> Volver al Inicio
+<div class="row">
+    <div class="col-md-10 mx-auto">
+        <!-- Tipos de Clases -->
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h4 class="mb-0">
+                    <i class="fas fa-om"></i> Tipos de Clases
+                </h4>
+                <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#nuevaClaseModal">
+                    <i class="fas fa-plus"></i> Nueva Clase
+                </button>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Color</th>
+                                <th>Descripción</th>
+                                <th>Estado</th>
+                                <th>Horarios</th>
+                                <th class="text-end">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for clase in clases %}
+                            <tr>
+                                <td>
+                                    <strong>{{ clase.nombre }}</strong>
+                                </td>
+                                <td>
+                                    <div style="display: inline-block; width: 30px; height: 20px; background-color: {{ clase.color or '#4ECDC4' }}; border: 1px solid #dee2e6; border-radius: 3px;"></div>
+                                    <small class="text-muted ms-2">{{ clase.color or '#4ECDC4' }}</small>
+                                </td>
+                                <td>
+                                    <small class="text-muted">{{ clase.descripcion or '-' }}</small>
+                                </td>
+                                <td>
+                                    {% if clase.activa %}
+                                        <span class="badge bg-success">Activa</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">Inactiva</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <span class="badge bg-info">{{ clase.horarios|length }} horarios</span>
+                                </td>
+                                <td class="text-end">
+                                    <button type="button" class="btn btn-sm btn-outline-secondary"
+                                            onclick="editarClase({{ clase.id }}, '{{ clase.nombre }}', '{{ clase.descripcion or '' }}', '{{ clase.color or '#4ECDC4' }}', {{ clase.duracion_minutos or 75 }}, '{{ clase.periodicidad or 'semanal' }}')">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <form method="POST" action="{{ url_for('toggle_clase', clase_id=clase.id) }}" style="display: inline;">
+                                        <button type="submit" class="btn btn-sm btn-outline-{% if clase.activa %}warning{% else %}success{% endif %}"
+                                                title="{% if clase.activa %}Desactivar{% else %}Activar{% endif %}">
+                                            <i class="fas fa-{% if clase.activa %}eye-slash{% else %}eye{% endif %}"></i>
+                                        </button>
+                                    </form>
+                                    {% if clase.horarios|length == 0 %}
+                                    <form method="POST" action="{{ url_for('eliminar_clase', clase_id=clase.id) }}"
+                                          style="display: inline;"
+                                          onsubmit="return confirm('¿Estás seguro de eliminar la clase {{ clase.nombre }}?');">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tarifas Personalizadas -->
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h4 class="mb-0">
+                    <i class="fas fa-tags"></i> Tarifas Personalizadas
+                </h4>
+                <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#nuevaTarifaModal">
+                    <i class="fas fa-plus"></i> Nueva Tarifa
+                </button>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Precio</th>
+                                <th>Descripción</th>
+                                <th>Estado</th>
+                                <th class="text-end">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for tarifa in tarifas %}
+                            <tr>
+                                <td><strong>{{ tarifa.nombre }}</strong></td>
+                                <td><span class="badge bg-primary">€{{ "%.2f"|format(tarifa.precio) }}</span></td>
+                                <td><small class="text-muted">{{ tarifa.descripcion or '-' }}</small></td>
+                                <td>
+                                    {% if tarifa.activa %}
+                                        <span class="badge bg-success">Activa</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">Inactiva</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-end">
+                                    <button type="button" class="btn btn-sm btn-outline-secondary"
+                                            onclick="editarTarifa({{ tarifa.id }}, '{{ tarifa.nombre }}', '{{ tarifa.descripcion or '' }}', {{ tarifa.precio }})">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <form method="POST" action="{{ url_for('toggle_tarifa', tarifa_id=tarifa.id) }}" style="display: inline;">
+                                        <button type="submit" class="btn btn-sm btn-outline-{% if tarifa.activa %}warning{% else %}success{% endif %}"
+                                                title="{% if tarifa.activa %}Desactivar{% else %}Activar{% endif %}">
+                                            <i class="fas fa-{% if tarifa.activa %}eye-slash{% else %}eye{% endif %}"></i>
+                                        </button>
+                                    </form>
+                                    <form method="POST" action="{{ url_for('eliminar_tarifa', tarifa_id=tarifa.id) }}"
+                                          style="display: inline;"
+                                          onsubmit="return confirm('¿Estás seguro de eliminar la tarifa {{ tarifa.nombre }}?');">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modo de Pruebas (Administrador) -->
+        <div class="card mb-4 border-warning">
+            <div class="card-header bg-warning text-dark d-flex justify-content-between align-items-center">
+                <div>
+                    <h5 class="mb-0">
+                        <i class="fas fa-flask"></i> Modo de Pruebas (Administrador)
+                    </h5>
+                    <small>Gestiona datos de prueba del sistema</small>
+                </div>
+                <a href="{{ url_for('modo_pruebas') }}" class="btn btn-dark btn-sm">
+                    <i class="fas fa-tools"></i> Acceder
                 </a>
+            </div>
+            <div class="card-body">
+                <p class="mb-0">
+                    <i class="fas fa-info-circle"></i> Puedes cargar datos de ejemplo completos o resetear el sistema para empezar de cero.
+                    <strong class="text-danger">Solo para administradores.</strong>
+                </p>
+            </div>
+        </div>
+
+        <!-- Configuración General -->
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0">
+                    <i class="fas fa-cog"></i> Configuración General
+                </h4>
+                <p class="mb-0 text-muted">Configura los datos generales de la escuela y precios</p>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('guardar_configuracion') }}">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <h5 class="text-primary mb-3">
+                                <i class="fas fa-euro-sign"></i> Tarifas
+                            </h5>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="precio_clase_suelta" class="form-label">Clase Suelta</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text">€</span>
+                                            <input type="number" step="0.01" class="form-control" id="precio_clase_suelta" 
+                                                   name="precio_clase_suelta" value="{{ config.get('precio_clase_suelta', '15.00') }}" required>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="precio_1_clase_semanal" class="form-label">1 Clase por Semana</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text">€</span>
+                                            <input type="number" step="0.01" class="form-control" id="precio_1_clase_semanal" 
+                                                   name="precio_1_clase_semanal" value="{{ config.get('precio_1_clase_semanal', '40.00') }}" required>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="precio_2_clases_semanal" class="form-label">2 Clases por Semana</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text">€</span>
+                                            <input type="number" step="0.01" class="form-control" id="precio_2_clases_semanal" 
+                                                   name="precio_2_clases_semanal" value="{{ config.get('precio_2_clases_semanal', '70.00') }}" required>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="precio_tarifa_plana" class="form-label">Tarifa Plana</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text">€</span>
+                                            <input type="number" step="0.01" class="form-control" id="precio_tarifa_plana" 
+                                                   name="precio_tarifa_plana" value="{{ config.get('precio_tarifa_plana', '90.00') }}" required>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="precio_1_clase_bimensual" class="form-label">1 Clase Bimensual</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text">€</span>
+                                            <input type="number" step="0.01" class="form-control" id="precio_1_clase_bimensual" 
+                                                   name="precio_1_clase_bimensual" value="{{ config.get('precio_1_clase_bimensual', '75.00') }}" required>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="precio_2_clases_bimensual" class="form-label">2 Clases Bimensual</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text">€</span>
+                                            <input type="number" step="0.01" class="form-control" id="precio_2_clases_bimensual" 
+                                                   name="precio_2_clases_bimensual" value="{{ config.get('precio_2_clases_bimensual', '135.00') }}" required>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="precio_matricula" class="form-label">Matrícula Anual</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text">€</span>
+                                            <input type="number" step="0.01" class="form-control" id="precio_matricula" 
+                                                   name="precio_matricula" value="{{ config.get('precio_matricula', '25.00') }}" required>
+                                        </div>
+                                        <div class="form-text">Pago único al año</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <hr class="my-4">
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5 class="text-primary mb-3">
+                                <i class="fas fa-user"></i> Instructora
+                            </h5>
+
+                            <div class="mb-3">
+                                <label for="nombre_instructora" class="form-label">Nombre de la Instructora *</label>
+                                <input type="text" class="form-control" id="nombre_instructora"
+                                       name="nombre_instructora" value="{{ config.get('nombre_instructora', 'Minouche') }}" required>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <hr class="my-4">
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5 class="text-primary mb-3">
+                                <i class="fas fa-map-marker-alt"></i> Información de la Escuela
+                            </h5>
+                            
+                            <div class="mb-3">
+                                <label for="direccion_escuela" class="form-label">Dirección</label>
+                                <textarea class="form-control" id="direccion_escuela" name="direccion_escuela" 
+                                          rows="3" placeholder="Calle, número, ciudad, código postal">{{ config.get('direccion_escuela', '') }}</textarea>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="telefono_escuela" class="form-label">Teléfono</label>
+                                <input type="tel" class="form-control" id="telefono_escuela" 
+                                       name="telefono_escuela" value="{{ config.get('telefono_escuela', '') }}" 
+                                       placeholder="+34 123 456 789">
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="email_escuela" class="form-label">Email</label>
+                                <input type="email" class="form-control" id="email_escuela" 
+                                       name="email_escuela" value="{{ config.get('email_escuela', '') }}" 
+                                       placeholder="contacto@atmasuddhi.com">
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <h5 class="text-primary mb-3">
+                                <i class="fas fa-university"></i> Información Bancaria
+                            </h5>
+                            
+                            <div class="mb-3">
+                                <label for="numero_cuenta" class="form-label">Número de Cuenta</label>
+                                <input type="text" class="form-control" id="numero_cuenta" 
+                                       name="numero_cuenta" value="{{ config.get('numero_cuenta', '') }}" 
+                                       placeholder="ES12 1234 5678 9012 3456 7890">
+                                <div class="form-text">Para transferencias bancarias</div>
+                            </div>
+                            
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle"></i>
+                                <strong>Nota:</strong> Esta información se utilizará para generar facturas y comunicaciones con los alumnos.
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between mt-4">
+                        <a href="{{ url_for('index') }}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Volver al Inicio
+                        </a>
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-save"></i> Guardar Configuración
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
@@ -188,132 +505,160 @@
     </div>
 </div>
 
-<!-- Modal Información del Centro -->
-<div class="modal fade" id="centroModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
+<!-- Modal Nueva Clase -->
+<div class="modal fade" id="nuevaClaseModal" tabindex="-1">
+    <div class="modal-dialog">
         <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title"><i class="fas fa-building"></i> Información del Centro</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <form method="POST" action="{{ url_for('guardar_configuracion') }}" enctype="multipart/form-data">
+            <form method="POST" action="{{ url_for('nueva_clase') }}">
+                <div class="modal-header">
+                    <h5 class="modal-title">Nueva Clase</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
                 <div class="modal-body">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label for="nombre_escuela" class="form-label">Nombre del Centro</label>
-                                <input type="text" class="form-control" id="nombre_escuela" 
-                                       name="nombre_escuela" value="{{ config.get('nombre_escuela', 'ATMA SUDDHI') }}">
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label for="telefono_escuela" class="form-label">Teléfono</label>
-                                <input type="tel" class="form-control" id="telefono_escuela" 
-                                       name="telefono_escuela" value="{{ config.get('telefono_escuela', '') }}">
-                            </div>
-                        </div>
-                    </div>
-                    
                     <div class="mb-3">
-                        <label for="direccion_escuela" class="form-label">Dirección</label>
-                        <textarea class="form-control" id="direccion_escuela" name="direccion_escuela" rows="2">{{ config.get('direccion_escuela', '') }}</textarea>
+                        <label for="nombre_clase" class="form-label">Nombre *</label>
+                        <input type="text" class="form-control" id="nombre_clase" name="nombre" required>
                     </div>
-                    
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label for="email_escuela" class="form-label">Email</label>
-                                <input type="email" class="form-control" id="email_escuela" 
-                                       name="email_escuela" value="{{ config.get('email_escuela', '') }}">
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label for="web_escuela" class="form-label">Página Web</label>
-                                <input type="url" class="form-control" id="web_escuela" 
-                                       name="web_escuela" value="{{ config.get('web_escuela', 'http://atmasuddhi.es') }}">
-                            </div>
-                        </div>
-                    </div>
-                    
                     <div class="mb-3">
-                        <label for="logo" class="form-label">Logo del Centro</label>
-                        <input type="file" class="form-control" id="logo" name="logo" accept="image/*">
-                        <div class="form-text">Formatos: JPG, PNG, SVG. Tamaño recomendado: 200x60px</div>
+                        <label for="color_clase" class="form-label">Color</label>
+                        <input type="color" class="form-control form-control-color" id="color_clase" name="color" value="#4ECDC4">
+                        <div class="form-text">Color que se mostrará en el calendario</div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="duracion_minutos" class="form-label">Duración (minutos)</label>
+                            <input type="number" class="form-control" id="duracion_minutos" name="duracion_minutos" value="75" min="15" max="180">
+                            <div class="form-text">Duración por defecto</div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="periodicidad" class="form-label">Periodicidad</label>
+                            <select class="form-select" id="periodicidad" name="periodicidad">
+                                <option value="semanal" selected>Semanal</option>
+                                <option value="quincenal">Quincenal</option>
+                                <option value="mensual">Mensual</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="descripcion_clase" class="form-label">Descripción</label>
+                        <textarea class="form-control" id="descripcion_clase" name="descripcion" rows="3"></textarea>
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-success">
-                        <i class="fas fa-save"></i> Guardar Información
-                    </button>
+                    <button type="submit" class="btn btn-primary">Crear Clase</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
 
-<!-- Modal Configuración de Precios -->
-<div class="modal fade" id="preciosModal" tabindex="-1">
+<!-- Modal Editar Clase -->
+<div class="modal fade" id="editarClaseModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title"><i class="fas fa-euro-sign"></i> Configuración de Precios</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <form method="POST" action="{{ url_for('guardar_configuracion') }}">
+            <form method="POST" id="formEditarClase">
+                <div class="modal-header">
+                    <h5 class="modal-title">Editar Clase</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
                 <div class="modal-body">
                     <div class="mb-3">
-                        <label for="precio_1_clase_semanal" class="form-label">1 Clase Semanal</label>
-                        <div class="input-group">
-                            <input type="number" step="0.01" class="form-control" id="precio_1_clase_semanal" 
-                                   name="precio_1_clase_semanal" value="{{ config.get('precio_1_clase_semanal', '40.00') }}">
-                            <span class="input-group-text">€/mes</span>
+                        <label for="editar_nombre_clase" class="form-label">Nombre *</label>
+                        <input type="text" class="form-control" id="editar_nombre_clase" name="nombre" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editar_color_clase" class="form-label">Color</label>
+                        <input type="color" class="form-control form-control-color" id="editar_color_clase" name="color" value="#4ECDC4">
+                        <div class="form-text">Color que se mostrará en el calendario</div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="editar_duracion_minutos" class="form-label">Duración (minutos)</label>
+                            <input type="number" class="form-control" id="editar_duracion_minutos" name="duracion_minutos" value="75" min="15" max="180">
+                            <div class="form-text">Duración por defecto</div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="editar_periodicidad" class="form-label">Periodicidad</label>
+                            <select class="form-select" id="editar_periodicidad" name="periodicidad">
+                                <option value="semanal">Semanal</option>
+                                <option value="quincenal">Quincenal</option>
+                                <option value="mensual">Mensual</option>
+                            </select>
                         </div>
                     </div>
-                    
                     <div class="mb-3">
-                        <label for="precio_2_clases_semanal" class="form-label">2 Clases Semanales</label>
-                        <div class="input-group">
-                            <input type="number" step="0.01" class="form-control" id="precio_2_clases_semanal" 
-                                   name="precio_2_clases_semanal" value="{{ config.get('precio_2_clases_semanal', '70.00') }}">
-                            <span class="input-group-text">€/mes</span>
-                        </div>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label for="precio_tarifa_plana" class="form-label">Tarifa Plana</label>
-                        <div class="input-group">
-                            <input type="number" step="0.01" class="form-control" id="precio_tarifa_plana" 
-                                   name="precio_tarifa_plana" value="{{ config.get('precio_tarifa_plana', '90.00') }}">
-                            <span class="input-group-text">€/mes</span>
-                        </div>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label for="precio_yogaterapia_individual" class="form-label">Yogaterapia Individual</label>
-                        <div class="input-group">
-                            <input type="number" step="0.01" class="form-control" id="precio_yogaterapia_individual" 
-                                   name="precio_yogaterapia_individual" value="{{ config.get('precio_yogaterapia_individual', '50.00') }}">
-                            <span class="input-group-text">€/sesión</span>
-                        </div>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label for="precio_matricula" class="form-label">Matrícula Anual</label>
-                        <div class="input-group">
-                            <input type="number" step="0.01" class="form-control" id="precio_matricula" 
-                                   name="precio_matricula" value="{{ config.get('precio_matricula', '25.00') }}">
-                            <span class="input-group-text">€/año</span>
-                        </div>
+                        <label for="editar_descripcion_clase" class="form-label">Descripción</label>
+                        <textarea class="form-control" id="editar_descripcion_clase" name="descripcion" rows="3"></textarea>
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-save"></i> Guardar Precios
-                    </button>
+                    <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Nueva Tarifa -->
+<div class="modal fade" id="nuevaTarifaModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="POST" action="{{ url_for('nueva_tarifa') }}">
+                <div class="modal-header">
+                    <h5 class="modal-title">Nueva Tarifa</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="nombre_tarifa" class="form-label">Nombre *</label>
+                        <input type="text" class="form-control" id="nombre_tarifa" name="nombre" placeholder="Ej: Sesión Individual" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="precio_tarifa" class="form-label">Precio (€) *</label>
+                        <input type="number" step="0.01" class="form-control" id="precio_tarifa" name="precio" placeholder="0.00" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="descripcion_tarifa" class="form-label">Descripción</label>
+                        <textarea class="form-control" id="descripcion_tarifa" name="descripcion" rows="3" placeholder="Descripción opcional de la tarifa"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-success">Crear Tarifa</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Editar Tarifa -->
+<div class="modal fade" id="editarTarifaModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="POST" id="formEditarTarifa">
+                <div class="modal-header">
+                    <h5 class="modal-title">Editar Tarifa</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="editar_nombre_tarifa" class="form-label">Nombre *</label>
+                        <input type="text" class="form-control" id="editar_nombre_tarifa" name="nombre" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editar_precio_tarifa" class="form-label">Precio (€) *</label>
+                        <input type="number" step="0.01" class="form-control" id="editar_precio_tarifa" name="precio" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editar_descripcion_tarifa" class="form-label">Descripción</label>
+                        <textarea class="form-control" id="editar_descripcion_tarifa" name="descripcion" rows="3"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-success">Guardar Cambios</button>
                 </div>
             </form>
         </div>
@@ -321,29 +666,26 @@
 </div>
 
 <script>
-function crearBackup() {
-    if (confirm('¿Crear backup completo de la base de datos?')) {
-        const btn = event.target;
-        btn.disabled = true;
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creando...';
-        
-        fetch('/backup', { method: 'POST' })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert('✅ Backup creado exitosamente');
-                } else {
-                    alert('❌ Error al crear backup: ' + data.error);
-                }
-            })
-            .catch(error => {
-                alert('❌ Error de conexión: ' + error);
-            })
-            .finally(() => {
-                btn.disabled = false;
-                btn.innerHTML = '<i class="fas fa-database"></i> Crear Backup';
-            });
-    }
+function editarClase(id, nombre, descripcion, color, duracion_minutos, periodicidad) {
+    document.getElementById('formEditarClase').action = `/configuracion/clases/${id}/editar`;
+    document.getElementById('editar_nombre_clase').value = nombre;
+    document.getElementById('editar_color_clase').value = color || '#4ECDC4';
+    document.getElementById('editar_descripcion_clase').value = descripcion || '';
+    document.getElementById('editar_duracion_minutos').value = duracion_minutos || 75;
+    document.getElementById('editar_periodicidad').value = periodicidad || 'semanal';
+
+    const modal = new bootstrap.Modal(document.getElementById('editarClaseModal'));
+    modal.show();
+}
+
+function editarTarifa(id, nombre, descripcion, precio) {
+    document.getElementById('formEditarTarifa').action = `/configuracion/tarifas/${id}/editar`;
+    document.getElementById('editar_nombre_tarifa').value = nombre;
+    document.getElementById('editar_precio_tarifa').value = precio;
+    document.getElementById('editar_descripcion_tarifa').value = descripcion || '';
+
+    const modal = new bootstrap.Modal(document.getElementById('editarTarifaModal'));
+    modal.show();
 }
 </script>
 {% endblock %}
