@@ -1,0 +1,183 @@
+{% extends "base.html" %}
+
+{% block title %}Nueva Factura de Proveedor - Atma suddhi{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <div class="card">
+            <div class="card-header bg-danger text-white">
+                <h4><i class="fas fa-file-invoice-dollar"></i> Registrar Factura de Proveedor</h4>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    <h5 class="border-bottom pb-2 mb-3">Datos de la Factura</h5>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="proveedor_id" class="form-label">Proveedor *</label>
+                            <select class="form-select" id="proveedor_id" name="proveedor_id" required>
+                                <option value="">Seleccione un proveedor...</option>
+                                {% for proveedor in proveedores %}
+                                <option value="{{ proveedor.id }}">{{ proveedor.nombre }} ({{ proveedor.cif_nif }})</option>
+                                {% endfor %}
+                            </select>
+                            <small class="form-text text-muted">
+                                <a href="{{ url_for('nuevo_proveedor') }}" target="_blank">
+                                    <i class="fas fa-plus"></i> Crear nuevo proveedor
+                                </a>
+                            </small>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="categoria_id" class="form-label">Categoría de Gasto *</label>
+                            <select class="form-select" id="categoria_id" name="categoria_id" required>
+                                <option value="">Seleccione una categoría...</option>
+                                {% for categoria in categorias %}
+                                <option value="{{ categoria.id }}">
+                                    {{ categoria.nombre }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="numero_factura" class="form-label">Número de Factura *</label>
+                            <input type="text" class="form-control" id="numero_factura" name="numero_factura"
+                                   placeholder="Ej: F-2025-001" required>
+                            <small class="form-text text-muted">El número de factura del proveedor</small>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label for="fecha_factura" class="form-label">Fecha Factura *</label>
+                            <input type="date" class="form-control" id="fecha_factura" name="fecha_factura"
+                                   value="{{ fecha_hoy if fecha_hoy else '' }}" required>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label for="fecha_vencimiento" class="form-label">Fecha Vencimiento</label>
+                            <input type="date" class="form-control" id="fecha_vencimiento" name="fecha_vencimiento">
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="descripcion" class="form-label">Descripción</label>
+                        <textarea class="form-control" id="descripcion" name="descripcion" rows="2"
+                                  placeholder="Descripción del servicio o producto facturado"></textarea>
+                    </div>
+
+                    <h5 class="border-bottom pb-2 mb-3 mt-4">Importes</h5>
+
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label for="importe_sin_iva" class="form-label">Importe sin IVA *</label>
+                            <div class="input-group">
+                                <span class="input-group-text">€</span>
+                                <input type="number" class="form-control" id="importe_sin_iva" name="importe_sin_iva"
+                                       step="0.01" min="0" required onchange="calcularTotal()">
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="iva" class="form-label">IVA (%)</label>
+                            <select class="form-select" id="iva" name="iva" onchange="calcularTotal()">
+                                <option value="0">0% (Exento)</option>
+                                <option value="4">4% (Superreducido)</option>
+                                <option value="10">10% (Reducido)</option>
+                                <option value="21" selected>21% (General)</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="importe_total" class="form-label">Importe Total</label>
+                            <div class="input-group">
+                                <span class="input-group-text">€</span>
+                                <input type="text" class="form-control bg-light" id="importe_total_display"
+                                       readonly value="0.00">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card bg-light mb-3">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <strong>Base Imponible:</strong> <span id="base_display">€0.00</span>
+                                </div>
+                                <div class="col-md-6">
+                                    <strong>Cuota IVA:</strong> <span id="cuota_iva_display">€0.00</span>
+                                </div>
+                            </div>
+                            <hr>
+                            <div class="row">
+                                <div class="col-md-12 text-end">
+                                    <h5>TOTAL: <span id="total_display">€0.00</span></h5>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="notas" class="form-label">Notas Internas</label>
+                        <textarea class="form-control" id="notas" name="notas" rows="2"
+                                  placeholder="Notas o comentarios adicionales (uso interno)"></textarea>
+                    </div>
+
+                    <div class="d-flex justify-content-between mt-4">
+                        <a href="{{ url_for('facturas') }}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Cancelar
+                        </a>
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-save"></i> Registrar Factura
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="card mt-3">
+            <div class="card-header bg-info text-white">
+                <h6 class="mb-0"><i class="fas fa-info-circle"></i> Información</h6>
+            </div>
+            <div class="card-body">
+                <p class="mb-2"><strong>¿Qué es una factura de proveedor?</strong></p>
+                <p class="mb-0">
+                    Las facturas de proveedores son documentos que registran los gastos de tu negocio.
+                    Incluyen alquileres, suministros, material, seguros y otros servicios contratados.
+                    Es importante registrarlas para llevar un control de gastos y cumplir con las obligaciones fiscales.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function calcularTotal() {
+    const importeSinIva = parseFloat(document.getElementById('importe_sin_iva').value) || 0;
+    const iva = parseFloat(document.getElementById('iva').value) || 0;
+
+    const cuotaIva = importeSinIva * (iva / 100);
+    const total = importeSinIva + cuotaIva;
+
+    document.getElementById('base_display').textContent = `€${importeSinIva.toFixed(2)}`;
+    document.getElementById('cuota_iva_display').textContent = `€${cuotaIva.toFixed(2)}`;
+    document.getElementById('total_display').textContent = `€${total.toFixed(2)}`;
+    document.getElementById('importe_total_display').value = total.toFixed(2);
+}
+
+// Calcular fecha de vencimiento automáticamente (30 días después de la fecha de factura)
+document.getElementById('fecha_factura').addEventListener('change', function() {
+    const fechaFactura = new Date(this.value);
+    if (!isNaN(fechaFactura.getTime())) {
+        const fechaVencimiento = new Date(fechaFactura);
+        fechaVencimiento.setDate(fechaVencimiento.getDate() + 30);
+
+        const año = fechaVencimiento.getFullYear();
+        const mes = String(fechaVencimiento.getMonth() + 1).padStart(2, '0');
+        const dia = String(fechaVencimiento.getDate()).padStart(2, '0');
+
+        document.getElementById('fecha_vencimiento').value = `${año}-${mes}-${dia}`;
+    }
+});
+
+// Calcular total al cargar la página
+document.addEventListener('DOMContentLoaded', calcularTotal);
+</script>
+{% endblock %}

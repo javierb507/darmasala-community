@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+
+{% block title %}Facturas de Proveedores - Atma suddhi{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2><i class="fas fa-file-invoice-dollar"></i> Facturas de Proveedores</h2>
+            <div>
+                <a href="{{ url_for('nueva_factura') }}" class="btn btn-success">
+                    <i class="fas fa-plus"></i> Nueva Factura
+                </a>
+                <a href="{{ url_for('proveedores') }}" class="btn btn-outline-primary">
+                    <i class="fas fa-building"></i> Proveedores
+                </a>
+                <a href="{{ url_for('economia') }}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left"></i> Volver
+                </a>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-list"></i> Listado de Facturas de Proveedores</h5>
+            </div>
+            <div class="card-body">
+                {% if facturas %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Número</th>
+                                <th>Proveedor</th>
+                                <th>Categoría</th>
+                                <th>Fecha</th>
+                                <th>Vencimiento</th>
+                                <th>Importe</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for factura in facturas %}
+                            <tr>
+                                <td><strong>{{ factura.numero_factura }}</strong></td>
+                                <td>{{ factura.proveedor.nombre }}</td>
+                                <td>
+                                    <span class="badge" style="background-color: {{ factura.categoria.color }}">
+                                        {{ factura.categoria.nombre }}
+                                    </span>
+                                </td>
+                                <td>{{ factura.fecha_factura.strftime('%d/%m/%Y') }}</td>
+                                <td>
+                                    {% if factura.fecha_vencimiento %}
+                                        {{ factura.fecha_vencimiento.strftime('%d/%m/%Y') }}
+                                        {% if factura.esta_vencida() %}
+                                            <span class="badge bg-danger ms-1">Vencida</span>
+                                        {% endif %}
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </td>
+                                <td><strong>€{{ "%.2f"|format(factura.importe_total) }}</strong></td>
+                                <td>
+                                    {% if factura.estado == 'pendiente' %}
+                                        <span class="badge bg-warning text-dark">Pendiente</span>
+                                    {% elif factura.estado == 'pagada' %}
+                                        <span class="badge bg-success">Pagada</span>
+                                    {% elif factura.estado == 'vencida' %}
+                                        <span class="badge bg-danger">Vencida</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-primary" title="Ver detalles">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    {% if factura.estado == 'pendiente' %}
+                                    <button class="btn btn-sm btn-outline-success" title="Marcar como pagada">
+                                        <i class="fas fa-check"></i>
+                                    </button>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-file-invoice-dollar fa-4x text-muted mb-3"></i>
+                    <p class="text-muted">No hay facturas de proveedores registradas aún.</p>
+                    <a href="{{ url_for('nueva_factura') }}" class="btn btn-success">
+                        <i class="fas fa-plus"></i> Registrar Primera Factura
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
