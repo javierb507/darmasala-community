@@ -28,21 +28,28 @@
                     
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label for="email" class="form-label">Email *</label>
-                            <input type="email" class="form-control" id="email" name="email" 
-                                   value="{{ alumno.email }}" required>
+                            <label for="dni" class="form-label">DNI/NIE</label>
+                            <input type="text" class="form-control" id="dni" name="dni"
+                                   value="{{ alumno.dni or '' }}" placeholder="12345678A">
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label for="telefono" class="form-label">Teléfono</label>
-                            <input type="tel" class="form-control" id="telefono" name="telefono" 
-                                   value="{{ alumno.telefono or '' }}">
+                            <label for="email" class="form-label">Email *</label>
+                            <input type="email" class="form-control" id="email" name="email"
+                                   value="{{ alumno.email }}" required>
                         </div>
                     </div>
-                    
-                    <div class="mb-3">
-                        <label for="fecha_nacimiento" class="form-label">Fecha de Nacimiento</label>
-                        <input type="date" class="form-control" id="fecha_nacimiento" name="fecha_nacimiento" 
-                               value="{{ alumno.fecha_nacimiento.strftime('%Y-%m-%d') if alumno.fecha_nacimiento else '' }}">
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="telefono" class="form-label">Teléfono</label>
+                            <input type="tel" class="form-control" id="telefono" name="telefono"
+                                   value="{{ alumno.telefono or '' }}">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="fecha_nacimiento" class="form-label">Fecha de Nacimiento</label>
+                            <input type="date" class="form-control" id="fecha_nacimiento" name="fecha_nacimiento"
+                                   value="{{ alumno.fecha_nacimiento.strftime('%Y-%m-%d') if alumno.fecha_nacimiento else '' }}">
+                        </div>
                     </div>
                     
                     <div class="mb-3">

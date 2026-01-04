@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% from "components/payment_calendar.html" import render_payment_calendar %}
 
 {% block title %}Alumnos - Atma suddhi{% endblock %}
 
@@ -61,14 +62,22 @@
                                         </div>
                                     </td>
                                     <td>
+                                        {% if alumno.dni %}
+                                        <div>
+                                            <i class="fas fa-id-card text-muted me-1"></i>
+                                            <small>{{ alumno.dni }}</small>
+                                        </div>
+                                        {% endif %}
                                         <div>
                                             <i class="fas fa-envelope text-muted me-1"></i>
                                             <small>{{ alumno.email }}</small>
                                         </div>
+                                        {% if alumno.telefono %}
                                         <div>
                                             <i class="fas fa-phone text-muted me-1"></i>
                                             <small>{{ alumno.telefono }}</small>
                                         </div>
+                                        {% endif %}
                                     </td>
                                     <td>
                                         <span class="badge bg-info">{{ alumno.get_tipo_cuota_display() }}</span>
@@ -76,76 +85,7 @@
                                         <small class="text-muted">{{ alumno.get_precio_cuota() }}€/mes</small>
                                     </td>
                                     <td>
-                                        <div class="payment-status">
-                                            <!-- Estado de Matrícula -->
-                                            <div class="mb-2">
-                                                {% set curso_actual = current_year|string + "/" + (current_year + 1)|string %}
-                                                {% if alumno.matricula_pagada and alumno.fecha_matricula and alumno.fecha_matricula.year == current_year %}
-                                                    <span class="badge bg-success">
-                                                        <i class="fas fa-check"></i> Matrícula {{ curso_actual }}
-                                                    </span>
-                                                {% else %}
-                                                    <span class="badge bg-warning">
-                                                        <i class="fas fa-exclamation"></i> Matrícula {{ curso_actual }} Pendiente
-                                                    </span>
-                                                {% endif %}
-                                            </div>
-                                            
-                                            <!-- Estado de Pagos Mensuales/Bimensuales -->
-                                            <div class="monthly-payments">
-                                                {% set meses_nombres = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dec'] %}
-                                                {% set es_bimensual = alumno.tipo_cuota.endswith('_bimensual') %}
-                                                
-                                                {% if es_bimensual %}
-                                                    <!-- Para pagos bimensuales: mostrar pares de meses -->
-                                                    {% for bimestre in range(0, 6) %}
-                                                        {% set mes1 = bimestre * 2 + 1 %}
-                                                        {% set mes2 = bimestre * 2 + 2 %}
-                                                        {% set bimestre_str = "%04d-%02d-%02d"|format(current_year, mes1, mes2) %}
-                                                        
-                                                        {% set pago_bimestre = false %}
-                                                        {% for pago in alumno.pagos %}
-                                                            {% if pago.mes and pago.mes.startswith(current_year|string) and pago.tipo_pago == 'cuota' %}
-                                                                {% set pago_mes_num = pago.mes.split('-')[1]|int %}
-                                                                {% if pago_mes_num == mes1 or pago_mes_num == mes2 %}
-                                                                    {% set pago_bimestre = true %}
-                                                                {% endif %}
-                                                            {% endif %}
-                                                        {% endfor %}
-                                                        
-                                                        {% if pago_bimestre %}
-                                                            <span class="badge bg-success text-white me-1 mb-1" title="✅ Pagado: {{ meses_nombres[mes1-1] }}/{{ meses_nombres[mes2-1] }} {{ current_year }}">
-                                                                {{ meses_nombres[mes1-1] }}/{{ meses_nombres[mes2-1] }}
-                                                            </span>
-                                                        {% else %}
-                                                            <span class="badge bg-danger text-white me-1 mb-1" title="❌ Pendiente: {{ meses_nombres[mes1-1] }}/{{ meses_nombres[mes2-1] }} {{ current_year }}">
-                                                                {{ meses_nombres[mes1-1] }}/{{ meses_nombres[mes2-1] }}
-                                                            </span>
-                                                        {% endif %}
-                                                    {% endfor %}
-                                                {% else %}
-                                                    <!-- Para pagos mensuales normales -->
-                                                    {% for mes in range(1, 13) %}
-                                                        {% set mes_str = "%04d-%02d"|format(current_year, mes) %}
-                                                        {% set pago_mes = false %}
-                                                        {% for pago in alumno.pagos %}
-                                                            {% if pago.mes == mes_str and pago.tipo_pago == 'cuota' %}
-                                                                {% set pago_mes = true %}
-                                                            {% endif %}
-                                                        {% endfor %}
-                                                        {% if pago_mes %}
-                                                            <span class="badge bg-success text-white me-1 mb-1" title="✅ Pagado: {{ meses_nombres[mes-1] }} {{ current_year }}">
-                                                                {{ meses_nombres[mes-1] }}
-                                                            </span>
-                                                        {% else %}
-                                                            <span class="badge bg-danger text-white me-1 mb-1" title="❌ Pendiente: {{ meses_nombres[mes-1] }} {{ current_year }}">
-                                                                {{ meses_nombres[mes-1] }}
-                                                            </span>
-                                                        {% endif %}
-                                                    {% endfor %}
-                                                {% endif %}
-                                            </div>
-                                        </div>
+                                        {{ render_payment_calendar(alumno, calendario, current_year) }}
                                     </td>
                                     <td>
                                         <div class="btn-group-vertical btn-group-sm" role="group">

@@ -22,7 +22,7 @@
                         <label for="año" class="form-label">Año de Matrícula *</label>
                         <select class="form-select" id="año" name="año">
                             <option value="">Seleccionar año</option>
-                            {% for año in range(2020, 2030) %}
+                            {% for año in range(current_year - 2, current_year + 3) %}
                             <option value="{{ año }}" {% if año == current_year %}selected{% endif %}>{{ año }}</option>
                             {% endfor %}
                         </select>
