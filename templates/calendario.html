@@ -1,0 +1,842 @@
+{% extends "base.html" %}
+
+{% block title %}Calendario - Atma suddhi{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2><i class="fas fa-calendar-alt"></i> Calendario de Clases</h2>
+            <div class="btn-group" role="group">
+                <button type="button" class="btn btn-primary" id="btnNuevoEvento">
+                    <i class="fas fa-plus"></i> Nueva Clase Individual
+                </button>
+                <button type="button" class="btn btn-success" id="btnRegistrarAsistencia">
+                    <i class="fas fa-clipboard-check"></i> Registrar Asistencia
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <!-- Leyenda de Colores -->
+        <div class="card mb-3">
+            <div class="card-body">
+                <h6 class="mb-3"><i class="fas fa-palette"></i> Leyenda de Clases</h6>
+                <div class="row">
+                    {% for clase in clases %}
+                    <div class="col-md-3 col-6 mb-2">
+                        <div class="d-flex align-items-center">
+                            <div style="width: 20px; height: 20px; background-color: {{ clase.color or '#4ECDC4' }}; border: 1px solid rgba(0,0,0,0.2); border-radius: 3px; margin-right: 8px;"></div>
+                            <small>{{ clase.nombre }}</small>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    <div class="col-md-3 col-6 mb-2">
+                        <div class="d-flex align-items-center">
+                            <div style="width: 20px; height: 20px; background-color: #8B5FBF; border: 1px solid rgba(0,0,0,0.2); border-radius: 3px; margin-right: 8px;"></div>
+                            <small>Clase Individual</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-body">
+                <div id="calendar"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para Crear/Editar Evento -->
+<div class="modal fade" id="eventoModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="eventoModalLabel">Nueva Clase</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="eventoForm">
+                    <input type="hidden" id="evento_id" name="evento_id">
+
+                    <div class="row">
+                        <div class="col-md-12 mb-3">
+                            <label for="tipo_evento" class="form-label">Tipo de Evento *</label>
+                            <select class="form-select" id="tipo_evento" name="tipo" required>
+                                <option value="individual">Clase Individual</option>
+                                <option value="taller">Taller</option>
+                                <option value="evento_especial">Evento Especial</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="clase_id" class="form-label">Tipo de Clase</label>
+                            <select class="form-select" id="clase_id" name="clase_id">
+                                <option value="">Sin tipo específico</option>
+                                {% for clase in clases %}
+                                <option value="{{ clase.id }}">{{ clase.nombre }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3" id="alumno_field">
+                            <label for="alumno_id" class="form-label">Alumno</label>
+                            <select class="form-select" id="alumno_id" name="alumno_id">
+                                <option value="">Seleccionar alumno</option>
+                                {% for alumno in alumnos %}
+                                <option value="{{ alumno.id }}">{{ alumno.nombre }} {{ alumno.apellido }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-12 mb-3">
+                            <label for="titulo" class="form-label">Título *</label>
+                            <input type="text" class="form-control" id="titulo" name="titulo" required>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="fecha_inicio" class="form-label">Fecha y Hora Inicio *</label>
+                            <input type="datetime-local" class="form-control" id="fecha_inicio" name="fecha_inicio" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="fecha_fin" class="form-label">Fecha y Hora Fin *</label>
+                            <input type="datetime-local" class="form-control" id="fecha_fin" name="fecha_fin" required>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="instructor" class="form-label">Instructor</label>
+                            <input type="text" class="form-control" id="instructor" name="instructor" value="Minouche">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="color" class="form-label">Color</label>
+                            <input type="color" class="form-control" id="color" name="color" value="#8B5FBF">
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="descripcion" class="form-label">Descripción</label>
+                        <textarea class="form-control" id="descripcion" name="descripcion" rows="3"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" id="btnEliminarEvento" style="display: none;">
+                    <i class="fas fa-trash"></i> Eliminar
+                </button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="btnGuardarEvento">
+                    <i class="fas fa-save"></i> Guardar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para Ver Detalles del Evento -->
+<div class="modal fade" id="detalleEventoModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="detalleEventoTitulo"></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="detalleEventoBody">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn btn-primary" id="btnEditarEvento">
+                    <i class="fas fa-edit"></i> Editar
+                </button>
+                <button type="button" class="btn btn-success" id="btnAsistenciaRapida">
+                    <i class="fas fa-check"></i> Registrar Asistencia
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+#calendar {
+    max-width: 100%;
+    margin: 0 auto;
+}
+
+.fc-event {
+    cursor: pointer;
+}
+
+.fc-event:hover {
+    opacity: 0.8;
+}
+
+/* Mejorar estilos visuales */
+.fc {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+/* Hacer el calendario más compacto */
+.fc-timegrid-slot {
+    height: 2.5em !important;
+}
+
+.fc-timegrid-slot-label {
+    vertical-align: middle !important;
+}
+
+/* Mejorar apariencia de los días */
+.fc-col-header-cell {
+    background: linear-gradient(135deg, #8B5FBF 0%, #6f4a99 100%) !important;
+    border: none !important;
+    padding: 12px 8px !important;
+}
+
+.fc-col-header-cell-cushion {
+    color: white !important;
+    text-decoration: none !important;
+    font-weight: 600 !important;
+    font-size: 0.95em !important;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: block;
+    padding: 4px 0;
+}
+
+.fc-col-header-cell-cushion:hover {
+    color: #FFD700 !important;
+    text-decoration: none !important;
+}
+
+/* Día actual destacado */
+.fc-day-today .fc-col-header-cell-cushion {
+    background: rgba(255, 215, 0, 0.2);
+    border-radius: 4px;
+}
+
+/* Estilos de eventos */
+.fc-event {
+    border-radius: 4px;
+    padding: 2px 6px;
+    font-size: 0.85em;
+    font-weight: 500;
+    border-left: 3px solid rgba(0,0,0,0.3) !important;
+}
+
+.fc-event-title {
+    font-weight: 600;
+}
+
+.fc-event-time {
+    font-size: 0.75em;
+    opacity: 0.9;
+}
+
+/* Toolbar mejorado */
+.fc-toolbar-title {
+    font-size: 1.5em !important;
+    font-weight: 600;
+    color: #6f4a99;
+}
+
+.fc-button {
+    background: #8B5FBF !important;
+    border-color: #8B5FBF !important;
+    text-transform: capitalize;
+}
+
+.fc-button:hover {
+    background: #6f4a99 !important;
+    border-color: #6f4a99 !important;
+}
+
+.fc-button-active {
+    background: #6f4a99 !important;
+    border-color: #6f4a99 !important;
+}
+
+/* Indicador de ahora */
+.fc-timegrid-now-indicator-line {
+    border-color: #dc3545;
+    border-width: 2px;
+}
+
+/* Horas no laborables */
+.fc-non-business {
+    background-color: #f8f9fa;
+}
+
+/* Grid más limpio */
+.fc-timegrid-slot-label {
+    border-right: 1px solid #e0e0e0 !important;
+}
+
+.fc-timegrid-divider {
+    display: none;
+}
+
+/* Eventos según tipo */
+.fc-event.recurrente {
+    border-left-width: 4px !important;
+}
+
+.fc-event.individual {
+    background-color: #8B5FBF !important;
+    border-color: #6f4a99 !important;
+}
+
+.fc-event.taller {
+    background-color: #F4A460 !important;
+    border-color: #d88d4a !important;
+}
+
+.fc-event.evento-especial {
+    background-color: #FF69B4 !important;
+    border-color: #e0549a !important;
+}
+
+/* Mejorar visualización de día actual en el grid */
+.fc-day-today {
+    background-color: rgba(139, 95, 191, 0.05) !important;
+}
+
+/* Scrollbar personalizado para el calendario */
+.fc-scroller::-webkit-scrollbar {
+    width: 8px;
+}
+
+.fc-scroller::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+.fc-scroller::-webkit-scrollbar-thumb {
+    background: #8B5FBF;
+    border-radius: 4px;
+}
+
+.fc-scroller::-webkit-scrollbar-thumb:hover {
+    background: #6f4a99;
+}
+</style>
+
+<!-- FullCalendar CSS y JS -->
+<link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.css' rel='stylesheet' />
+<script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js'></script>
+<script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/locales/es.global.min.js'></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const calendarEl = document.getElementById('calendar');
+    let calendar;
+    let eventoActual = null;
+
+    // Inicializar calendario
+    calendar = new FullCalendar.Calendar(calendarEl, {
+        locale: 'es',
+        initialView: 'timeGridWeek',
+        firstDay: 1, // Comenzar semana en lunes
+        headerToolbar: {
+            left: 'prev,next today',
+            center: 'title',
+            right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek'
+        },
+        buttonText: {
+            today: 'Hoy',
+            month: 'Mes',
+            week: 'Semana',
+            day: 'Día',
+            list: 'Lista'
+        },
+        titleFormat: {
+            year: 'numeric',
+            month: 'long'
+        },
+        dayHeaderFormat: {
+            weekday: 'short',
+            day: 'numeric',
+            omitCommas: true
+        },
+        slotMinTime: '09:00:00',
+        slotMaxTime: '21:00:00',
+        slotDuration: '00:30:00',
+        slotLabelInterval: '01:00',
+        slotLabelFormat: {
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false
+        },
+        allDaySlot: false,
+        height: 'auto',
+        contentHeight: 'auto',
+        expandRows: false,
+        stickyHeaderDates: true,
+        editable: true,
+        selectable: true,
+        selectMirror: true,
+        dayMaxEvents: true,
+        weekends: true,
+        nowIndicator: true,
+        navLinks: true,
+        businessHours: {
+            daysOfWeek: [1, 2, 3, 4, 5],
+            startTime: '09:00',
+            endTime: '21:00'
+        },
+
+        // Cargar eventos - usar función para asegurar que se recarguen correctamente
+        events: function(info, successCallback, failureCallback) {
+            console.log('Cargando eventos del calendario...');
+            console.log('Rango:', info.startStr, 'a', info.endStr);
+
+            fetch(`/api/calendario/eventos?start=${info.startStr}&end=${info.endStr}`)
+                .then(response => {
+                    console.log('Respuesta recibida:', response.status);
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Eventos cargados:', data.length);
+                    console.log('Primeros 3 eventos:', data.slice(0, 3));
+
+                    // Transformar eventos para compatibilidad con FullCalendar
+                    const eventosTransformados = data.map(e => {
+                        const evento = {
+                            id: e.id,
+                            title: e.title,
+                            start: e.start,
+                            end: e.end,
+                            backgroundColor: e.color,
+                            borderColor: e.color,
+                            editable: e.editable !== false,
+                            extendedProps: {
+                                tipo: e.tipo,
+                                instructor: e.instructor,
+                                description: e.description,
+                                horario_id: e.horario_id,
+                                evento_id: e.evento_id,
+                                total_asistencias: e.total_asistencias || 0,
+                                presentes: e.presentes || 0,
+                                alumnos_presentes: e.alumnos_presentes || [],
+                                alumnos_ausentes: e.alumnos_ausentes || [],
+                                fecha: e.fecha,
+                                alumno: e.alumno,
+                                className: e.className
+                            }
+                        };
+
+                        // Añadir classNames array si existe
+                        if (e.className) {
+                            evento.classNames = [e.className.toLowerCase().replace(/ /g, '-')];
+                        }
+                        if (e.tipo) {
+                            if (!evento.classNames) evento.classNames = [];
+                            evento.classNames.push(e.tipo);
+                        }
+
+                        return evento;
+                    });
+
+                    console.log('Eventos transformados:', eventosTransformados.length);
+                    successCallback(eventosTransformados);
+                })
+                .catch(error => {
+                    console.error('Error loading events:', error);
+                    failureCallback(error);
+                });
+        },
+
+        // Hacer clic en un espacio vacío para crear evento
+        select: function(info) {
+            abrirModalNuevoEvento(info.start, info.end);
+        },
+
+        // Hacer clic en un evento
+        eventClick: function(info) {
+            info.jsEvent.preventDefault();
+            mostrarDetalleEvento(info.event);
+        },
+
+        // Arrastrar y soltar evento (solo para eventos editables)
+        eventDrop: function(info) {
+            if (info.event.extendedProps.editable !== false) {
+                actualizarEvento(info.event);
+            } else {
+                info.revert();
+            }
+        },
+
+        // Redimensionar evento (solo para eventos editables)
+        eventResize: function(info) {
+            if (info.event.extendedProps.editable !== false) {
+                actualizarEvento(info.event);
+            } else {
+                info.revert();
+            }
+        },
+
+        // Estilos dinámicos de eventos
+        eventDidMount: function(info) {
+            // Aplicar color personalizado del evento
+            if (info.event.backgroundColor) {
+                info.el.style.backgroundColor = info.event.backgroundColor;
+                info.el.style.borderColor = info.event.backgroundColor;
+            }
+
+            // Añadir clases CSS según el tipo
+            if (info.event.extendedProps.tipo) {
+                info.el.classList.add(info.event.extendedProps.tipo);
+            }
+            if (info.event.extendedProps.className) {
+                const className = info.event.extendedProps.className.toLowerCase().replace(/ /g, '-');
+                info.el.classList.add(className);
+            }
+
+            // Hacer que los eventos recurrentes no se puedan arrastrar
+            if (info.event.extendedProps.horario_id) {
+                info.el.style.cursor = 'pointer';
+            }
+
+            // Añadir tooltip enriquecido con información de asistencias
+            const totalAsistencias = info.event.extendedProps.total_asistencias || 0;
+            const presentes = info.event.extendedProps.presentes || 0;
+            const ausentes = totalAsistencias - presentes;
+            const porcentaje = totalAsistencias > 0 ? Math.round((presentes / totalAsistencias) * 100) : 0;
+            const alumnosPresentes = info.event.extendedProps.alumnos_presentes || [];
+            const alumnosAusentes = info.event.extendedProps.alumnos_ausentes || [];
+
+            let tooltipText = info.event.title.split(' (')[0]; // Nombre de la clase sin contador
+
+            if (info.event.extendedProps.instructor) {
+                tooltipText += `\n👤 ${info.event.extendedProps.instructor}`;
+            }
+
+            if (totalAsistencias > 0) {
+                tooltipText += `\n\n📊 ${presentes}/${totalAsistencias} (${porcentaje}%)`;
+
+                if (alumnosPresentes.length > 0) {
+                    tooltipText += `\n\n✓ Presentes:\n  • ${alumnosPresentes.join('\n  • ')}`;
+                }
+
+                if (alumnosAusentes.length > 0) {
+                    tooltipText += `\n\n✗ Ausentes:\n  • ${alumnosAusentes.join('\n  • ')}`;
+                }
+            } else {
+                tooltipText += '\n\n⚠️ Sin asistencias registradas';
+            }
+
+            info.el.title = tooltipText;
+
+            // Agregar badge visual en el evento para clases con asistencias
+            if (totalAsistencias > 0) {
+                const badge = document.createElement('span');
+                badge.style.cssText = 'position: absolute; top: 2px; right: 2px; background: rgba(0,0,0,0.6); color: white; padding: 1px 4px; border-radius: 3px; font-size: 10px; font-weight: bold;';
+                badge.textContent = `${presentes}/${totalAsistencias}`;
+                info.el.querySelector('.fc-event-main').style.position = 'relative';
+                info.el.querySelector('.fc-event-main').appendChild(badge);
+            }
+        },
+
+        // Mostrar tooltip personalizado al pasar el ratón
+        eventMouseEnter: function(info) {
+            const totalAsistencias = info.event.extendedProps.total_asistencias || 0;
+            if (totalAsistencias > 0) {
+                // Cambiar opacidad para resaltar
+                info.el.style.opacity = '0.9';
+            }
+        },
+
+        eventMouseLeave: function(info) {
+            info.el.style.opacity = '1';
+        }
+    });
+
+    calendar.render();
+
+    // Función para abrir modal de nuevo evento
+    function abrirModalNuevoEvento(start, end) {
+        document.getElementById('eventoModalLabel').textContent = 'Nueva Clase';
+        document.getElementById('eventoForm').reset();
+        document.getElementById('evento_id').value = '';
+        document.getElementById('btnEliminarEvento').style.display = 'none';
+
+        // Setear fechas
+        document.getElementById('fecha_inicio').value = formatearFechaInput(start);
+        document.getElementById('fecha_fin').value = formatearFechaInput(end);
+
+        const modal = new bootstrap.Modal(document.getElementById('eventoModal'));
+        modal.show();
+    }
+
+    // Función para mostrar detalle de evento
+    function mostrarDetalleEvento(event) {
+        eventoActual = event;
+        const isRecurrente = event.extendedProps.horario_id != null;
+
+        document.getElementById('detalleEventoTitulo').textContent = event.title;
+
+        let html = `
+            <div class="mb-2"><strong>Fecha:</strong> ${formatearFecha(event.start)}</div>
+            <div class="mb-2"><strong>Horario:</strong> ${formatearHora(event.start)} - ${formatearHora(event.end)}</div>
+        `;
+
+        if (event.extendedProps.alumno) {
+            html += `<div class="mb-2"><strong>Alumno:</strong> ${event.extendedProps.alumno}</div>`;
+        }
+
+        if (event.extendedProps.instructor) {
+            html += `<div class="mb-2"><strong>Instructor:</strong> ${event.extendedProps.instructor}</div>`;
+        }
+
+        if (event.extendedProps.description) {
+            html += `<div class="mb-2"><strong>Descripción:</strong> ${event.extendedProps.description}</div>`;
+        }
+
+        if (isRecurrente) {
+            html += `<div class="alert alert-info mt-3">
+                <i class="fas fa-redo"></i> Clase recurrente del horario semanal
+            </div>`;
+
+            // Mostrar información de asistencias
+            const totalAsistencias = event.extendedProps.total_asistencias || 0;
+            const presentes = event.extendedProps.presentes || 0;
+            const alumnosPresentes = event.extendedProps.alumnos_presentes || [];
+            const alumnosAusentes = event.extendedProps.alumnos_ausentes || [];
+
+            if (totalAsistencias > 0) {
+                const porcentaje = Math.round((presentes / totalAsistencias) * 100);
+                html += `
+                    <div class="card mt-3">
+                        <div class="card-body">
+                            <h6 class="card-title"><i class="fas fa-users"></i> Asistencias (${presentes}/${totalAsistencias} - ${porcentaje}%)</h6>
+                            <div class="progress mb-3" style="height: 20px;">
+                                <div class="progress-bar bg-success" role="progressbar"
+                                     style="width: ${porcentaje}%"
+                                     aria-valuenow="${porcentaje}" aria-valuemin="0" aria-valuemax="100">
+                                    ${porcentaje}%
+                                </div>
+                            </div>
+                `;
+
+                if (alumnosPresentes.length > 0) {
+                    html += `
+                        <div class="mb-3">
+                            <strong class="text-success"><i class="fas fa-check-circle"></i> Presentes (${alumnosPresentes.length}):</strong>
+                            <ul class="list-unstyled mt-2 ms-3">
+                                ${alumnosPresentes.map(nombre => `<li><i class="fas fa-user text-success me-2"></i>${nombre}</li>`).join('')}
+                            </ul>
+                        </div>
+                    `;
+                }
+
+                if (alumnosAusentes.length > 0) {
+                    html += `
+                        <div>
+                            <strong class="text-danger"><i class="fas fa-times-circle"></i> Ausentes (${alumnosAusentes.length}):</strong>
+                            <ul class="list-unstyled mt-2 ms-3">
+                                ${alumnosAusentes.map(nombre => `<li><i class="fas fa-user-slash text-danger me-2"></i>${nombre}</li>`).join('')}
+                            </ul>
+                        </div>
+                    `;
+                }
+
+                html += `
+                        </div>
+                    </div>
+                `;
+            } else {
+                html += `
+                    <div class="alert alert-warning mt-3">
+                        <i class="fas fa-exclamation-triangle"></i> No hay asistencias registradas para esta clase aún
+                    </div>
+                `;
+            }
+
+            // Botón para registrar asistencia
+            html += `
+                <a href="/asistencias/registrar?horario_id=${event.extendedProps.horario_id}&fecha=${event.extendedProps.fecha}"
+                   class="btn btn-primary btn-sm mt-3 w-100">
+                    <i class="fas fa-clipboard-check"></i> Gestionar Asistencias
+                </a>
+            `;
+        }
+
+        document.getElementById('detalleEventoBody').innerHTML = html;
+
+        // Mostrar/ocultar botón editar según si es recurrente
+        document.getElementById('btnEditarEvento').style.display = isRecurrente ? 'none' : 'inline-block';
+
+        const modal = new bootstrap.Modal(document.getElementById('detalleEventoModal'));
+        modal.show();
+    }
+
+    // Botón Nuevo Evento
+    document.getElementById('btnNuevoEvento').addEventListener('click', function() {
+        const now = new Date();
+        const start = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 10, 0);
+        const end = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 11, 15);
+        abrirModalNuevoEvento(start, end);
+    });
+
+    // Botón Editar Evento
+    document.getElementById('btnEditarEvento').addEventListener('click', function() {
+        if (!eventoActual) return;
+
+        document.getElementById('detalleEventoModal').querySelector('.btn-close').click();
+
+        // Cargar datos del evento
+        fetch(`/api/calendario/eventos/${eventoActual.id}`)
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('eventoModalLabel').textContent = 'Editar Clase';
+                document.getElementById('evento_id').value = data.id;
+                document.getElementById('tipo_evento').value = data.tipo || 'individual';
+                document.getElementById('clase_id').value = data.clase_id || '';
+                document.getElementById('alumno_id').value = data.alumno_id || '';
+                document.getElementById('titulo').value = data.titulo;
+                document.getElementById('fecha_inicio').value = formatearFechaInput(new Date(data.fecha_inicio));
+                document.getElementById('fecha_fin').value = formatearFechaInput(new Date(data.fecha_fin));
+                document.getElementById('instructor').value = data.instructor || 'Minouche';
+                document.getElementById('color').value = data.color || '#8B5FBF';
+                document.getElementById('descripcion').value = data.descripcion || '';
+                document.getElementById('btnEliminarEvento').style.display = 'inline-block';
+
+                const modal = new bootstrap.Modal(document.getElementById('eventoModal'));
+                modal.show();
+            });
+    });
+
+    // Guardar Evento
+    document.getElementById('btnGuardarEvento').addEventListener('click', function() {
+        const form = document.getElementById('eventoForm');
+        if (!form.checkValidity()) {
+            form.reportValidity();
+            return;
+        }
+
+        const eventoId = document.getElementById('evento_id').value;
+        const url = eventoId ? `/api/calendario/eventos/${eventoId}` : '/api/calendario/eventos';
+        const method = eventoId ? 'PUT' : 'POST';
+
+        const formData = {
+            tipo: document.getElementById('tipo_evento').value,
+            clase_id: document.getElementById('clase_id').value || null,
+            alumno_id: document.getElementById('alumno_id').value || null,
+            titulo: document.getElementById('titulo').value,
+            fecha_inicio: document.getElementById('fecha_inicio').value,
+            fecha_fin: document.getElementById('fecha_fin').value,
+            instructor: document.getElementById('instructor').value,
+            color: document.getElementById('color').value,
+            descripcion: document.getElementById('descripcion').value
+        };
+
+        fetch(url, {
+            method: method,
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(formData)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                calendar.refetchEvents();
+                document.getElementById('eventoModal').querySelector('.btn-close').click();
+                mostrarMensaje('Evento guardado exitosamente', 'success');
+            } else {
+                mostrarMensaje('Error al guardar el evento', 'error');
+            }
+        })
+        .catch(error => {
+            mostrarMensaje('Error al guardar el evento', 'error');
+        });
+    });
+
+    // Eliminar Evento
+    document.getElementById('btnEliminarEvento').addEventListener('click', function() {
+        if (!confirm('¿Estás seguro de que quieres eliminar este evento?')) return;
+
+        const eventoId = document.getElementById('evento_id').value;
+
+        fetch(`/api/calendario/eventos/${eventoId}`, {
+            method: 'DELETE'
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                calendar.refetchEvents();
+                document.getElementById('eventoModal').querySelector('.btn-close').click();
+                mostrarMensaje('Evento eliminado exitosamente', 'success');
+            }
+        });
+    });
+
+    // Actualizar evento (drag & drop)
+    function actualizarEvento(event) {
+        const formData = {
+            fecha_inicio: event.start.toISOString(),
+            fecha_fin: event.end.toISOString()
+        };
+
+        fetch(`/api/calendario/eventos/${event.id}`, {
+            method: 'PUT',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(formData)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                mostrarMensaje('Evento actualizado', 'success');
+            }
+        });
+    }
+
+    // Registro rápido de asistencia
+    document.getElementById('btnAsistenciaRapida').addEventListener('click', function() {
+        if (!eventoActual) return;
+        window.location.href = `/asistencias/registrar?evento_id=${eventoActual.id}`;
+    });
+
+    // Utilidades
+    function formatearFechaInput(date) {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        return `${year}-${month}-${day}T${hours}:${minutes}`;
+    }
+
+    function formatearFecha(date) {
+        return date.toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+    }
+
+    function formatearHora(date) {
+        return date.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+    }
+
+    function mostrarMensaje(mensaje, tipo) {
+        // Implementar sistema de notificaciones toast
+        alert(mensaje);
+    }
+
+    // Cambiar campos según tipo de evento
+    document.getElementById('tipo_evento').addEventListener('change', function() {
+        const alumnoField = document.getElementById('alumno_field');
+        if (this.value === 'individual') {
+            alumnoField.style.display = 'block';
+        } else {
+            alumnoField.style.display = 'none';
+            document.getElementById('alumno_id').value = '';
+        }
+    });
+});
+</script>
+{% endblock %}

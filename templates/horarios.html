@@ -5,13 +5,92 @@
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h1><i class="fas fa-calendar-alt"></i> Horarios Semanales</h1>
-    <a href="{{ url_for('nuevo_horario') }}" class="btn btn-success">
-        <i class="fas fa-plus"></i> Agregar Horario
-    </a>
+    <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#nuevoHorarioModal">
+        <i class="fas fa-plus"></i> Agregar Horario Periódico
+    </button>
+</div>
+
+<!-- Dashboard de Estadísticas -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card text-center stats-card">
+            <div class="card-body">
+                <i class="fas fa-calendar-week fa-2x mb-2 text-primary"></i>
+                <h3 class="mb-0">{{ horarios|length }}</h3>
+                <p class="text-muted mb-0">Horarios Activos</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center stats-card">
+            <div class="card-body">
+                <i class="fas fa-redo fa-2x mb-2 text-success"></i>
+                <h3 class="mb-0">{{ clases_periodicidad.semanal|default(0) }}</h3>
+                <p class="text-muted mb-0">Clases Semanales</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center stats-card">
+            <div class="card-body">
+                <i class="fas fa-clock fa-2x mb-2 text-info"></i>
+                <h3 class="mb-0">{{ total_horas_semanales|default(0) }}</h3>
+                <p class="text-muted mb-0">Horas/Semana</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center stats-card">
+            <div class="card-body">
+                <i class="fas fa-users fa-2x mb-2 text-warning"></i>
+                <h3 class="mb-0">{{ clases|length }}</h3>
+                <p class="text-muted mb-0">Tipos de Clase</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Resumen por Tipo de Clase y Periodicidad -->
+<div class="card mb-4">
+    <div class="card-header bg-gradient-purple text-white">
+        <h5 class="mb-0"><i class="fas fa-chart-pie"></i> Resumen por Tipo de Clase</h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            {% for clase in clases %}
+            {% set count = horarios|selectattr('clase_id', 'equalto', clase.id)|list|length %}
+            {% if count > 0 %}
+            <div class="col-md-6 col-lg-3 mb-3">
+                <div class="clase-summary-card" style="border-left: 4px solid {{ clase.color }};">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <h6 class="mb-1">{{ clase.nombre }}</h6>
+                            <small class="text-muted">
+                                <i class="fas fa-sync"></i> {{ clase.periodicidad|capitalize }}
+                            </small>
+                            <br>
+                            <small class="text-muted">
+                                <i class="fas fa-hourglass-half"></i> {{ clase.duracion_minutos }} min
+                            </small>
+                        </div>
+                        <div class="text-end">
+                            <span class="badge bg-primary rounded-pill">{{ count }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            {% endfor %}
+        </div>
+    </div>
 </div>
 
 {% if horarios %}
-<div class="card">
+<!-- Lista de Horarios -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0"><i class="fas fa-list"></i> Todos los Horarios</h5>
+    </div>
     <div class="card-body">
         <div class="table-responsive">
             <table class="table table-hover">
@@ -20,7 +99,9 @@
                         <th>Día</th>
                         <th>Clase</th>
                         <th>Horario</th>
+                        <th>Duración</th>
                         <th>Instructor</th>
+                        <th>Periodicidad</th>
                         <th>Acciones</th>
                     </tr>
                 </thead>
@@ -31,18 +112,32 @@
                             <strong>{{ horario.get_dia_display() }}</strong>
                         </td>
                         <td>
-                            <span class="badge bg-info">{{ horario.clase.nombre }}</span>
+                            <span class="badge" style="background-color: {{ horario.clase.color }};">
+                                {{ horario.clase.nombre }}
+                            </span>
                         </td>
                         <td>
-                            {{ horario.hora_inicio.strftime('%H:%M') }} - {{ horario.hora_fin.strftime('%H:%M') }}
+                            {{ formatear_horario(horario.hora_inicio, horario.hora_fin) }}
+                        </td>
+                        <td>
+                            <small class="text-muted">{{ horario.clase.duracion_minutos }} min</small>
                         </td>
                         <td>{{ horario.instructor }}</td>
                         <td>
+                            <span class="badge bg-secondary">{{ horario.clase.periodicidad }}</span>
+                        </td>
+                        <td>
                             <div class="btn-group" role="group">
-                                <a href="{{ url_for('registrar_asistencia') }}?horario_id={{ horario.id }}" 
-                                   class="btn btn-sm btn-outline-primary">
-                                    <i class="fas fa-clipboard-check"></i> Registrar Asistencia
+                                <a href="{{ url_for('registrar_asistencia') }}?horario_id={{ horario.id }}"
+                                   class="btn btn-sm btn-outline-primary"
+                                   title="Registrar Asistencia">
+                                    <i class="fas fa-clipboard-check"></i>
                                 </a>
+                                <button class="btn btn-sm btn-outline-danger"
+                                        onclick="eliminarHorario({{ horario.id }})"
+                                        title="Eliminar">
+                                    <i class="fas fa-trash"></i>
+                                </button>
                             </div>
                         </td>
                     </tr>
@@ -54,7 +149,7 @@
 </div>
 
 <!-- Vista de horario semanal -->
-<div class="card mt-4">
+<div class="card">
     <div class="card-header">
         <h5 class="mb-0">
             <i class="fas fa-calendar-week"></i> Vista Semanal
@@ -62,10 +157,10 @@
     </div>
     <div class="card-body">
         <div class="table-responsive">
-            <table class="table table-bordered">
+            <table class="table table-bordered schedule-grid">
                 <thead>
                     <tr>
-                        <th style="width: 120px;">Hora</th>
+                        <th style="width: 80px;">Hora</th>
                         <th>Lunes</th>
                         <th>Martes</th>
                         <th>Miércoles</th>
@@ -78,18 +173,24 @@
                 <tbody>
                     {% for hora in range(8, 22) %}
                     <tr>
-                        <td class="bg-light fw-bold text-center">
+                        <td class="bg-light fw-bold text-center time-cell">
                             {{ "%02d:00"|format(hora) }}
                         </td>
                         {% for dia in range(7) %}
-                        <td style="height: 60px; vertical-align: top; padding: 5px;">
+                        <td class="schedule-cell">
                             {% set horarios_dia_hora = horarios | selectattr('dia_semana', 'equalto', dia) | list %}
                             {% for horario in horarios_dia_hora %}
                                 {% if horario.hora_inicio.hour == hora %}
-                                <div class="clase-badge mb-1 {{ horario.clase.nombre.lower().replace(' ', '-') }}">
-                                    {{ horario.clase.nombre }}
-                                    <br>
-                                    <small>{{ horario.hora_inicio.strftime('%H:%M') }} - {{ horario.hora_fin.strftime('%H:%M') }}</small>
+                                <div class="clase-badge"
+                                     style="background: linear-gradient(135deg, {{ horario.clase.color }} 0%, {{ horario.clase.color }}dd 100%);">
+                                    <div class="clase-nombre">{{ horario.clase.nombre }}</div>
+                                    <div class="clase-hora">
+                                        <i class="fas fa-clock"></i>
+                                        {{ horario.hora_inicio.strftime('%H:%M') }} - {{ horario.hora_fin.strftime('%H:%M') }}
+                                    </div>
+                                    <div class="clase-instructor">
+                                        <i class="fas fa-user"></i> {{ horario.instructor }}
+                                    </div>
                                 </div>
                                 {% endif %}
                             {% endfor %}
@@ -103,43 +204,230 @@
     </div>
 </div>
 
-<style>
-.clase-badge {
-    color: white;
-    padding: 4px 8px;
-    border-radius: 8px;
-    font-size: 0.75rem;
-    text-align: center;
-    display: block;
-}
-
-/* Colores específicos para cada tipo de clase */
-.yoga-menopausia {
-    background: linear-gradient(135deg, #FF6B6B 0%, #FF8E8E 100%);
-}
-
-.yoga-integral {
-    background: linear-gradient(135deg, #4ECDC4 0%, #7FDBDA 100%);
-}
-
-.yoga-embarazadas {
-    background: linear-gradient(135deg, #FFE66D 0%, #FFF8A5 100%);
-    color: #333;
-}
-
-.meditación {
-    background: linear-gradient(135deg, #A8E6CF 0%, #C7F0DB 100%);
-    color: #333;
-}
-</style>
 {% else %}
 <div class="text-center py-5">
     <i class="fas fa-calendar-alt fa-5x text-muted mb-3"></i>
     <h3 class="text-muted">No hay horarios configurados</h3>
     <p class="text-muted">Comienza configurando los horarios semanales de las clases.</p>
-    <a href="{{ url_for('nuevo_horario') }}" class="btn btn-success">
+    <button class="btn btn-success btn-lg" data-bs-toggle="modal" data-bs-target="#nuevoHorarioModal">
         <i class="fas fa-plus"></i> Configurar Primer Horario
-    </a>
+    </button>
 </div>
 {% endif %}
+
+<!-- Modal para Nuevo Horario Periódico -->
+<div class="modal fade" id="nuevoHorarioModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-gradient-purple text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-plus-circle"></i> Nuevo Horario Periódico
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="{{ url_for('nuevo_horario') }}" method="POST">
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="clase_id" class="form-label">
+                                <i class="fas fa-dumbbell"></i> Tipo de Clase
+                            </label>
+                            <select class="form-select" id="clase_id" name="clase_id" required>
+                                <option value="">Seleccionar clase...</option>
+                                {% for clase in clases %}
+                                <option value="{{ clase.id }}"
+                                        data-duracion="{{ clase.duracion_minutos }}"
+                                        data-periodicidad="{{ clase.periodicidad }}">
+                                    {{ clase.nombre }} ({{ clase.duracion_minutos }} min - {{ clase.periodicidad }})
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="dia_semana" class="form-label">
+                                <i class="fas fa-calendar-day"></i> Día de la Semana
+                            </label>
+                            <select class="form-select" id="dia_semana" name="dia_semana" required>
+                                <option value="">Seleccionar día...</option>
+                                <option value="0">Lunes</option>
+                                <option value="1">Martes</option>
+                                <option value="2">Miércoles</option>
+                                <option value="3">Jueves</option>
+                                <option value="4">Viernes</option>
+                                <option value="5">Sábado</option>
+                                <option value="6">Domingo</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="hora_inicio" class="form-label">
+                                <i class="fas fa-clock"></i> Hora de Inicio
+                            </label>
+                            <input type="time" class="form-control" id="hora_inicio" name="hora_inicio" required>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="hora_fin" class="form-label">
+                                <i class="fas fa-clock"></i> Hora de Fin
+                            </label>
+                            <input type="time" class="form-control" id="hora_fin" name="hora_fin" required readonly>
+                            <div class="form-text">Se calcula automáticamente según la duración</div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="instructor" class="form-label">
+                            <i class="fas fa-user-tie"></i> Instructor
+                        </label>
+                        <input type="text" class="form-control" id="instructor" name="instructor"
+                               value="Minouche" required>
+                    </div>
+
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i>
+                        <strong>Nota:</strong> Este horario se repetirá automáticamente cada semana en el día seleccionado.
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-save"></i> Guardar Horario
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+.stats-card {
+    transition: transform 0.2s;
+    border: none;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.stats-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+.bg-gradient-purple {
+    background: linear-gradient(135deg, #8B5FBF 0%, #6f4a99 100%);
+}
+
+.clase-summary-card {
+    padding: 15px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    height: 100%;
+}
+
+.schedule-grid {
+    font-size: 0.85rem;
+}
+
+.schedule-cell {
+    height: 70px;
+    vertical-align: top;
+    padding: 5px !important;
+    position: relative;
+}
+
+.time-cell {
+    font-size: 0.75rem;
+    vertical-align: middle;
+}
+
+.clase-badge {
+    color: white;
+    padding: 8px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    text-align: center;
+    display: block;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    height: 100%;
+}
+
+.clase-nombre {
+    font-weight: 600;
+    margin-bottom: 2px;
+}
+
+.clase-hora {
+    font-size: 0.7rem;
+    opacity: 0.9;
+    margin-bottom: 2px;
+}
+
+.clase-instructor {
+    font-size: 0.65rem;
+    opacity: 0.8;
+}
+
+.clase-badge i {
+    font-size: 0.7rem;
+    margin-right: 2px;
+}
+</style>
+
+<script>
+// Calcular automáticamente hora de fin basado en duración
+document.getElementById('clase_id').addEventListener('change', function() {
+    const selectedOption = this.options[this.selectedIndex];
+    const duracion = parseInt(selectedOption.dataset.duracion) || 75;
+    const periodicidad = selectedOption.dataset.periodicidad || 'semanal';
+
+    calcularHoraFin(duracion);
+});
+
+document.getElementById('hora_inicio').addEventListener('change', function() {
+    const claseSelect = document.getElementById('clase_id');
+    const selectedOption = claseSelect.options[claseSelect.selectedIndex];
+    const duracion = parseInt(selectedOption.dataset.duracion) || 75;
+
+    calcularHoraFin(duracion);
+});
+
+function calcularHoraFin(duracionMinutos) {
+    const horaInicio = document.getElementById('hora_inicio').value;
+    if (!horaInicio) return;
+
+    const [horas, minutos] = horaInicio.split(':').map(Number);
+    const inicioDate = new Date(2000, 0, 1, horas, minutos);
+    const finDate = new Date(inicioDate.getTime() + duracionMinutos * 60000);
+
+    const horaFin = String(finDate.getHours()).padStart(2, '0') + ':' +
+                    String(finDate.getMinutes()).padStart(2, '0');
+
+    document.getElementById('hora_fin').value = horaFin;
+}
+
+function eliminarHorario(id) {
+    if (confirm('¿Estás seguro de que quieres eliminar este horario? Esto no afectará a las asistencias ya registradas.')) {
+        fetch(`/horarios/${id}/eliminar`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Error al eliminar el horario');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error al eliminar el horario');
+        });
+    }
+}
+</script>
 {% endblock %}
