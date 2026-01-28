@@ -2840,6 +2840,12 @@ def tipos_clase():
     tipos = TipoClase.query.order_by(TipoClase.orden, TipoClase.nombre).all()
     return render_template('configuracion/tipos_clase.html', tipos=tipos)
 
+@app.route('/configuracion/clases-gestion')
+@login_required
+def configuracion_clases():
+    """Alias para la gestión de tipos de clase por compatibilidad"""
+    return redirect(url_for('tipos_clase'))
+
 @app.route('/configuracion/tipos-clase/nuevo', methods=['GET', 'POST'])
 @login_required
 def nuevo_tipo_clase():
