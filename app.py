@@ -2723,11 +2723,30 @@ def reporte_contabilidad_pdf():
 @app.route('/configuracion')
 @login_required
 def configuracion():
-    configuraciones = Configuracion.query.all()
-    config_dict = {config.clave: config.valor for config in configuraciones}
-    clases = Clase.query.order_by(Clase.nombre).all()
-    tarifas = Tarifa.query.all()
-    return render_template('configuracion.html', config=config_dict, clases=clases, tarifas=tarifas)
+    try:
+        configuraciones = Configuracion.query.all()
+        config_dict = {config.clave: config.valor for config in configuraciones}
+        clases = Clase.query.order_by(Clase.nombre).all()
+        tarifas = Tarifa.query.all()
+        
+        # Estadísticas para el dashboard de configuración
+        from app import Alumno, HorarioSemanal
+        total_alumnos = Alumno.query.filter_by(activo=True).count()
+        total_clases = len(clases)
+        total_horarios = HorarioSemanal.query.filter_by(activo=True).count()
+        
+        return render_template('configuracion.html', 
+                               config=config_dict, 
+                               clases=clases, 
+                               tarifas=tarifas,
+                               total_alumnos=total_alumnos,
+                               total_clases=total_clases,
+                               total_horarios=total_horarios,
+                               total_eventos=0) # Por ahora 0 o implementar lógica si es necesario
+    except Exception as e:
+        print(f"Error en configuración: {e}")
+        flash(f"Error al cargar la configuración: Asegúrate de inicializar la base de datos. {e}", "danger")
+        return redirect(url_for('index'))
 
 @app.route('/configuracion/guardar', methods=['POST'])
 @login_required
