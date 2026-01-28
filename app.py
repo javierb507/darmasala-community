@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, send_file
+from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, send_file, session
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import or_
 from datetime import datetime, date, timedelta
@@ -161,6 +161,7 @@ class Alumno(db.Model):
     # Relaciones
     pagos = db.relationship('Pago', backref='alumno', lazy=True)
     cliente = db.relationship('Cliente', backref='alumno', lazy=True, uselist=False)
+    horarios = db.relationship('HorarioSemanal', secondary='inscripciones_horarios', backref='alumnos_inscritos', lazy=True)
     
     def __repr__(self):
         return f'<Alumno {self.nombre} {self.apellido}>'
@@ -239,6 +240,9 @@ class Clase(db.Model):
     activa = db.Column(db.Boolean, default=True)
     duracion_minutos = db.Column(db.Integer, default=75)  # Duración por defecto de la clase
     periodicidad = db.Column(db.String(50), default='semanal')  # semanal, quincenal, mensual
+    precio = db.Column(db.Float, default=15.00)
+    nivel = db.Column(db.String(50), default='todos')
+    capacidad_maxima = db.Column(db.Integer, default=15)
 
     def __repr__(self):
         return f'<Clase {self.nombre}>'
@@ -256,6 +260,12 @@ class Clase(db.Model):
         return precios.get(tipo_cuota, self.precio_1_semanal)
 
 # Modelo de Horario Semanal
+# Tabla de asociación para inscripciones de alumnos en clases semanales
+inscripciones_horarios = db.Table('inscripciones_horarios',
+    db.Column('alumno_id', db.Integer, db.ForeignKey('alumno.id'), primary_key=True),
+    db.Column('horario_id', db.Integer, db.ForeignKey('horario_semanal.id'), primary_key=True)
+)
+
 class HorarioSemanal(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     clase_id = db.Column(db.Integer, db.ForeignKey('clase.id'), nullable=False)
@@ -270,6 +280,7 @@ class HorarioSemanal(db.Model):
     
     # Relaciones
     asistencias = db.relationship('Asistencia', backref='horario', lazy=True)
+    clase = db.relationship('Clase', backref='horarios', lazy=True)
     
     def __repr__(self):
         dias = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo']
@@ -278,6 +289,21 @@ class HorarioSemanal(db.Model):
     def get_dia_display(self):
         dias = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo']
         return dias[self.dia_semana]
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'clase_id': self.clase_id,
+            'clase': self.clase.to_dict() if self.clase else None,
+            'dia_semana': self.dia_semana,
+            'dias_semana_texto': self.get_dia_display(),
+            'hora_inicio': self.hora_inicio.strftime('%H:%M'),
+            'hora_fin': self.hora_fin.strftime('%H:%M'),
+            'instructor': self.instructor,
+            'capacidad_maxima': self.capacidad_maxima,
+            'observaciones': self.observaciones or '',
+            'activo': self.activo
+        }
 
 # Modelo de Asistencia
 class Asistencia(db.Model):
@@ -292,7 +318,7 @@ class Asistencia(db.Model):
 
     # Relaciones
     alumno = db.relationship('Alumno', backref='asistencias')
-    horario = db.relationship('HorarioSemanal', backref='asistencias')
+
 
     def __repr__(self):
         return f'<Asistencia {self.alumno.nombre} - {self.fecha_clase}>'
@@ -681,6 +707,25 @@ class GastoFijo(db.Model):
     def __repr__(self):
         return f'<GastoFijo {self.nombre} - {self.importe}€/{self.frecuencia}>'
 
+
+# Modelo de Ingreso
+class Ingreso(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    fecha = db.Column(db.Date, nullable=False)
+    concepto = db.Column(db.String(200), nullable=False)
+    importe = db.Column(db.Float, nullable=False)
+    tipo = db.Column(db.String(50), default='Varios')
+    metodo_pago = db.Column(db.String(50))
+    alumno_id = db.Column(db.Integer, db.ForeignKey('alumno.id'), nullable=True)
+    notas = db.Column(db.Text)
+    fecha_creacion = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    # Relación
+    alumno = db.relationship('Alumno', backref='ingresos')
+    
+    def __repr__(self):
+        return f'<Ingreso {self.concepto} - {self.importe}€>'
+
 # Modelo de Gasto Mensual (Simplificado)
 class GastoMensual(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -710,16 +755,7 @@ class GastoMensual(db.Model):
         }
         return colores.get(self.categoria, '#6c757d')
 
-# Modelo de Configuración
-class Configuracion(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    clave = db.Column(db.String(50), unique=True, nullable=False)
-    valor = db.Column(db.Text, nullable=False)
-    descripcion = db.Column(db.Text)
-    fecha_actualizacion = db.Column(db.DateTime, default=datetime.utcnow)
-    
-    def __repr__(self):
-        return f'<Configuracion {self.clave}: {self.valor}>'
+
 
 # Modelo de Tipo de Clase Configurable
 class TipoClase(db.Model):
@@ -873,11 +909,13 @@ def logout():
 
 # RUTAS PRINCIPALES
 
-# Context Processor para hacer disponibles las utilidades de calendario en todos los templates
+# Context Processor para hacer disponibles las utilidades de calendario y versión en todos los templates
 @app.context_processor
-def inject_calendar_utils():
-    """Inyecta utilidades de calendario en todos los templates."""
-    return crear_contexto_calendario()
+def inject_global_vars():
+    """Inyecta utilidades de calendario y versión en todos los templates."""
+    context = crear_contexto_calendario()
+    context['version_info'] = get_version_info()
+    return context
 
 # Routes
 @app.route('/')
@@ -1330,16 +1368,7 @@ def nuevo_horario():
     # Para GET, simplemente redirigir a horarios (el modal está en esa página)
     return redirect(url_for('horarios'))
 
-@app.route('/horarios/<int:horario_id>/eliminar', methods=['POST'])
-def eliminar_horario(horario_id):
-    try:
-        horario = HorarioSemanal.query.get_or_404(horario_id)
-        horario.activo = False
-        db.session.commit()
-        return jsonify({'success': True})
-    except Exception as e:
-        db.session.rollback()
-        return jsonify({'success': False, 'error': str(e)}), 500
+
 
 @app.route('/asistencias')
 def asistencias():
@@ -1383,9 +1412,33 @@ def registrar_asistencia():
             flash('¡Asistencia registrada exitosamente!', 'success')
             return redirect(url_for('calendario'))
         except Exception as e:
-            flash(f'Error al actualizar horario: {str(e)}', 'error')
+            flash(f'Error al registrar asistencia: {str(e)}', 'error')
             db.session.rollback()
+            return redirect(url_for('calendario'))
     
+    # GET request
+    return redirect(url_for('calendario'))
+
+@app.route('/horarios/<int:horario_id>/editar', methods=['GET', 'POST'])
+@login_required
+def editar_horario(horario_id):
+    horario = HorarioSemanal.query.get_or_404(horario_id)
+    
+    if request.method == 'POST':
+        try:
+            horario.dia_semana = int(request.form['dia_semana'])
+            horario.hora_inicio = datetime.strptime(request.form['hora_inicio'], '%H:%M').time()
+            horario.hora_fin = datetime.strptime(request.form['hora_fin'], '%H:%M').time()
+            horario.instructor = request.form['instructor']
+            horario.clase_id = int(request.form['clase_id'])
+            
+            db.session.commit()
+            flash('Horario actualizado exitosamente', 'success')
+            return redirect(url_for('horarios'))
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Error al actualizar horario: {str(e)}', 'error')
+
     clases = Clase.query.filter_by(activa=True).all()
     return render_template('editar_horario.html', horario=horario, clases=clases)
 
@@ -2143,9 +2196,9 @@ def nueva_yogaterapia_alumno(alumno_id):
 
 # RUTAS PARA GESTIÓN ECONÓMICA
 
-@app.route('/economia')
+@app.route('/economia/historico')
 @login_required
-def economia():
+def economia_historico():
     """Dashboard principal de contabilidad con períodos"""
     # Obtener parámetros de período
     periodo = request.args.get('periodo', 'mes_actual')
@@ -2454,6 +2507,7 @@ def nuevo_gasto_fijo():
                 nombre=request.form.get('nombre'),
                 descripcion=request.form.get('descripcion', ''),
                 categoria_id=request.form.get('categoria_id'),
+                proveedor_id=request.form.get('proveedor_id') or None,
                 importe=float(request.form.get('importe')),
                 frecuencia=request.form.get('frecuencia', 'mensual'),
                 dia_cargo=int(request.form.get('dia_cargo', 1)),
@@ -2472,8 +2526,9 @@ def nuevo_gasto_fijo():
             db.session.rollback()
     
     categorias = CategoriaGasto.query.filter_by(activo=True).all()
+    proveedores = Proveedor.query.filter_by(activo=True).all()
     fecha_hoy = date.today()
-    return render_template('economia/nuevo_gasto_fijo.html', categorias=categorias, fecha_hoy=fecha_hoy)
+    return render_template('economia/nuevo_gasto_fijo.html', categorias=categorias, proveedores=proveedores, fecha_hoy=fecha_hoy)
 
 @app.route('/gastos-fijos/<int:gasto_id>/editar', methods=['GET', 'POST'])
 @login_required
@@ -2486,6 +2541,7 @@ def editar_gasto_fijo(gasto_id):
             gasto.nombre = request.form.get('nombre')
             gasto.descripcion = request.form.get('descripcion', '')
             gasto.categoria_id = request.form.get('categoria_id')
+            gasto.proveedor_id = request.form.get('proveedor_id') or None
             gasto.importe = float(request.form.get('importe'))
             gasto.frecuencia = request.form.get('frecuencia', 'mensual')
             gasto.dia_cargo = int(request.form.get('dia_cargo', 1))
@@ -2503,7 +2559,8 @@ def editar_gasto_fijo(gasto_id):
             db.session.rollback()
     
     categorias = CategoriaGasto.query.filter_by(activo=True).all()
-    return render_template('economia/editar_gasto_fijo.html', gasto=gasto, categorias=categorias)
+    proveedores = Proveedor.query.filter_by(activo=True).all()
+    return render_template('economia/editar_gasto_fijo.html', gasto=gasto, categorias=categorias, proveedores=proveedores)
 
 @app.route('/gastos-fijos/<int:gasto_id>/eliminar', methods=['POST'])
 @login_required
@@ -2665,7 +2722,8 @@ def configuracion():
     configuraciones = Configuracion.query.all()
     config_dict = {config.clave: config.valor for config in configuraciones}
     clases = Clase.query.order_by(Clase.nombre).all()
-    return render_template('configuracion.html', config=config_dict, clases=clases)
+    tarifas = Tarifa.query.all()
+    return render_template('configuracion.html', config=config_dict, clases=clases, tarifas=tarifas)
 
 @app.route('/configuracion/guardar', methods=['POST'])
 @login_required
@@ -3045,12 +3103,7 @@ def api_clases():
                 'id': clase.id,
                 'nombre': clase.nombre,
                 'descripcion': clase.descripcion,
-                'precio_clase_suelta': clase.precio_clase_suelta,
-                'precio_1_semanal': clase.precio_1_semanal,
-                'precio_2_semanal': clase.precio_2_semanal,
-                'precio_plana': clase.precio_plana,
-                'precio_1_bimensual': clase.precio_1_bimensual,
-                'precio_2_bimensual': clase.precio_2_bimensual,
+                'precio': clase.precio,
                 'color': clase.color,
                 'nivel': clase.nivel,
                 'duracion_minutos': clase.duracion_minutos,
@@ -3083,99 +3136,9 @@ def api_toggle_clase(clase_id):
         db.session.rollback()
         return jsonify({'success': False, 'error': str(e)}), 500
 
-# Rutas para Configuración
-@app.route('/configuracion')
-def configuracion():
-    configuraciones = Configuracion.query.all()
-    config_dict = {config.clave: config.valor for config in configuraciones}
-    clases = Clase.query.all()
-    tarifas = Tarifa.query.all()
-    return render_template('configuracion.html', config=config_dict, clases=clases, tarifas=tarifas)
 
-@app.route('/configuracion/guardar', methods=['POST'])
-def guardar_configuracion():
-    try:
-        # TODO: Implementar lógica de backup real
-        import shutil
-        import os
-        from datetime import datetime
-        
-        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-        backup_filename = f'backup_yoga_{timestamp}.db'
-        
-        # Copiar la base de datos actual
-        shutil.copy2('yoga_school.db', f'backups/{backup_filename}')
-        
-        return jsonify({
-            'success': True,
-            'filename': backup_filename
-        })
-    except Exception as e:
-        return jsonify({'success': False, 'error': str(e)}), 500
 
-# RUTAS DE GESTIÓN DE CLASES
 
-@app.route('/configuracion/clases/nueva', methods=['GET', 'POST'])
-@login_required
-def nueva_clase():
-    """Crear nueva clase"""
-    if request.method == 'POST':
-        try:
-            clase = Clase(
-                nombre=request.form['nombre'],
-                descripcion=request.form.get('descripcion'),
-                precio=float(request.form.get('precio', 15.00)),
-                duracion_minutos=int(request.form.get('duracion_minutos', 60)),
-                color=request.form.get('color', '#007bff'),
-                nivel=request.form.get('nivel', 'todos'),
-                capacidad_maxima=int(request.form.get('capacidad_maxima', 15))
-            )
-            db.session.add(clase)
-            db.session.commit()
-            flash('¡Clase creada exitosamente!', 'success')
-            return redirect(url_for('configuracion'))
-        except Exception as e:
-            flash(f'Error al crear clase: {str(e)}', 'error')
-            db.session.rollback()
-    
-    return render_template('configuracion/nueva_clase.html')
-
-@app.route('/configuracion/clases/<int:clase_id>/eliminar')
-@login_required
-def eliminar_clase(clase_id):
-    """Eliminar clase (desactivar)"""
-    clase = Clase.query.get_or_404(clase_id)
-    clase.activa = False
-    db.session.commit()
-    flash('Clase eliminada exitosamente', 'success')
-    return redirect(url_for('configuracion'))
-
-@app.route('/configuracion/clases/<int:clase_id>/editar', methods=['GET', 'POST'])
-@login_required
-def editar_clase(clase_id):
-    """Editar clase existente"""
-    clase = Clase.query.get_or_404(clase_id)
-    
-    if request.method == 'POST':
-        try:
-            clase.nombre = request.form['nombre']
-            clase.descripcion = request.form.get('descripcion')
-            clase.precio = float(request.form.get('precio', 15.00))
-            clase.duracion_minutos = int(request.form.get('duracion_minutos', 60))
-            clase.color = request.form.get('color', '#007bff')
-            clase.nivel = request.form.get('nivel', 'todos')
-            clase.capacidad_maxima = int(request.form.get('capacidad_maxima', 15))
-            
-            db.session.commit()
-            flash('¡Clase actualizada exitosamente!', 'success')
-            return redirect(url_for('configuracion'))
-        except Exception as e:
-            flash(f'Error al actualizar clase: {str(e)}', 'error')
-            db.session.rollback()
-    
-    return render_template('configuracion/editar_clase.html', clase=clase)
-
-# RUTAS PARA GESTIÓN DE USUARIOS
 
 @app.route('/usuarios')
 @login_required
@@ -4612,28 +4575,118 @@ def api_eventos_disponibles():
             return jsonify({'success': False, 'message': 'Parámetros incompletos'}), 400
         
         # Convertir fechas
-        inicio = datetime.strptime(fecha_inicio, '%Y-%m-%d').date()
-        fin = datetime.strptime(fecha_fin, '%Y-%m-%d').date()
-        
+        try:
+            inicio = datetime.strptime(fecha_inicio, '%Y-%m-%d').date()
+            fin = datetime.strptime(fecha_fin, '%Y-%m-%d').date()
+        except ValueError:
+            # Soportar formato ISO si viene así
+            inicio = datetime.fromisoformat(fecha_inicio).date()
+            fin = datetime.fromisoformat(fecha_fin).date()
+
         # Obtener eventos futuros con capacidad disponible
         eventos_query = EventoCalendario.query.filter(
-            EventoCalendario.fecha >= inicio,
-            EventoCalendario.fecha <= fin,
+            EventoCalendario.fecha_inicio >= datetime.combine(inicio, datetime.min.time()),
+            EventoCalendario.fecha_fin <= datetime.combine(fin, datetime.max.time()),
             EventoCalendario.activo == True,
-            EventoCalendario.cancelado == False,
-            EventoCalendario.tipo_evento != 'yogaterapia'  # Excluir yogaterapia
-        ).order_by(EventoCalendario.fecha, EventoCalendario.hora_inicio).all()
+            EventoCalendario.tipo != 'yogaterapia'  # Excluir yogaterapia
+        ).order_by(EventoCalendario.fecha_inicio).all()
         
         eventos_disponibles = []
         
         for evento in eventos_query:
             # Verificar si el alumno ya está inscrito
-            ya_inscrito = AsistenciaEvento.query.filter_by(
+            # Verificar si el alumno ya está inscrito
+            ya_inscrito = Asistencia.query.filter_by(
                 evento_id=evento.id,
-                alumno_id=alumno_id,
-                confirmado=True
+                alumno_id=alumno_id
             ).first()
             
+            if ya_inscrito:
+                continue
+
+            # Contar asistencias actuales
+            asistencias_count = Asistencia.query.filter_by(
+                evento_id=evento.id
+            ).count()
+            
+            # Verificar capacidad disponible
+            # Usar un valor por defecto si no tiene atributo capacidad_maxima (o 15)
+            capacidad_maxima = getattr(evento, 'capacidad_maxima', 15)
+            if asistencias_count >= capacidad_maxima:
+                continue  # Skip si está lleno
+            
+            eventos_disponibles.append({
+                'id': evento.id,
+                'titulo': evento.titulo,
+                'fecha': evento.fecha_inicio.strftime('%Y-%m-%d'),
+                'hora_inicio': evento.fecha_inicio.strftime('%H:%M'),
+                'hora_fin': evento.fecha_fin.strftime('%H:%M'),
+                'instructor': evento.instructor,
+                'capacidad_maxima': capacidad_maxima,
+                'asistencias': asistencias_count,
+                'precio': getattr(evento, 'precio', 0),
+                'color': evento.color,
+                'descripcion': evento.descripcion
+            })
+        
+        # También incluir eventos virtuales de horarios semanales
+        horarios_semanales = HorarioSemanal.query.filter_by(activo=True).all()
+        
+        fecha_actual = inicio
+        while fecha_actual <= fin:
+            dia_semana = fecha_actual.weekday()  # Monday is 0
+            
+            for horario in horarios_semanales:
+                # HorarioSemanal dia_semana: 0=Lunes...
+                if horario.dia_semana == dia_semana:
+                    # Verificar si ya existe un evento específico para esta fecha/hora
+                    evento_existente = any(
+                        e['fecha'] == fecha_actual.strftime('%Y-%m-%d') and
+                        e['hora_inicio'] == horario.hora_inicio.strftime('%H:%M')
+                        for e in eventos_disponibles
+                    )
+                    
+                    if not evento_existente:
+                        # Crear evento virtual
+                        eventos_disponibles.append({
+                            'id': f'virtual-{horario.id}-{fecha_actual.strftime("%Y%m%d")}',
+                            'titulo': f'{horario.clase.nombre}',
+                            'fecha': fecha_actual.strftime('%Y-%m-%d'),
+                            'hora_inicio': horario.hora_inicio.strftime('%H:%M'),
+                            'hora_fin': horario.hora_fin.strftime('%H:%M'),
+                            'instructor': horario.instructor,
+                            'capacidad_maxima': 15, # Default
+                            'asistencias': 0,
+                            'precio': 0, # Default
+                            'color': getattr(horario.clase, 'color', '#007bff'),
+                            'descripcion': f'Clase regular de {horario.clase.nombre}',
+                            'es_virtual': True,
+                            'horario_id': horario.id
+                        })
+            
+            fecha_actual += timedelta(days=1)
+        
+        # Ordenar por fecha y hora
+        eventos_disponibles.sort(key=lambda x: (x['fecha'], x['hora_inicio']))
+        
+        return jsonify({
+            'success': True,
+            'eventos': eventos_disponibles
+        })
+        
+    except Exception as e:
+        print(f"Error en api_eventos_disponibles: {e}")
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+@app.route('/economia/facturas/nueva', methods=['GET', 'POST'])
+def nueva_factura_proveedor():
+    """Registrar nueva factura de proveedor"""
+    if request.method == 'POST':
+        try:
+            importe_sin_iva = float(request.form.get('importe_sin_iva', 0))
+            iva = float(request.form.get('iva', 0))
+            importe_total = float(request.form.get('importe_total', 0))
+
             factura = FacturaProveedor(
                 numero_factura=request.form['numero_factura'],
                 proveedor_id=int(request.form['proveedor_id']),
@@ -4658,40 +4711,7 @@ def api_eventos_disponibles():
     categorias = CategoriaGasto.query.filter_by(activo=True).all()
     return render_template('economia/nueva_factura.html', proveedores=proveedores, categorias=categorias)
 
-@app.route('/economia/gastos-fijos')
-def gastos_fijos():
-    """Lista de gastos fijos"""
-    gastos = GastoFijo.query.filter_by(activo=True).all()
-    return render_template('economia/gastos_fijos.html', gastos=gastos)
 
-@app.route('/economia/gastos-fijos/nuevo', methods=['GET', 'POST'])
-def nuevo_gasto_fijo():
-    """Crear nuevo gasto fijo"""
-    if request.method == 'POST':
-        try:
-            gasto = GastoFijo(
-                nombre=request.form['nombre'],
-                descripcion=request.form.get('descripcion'),
-                proveedor_id=int(request.form['proveedor_id']) if request.form.get('proveedor_id') else None,
-                categoria_id=int(request.form['categoria_id']),
-                importe=float(request.form['importe']),
-                frecuencia=request.form['frecuencia'],
-                dia_cargo=int(request.form.get('dia_cargo', 1)),
-                fecha_inicio=datetime.strptime(request.form['fecha_inicio'], '%Y-%m-%d').date(),
-                fecha_fin=datetime.strptime(request.form['fecha_fin'], '%Y-%m-%d').date() if request.form.get('fecha_fin') else None,
-                notas=request.form.get('notas')
-            )
-            db.session.add(gasto)
-            db.session.commit()
-            flash('¡Gasto fijo creado exitosamente!', 'success')
-            return redirect(url_for('gastos_fijos'))
-        except Exception as e:
-            flash(f'Error al crear gasto fijo: {str(e)}', 'error')
-            db.session.rollback()
-
-    categorias = CategoriaGasto.query.filter_by(activo=True).all()
-    proveedores = Proveedor.query.filter_by(activo=True).all()
-    return render_template('economia/nuevo_gasto_fijo.html', categorias=categorias, proveedores=proveedores, fecha_hoy=date.today())
 
 @app.route('/economia/export/<tipo>')
 def export_data(tipo):
@@ -4749,76 +4769,21 @@ def export_data(tipo):
                 if alumno:
                     alumno_nombre = f"{alumno.nombre} {alumno.apellido}"
             
-            # Contar asistencias actuales
-            asistencias_count = AsistenciaEvento.query.filter_by(
-                evento_id=evento.id,
-                confirmado=True
-            ).count()
+            writer.writerow([
+                ingreso.concepto,
+                getattr(ingreso, 'monto', getattr(ingreso, 'importe', 0)),
+                ingreso.fecha_creacion.strftime('%Y-%m-%d') if getattr(ingreso, 'fecha_creacion', None) else '',
+                getattr(ingreso, 'tipo_pago', 'Pago'),
+                getattr(ingreso, 'metodo_pago', ''),
+                alumno_nombre,
+                getattr(ingreso, 'descripcion', '')
+            ])
             
-            # Verificar capacidad disponible
-            capacidad_maxima = evento.capacidad_maxima or 15
-            if asistencias_count >= capacidad_maxima:
-                continue  # Skip si está lleno
-            
-            eventos_disponibles.append({
-                'id': evento.id,
-                'titulo': evento.titulo,
-                'fecha': evento.fecha.strftime('%Y-%m-%d'),
-                'hora_inicio': evento.hora_inicio.strftime('%H:%M'),
-                'hora_fin': evento.hora_fin.strftime('%H:%M'),
-                'instructor': evento.instructor,
-                'capacidad_maxima': capacidad_maxima,
-                'asistencias': asistencias_count,
-                'precio': float(evento.precio) if evento.precio else 0,
-                'color': evento.color,
-                'descripcion': evento.descripcion
-            })
-        
-        # También incluir eventos virtuales de horarios semanales
-        horarios_semanales = HorarioSemanal.query.filter_by(activo=True).all()
-        
-        fecha_actual = inicio
-        while fecha_actual <= fin:
-            dia_semana = fecha_actual.weekday() + 1  # Lunes = 1
-            
-            for horario in horarios_semanales:
-                if str(dia_semana) in (horario.dias_semana or '').split(','):
-                    # Verificar si ya existe un evento específico para esta fecha/hora
-                    evento_existente = any(
-                        e['fecha'] == fecha_actual.strftime('%Y-%m-%d') and
-                        e['hora_inicio'] == horario.hora_inicio.strftime('%H:%M')
-                        for e in eventos_disponibles
-                    )
-                    
-                    if not evento_existente:
-                        eventos_disponibles.append({
-                            'id': f'virtual-{horario.id}-{fecha_actual.strftime("%Y%m%d")}',
-                            'titulo': f'{horario.clase.nombre} (Horario Regular)',
-                            'fecha': fecha_actual.strftime('%Y-%m-%d'),
-                            'hora_inicio': horario.hora_inicio.strftime('%H:%M'),
-                            'hora_fin': horario.hora_fin.strftime('%H:%M'),
-                            'instructor': horario.instructor,
-                            'capacidad_maxima': horario.capacidad_maxima or 15,
-                            'asistencias': 0,
-                            'precio': float(horario.clase.precio) if horario.clase.precio else 0,
-                            'color': horario.clase.color if hasattr(horario.clase, 'color') else '#007bff',
-                            'descripcion': f'Clase regular de {horario.clase.nombre}',
-                            'es_virtual': True,
-                            'horario_id': horario.id
-                        })
-            
-            fecha_actual += timedelta(days=1)
-        
-        # Ordenar por fecha y hora
-        eventos_disponibles.sort(key=lambda x: (x['fecha'], x['hora_inicio']))
-        
-        return jsonify({
-            'success': True,
-            'eventos': eventos_disponibles
-        })
-        
-    except Exception as e:
-        return jsonify({'success': False, 'message': str(e)}), 500
+    output.seek(0)
+    response = make_response(output.getvalue())
+    response.headers["Content-Disposition"] = f"attachment; filename=export_{tipo}_{date.today()}.csv"
+    response.headers["Content-type"] = "text/csv"
+    return response
 
 # Rutas del Calendario Interactivo
 @app.route('/calendario')
@@ -5062,6 +5027,433 @@ def eliminar_evento_calendario(evento_id):
     except Exception as e:
         db.session.rollback()
         return jsonify({'success': False, 'error': str(e)}), 400
+
+# NUEVAS RUTAS DE API PARA HORARIOS (SOPORTE PARA CALENDARIO UNIFICADO)
+
+@app.route('/api/horario/<int:horario_id>')
+@login_required
+def get_horario_api_detalles(horario_id):
+    """Obtiene los detalles de un horario específico"""
+    try:
+        horario = HorarioSemanal.query.get_or_404(horario_id)
+        return jsonify({
+            'success': True,
+            'horario': horario.to_dict()
+        })
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/api/horario/crear', methods=['POST'])
+@login_required
+def api_crear_horario():
+    """Crea uno o varios horarios semanales"""
+    try:
+        data = request.get_json()
+        clase_id = data.get('clase_id')
+        hora_inicio_str = data.get('hora_inicio')
+        hora_fin_str = data.get('hora_fin')
+        dias_semana_str = data.get('dias_semana') # Ej: "1,3,5"
+        
+        if not all([clase_id, hora_inicio_str, hora_fin_str, dias_semana_str]):
+            return jsonify({'success': False, 'message': 'Faltan datos obligatorios'}), 400
+            
+        hora_inicio = datetime.strptime(hora_inicio_str, '%H:%M').time()
+        hora_fin = datetime.strptime(hora_fin_str, '%H:%M').time()
+        # El front envía 1-7 (Lunes-Domingo), convertimos a 0-6
+        dias_semana = [int(d.strip()) - 1 for d in str(dias_semana_str).split(',')]
+        
+        nuevos_ids = []
+        for dia in dias_semana:
+            horario = HorarioSemanal(
+                clase_id=clase_id,
+                dia_semana=dia,
+                hora_inicio=hora_inicio,
+                hora_fin=hora_fin,
+                instructor=data.get('instructor', 'Minouche'),
+                capacidad_maxima=data.get('capacidad_maxima', 15),
+                observaciones=data.get('observaciones', '')
+            )
+            db.session.add(horario)
+            db.session.flush()
+            nuevos_ids.append(horario.id)
+            
+        db.session.commit()
+        return jsonify({'success': True, 'ids': nuevos_ids})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+@app.route('/api/horario/actualizar', methods=['POST'])
+@login_required
+def api_actualizar_horario():
+    """Actualiza un horario semanal existente"""
+    try:
+        data = request.get_json()
+        horario_id = data.get('horario_id')
+        horario = HorarioSemanal.query.get_or_404(horario_id)
+        
+        clase_id = data.get('clase_id')
+        hora_inicio_str = data.get('hora_inicio')
+        hora_fin_str = data.get('hora_fin')
+        dia_semana_str = data.get('dias_semana')
+        
+        if not all([clase_id, hora_inicio_str, hora_fin_str, dia_semana_str]):
+            return jsonify({'success': False, 'message': 'Faltan datos obligatorios'}), 400
+            
+        horario.clase_id = clase_id
+        horario.hora_inicio = datetime.strptime(hora_inicio_str, '%H:%M').time()
+        horario.hora_fin = datetime.strptime(hora_fin_str, '%H:%M').time()
+        horario.dia_semana = int(str(dia_semana_str).split(',')[0]) - 1
+        horario.instructor = data.get('instructor', 'Minouche')
+        horario.capacidad_maxima = data.get('capacidad_maxima', 15)
+        horario.observaciones = data.get('observaciones', '')
+        
+        db.session.commit()
+        return jsonify({'success': True})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+@app.route('/api/horario/<int:horario_id>/eliminar', methods=['DELETE'])
+@login_required
+def api_eliminar_horario(horario_id):
+    """Elimina un horario semanal"""
+    try:
+        horario = HorarioSemanal.query.get_or_404(horario_id)
+        db.session.delete(horario)
+        db.session.commit()
+        return jsonify({'success': True})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+@app.route('/api/alumnos-disponibles')
+@login_required
+def api_alumnos_disponibles():
+    """Obtiene lista de alumnos activos"""
+    try:
+        alumnos = Alumno.query.filter_by(activo=True).order_by(Alumno.nombre, Alumno.apellido).all()
+        return jsonify({
+            'success': True,
+            'alumnos': [{
+                'id': a.id,
+                'nombre': a.nombre,
+                'apellido': a.apellido,
+                'tipo_clase': a.get_tipo_cuota_display()
+            } for a in alumnos]
+        })
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/api/horario/<int:horario_id>/alumnos')
+@login_required
+def get_alumnos_horario(horario_id):
+    """Obtiene alumnos inscritos en un horario"""
+    try:
+        horario = HorarioSemanal.query.get_or_404(horario_id)
+        alumnos = [{
+            'id': a.id,
+            'nombre': a.nombre,
+            'apellido': a.apellido,
+            'tipo_clase': a.get_tipo_cuota_display()
+        } for a in horario.alumnos_inscritos]
+        
+        return jsonify({
+            'success': True,
+            'alumnos': alumnos
+        })
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/api/horario/agregar-alumno', methods=['POST'])
+@login_required
+def agregar_alumno_horario():
+    """Inscribe un alumno en un horario semanal"""
+    try:
+        data = request.get_json()
+        alumno = Alumno.query.get_or_404(data['alumno_id'])
+        horario = HorarioSemanal.query.get_or_404(data['horario_id'])
+        
+        if alumno not in horario.alumnos_inscritos:
+            horario.alumnos_inscritos.append(alumno)
+            db.session.commit()
+            
+        return jsonify({'success': True})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+@app.route('/api/horario/quitar-alumno', methods=['POST'])
+@login_required
+def quitar_alumno_horario():
+    """Desinscribe un alumno de un horario semanal"""
+    try:
+        data = request.get_json()
+        alumno = Alumno.query.get_or_404(data['alumno_id'])
+        horario = HorarioSemanal.query.get_or_404(data['horario_id'])
+        
+        if alumno in horario.alumnos_inscritos:
+            horario.alumnos_inscritos.remove(alumno)
+            db.session.commit()
+            
+        return jsonify({'success': True})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+@app.route('/api/horario/<int:horario_id>/limpiar-alumnos', methods=['POST'])
+@login_required
+def limpiar_alumnos_horario(horario_id):
+    """Quita todos los alumnos de un horario semanal"""
+    try:
+        horario = HorarioSemanal.query.get_or_404(horario_id)
+        horario.alumnos_inscritos = []
+        db.session.commit()
+        return jsonify({'success': True})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+@app.route('/api/alumno/<int:alumno_id>/asistencias')
+@login_required
+def get_asistencias_alumno_api(alumno_id):
+    """API para obtener todas las asistencias de un alumno"""
+    try:
+        alumno = Alumno.query.get_or_404(alumno_id)
+        # Obtener todas las asistencias
+        asistencias = Asistencia.query.filter_by(alumno_id=alumno_id).order_by(Asistencia.fecha_clase.desc()).all()
+        
+        asistencias_data = []
+        presentes = 0
+        ausentes = 0
+        pendientes = 0
+        
+        for a in asistencias:
+            # Determinar info del evento/clase
+            if a.evento:
+                evento_info = {
+                    'titulo': a.evento.titulo,
+                    'color': a.evento.color,
+                    'hora_inicio': a.evento.fecha_inicio.strftime('%H:%M'),
+                    'hora_fin': a.evento.fecha_fin.strftime('%H:%M'),
+                    'instructor': a.evento.instructor
+                }
+            elif a.horario:
+                evento_info = {
+                    'titulo': a.horario.clase.nombre,
+                    'color': a.horario.clase.color,
+                    'hora_inicio': a.horario.hora_inicio.strftime('%H:%M'),
+                    'hora_fin': a.horario.hora_fin.strftime('%H:%M'),
+                    'instructor': a.horario.instructor
+                }
+            else:
+                evento_info = {
+                    'titulo': 'Clase sin asignar',
+                    'color': '#6c757d',
+                    'hora_inicio': '--:--',
+                    'hora_fin': '--:--',
+                    'instructor': 'N/A'
+                }
+            
+            asistencias_data.append({
+                'id': a.id,
+                'fecha': a.fecha_clase.isoformat(),
+                'asistio': a.presente,
+                'evento': evento_info,
+                'observaciones': a.observaciones
+            })
+            
+            if a.presente is True:
+                presentes += 1
+            elif a.presente is False:
+                ausentes += 1
+            else:
+                pendientes += 1
+                
+        total = presentes + ausentes
+        porcentaje = round((presentes / total * 100), 1) if total > 0 else 0
+        
+        return jsonify({
+            'success': True,
+            'asistencias': asistencias_data,
+            'estadisticas': {
+                'presentes': presentes,
+                'ausentes': ausentes,
+                'pendientes': pendientes,
+                'porcentaje_asistencia': porcentaje
+            }
+        })
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+@app.route('/api/evento/agregar-alumno', methods=['POST'])
+@login_required
+def api_agregar_alumno_evento():
+    """Inscribe un alumno en un evento o clase semanal virtual"""
+    try:
+        data = request.get_json()
+        alumno_id = data.get('alumno_id')
+        evento_id = data.get('evento_id')
+        
+        if not alumno_id or not evento_id:
+            return jsonify({'success': False, 'message': 'IDs de alumno y evento requeridos'}), 400
+            
+        alumno = Alumno.query.get_or_404(alumno_id)
+        
+        # El evento_id puede ser un entero (EventoCalendario) o un string "virtual-ID-FECHA" (HorarioSemanal)
+        if isinstance(evento_id, str) and evento_id.startswith('virtual-'):
+            parts = evento_id.split('-')
+            horario_id = int(parts[1])
+            fecha_str = parts[2]
+            fecha_obj = datetime.strptime(fecha_str, '%Y%m%d').date()
+            
+            # Verificar si ya existe
+            existente = Asistencia.query.filter_by(
+                alumno_id=alumno_id,
+                horario_id=horario_id,
+                fecha_clase=fecha_obj
+            ).first()
+            
+            if existente:
+                return jsonify({'success': False, 'message': 'El alumno ya está inscrito en esta clase'}), 400
+                
+            nueva_asistencia = Asistencia(
+                alumno_id=alumno_id,
+                horario_id=horario_id,
+                fecha_clase=fecha_obj,
+                presente=None
+            )
+            db.session.add(nueva_asistencia)
+            db.session.commit()
+            return jsonify({'success': True})
+        else:
+            # Asumimos que evento_id es de EventoCalendario
+            evento = EventoCalendario.query.get_or_404(evento_id)
+            
+            # Verificar si ya existe la asistencia
+            existente = Asistencia.query.filter_by(
+                alumno_id=alumno_id,
+                evento_id=evento.id,
+                fecha_clase=evento.fecha_inicio.date()
+            ).first()
+            
+            if existente:
+                return jsonify({'success': False, 'message': 'El alumno ya está inscrito en esta clase'}), 400
+                
+            nueva_asistencia = Asistencia(
+                alumno_id=alumno_id,
+                evento_id=evento.id,
+                fecha_clase=evento.fecha_inicio.date(),
+                presente=None
+            )
+            db.session.add(nueva_asistencia)
+            db.session.commit()
+            
+            return jsonify({'success': True})
+            
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+@app.route('/api/asistencias/clase/<int:horario_id>/<fecha>')
+@login_required
+def api_get_asistencias_clase_fecha(horario_id, fecha):
+    """Obtiene alumnos y su estado de asistencia para una clase y fecha concreta"""
+    try:
+        fecha_obj = datetime.strptime(fecha, '%Y-%m-%d').date()
+        horario = HorarioSemanal.query.get_or_404(horario_id)
+        
+        # Alumnos inscritos en el horario recurrente (el "roster")
+        alumnos_inscritos = horario.alumnos_inscritos
+        
+        # Asistencias ya registradas para ese día
+        asistencias_db = Asistencia.query.filter_by(
+            horario_id=horario_id,
+            fecha_clase=fecha_obj
+        ).all()
+        
+        asistencias_map = {a.alumno_id: a for a in asistencias_db}
+        
+        resultado = []
+        # Primero procesamos los que están en el roster
+        ids_procesados = set()
+        for alumno in alumnos_inscritos:
+            asistencia = asistencias_map.get(alumno.id)
+            resultado.append({
+                'id': alumno.id,
+                'nombre': f"{alumno.nombre} {alumno.apellido}",
+                'inscrito': True,
+                'asistio': asistencia.presente if asistencia else None,
+                'observaciones': asistencia.observaciones if asistencia else ""
+            })
+            ids_procesados.add(alumno.id)
+            
+        # Luego añadimos alumnos que asistieron pero no están en el roster (casos especiales)
+        for alumno_id, asistencia in asistencias_map.items():
+            if alumno_id not in ids_procesados:
+                alumno = Alumno.query.get(alumno_id)
+                if alumno:
+                    resultado.append({
+                        'id': alumno.id,
+                        'nombre': f"{alumno.nombre} {alumno.apellido}",
+                        'inscrito': False,
+                        'asistio': asistencia.presente,
+                        'observaciones': asistencia.observaciones
+                    })
+        
+        return jsonify({
+            'success': True,
+            'alumnos': resultado,
+            'clase': horario.clase.nombre,
+            'fecha': fecha_obj.strftime('%d/%m/%Y')
+        })
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+@app.route('/api/asistencias/registrar-lote', methods=['POST'])
+@login_required
+def api_registrar_asistencia_lote():
+    """Registra la asistencia de múltiples alumnos para una clase y fecha"""
+    try:
+        data = request.get_json()
+        horario_id = data.get('horario_id')
+        fecha_str = data.get('fecha')
+        registro = data.get('registro') # Lista de {alumno_id, asistio, observaciones}
+        
+        if not all([horario_id, fecha_str, registro]):
+            return jsonify({'success': False, 'message': 'Datos incompletos'}), 400
+            
+        fecha_obj = datetime.strptime(fecha_str, '%Y-%m-%d').date()
+        
+        for item in registro:
+            alumno_id = item['alumno_id']
+            asistio = item['asistio']
+            obs = item.get('observaciones', "")
+            
+            asistencia = Asistencia.query.filter_by(
+                alumno_id=alumno_id,
+                horario_id=horario_id,
+                fecha_clase=fecha_obj
+            ).first()
+            
+            if asistencia:
+                asistencia.presente = asistio
+                asistencia.observaciones = obs
+            else:
+                nueva = Asistencia(
+                    alumno_id=alumno_id,
+                    horario_id=horario_id,
+                    fecha_clase=fecha_obj,
+                    presente=asistio,
+                    observaciones=obs
+                )
+                db.session.add(nueva)
+        
+        db.session.commit()
+        return jsonify({'success': True})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'message': str(e)}), 500
 
 if __name__ == '__main__':
     with app.app_context():

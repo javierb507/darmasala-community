@@ -8,158 +8,83 @@
     <div class="row mb-5">
         <div class="col-12 text-center">
             <h1 class="display-4 mb-3">
-                <i class="fas fa-om text-warning"></i> 
+                <i class="fas fa-om text-warning"></i>
                 Atma Suddhi
             </h1>
             <p class="lead text-muted">Sistema de Gestión para Escuela de Yoga</p>
         </div>
     </div>
 
-<div class="row">
-    <div class="col-md-4">
-        <div class="card text-center">
-            <div class="card-body">
-                <i class="fas fa-users fa-3x text-primary mb-3"></i>
-                <h5 class="card-title">Alumnos</h5>
-                <p class="card-text">Gestionar registros e información de alumnos</p>
-                <a href="{{ url_for('alumnos') }}" class="btn btn-primary">
-                    <i class="fas fa-eye"></i> Ver Alumnos
-                </a>
-            </div>
-        </div>
-    </div>
-    
-    <div class="col-md-4">
-        <div class="card text-center">
-            <div class="card-body">
-                <i class="fas fa-user-plus fa-3x text-success mb-3"></i>
-                <h5 class="card-title">Nuevo Alumno</h5>
-                <p class="card-text">Registrar un nuevo alumno</p>
-                <a href="{{ url_for('nuevo_alumno') }}" class="btn btn-success">
-                    <i class="fas fa-plus"></i> Agregar Alumno
-                </a>
-            </div>
-        </div>
-    </div>
-    
-    <div class="col-md-4">
-        <div class="card text-center">
-            <div class="card-body">
-                <i class="fas fa-calendar-alt fa-3x text-info mb-3"></i>
-                <h5 class="card-title">Horarios</h5>
-                <p class="card-text">Configurar horarios semanales de clases</p>
-                <a href="{{ url_for('horarios') }}" class="btn btn-info">
-                    <i class="fas fa-calendar"></i> Ver Horarios
-                </a>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="row mt-4">
-    <div class="col-md-4">
-        <div class="card text-center">
-            <div class="card-body">
-                <i class="fas fa-clipboard-check fa-3x text-warning mb-3"></i>
-                <h5 class="card-title">Asistencias</h5>
-                <p class="card-text">Registrar asistencias a las clases</p>
-                <a href="{{ url_for('calendario') }}" class="btn btn-warning">
-                    <i class="fas fa-clipboard-check"></i> Ver Asistencias
-                </a>
-            </div>
-        </div>
-    </div>
-    
-    <div class="col-md-4">
-        <div class="card text-center">
-            <div class="card-body">
-                <i class="fas fa-chart-bar fa-3x text-primary mb-3"></i>
-                <h5 class="card-title">Reportes</h5>
-                <p class="card-text">Consultar asistencias y estadísticas</p>
-                <a href="{{ url_for('reporte_asistencia') }}" class="btn btn-primary">
-                    <i class="fas fa-chart-bar"></i> Ver Reportes
-                </a>
-            </div>
-        </div>
-    </div>
-    
-    <div class="col-md-4">
-        <div class="card text-center">
-            <div class="card-body">
-                <i class="fas fa-plus-circle fa-3x text-success mb-3"></i>
-                <h5 class="card-title">Registrar Asistencia</h5>
-                <p class="card-text">Marcar asistencia después de cada clase</p>
-                <a href="{{ url_for('registrar_asistencia') }}" class="btn btn-success">
-                    <i class="fas fa-plus"></i> Registrar
-                </a>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="row mt-4">
-    <div class="col-12">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="mb-0">
-                    <i class="fas fa-info-circle"></i> Información del Sistema
-                </h5>
-            </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-6">
-                        <h6>Base de Datos</h6>
-                        <p class="text-muted">SQLite - No requiere instalación, perfecto para laptops con recursos limitados</p>
+    <!-- Quick Actions -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card h-100 text-center shadow-sm">
+                <div class="card-body">
+                    <i class="fas fa-users fa-3x text-primary mb-3"></i>
+                    <h5 class="card-title">Alumnos</h5>
+                    <p class="card-text small text-muted">Gestión de la base de datos de alumnos</p>
+                    <div class="d-grid gap-2">
+                        <a href="{{ url_for('alumnos') }}" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-list"></i> Ver Lista
+                        </a>
+                        <a href="{{ url_for('nuevo_alumno') }}" class="btn btn-primary btn-sm">
+                            <i class="fas fa-user-plus"></i> Nuevo
+                        </a>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-    {% endif %}
 
-    <!-- Quick Actions -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <h3><i class="fas fa-bolt"></i> Acciones Rápidas</h3>
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="col-md-4 mb-3">
-            <div class="card h-100">
-                <div class="card-body text-center">
-                    <i class="fas fa-user-plus fa-3x text-primary mb-3"></i>
-                    <h5>Nuevo Alumno</h5>
-                    <p class="text-muted">Registrar un nuevo alumno en la escuela</p>
-                    <a href="{{ url_for('nuevo_alumno') }}" class="btn btn-primary">
-                        <i class="fas fa-plus"></i> Agregar Alumno
-                    </a>
+        <div class="col-md-3">
+            <div class="card h-100 text-center shadow-sm">
+                <div class="card-body">
+                    <i class="fas fa-calendar-alt fa-3x text-success mb-3"></i>
+                    <h5 class="card-title">Calendario</h5>
+                    <p class="card-text small text-muted">Clases grupales y asistencia</p>
+                    <div class="d-grid gap-2">
+                        <a href="{{ url_for('calendario') }}" class="btn btn-success btn-sm">
+                            <i class="fas fa-calendar"></i> Ver Calendario
+                        </a>
+                        <a href="{{ url_for('horarios') }}" class="btn btn-outline-success btn-sm">
+                            <i class="fas fa-clock"></i> Horarios
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <div class="col-md-4 mb-3">
-            <div class="card h-100">
-                <div class="card-body text-center">
-                    <i class="fas fa-users fa-3x text-success mb-3"></i>
-                    <h5>Gestionar Alumnos</h5>
-                    <p class="text-muted">Ver y administrar todos los alumnos</p>
-                    <a href="{{ url_for('alumnos') }}" class="btn btn-success">
-                        <i class="fas fa-list"></i> Ver Alumnos
-                    </a>
+        <div class="col-md-3">
+            <div class="card h-100 text-center shadow-sm">
+                <div class="card-body">
+                    <i class="fas fa-user-md fa-3x text-info mb-3"></i>
+                    <h5 class="card-title">Yogaterapia</h5>
+                    <p class="card-text small text-muted">Sesiones individuales y clínico</p>
+                    <div class="d-grid gap-2">
+                        <a href="{{ url_for('nueva_yogaterapia') }}" class="btn btn-info btn-sm text-white">
+                            <i class="fas fa-plus"></i> Nueva Sesión
+                        </a>
+                        <a href="{{ url_for('yogaterapia') }}" class="btn btn-outline-info btn-sm">
+                            <i class="fas fa-folder-open"></i> Historial
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <div class="col-md-4 mb-3">
-            <div class="card h-100">
-                <div class="card-body text-center">
-                    <i class="fas fa-calendar-alt fa-3x text-info mb-3"></i>
-                    <h5>Calendario</h5>
-                    <p class="text-muted">Vista unificada de actividades y citas</p>
-                    <a href="{{ url_for('calendario_unificado') }}" class="btn btn-info">
-                        <i class="fas fa-calendar"></i> Ver Calendario
-                    </a>
+        <div class="col-md-3">
+            <div class="card h-100 text-center shadow-sm">
+                <div class="card-body">
+                    <i class="fas fa-chart-line fa-3x text-warning mb-3"></i>
+                    <h5 class="card-title">Economía</h5>
+                    <p class="card-text small text-muted">Contabilidad y facturación</p>
+                    <div class="d-grid gap-2">
+                        <a href="{{ url_for('economia') }}" class="btn btn-warning btn-sm text-white">
+                            <i class="fas fa-tachometer-alt"></i> Dashboard
+                        </a>
+                        <a href="{{ url_for('facturas') }}" class="btn btn-outline-warning btn-sm">
+                            <i class="fas fa-file-invoice"></i> Facturas
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
@@ -182,64 +107,68 @@
                 </div>
                 <div class="card-body">
                     {% if proximas_citas %}
-                        <div class="timeline">
-                            {% for cita in proximas_citas %}
-                            <div class="timeline-item {% if cita.fecha_sesion == today %}timeline-today{% endif %}">
-                                <div class="timeline-marker">
-                                    <i class="fas fa-{% if cita.fecha_sesion == today %}heart text-danger{% else %}leaf text-success{% endif %}"></i>
-                                </div>
-                                <div class="timeline-content">
-                                    <div class="d-flex justify-content-between align-items-start">
-                                        <div>
-                                            <h6 class="mb-1">
-                                                <strong>{{ cita.alumno.nombre }} {{ cita.alumno.apellido }}</strong>
-                                                {% if cita.fecha_sesion == today %}
-                                                <span class="badge bg-danger pulse-animation">¡HOY!</span>
-                                                {% endif %}
-                                            </h6>
-                                            <p class="mb-1 text-muted">
-                                                <i class="fas fa-calendar"></i> {{ cita.fecha_sesion.strftime('%d/%m/%Y') }}
-                                                {% if cita.hora_inicio %}
-                                                <i class="fas fa-clock ms-2"></i> {{ cita.hora_inicio.strftime('%H:%M') }}
-                                                {% endif %}
-                                            </p>
-                                            <small class="text-muted">
-                                                <i class="fas fa-stopwatch"></i> {{ cita.duracion_minutos }} min
-                                                <i class="fas fa-euro-sign ms-2"></i> {{ "%.2f"|format(cita.precio) }}€
-                                                <span class="badge bg-{% if cita.pagado %}success{% else %}warning{% endif %} ms-2">
-                                                    {% if cita.pagado %}Pagado{% else %}Pendiente{% endif %}
-                                                </span>
-                                            </small>
-                                        </div>
-                                        <div class="timeline-actions">
-                                            <a href="{{ url_for('ver_sesion_yogaterapia', sesion_id=cita.id) }}" 
-                                               class="btn btn-sm btn-outline-primary">
-                                                <i class="fas fa-eye"></i>
-                                            </a>
-                                            <a href="{{ url_for('editar_sesion_yogaterapia', sesion_id=cita.id) }}" 
-                                               class="btn btn-sm btn-outline-warning">
-                                                <i class="fas fa-edit"></i>
-                                            </a>
-                                        </div>
+                    <div class="timeline">
+                        {% for cita in proximas_citas %}
+                        <div class="timeline-item {% if cita.fecha_sesion == today %}timeline-today{% endif %}">
+                            <div class="timeline-marker">
+                                <i
+                                    class="fas fa-{% if cita.fecha_sesion == today %}heart text-danger{% else %}leaf text-success{% endif %}"></i>
+                            </div>
+                            <div class="timeline-content">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <h6 class="mb-1">
+                                            <strong>{{ cita.alumno.nombre }} {{ cita.alumno.apellido }}</strong>
+                                            {% if cita.fecha_sesion == today %}
+                                            <span class="badge bg-danger pulse-animation">¡HOY!</span>
+                                            {% endif %}
+                                        </h6>
+                                        <p class="mb-1 text-muted">
+                                            <i class="fas fa-calendar"></i> {{
+                                            cita.fecha_sesion.strftime('%d/%m/%Y') }}
+                                            {% if cita.hora_inicio %}
+                                            <i class="fas fa-clock ms-2"></i> {{ cita.hora_inicio.strftime('%H:%M')
+                                            }}
+                                            {% endif %}
+                                        </p>
+                                        <small class="text-muted">
+                                            <i class="fas fa-stopwatch"></i> {{ cita.duracion_minutos }} min
+                                            <i class="fas fa-euro-sign ms-2"></i> {{ "%.2f"|format(cita.precio) }}€
+                                            <span
+                                                class="badge bg-{% if cita.pagado %}success{% else %}warning{% endif %} ms-2">
+                                                {% if cita.pagado %}Pagado{% else %}Pendiente{% endif %}
+                                            </span>
+                                        </small>
+                                    </div>
+                                    <div class="timeline-actions">
+                                        <a href="{{ url_for('ver_sesion_yogaterapia', sesion_id=cita.id) }}"
+                                            class="btn btn-sm btn-outline-primary">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a href="{{ url_for('editar_sesion_yogaterapia', sesion_id=cita.id) }}"
+                                            class="btn btn-sm btn-outline-warning">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
                                     </div>
                                 </div>
                             </div>
-                            {% endfor %}
                         </div>
+                        {% endfor %}
+                    </div>
                     {% else %}
-                        <div class="text-center py-4">
-                            <i class="fas fa-calendar-times fa-3x text-muted mb-3"></i>
-                            <h5 class="text-muted">No hay citas programadas</h5>
-                            <p class="text-muted">Las próximas sesiones de yogaterapia aparecerán aquí</p>
-                            <a href="{{ url_for('nueva_yogaterapia') }}" class="btn btn-primary">
-                                <i class="fas fa-plus"></i> Programar Nueva Cita
-                            </a>
-                        </div>
+                    <div class="text-center py-4">
+                        <i class="fas fa-calendar-times fa-3x text-muted mb-3"></i>
+                        <h5 class="text-muted">No hay citas programadas</h5>
+                        <p class="text-muted">Las próximas sesiones de yogaterapia aparecerán aquí</p>
+                        <a href="{{ url_for('nueva_yogaterapia') }}" class="btn btn-primary">
+                            <i class="fas fa-plus"></i> Programar Nueva Cita
+                        </a>
+                    </div>
                     {% endif %}
                 </div>
             </div>
         </div>
-        
+
         <div class="col-md-4">
             <div class="card">
                 <div class="card-header bg-gradient-info text-white">
@@ -257,7 +186,7 @@
                             <small class="text-muted">Alumnos Activos</small>
                         </div>
                     </div>
-                    
+
                     <div class="stat-item">
                         <div class="stat-icon">
                             <i class="fas fa-heart text-danger"></i>
@@ -267,7 +196,7 @@
                             <small class="text-muted">Sesiones Hoy</small>
                         </div>
                     </div>
-                    
+
                     <div class="stat-item">
                         <div class="stat-icon">
                             <i class="fas fa-calendar-week text-success"></i>
@@ -284,207 +213,230 @@
 </div>
 
 <style>
-.card {
-    transition: transform 0.2s;
-    border: none;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-}
-
-.display-4 {
-    font-family: 'Playfair Display', serif;
-    font-weight: 700;
-}
-
-/* Timeline Styles */
-.timeline {
-    position: relative;
-    padding-left: 30px;
-}
-
-.timeline::before {
-    content: '';
-    position: absolute;
-    left: 15px;
-    top: 0;
-    bottom: 0;
-    width: 2px;
-    background: linear-gradient(to bottom, #8B5FBF, #B19CD9);
-}
-
-.timeline-item {
-    position: relative;
-    margin-bottom: 20px;
-    padding-left: 20px;
-}
-
-.timeline-marker {
-    position: absolute;
-    left: -25px;
-    top: 5px;
-    width: 20px;
-    height: 20px;
-    background: white;
-    border: 3px solid #8B5FBF;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1;
-}
-
-.timeline-today .timeline-marker {
-    border-color: #dc3545;
-    animation: pulse 2s infinite;
-}
-
-.timeline-content {
-    background: #f8f9fa;
-    padding: 15px;
-    border-radius: 10px;
-    border-left: 4px solid #8B5FBF;
-    transition: all 0.3s ease;
-}
-
-.timeline-today .timeline-content {
-    background: linear-gradient(135deg, #fff5f5, #ffe6e6);
-    border-left-color: #dc3545;
-}
-
-.timeline-content:hover {
-    transform: translateX(5px);
-    box-shadow: 0 4px 12px rgba(139, 95, 191, 0.2);
-}
-
-/* Statistics Styles */
-.stat-item {
-    display: flex;
-    align-items: center;
-    padding: 15px 0;
-    border-bottom: 1px solid #e9ecef;
-}
-
-.stat-item:last-child {
-    border-bottom: none;
-}
-
-.stat-icon {
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #8B5FBF, #B19CD9);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-right: 15px;
-    font-size: 20px;
-    color: white;
-}
-
-.stat-content h4 {
-    font-weight: 700;
-    color: #2c3e50;
-}
-
-/* Animations */
-@keyframes pulse {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.1); }
-    100% { transform: scale(1); }
-}
-
-.pulse-animation {
-    animation: pulse 1.5s infinite;
-}
-
-@keyframes fadeInUp {
-    from {
-        opacity: 0;
-        transform: translateY(30px);
+    .card {
+        transition: transform 0.2s;
+        border: none;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
-    to {
-        opacity: 1;
-        transform: translateY(0);
+
+    .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
     }
-}
 
-.timeline-item {
-    animation: fadeInUp 0.6s ease-out;
-}
+    .display-4 {
+        font-family: 'Playfair Display', serif;
+        font-weight: 700;
+    }
 
-.timeline-item:nth-child(1) { animation-delay: 0.1s; }
-.timeline-item:nth-child(2) { animation-delay: 0.2s; }
-.timeline-item:nth-child(3) { animation-delay: 0.3s; }
-.timeline-item:nth-child(4) { animation-delay: 0.4s; }
-.timeline-item:nth-child(5) { animation-delay: 0.5s; }
+    /* Timeline Styles */
+    .timeline {
+        position: relative;
+        padding-left: 30px;
+    }
 
-/* Gradient backgrounds */
-.bg-gradient-primary {
-    background: linear-gradient(135deg, #8B5FBF, #6B4C93) !important;
-}
+    .timeline::before {
+        content: '';
+        position: absolute;
+        left: 15px;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: linear-gradient(to bottom, #8B5FBF, #B19CD9);
+    }
 
-.bg-gradient-info {
-    background: linear-gradient(135deg, #17a2b8, #007bff) !important;
-}
+    .timeline-item {
+        position: relative;
+        margin-bottom: 20px;
+        padding-left: 20px;
+    }
 
-/* Timeline actions */
-.timeline-actions {
-    display: flex;
-    gap: 5px;
-}
+    .timeline-marker {
+        position: absolute;
+        left: -25px;
+        top: 5px;
+        width: 20px;
+        height: 20px;
+        background: white;
+        border: 3px solid #8B5FBF;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1;
+    }
 
-.timeline-actions .btn {
-    border-radius: 20px;
-    padding: 5px 10px;
-    font-size: 12px;
-}
+    .timeline-today .timeline-marker {
+        border-color: #dc3545;
+        animation: pulse 2s infinite;
+    }
 
-/* Sutra Card Styles */
-.sutra-card {
-    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-    border-radius: 12px;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
+    .timeline-content {
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 10px;
+        border-left: 4px solid #8B5FBF;
+        transition: all 0.3s ease;
+    }
 
-.sutra-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(0,0,0,0.1) !important;
-}
+    .timeline-today .timeline-content {
+        background: linear-gradient(135deg, #fff5f5, #ffe6e6);
+        border-left-color: #dc3545;
+    }
 
-.sutra-number {
-    font-size: 0.8rem;
-    padding: 4px 8px;
-    border-radius: 12px;
-}
+    .timeline-content:hover {
+        transform: translateX(5px);
+        box-shadow: 0 4px 12px rgba(139, 95, 191, 0.2);
+    }
 
-.sutra-texts {
-    margin-top: 8px;
-}
+    /* Statistics Styles */
+    .stat-item {
+        display: flex;
+        align-items: center;
+        padding: 15px 0;
+        border-bottom: 1px solid #e9ecef;
+    }
 
-.sanskrit-text {
-    font-family: 'Devanagari Sangam MN', 'Noto Sans Devanagari', serif;
-    font-size: 1.2rem;
-    line-height: 1.5;
-    color: #2c3e50;
-    font-weight: 500;
-}
+    .stat-item:last-child {
+        border-bottom: none;
+    }
 
-.transliteration {
-    color: #6c757d;
-    font-style: italic;
-    font-size: 0.95rem;
-    line-height: 1.4;
-}
+    .stat-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #8B5FBF, #B19CD9);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 15px;
+        font-size: 20px;
+        color: white;
+    }
 
-.translation {
-    color: #495057;
-    font-size: 1rem;
-    line-height: 1.4;
-    font-weight: 500;
-}
+    .stat-content h4 {
+        font-weight: 700;
+        color: #2c3e50;
+    }
+
+    /* Animations */
+    @keyframes pulse {
+        0% {
+            transform: scale(1);
+        }
+
+        50% {
+            transform: scale(1.1);
+        }
+
+        100% {
+            transform: scale(1);
+        }
+    }
+
+    .pulse-animation {
+        animation: pulse 1.5s infinite;
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .timeline-item {
+        animation: fadeInUp 0.6s ease-out;
+    }
+
+    .timeline-item:nth-child(1) {
+        animation-delay: 0.1s;
+    }
+
+    .timeline-item:nth-child(2) {
+        animation-delay: 0.2s;
+    }
+
+    .timeline-item:nth-child(3) {
+        animation-delay: 0.3s;
+    }
+
+    .timeline-item:nth-child(4) {
+        animation-delay: 0.4s;
+    }
+
+    .timeline-item:nth-child(5) {
+        animation-delay: 0.5s;
+    }
+
+    /* Gradient backgrounds */
+    .bg-gradient-primary {
+        background: linear-gradient(135deg, #8B5FBF, #6B4C93) !important;
+    }
+
+    .bg-gradient-info {
+        background: linear-gradient(135deg, #17a2b8, #007bff) !important;
+    }
+
+    /* Timeline actions */
+    .timeline-actions {
+        display: flex;
+        gap: 5px;
+    }
+
+    .timeline-actions .btn {
+        border-radius: 20px;
+        padding: 5px 10px;
+        font-size: 12px;
+    }
+
+    /* Sutra Card Styles */
+    .sutra-card {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-radius: 12px;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .sutra-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1) !important;
+    }
+
+    .sutra-number {
+        font-size: 0.8rem;
+        padding: 4px 8px;
+        border-radius: 12px;
+    }
+
+    .sutra-texts {
+        margin-top: 8px;
+    }
+
+    .sanskrit-text {
+        font-family: 'Devanagari Sangam MN', 'Noto Sans Devanagari', serif;
+        font-size: 1.2rem;
+        line-height: 1.5;
+        color: #2c3e50;
+        font-weight: 500;
+    }
+
+    .transliteration {
+        color: #6c757d;
+        font-style: italic;
+        font-size: 0.95rem;
+        line-height: 1.4;
+    }
+
+    .translation {
+        color: #495057;
+        font-size: 1rem;
+        line-height: 1.4;
+        font-weight: 500;
+    }
 </style>
 {% endblock %}
