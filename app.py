@@ -118,28 +118,32 @@ def obtener_sutra_semanal():
     semana_actual = datetime.now().isocalendar()[1]
     
     # Obtener el sutra correspondiente a esta semana
-    total_sutras = Sutra.query.count()
-    if total_sutras == 0:
-        return None
-    
-    # Usar el número de semana para seleccionar un sutra
-    indice_sutra = (semana_actual - 1) % total_sutras
-    sutra = Sutra.query.offset(indice_sutra).first()
-    
-    if sutra:
-        # Formatear el número del sutra como I.1, I.2, etc.
-        if '.' in str(sutra.numero):
-            # Si ya tiene formato I.1, mantenerlo
-            sutra.numero_formateado = sutra.numero
-        else:
-            # Si es solo un número, formatearlo como I.X
-            try:
-                num = int(sutra.numero)
-                sutra.numero_formateado = f"I.{num}"
-            except:
+    try:
+        total_sutras = Sutra.query.count()
+        if total_sutras == 0:
+            return None
+        
+        # Usar el número de semana para seleccionar un sutra
+        indice_sutra = (semana_actual - 1) % total_sutras
+        sutra = Sutra.query.offset(indice_sutra).first()
+        
+        if sutra:
+            # Formatear el número del sutra como I.1, I.2, etc.
+            if '.' in str(sutra.numero):
+                # Si ya tiene formato I.1, mantenerlo
                 sutra.numero_formateado = sutra.numero
-    
-    return sutra
+            else:
+                # Si es solo un número, formatearlo como I.X
+                try:
+                    num = int(sutra.numero)
+                    sutra.numero_formateado = f"I.{num}"
+                except:
+                    sutra.numero_formateado = sutra.numero
+        
+        return sutra
+    except Exception as e:
+        print(f"Error consultando sutras: {e}")
+        return None
 
 # Modelo de Alumno
 class Alumno(db.Model):
