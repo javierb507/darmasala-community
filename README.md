@@ -8,6 +8,7 @@ Sistema completo de gestión para una escuela de yoga que incluye gestión de al
 
 ## 📋 Tabla de Contenidos
 
+- [Visualización](#-visualización)
 - [Características Principales](#-características-principales)
 - [Funcionalidades Detalladas](#-funcionalidades-detalladas)
 - [Tecnologías Utilizadas](#-tecnologías-utilizadas)
@@ -16,6 +17,25 @@ Sistema completo de gestión para una escuela de yoga que incluye gestión de al
 - [Estructura del Proyecto](#-estructura-del-proyecto)
 - [Pendientes](#-pendientes)
 - [Contribución](#-contribución)
+
+## 📸 Visualización
+
+### 🏠 Inicio (Dashboard Principal)
+Interfaz simplificada con acceso directo a las áreas más importantes: Alumnos, Calendario, Yogaterapia y Economía.
+![Pantalla de Inicio](documentation/screenshots/inicio.png)
+
+### 📅 Calendario y Gestión de Asistencias
+Vista unificada de clases con capacidad de pasar lista diariamente de forma sencilla.
+![Calendario](documentation/screenshots/calendario.png)
+![Gestión de Asistencia](documentation/screenshots/asistencia.png)
+
+### 👤 Perfil del Alumno
+Historial completo de asistencias, estadísticas y sesiones de yogaterapia.
+![Perfil de Alumno](documentation/screenshots/alumno.png)
+
+### 📊 Gestión Económica
+Dashboard de contabilidad, gastos y facturación.
+![Economía](documentation/screenshots/economia.png)
 
 ## 🌟 Características Principales
 
