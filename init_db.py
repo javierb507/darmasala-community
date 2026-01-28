@@ -1,4 +1,4 @@
-from app import app, db, Usuario, Sutra
+from app import app, db, Usuario, Sutra, Configuracion, Tarifa, Clase
 from werkzeug.security import generate_password_hash
 from datetime import datetime
 
@@ -25,6 +25,45 @@ def init_production():
         else:
             print("👤 Usuario admin ya existe.")
             
+        # Añadir configuraciones básicas
+        configs_base = [
+            {'clave': 'nombre_escuela', 'valor': 'ATMA SUDDHI', 'descripcion': 'Nombre de la escuela'},
+            {'clave': 'logo_escuela', 'valor': 'images/logo.svg', 'descripcion': 'Ruta del logo'},
+            {'clave': 'direccion', 'valor': 'Calle Principal 123', 'descripcion': 'Dirección física'},
+            {'clave': 'telefono', 'valor': '+34 123 456 789', 'descripcion': 'Teléfono de contacto'}
+        ]
+        
+        for c in configs_base:
+            if not Configuracion.query.filter_by(clave=c['clave']).first():
+                nueva_conf = Configuracion(clave=c['clave'], valor=c['valor'], descripcion=c['descripcion'])
+                db.session.add(nueva_conf)
+                print(f"⚙️ Configuración '{c['clave']}' añadida.")
+
+        # Añadir tarifas básicas
+        if Tarifa.query.count() == 0:
+            tarifas_base = [
+                {'nombre': 'Clase Suelta', 'precio': 15.0, 'descripcion': 'Una sesión individual'},
+                {'nombre': 'Mensualidad 1 día/semana', 'precio': 45.0, 'descripcion': '4 clases al mes'},
+                {'nombre': 'Mensualidad 2 días/semana', 'precio': 75.0, 'descripcion': '8 clases al mes'}
+            ]
+            for t in tarifas_base:
+                nueva_tarifa = Tarifa(nombre=t['nombre'], precio=t['precio'], descripcion=t['descripcion'])
+                db.session.add(nueva_tarifa)
+            print("💰 Tarifas básicas añadidas.")
+
+        # Añadir una clase básica para evitar listas vacías críticas
+        if Clase.query.count() == 0:
+            clase_demo = Clase(
+                nombre='Yoga General',
+                descripcion='Clase de yoga para todos los niveles',
+                precio=15.0,
+                duracion_minutos=60,
+                color='#8B5FBF',
+                activa=True
+            )
+            db.session.add(clase_demo)
+            print("🧘 Clase básica añadida.")
+
         # Añadir sutras básicos si no hay ninguno
         if Sutra.query.count() == 0:
             sutras_base = [
@@ -41,13 +80,6 @@ def init_production():
                     'transliteracion': 'yogaś-citta-vṛtti-nirodhaḥ',
                     'traduccion': 'Yoga es la cesación de las fluctuaciones de la mente.',
                     'libro': 'Samadhi Pada'
-                },
-                {
-                    'numero': 'I.3',
-                    'sanscrito': 'तदा द्रष्टुः स्वरूपेऽवस्थानम्',
-                    'transliteracion': 'tadā draṣṭuḥ svarūpe-’vasthānam',
-                    'traduccion': 'Entonces el Observador descansa en su propia naturaleza.',
-                    'libro': 'Samadhi Pada'
                 }
             ]
             for s in sutras_base:
@@ -59,9 +91,7 @@ def init_production():
                     libro=s['libro']
                 )
                 db.session.add(nuevo_sutra)
-            print("🧘 Sutras básicos añadidos.")
-        else:
-            print("🧘 Ya existen sutras en la base de datos.")
+            print("📖 Sutras básicos añadidos.")
             
         db.session.commit()
         print("🚀 Configuración completada con éxito.")
