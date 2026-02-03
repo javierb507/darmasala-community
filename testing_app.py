@@ -18,7 +18,7 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from app import (
     app, db, Usuario, Alumno, Pago, SesionYogaterapia, HorarioSemanal, 
     Clase, Asistencia, CategoriaGasto, Proveedor, GastoFijo, 
-    FacturaProveedor, GastoMensual, Sutra, TipoClase, EventoCalendario, AsistenciaEvento
+    FacturaProveedor, GastoMensual, Sutra, TipoClase, EventoCalendario, Instructor
 )
 
 def limpiar_base_datos():
@@ -31,7 +31,7 @@ def limpiar_base_datos():
         db.session.execute(text('PRAGMA foreign_keys = OFF'))
         
         # Eliminar datos en orden
-        AsistenciaEvento.query.delete()
+        # AsistenciaEvento.query.delete()  # Temporary fix - model not defined
         EventoCalendario.query.delete()
         Asistencia.query.delete()
         SesionYogaterapia.query.delete()
@@ -46,6 +46,7 @@ def limpiar_base_datos():
         TipoClase.query.delete()
         Alumno.query.delete()
         Usuario.query.delete()
+        Instructor.query.delete()
         Sutra.query.delete()
         
         db.session.commit()
@@ -64,6 +65,22 @@ def crear_tablas():
     print("🏗️ Creando estructura de tablas...")
     db.create_all()
     print("✅ Tablas creadas")
+
+def crear_instructores():
+    """Crear instructores predeterminados"""
+    print("👨‍🏫 Creando instructores...")
+    instructores_data = [
+        {'nombre': 'Minouche', 'especialidad': 'Yoga Integral y Yogaterapia', 'email': 'minouche@atmasuddhi.es'},
+        {'nombre': 'Elena', 'especialidad': 'Hatha y Meditación', 'email': 'elena@atmasuddhi.es'},
+        {'nombre': 'Carlos', 'especialidad': 'Vinyasa y Dinámico', 'email': 'carlos@atmasuddhi.es'}
+    ]
+    
+    for data in instructores_data:
+        inst = Instructor(**data)
+        db.session.add(inst)
+    
+    db.session.commit()
+    print("✅ Instructores creados")
 
 def crear_usuario_admin():
     """Crear usuario administrador"""
@@ -114,29 +131,24 @@ def crear_eventos_calendario():
             # Verificar si la fecha corresponde al día de la semana del horario
             if fecha_actual.weekday() == horario.dia_semana:
                 # Verificar si ya existe un evento para esta fecha y horario
+                inicio_dt_check = datetime.combine(fecha_actual, horario.hora_inicio)
                 evento_existente = EventoCalendario.query.filter_by(
-                    fecha=fecha_actual,
-                    hora_inicio=horario.hora_inicio,
-                    hora_fin=horario.hora_fin,
-                    horario_semanal_id=horario.id
+                    fecha_inicio=inicio_dt_check
                 ).first()
                 
                 if not evento_existente:
+                    # Combinar fecha y hora para fecha_inicio y fecha_fin
+                    inicio_dt = datetime.combine(fecha_actual, horario.hora_inicio)
+                    fin_dt = datetime.combine(fecha_actual, horario.hora_fin)
+                    
                     evento = EventoCalendario(
                         titulo=f"{horario.clase.nombre}",
                         descripcion=horario.clase.descripcion or f"Clase de {horario.clase.nombre}",
-                        fecha=fecha_actual,
-                        hora_inicio=horario.hora_inicio,
-                        hora_fin=horario.hora_fin,
-                        tipo_evento='clase_grupal',
-                        es_recurrente=True,
-                        patron_recurrencia='semanal',
-                        dias_semana=str(horario.dia_semana),
+                        fecha_inicio=inicio_dt,
+                        fecha_fin=fin_dt,
+                        tipo='clase_grupal',
                         clase_id=horario.clase_id,
-                        horario_semanal_id=horario.id,
                         instructor=horario.instructor,
-                        capacidad_maxima=horario.clase.capacidad_maxima,
-                        precio=horario.clase.precio,
                         color=horario.clase.color,
                         activo=True
                     )
@@ -174,7 +186,29 @@ def crear_eventos_calendario():
     ]
     
     for evento_data in eventos_especiales:
-        evento = EventoCalendario(**evento_data)
+        # Combinar fecha y hora para fecha_inicio y fecha_fin
+        fecha = evento_data.pop('fecha')
+        hora_inicio = evento_data.pop('hora_inicio')
+        hora_fin = evento_data.pop('hora_fin')
+        
+        inicio_dt = datetime.combine(fecha, hora_inicio)
+        fin_dt = datetime.combine(fecha, hora_fin)
+        
+        # Mapear campos
+        if 'tipo_evento' in evento_data:
+            evento_data['tipo'] = evento_data.pop('tipo_evento')
+            
+        # Eliminar campos no presentes en el modelo simplificado
+        if 'precio' in evento_data:
+            evento_data.pop('precio')
+        if 'capacidad_maxima' in evento_data:
+            evento_data.pop('capacidad_maxima')
+            
+        evento = EventoCalendario(
+            fecha_inicio=inicio_dt,
+            fecha_fin=fin_dt,
+            **evento_data
+        )
         db.session.add(evento)
         eventos_creados += 1
     
@@ -398,8 +432,8 @@ def crear_horarios_semanales(clases):
         {'clase': 'Yoga Integral', 'dia_semana': 4, 'hora_inicio': '18:30', 'hora_fin': '19:45'},
         
         # Sábado (5)
-        {'clase': 'Yoga Integral', 'dia_semana': 5, 'hora_inicio': '10:00', 'hora_fin': '11:15'},
-        {'clase': 'Meditación', 'dia_semana': 5, 'hora_inicio': '11:30', 'hora_fin': '12:15'},
+        {'clase': 'Yoga Integral', 'dia_semana': 5, 'hora_inicio': '10:00', 'hora_fin': '11:15', 'instructor': 'Minouche'},
+        {'clase': 'Meditación', 'dia_semana': 5, 'hora_inicio': '11:30', 'hora_fin': '12:15', 'instructor': 'Elena'},
     ]
     
     horarios = []
@@ -411,7 +445,7 @@ def crear_horarios_semanales(clases):
                 dia_semana=horario_data['dia_semana'],
                 hora_inicio=datetime.strptime(horario_data['hora_inicio'], '%H:%M').time(),
                 hora_fin=datetime.strptime(horario_data['hora_fin'], '%H:%M').time(),
-                instructor='Minouche',
+                instructor=horario_data.get('instructor', 'Minouche'),
                 activo=True
             )
             db.session.add(horario)
@@ -527,15 +561,7 @@ def crear_alumnos_diversos():
             telefono=f"6{random.randint(10000000, 99999999)}",
             fecha_nacimiento=date(1960 + random.randint(0, 40), random.randint(1, 12), random.randint(1, 28)),
             direccion=f"Calle {random.choice(['Mayor', 'Real', 'Nueva', 'Vieja', 'Principal'])} {random.randint(1, 100)}",
-            ciudad=ciudad,
-            codigo_postal=f"{random.randint(28000, 28999):05d}",
-            pais='España',
-            numero_cuenta=generar_iban_espanol(),
             condiciones_medicas=random.choice(['Ninguna', 'Hipertensión leve', 'Problemas de espalda', 'Artritis leve', 'Diabetes tipo 2 controlada']),
-            medicamentos=random.choice(medicamentos_comunes),
-            alergias=random.choice(alergias_comunes),
-            estado_fisico=random.choice(estados_fisicos),
-            motivacion=random.choice(motivaciones),
             tipo_cuota=tipo_cuota,
             matricula_pagada=True,
             fecha_matricula=date(current_year, 1, random.randint(1, 28)),
@@ -558,15 +584,7 @@ def crear_alumnos_diversos():
             telefono=f"6{random.randint(10000000, 99999999)}",
             fecha_nacimiento=date(1965 + random.randint(0, 35), random.randint(1, 12), random.randint(1, 28)),
             direccion=f"Avenida {random.choice(['Constitución', 'España', 'Libertad'])} {random.randint(1, 50)}",
-            ciudad=ciudad,
-            codigo_postal=f"{random.randint(28000, 28999):05d}",
-            pais='España',
-            numero_cuenta=generar_iban_espanol(),
             condiciones_medicas=random.choice(['Fibromialgia', 'Artritis reumatoide', 'Ninguna', 'Problemas cervicales']),
-            medicamentos=random.choice(medicamentos_comunes),
-            alergias=random.choice(alergias_comunes),
-            estado_fisico=random.choice(estados_fisicos),
-            motivacion=random.choice(motivaciones),
             tipo_cuota=tipo_cuota,
             matricula_pagada=True,
             fecha_matricula=date(current_year, 1, random.randint(1, 28)),
@@ -590,15 +608,7 @@ def crear_alumnos_diversos():
             telefono=f"6{random.randint(10000000, 99999999)}",
             fecha_nacimiento=date(1970 + random.randint(0, 30), random.randint(1, 12), random.randint(1, 28)),
             direccion=f"Plaza {random.choice(['Mayor', 'España', 'Constitución'])} {random.randint(1, 20)}",
-            ciudad=ciudad,
-            codigo_postal=f"{random.randint(28000, 28999):05d}",
-            pais='España',
-            numero_cuenta=generar_iban_espanol() if random.choice([True, False]) else None,  # Algunos sin cuenta
             condiciones_medicas=random.choice(['Estrés crónico', 'Insomnio', 'Ninguna', 'Ansiedad', 'Depresión leve']),
-            medicamentos=random.choice(medicamentos_comunes),
-            alergias=random.choice(alergias_comunes),
-            estado_fisico=random.choice(estados_fisicos),
-            motivacion=random.choice(motivaciones),
             tipo_cuota=tipo_cuota,
             matricula_pagada=matricula_pagada,
             fecha_matricula=date(current_year, 1, random.randint(1, 28)) if matricula_pagada else None,
@@ -620,14 +630,7 @@ def crear_alumnos_diversos():
             telefono=f"6{random.randint(10000000, 99999999)}",
             fecha_nacimiento=date(1975 + random.randint(0, 25), random.randint(1, 12), random.randint(1, 28)),
             direccion=f"Calle {random.choice(['Olmo', 'Roble', 'Pino'])} {random.randint(1, 30)}",
-            ciudad=ciudad,
-            codigo_postal=f"{random.randint(28000, 28999):05d}",
-            pais='España',
-            numero_cuenta=generar_iban_espanol(),
             condiciones_medicas=random.choice(['Lesión de rodilla antigua', 'Problemas de espalda crónicos', 'Fibromialgia']),
-            medicamentos=random.choice(medicamentos_comunes),
-            alergias=random.choice(alergias_comunes),
-            estado_fisico=random.choice(['En recuperación de lesión', 'Inactivo por trabajo', 'Problemas de salud temporales']),
             tipo_cuota=random.choice(['1_clase_semanal', '2_clases_semanal']),
             matricula_pagada=True,
             fecha_matricula=date(current_year, 1, 15),
@@ -644,15 +647,7 @@ def crear_alumnos_diversos():
         telefono="600000000",
         fecha_nacimiento=date(1980, 5, 15),
         direccion="Calle Desactivada 1",
-        ciudad="Madrid",
-        codigo_postal="28001",
-        pais="España",
-        numero_cuenta=None,
         condiciones_medicas="Ninguna",
-        medicamentos="Ninguno",
-        alergias="Ninguna",
-        estado_fisico="Desconocido",
-        motivacion="No especificado",
         tipo_cuota='1_clase_semanal',
         matricula_pagada=False,
         activo=False
@@ -673,21 +668,7 @@ def crear_alumnos_diversos():
             telefono=f"6{random.randint(10000000, 99999999)}",
             fecha_nacimiento=date(1970 + random.randint(0, 30), random.randint(1, 12), random.randint(1, 28)),
             direccion=f"Calle {random.choice(['Esperanza', 'Libertad', 'Paz'])} {random.randint(1, 50)}",
-            ciudad=ciudad,
-            codigo_postal=f"{random.randint(28000, 28999):05d}",
-            pais='España',
-            numero_cuenta=None,  # Aún no proporcionado
             condiciones_medicas=random.choice(['Por determinar', 'Pendiente de evaluación', 'Sin especificar']),
-            medicamentos=random.choice(['Por confirmar', 'Pendiente de consulta', 'Sin especificar']),
-            alergias=random.choice(['Por determinar', 'Pendiente de consulta', 'Sin especificar']),
-            estado_fisico=random.choice(['Pendiente de evaluación', 'A determinar en primera clase', 'Sin especificar']),
-            motivacion=random.choice([
-                'Interesado en empezar yoga pero aún evaluando opciones',
-                'Recomendado por un amigo, quiere saber más antes de decidir',
-                'Ha hecho una clase de prueba, pensando en el tipo de cuota',
-                'Esperando a resolver horarios laborales para decidir frecuencia',
-                'Quiere probar diferentes tipos de clase antes de comprometerse'
-            ]),
             tipo_cuota='pendiente',  # Estado pendiente
             matricula_pagada=False,
             fecha_matricula=None,
@@ -1308,6 +1289,7 @@ def mostrar_resumen():
     
     try:
         print(f"👤 Usuarios: {Usuario.query.count()}")
+        print(f"👨‍🏫 Instructores: {Instructor.query.count()}")
         print(f"👥 Alumnos: {Alumno.query.count()}")
         print(f"📚 Clases: {Clase.query.count()}")
         print(f"⏰ Horarios: {HorarioSemanal.query.count()}")
@@ -1365,6 +1347,7 @@ def main():
             
             # 2. Crear datos básicos
             crear_usuario_admin()
+            crear_instructores()
             crear_tipos_clase()
             clases = crear_clases_completas()
             horarios = crear_horarios_semanales(clases)

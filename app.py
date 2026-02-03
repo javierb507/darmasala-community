@@ -5,6 +5,7 @@ from datetime import datetime, date, timedelta
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
 import os
+import json
 from utils.calendar_utils import (
     CalendarioAcademico,
     PeriodoPago,
@@ -55,6 +56,9 @@ def get_version_info():
     }
 
 # MODELOS DE BASE DE DATOS
+
+
+
 
 # Modelo de Usuario del Sistema
 class Usuario(db.Model):
@@ -247,6 +251,7 @@ class Clase(db.Model):
     precio = db.Column(db.Float, default=15.00)
     nivel = db.Column(db.String(50), default='todos')
     capacidad_maxima = db.Column(db.Integer, default=15)
+    instructor = db.Column(db.String(100), default='Minouche')
 
     def __repr__(self):
         return f'<Clase {self.nombre}>'
@@ -259,9 +264,9 @@ class Clase(db.Model):
             'color': self.color,
             'activa': self.activa,
             'duracion_minutos': self.duracion_minutos,
-            'periodicidad': self.periodicidad
+            'periodicidad': self.periodicidad,
+            'instructor': self.instructor
         }
-        return precios.get(tipo_cuota, self.precio_1_semanal)
 
 # Modelo de Horario Semanal
 # Tabla de asociación para inscripciones de alumnos en clases semanales
@@ -417,6 +422,29 @@ class Tarifa(db.Model):
             'descripcion': self.descripcion,
             'precio': self.precio,
             'activa': self.activa
+        }
+
+# Modelo de Instructor
+class Instructor(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    nombre = db.Column(db.String(100), nullable=False)
+    email = db.Column(db.String(100))
+    telefono = db.Column(db.String(20))
+    especialidad = db.Column(db.String(200))
+    activo = db.Column(db.Boolean, default=True)
+    fecha_registro = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def __repr__(self):
+        return f'<Instructor {self.nombre}>'
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'nombre': self.nombre,
+            'email': self.email,
+            'telefono': self.telefono,
+            'especialidad': self.especialidad,
+            'activo': self.activo
         }
 
 # MODELOS PARA FACTURACIÓN (Facturas emitidas a clientes)
@@ -916,8 +944,16 @@ def logout():
 # Context Processor para hacer disponibles las utilidades de calendario y versión en todos los templates
 @app.context_processor
 def inject_global_vars():
-    """Inyecta utilidades de calendario y versión en todos los templates."""
+    """Inyecta configuración de la escuela, utilidades de calendario y versión en todos los templates."""
+    try:
+        # Obtener configuración de la escuela
+        configs = Configuracion.query.all()
+        config_dict = {c.clave: c.valor for c in configs}
+    except Exception:
+        config_dict = {}
+
     context = crear_contexto_calendario()
+    context['config'] = config_dict
     context['version_info'] = get_version_info()
     return context
 
@@ -2728,9 +2764,9 @@ def configuracion():
         config_dict = {config.clave: config.valor for config in configuraciones}
         clases = Clase.query.order_by(Clase.nombre).all()
         tarifas = Tarifa.query.all()
+        instructores = Instructor.query.order_by(Instructor.activo.desc(), Instructor.nombre).all()
         
         # Estadísticas para el dashboard de configuración
-        from app import Alumno, HorarioSemanal
         total_alumnos = Alumno.query.filter_by(activo=True).count()
         total_clases = len(clases)
         total_horarios = HorarioSemanal.query.filter_by(activo=True).count()
@@ -2739,89 +2775,89 @@ def configuracion():
                                config=config_dict, 
                                clases=clases, 
                                tarifas=tarifas,
+                               instructores=instructores,
                                total_alumnos=total_alumnos,
                                total_clases=total_clases,
                                total_horarios=total_horarios,
-                               total_eventos=0) # Por ahora 0 o implementar lógica si es necesario
+                               total_eventos=0)
     except Exception as e:
-        print(f"Error en configuración: {e}")
-        flash(f"Error al cargar la configuración: Asegúrate de inicializar la base de datos. {e}", "danger")
+        import traceback
+        traceback.print_exc()
+        flash(f"Error al cargar la configuración: {str(e)}", "danger")
         return redirect(url_for('index'))
 
 @app.route('/configuracion/guardar', methods=['POST'])
 @login_required
 def guardar_configuracion():
     try:
-        # Manejar subida de logo
+        # Manejar subida de logo con mayor cuidado
         if 'logo' in request.files:
             logo_file = request.files['logo']
-            if logo_file and logo_file.filename:
-                # Crear directorio para logos
-                logo_dir = os.path.join('static', 'images')
-                os.makedirs(logo_dir, exist_ok=True)
-                
-                # Generar nombre único para el logo
-                timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-                filename = f"logo_{timestamp}.{logo_file.filename.split('.')[-1]}"
-                filepath = os.path.join(logo_dir, filename)
-                
-                # Guardar archivo
-                logo_file.save(filepath)
-                
-                # Actualizar configuración con la ruta del logo
-                config_logo = Configuracion.query.filter_by(clave='logo_escuela').first()
-                if config_logo:
-                    config_logo.valor = f"images/{filename}"
+            if logo_file and logo_file.filename != '':
+                print(f"DEBUG: Intentando subir logo: {logo_file.filename}")
+                # Asegurar extensión válida
+                ext = logo_file.filename.rsplit('.', 1)[1].lower() if '.' in logo_file.filename else ''
+                if ext in ['png', 'jpg', 'jpeg', 'gif', 'svg']:
+                    # Crear directorio para logos si no existe
+                    logo_dir = os.path.join(app.root_path, 'static', 'images')
+                    if not os.path.exists(logo_dir):
+                        os.makedirs(logo_dir, exist_ok=True)
+                        print(f"DEBUG: Creado directorio {logo_dir}")
+                    
+                    # Generar nombre único para evitar caché
+                    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+                    filename = f"logo_{timestamp}.{ext}"
+                    filepath = os.path.join(logo_dir, filename)
+                    
+                    # Guardar el archivo físicamente
+                    logo_file.save(filepath)
+                    print(f"DEBUG: Logo guardado en {filepath}")
+                    
+                    # Registrar en la base de datos
+                    db_path = f"images/{filename}"
+                    config_logo = Configuracion.query.filter_by(clave='logo_escuela').first()
+                    if config_logo:
+                        config_logo.valor = db_path
+                        print(f"DEBUG: Actualizada clave logo_escuela a {db_path}")
+                    else:
+                        config_logo = Configuracion(
+                            clave='logo_escuela',
+                            valor=db_path,
+                            descripcion='Logo de la escuela'
+                        )
+                        db.session.add(config_logo)
+                        print(f"DEBUG: Creada nueva clave logo_escuela con {db_path}")
+                    
+                    db.session.commit()
                 else:
-                    config_logo = Configuracion(
-                        clave='logo_escuela',
-                        valor=f"images/{filename}",
-                        descripcion='Logo de la escuela'
-                    )
-                    db.session.add(config_logo)
+                    flash('Extensión de imagen no permitida (usa PNG, JPG, GIF o SVG)', 'error')
+                    print(f"DEBUG: Extensión no permitida: {ext}")
         
-        configuraciones = [
-            # Tarifas
-            ('precio_clase_suelta', request.form.get('precio_clase_suelta', '15.00'), 'Precio por clase suelta'),
-            ('precio_1_clase_semanal', request.form.get('precio_1_clase_semanal', '40.00'), 'Precio 1 clase por semana'),
-            ('precio_2_clases_semanal', request.form.get('precio_2_clases_semanal', '70.00'), 'Precio 2 clases por semana'),
-            ('precio_tarifa_plana', request.form.get('precio_tarifa_plana', '90.00'), 'Precio tarifa plana'),
-            ('precio_1_clase_bimensual', request.form.get('precio_1_clase_bimensual', '75.00'), 'Precio 1 clase bimensual'),
-            ('precio_2_clases_bimensual', request.form.get('precio_2_clases_bimensual', '135.00'), 'Precio 2 clases bimensual'),
-            ('precio_matricula', request.form.get('precio_matricula', '25.00'), 'Precio de matrícula anual'),
-            ('precio_yogaterapia_individual', request.form.get('precio_yogaterapia_individual', '50.00'), 'Precio yogaterapia individual'),
-            ('precio_yogaterapia_pareja', request.form.get('precio_yogaterapia_pareja', '70.00'), 'Precio yogaterapia en pareja'),
-            
-            # Información de la escuela
-            ('nombre_escuela', request.form.get('nombre_escuela', 'ATMA SUDDHI'), 'Nombre de la escuela'),
-            ('direccion_escuela', request.form.get('direccion_escuela', ''), 'Dirección de la escuela'),
-            ('telefono_escuela', request.form.get('telefono_escuela', ''), 'Teléfono de contacto'),
-            ('email_escuela', request.form.get('email_escuela', ''), 'Email de contacto'),
-            ('web_escuela', request.form.get('web_escuela', 'http://atmasuddhi.es'), 'Página web'),
-            
-            # Instructor principal
-            ('nombre_instructora', request.form.get('nombre_instructora', 'Minouche'), 'Nombre de la instructora principal'),
-            ('email_instructora', request.form.get('email_instructora', ''), 'Email de la instructora'),
-            ('telefono_instructora', request.form.get('telefono_instructora', ''), 'Teléfono de la instructora'),
-            
-            # Configuración de pagos
-            ('numero_cuenta', request.form.get('numero_cuenta', ''), 'Número de cuenta bancaria'),
-            ('cif_escuela', request.form.get('cif_escuela', ''), 'CIF de la escuela'),
+        # Lista de claves posibles para procesar del formulario
+        claves_formulario = [
+            'precio_clase_suelta', 'precio_1_clase_semanal', 'precio_2_clases_semanal',
+            'precio_tarifa_plana', 'precio_1_clase_bimensual', 'precio_2_clases_bimensual',
+            'precio_matricula', 'precio_yogaterapia_individual', 'precio_yogaterapia_pareja',
+            'nombre_escuela', 'direccion_escuela', 'telefono_escuela', 'email_escuela',
+            'web_escuela', 'nombre_instructora', 'email_instructora', 'telefono_instructora',
+            'color_primario', 'color_secundario', 'color_acento', 'numero_cuenta', 'cif_escuela',
+            'capacidad_centro'
         ]
         
-        for clave, valor, descripcion in configuraciones:
-            config_existente = Configuracion.query.filter_by(clave=clave).first()
-            if config_existente:
-                config_existente.valor = valor
-                config_existente.descripcion = descripcion
-                config_existente.fecha_actualizacion = datetime.utcnow()
-            else:
-                nueva_config = Configuracion(
-                    clave=clave,
-                    valor=valor,
-                    descripcion=descripcion
-                )
-                db.session.add(nueva_config)
+        for clave in claves_formulario:
+            valor = request.form.get(clave)
+            if valor is not None:  # Solo actualizamos si el campo viene en el POST
+                config_existente = Configuracion.query.filter_by(clave=clave).first()
+                if config_existente:
+                    config_existente.valor = valor
+                    config_existente.fecha_actualizacion = datetime.utcnow()
+                else:
+                    nueva_config = Configuracion(
+                        clave=clave,
+                        valor=valor,
+                        descripcion=f"Configuración de {clave.replace('_', ' ')}"
+                    )
+                    db.session.add(nueva_config)
         
         db.session.commit()
         flash('¡Configuración guardada exitosamente!', 'success')
@@ -2913,11 +2949,34 @@ def toggle_tipo_clase(tipo_id):
 
 # RUTAS DE BACKUP Y EXPORTACIÓN
 
+@app.route('/configuracion/descargar-db')
+@login_required
+def descargar_db():
+    """Permitir la descarga manual del archivo de base de datos"""
+    try:
+        db_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'instance', 'yoga_school.db')
+        if not os.path.exists(db_path):
+            # Probar en raíz si no está en instance
+            db_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'yoga_school.db')
+            
+        if os.path.exists(db_path):
+            return send_file(db_path, as_attachment=True, download_name=f"backup_yoga_{datetime.now().strftime('%Y%m%d')}.db")
+        else:
+            flash("No se encontró el archivo de base de datos para descargar.", "error")
+            return redirect(url_for('configuracion'))
+    except Exception as e:
+        flash(f"Error al descargar la base de datos: {e}", "error")
+        return redirect(url_for('configuracion'))
+
 @app.route('/backup')
 @login_required
 def backup():
     """Página de gestión de backups"""
-    return render_template('backup.html')
+    # Listar archivos en la carpeta backups
+    backups = []
+    if os.path.exists('backups'):
+        backups = sorted(os.listdir('backups'), reverse=True)
+    return render_template('backup.html', backups=backups)
 
 @app.route('/backup/crear', methods=['POST'])
 @login_required
@@ -2935,11 +2994,17 @@ def crear_backup():
         # Asegurar que existe el directorio
         os.makedirs('backups', exist_ok=True)
         
+        # Ruta de la base de datos
+        db_path = 'instance/yoga_school.db'
+        if not os.path.exists(db_path):
+            db_path = 'yoga_school.db'
+            
         # Copiar la base de datos
-        if os.path.exists('yoga_school.db'):
-            shutil.copy2('yoga_school.db', backup_path)
+        if os.path.exists(db_path):
+            shutil.copy2(db_path, backup_path)
             flash(f'Backup creado exitosamente: {filename}', 'success')
         else:
+            flash('Error: No se encontró el archivo de base de datos.', 'error')
             flash('Error: Base de datos no encontrada', 'error')
             
     except Exception as e:
@@ -3909,6 +3974,7 @@ def nueva_clase():
 
         duracion_minutos = request.form.get('duracion_minutos', 75, type=int)
         periodicidad = request.form.get('periodicidad', 'semanal')
+        instructor = request.form.get('instructor', 'Minouche')
 
         nueva_clase = Clase(
             nombre=nombre,
@@ -3916,6 +3982,7 @@ def nueva_clase():
             color=color,
             duracion_minutos=duracion_minutos,
             periodicidad=periodicidad,
+            instructor=instructor,
             activa=True
         )
         db.session.add(nueva_clase)
@@ -3954,6 +4021,7 @@ def editar_clase(clase_id):
         clase.color = request.form.get('color', '#4ECDC4')
         clase.duracion_minutos = request.form.get('duracion_minutos', 75, type=int)
         clase.periodicidad = request.form.get('periodicidad', 'semanal')
+        clase.instructor = request.form.get('instructor', 'Minouche')
         db.session.commit()
 
         flash(f'Clase "{nombre}" actualizada exitosamente', 'success')
@@ -4097,6 +4165,96 @@ def eliminar_tarifa(tarifa_id):
         flash(f'Error al eliminar la tarifa: {str(e)}', 'error')
         db.session.rollback()
         return redirect(url_for('configuracion'))
+
+# Rutas para Gestión de Instructores
+@app.route('/configuracion/instructores/nuevo', methods=['POST'])
+def nuevo_instructor():
+    try:
+        nombre = request.form.get('nombre')
+        if not nombre:
+            flash('El nombre del instructor es obligatorio', 'error')
+            return redirect(url_for('configuracion'))
+        
+        nuevo = Instructor(
+            nombre=nombre,
+            email=request.form.get('email'),
+            telefono=request.form.get('telefono'),
+            especialidad=request.form.get('especialidad'),
+            activo=True
+        )
+        db.session.add(nuevo)
+        db.session.commit()
+        flash(f'Instructor {nombre} añadido correctamente', 'success')
+    except Exception as e:
+        flash(f'Error al añadir instructor: {str(e)}', 'error')
+        db.session.rollback()
+    return redirect(url_for('configuracion'))
+
+@app.route('/configuracion/instructores/<int:instructor_id>/eliminar', methods=['POST'])
+def eliminar_instructor(instructor_id):
+    try:
+        inst = Instructor.query.get_or_404(instructor_id)
+        # Si tiene clases o horarios asociados, no podemos borrarlo físicamente sin romper integridad
+        # Así que hacemos borrado lógico por defecto
+        inst.activo = False
+        db.session.commit()
+        flash(f'Instructor {inst.nombre} desactivado correctamente. Permanecerá en el historial.', 'success')
+    except Exception as e:
+        flash(f'Error al desactivar instructor: {str(e)}', 'error')
+        db.session.rollback()
+    return redirect(url_for('configuracion'))
+
+@app.route('/configuracion/instructores/<int:instructor_id>/editar', methods=['POST'])
+def editar_instructor(instructor_id):
+    try:
+        inst = Instructor.query.get_or_404(instructor_id)
+        inst.nombre = request.form.get('nombre')
+        inst.email = request.form.get('email')
+        inst.telefono = request.form.get('telefono')
+        inst.especialidad = request.form.get('especialidad')
+        
+        db.session.commit()
+        flash(f'Instructor {inst.nombre} actualizado correctamente', 'success')
+    except Exception as e:
+        flash(f'Error al editar instructor: {str(e)}', 'error')
+        db.session.rollback()
+    return redirect(url_for('configuracion'))
+
+# Rutas adicionales para Horarios desde Configuración
+@app.route('/configuracion/horarios/nuevo', methods=['POST'])
+def configuracion_nuevo_horario():
+    try:
+        clase_id = int(request.form['clase_id'])
+        dia_semana = int(request.form['dia_semana'])
+        hora_inicio = datetime.strptime(request.form['hora_inicio'], '%H:%M').time()
+        hora_fin = datetime.strptime(request.form['hora_fin'], '%H:%M').time()
+        
+        nuevo = HorarioSemanal(
+            clase_id=clase_id,
+            dia_semana=dia_semana,
+            hora_inicio=hora_inicio,
+            hora_fin=hora_fin,
+            instructor=request.form.get('instructor', 'Minouche')
+        )
+        db.session.add(nuevo)
+        db.session.commit()
+        flash('Horario añadido correctamente', 'success')
+    except Exception as e:
+        flash(f'Error al añadir horario: {str(e)}', 'error')
+        db.session.rollback()
+    return redirect(url_for('configuracion'))
+
+@app.route('/configuracion/horarios/<int:horario_id>/eliminar', methods=['POST'])
+def eliminar_horario_config(horario_id):
+    try:
+        horario = HorarioSemanal.query.get_or_404(horario_id)
+        db.session.delete(horario)
+        db.session.commit()
+        flash('Horario eliminado correctamente', 'success')
+    except Exception as e:
+        flash(f'Error al eliminar horario: {str(e)}', 'error')
+        db.session.rollback()
+    return redirect(url_for('configuracion'))
 
 # RUTAS PARA MODO DE PRUEBAS (ADMINISTRADOR)
 

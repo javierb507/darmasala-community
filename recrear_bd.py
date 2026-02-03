@@ -5,6 +5,7 @@ Script para recrear la base de datos con el nuevo esquema
 
 import os
 from app import app, db
+from werkzeug.security import generate_password_hash
 
 def recrear_base_datos():
     """Recrear la base de datos con el nuevo esquema"""
@@ -46,7 +47,7 @@ def recrear_base_datos():
             admin = Usuario(
                 username='admin',
                 email='admin@atmasuddhi.es',
-                password_hash=hashlib.sha256('admin123'.encode()).hexdigest(),
+                password_hash=generate_password_hash('AtmaSuddhi74'),
                 nombre='Administrador',
                 apellido='Sistema',
                 rol='admin'

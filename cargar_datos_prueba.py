@@ -8,6 +8,7 @@ import random
 from datetime import datetime, timedelta, date, time
 from app import app, db
 from app import Alumno, Pago, SesionYogaterapia, HorarioSemanal, Clase, Usuario
+from werkzeug.security import generate_password_hash
 
 def cargar_datos_prueba():
     """Cargar datos de prueba completos"""
@@ -50,48 +51,65 @@ def cargar_datos_prueba():
         # Guardar clases primero
         db.session.commit()
         
+        # Crear instructores
+        print("👨‍🏫 Creando instructores...")
+        instructores_data = [
+            {'nombre': 'Minouche', 'especialidad': 'Yoga Integral y Yogaterapia'},
+            {'nombre': 'Elena', 'especialidad': 'Hatha Yoga y Meditación'},
+            {'nombre': 'Carlos', 'especialidad': 'Vinyasa Flow y Ashtanga'}
+        ]
+        
+        from app import Instructor
+        instructores = []
+        for inst_data in instructores_data:
+            inst = Instructor(
+                nombre=inst_data['nombre'],
+                especialidad=inst_data['especialidad'],
+                email=f"{inst_data['nombre'].lower()}@atmasuddhi.es",
+                activo=True
+            )
+            db.session.add(inst)
+            instructores.append(inst)
+        
+        db.session.commit()
+        
         # Crear horarios semanales
         print("⏰ Creando horarios semanales...")
         horarios_data = [
             # Lunes
-            {'dia_semana': 0, 'hora_inicio': '09:00', 'hora_fin': '10:15', 'clase': 'Hatha Yoga'},
-            {'dia_semana': 0, 'hora_inicio': '10:30', 'hora_fin': '11:45', 'clase': 'Yoga menopausia'},
-            {'dia_semana': 0, 'hora_inicio': '18:00', 'hora_fin': '19:15', 'clase': 'Yoga integral'},
-            {'dia_semana': 0, 'hora_inicio': '19:30', 'hora_fin': '20:45', 'clase': 'Vinyasa Flow'},
+            {'dia_semana': 0, 'hora_inicio': '09:00', 'hora_fin': '10:15', 'clase': 'Hatha Yoga', 'instructor': 'Elena'},
+            {'dia_semana': 0, 'hora_inicio': '10:30', 'hora_fin': '11:45', 'clase': 'Yoga menopausia', 'instructor': 'Minouche'},
+            {'dia_semana': 0, 'hora_inicio': '18:00', 'hora_fin': '19:15', 'clase': 'Yoga integral', 'instructor': 'Minouche'},
+            {'dia_semana': 0, 'hora_inicio': '19:30', 'hora_fin': '20:45', 'clase': 'Vinyasa Flow', 'instructor': 'Carlos'},
             
             # Martes
-            {'dia_semana': 1, 'hora_inicio': '09:00', 'hora_fin': '10:00', 'clase': 'Yoga embarazadas'},
-            {'dia_semana': 1, 'hora_inicio': '10:15', 'hora_fin': '11:00', 'clase': 'Meditación'},
-            {'dia_semana': 1, 'hora_inicio': '18:00', 'hora_fin': '19:15', 'clase': 'Yoga integral'},
-            {'dia_semana': 1, 'hora_inicio': '19:30', 'hora_fin': '21:00', 'clase': 'Yin Yoga'},
+            {'dia_semana': 1, 'hora_inicio': '09:00', 'hora_fin': '10:00', 'clase': 'Yoga embarazadas', 'instructor': 'Minouche'},
+            {'dia_semana': 1, 'hora_inicio': '10:15', 'hora_fin': '11:00', 'clase': 'Meditación', 'instructor': 'Elena'},
+            {'dia_semana': 1, 'hora_inicio': '18:00', 'hora_fin': '19:15', 'clase': 'Yoga integral', 'instructor': 'Minouche'},
+            {'dia_semana': 1, 'hora_inicio': '19:30', 'hora_fin': '21:00', 'clase': 'Yin Yoga', 'instructor': 'Elena'},
             
             # Miércoles
-            {'dia_semana': 2, 'hora_inicio': '09:00', 'hora_fin': '10:15', 'clase': 'Hatha Yoga'},
-            {'dia_semana': 2, 'hora_inicio': '10:30', 'hora_fin': '11:45', 'clase': 'Yoga menopausia'},
-            {'dia_semana': 2, 'hora_inicio': '18:00', 'hora_fin': '19:15', 'clase': 'Vinyasa Flow'},
-            {'dia_semana': 2, 'hora_inicio': '19:30', 'hora_fin': '20:45', 'clase': 'Yoga integral'},
+            {'dia_semana': 2, 'hora_inicio': '09:00', 'hora_fin': '10:15', 'clase': 'Hatha Yoga', 'instructor': 'Elena'},
+            {'dia_semana': 2, 'hora_inicio': '10:30', 'hora_fin': '11:45', 'clase': 'Yoga menopausia', 'instructor': 'Minouche'},
+            {'dia_semana': 2, 'hora_inicio': '18:00', 'hora_fin': '19:15', 'clase': 'Vinyasa Flow', 'instructor': 'Carlos'},
+            {'dia_semana': 2, 'hora_inicio': '19:30', 'hora_fin': '20:45', 'clase': 'Yoga integral', 'instructor': 'Minouche'},
             
             # Jueves
-            {'dia_semana': 3, 'hora_inicio': '09:00', 'hora_fin': '10:00', 'clase': 'Yoga embarazadas'},
-            {'dia_semana': 3, 'hora_inicio': '10:15', 'hora_fin': '11:00', 'clase': 'Meditación'},
-            {'dia_semana': 3, 'hora_inicio': '18:00', 'hora_fin': '19:15', 'clase': 'Yoga integral'},
-            {'dia_semana': 3, 'hora_inicio': '19:30', 'hora_fin': '21:00', 'clase': 'Yin Yoga'},
+            {'dia_semana': 3, 'hora_inicio': '09:00', 'hora_fin': '10:00', 'clase': 'Yoga embarazadas', 'instructor': 'Minouche'},
+            {'dia_semana': 3, 'hora_inicio': '10:15', 'hora_fin': '11:00', 'clase': 'Meditación', 'instructor': 'Elena'},
+            {'dia_semana': 3, 'hora_inicio': '18:00', 'hora_fin': '19:15', 'clase': 'Yoga integral', 'instructor': 'Minouche'},
+            {'dia_semana': 3, 'hora_inicio': '19:30', 'hora_fin': '21:00', 'clase': 'Yin Yoga', 'instructor': 'Elena'},
             
             # Viernes
-            {'dia_semana': 4, 'hora_inicio': '09:00', 'hora_fin': '10:15', 'clase': 'Hatha Yoga'},
-            {'dia_semana': 4, 'hora_inicio': '10:30', 'hora_fin': '11:45', 'clase': 'Vinyasa Flow'},
-            {'dia_semana': 4, 'hora_inicio': '18:00', 'hora_fin': '19:15', 'clase': 'Yoga integral'},
-            {'dia_semana': 4, 'hora_inicio': '19:30', 'hora_fin': '20:45', 'clase': 'Yoga menopausia'},
+            {'dia_semana': 4, 'hora_inicio': '09:00', 'hora_fin': '10:15', 'clase': 'Hatha Yoga', 'instructor': 'Elena'},
+            {'dia_semana': 4, 'hora_inicio': '10:30', 'hora_fin': '11:45', 'clase': 'Vinyasa Flow', 'instructor': 'Carlos'},
+            {'dia_semana': 4, 'hora_inicio': '18:00', 'hora_fin': '19:15', 'clase': 'Yoga integral', 'instructor': 'Minouche'},
+            {'dia_semana': 4, 'hora_inicio': '19:30', 'hora_fin': '20:45', 'clase': 'Yoga menopausia', 'instructor': 'Minouche'},
             
             # Sábado
-            {'dia_semana': 5, 'hora_inicio': '10:00', 'hora_fin': '11:15', 'clase': 'Yoga integral'},
-            {'dia_semana': 5, 'hora_inicio': '11:30', 'hora_fin': '12:45', 'clase': 'Vinyasa Flow'},
-            {'dia_semana': 5, 'hora_inicio': '17:00', 'hora_fin': '18:30', 'clase': 'Yin Yoga'},
-            
-            # Domingo
-            {'dia_semana': 6, 'hora_inicio': '10:00', 'hora_fin': '11:15', 'clase': 'Hatha Yoga'},
-            {'dia_semana': 6, 'hora_inicio': '11:30', 'hora_fin': '12:15', 'clase': 'Meditación'},
-            {'dia_semana': 6, 'hora_inicio': '17:00', 'hora_fin': '18:15', 'clase': 'Yoga integral'}
+            {'dia_semana': 5, 'hora_inicio': '10:00', 'hora_fin': '11:15', 'clase': 'Yoga integral', 'instructor': 'Minouche'},
+            {'dia_semana': 5, 'hora_inicio': '11:30', 'hora_fin': '12:45', 'clase': 'Vinyasa Flow', 'instructor': 'Carlos'},
+            {'dia_semana': 5, 'hora_inicio': '17:00', 'hora_fin': '18:30', 'clase': 'Yin Yoga', 'instructor': 'Elena'}
         ]
         
         for horario_data in horarios_data:
@@ -102,7 +120,7 @@ def cargar_datos_prueba():
                     dia_semana=horario_data['dia_semana'],
                     hora_inicio=datetime.strptime(horario_data['hora_inicio'], '%H:%M').time(),
                     hora_fin=datetime.strptime(horario_data['hora_fin'], '%H:%M').time(),
-                    instructor='Minouche',
+                    instructor=horario_data.get('instructor', 'Minouche'),
                     activo=True
                 )
                 db.session.add(horario)
@@ -194,7 +212,7 @@ def cargar_datos_prueba():
         admin = Usuario(
             username='admin',
             email='admin@atmasuddhi.es',
-            password_hash=hashlib.sha256('admin123'.encode()).hexdigest(),
+            password_hash=generate_password_hash('AtmaSuddhi74'),
             nombre='Administrador',
             apellido='Sistema',
             rol='admin'

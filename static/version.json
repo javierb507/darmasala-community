@@ -1,12 +1,12 @@
 {
   "version": "1.0.0",
-  "build_date": "2025-11-03 15:59:16",
+  "build_date": "2026-02-03 21:15:20",
   "git_info": {
-    "commit_hash": "bfd96e3",
-    "commit_date": "2025-09-30 16:02:47",
-    "commit_message": "✨ Ampliar modelo Alumno con información completa",
+    "commit_hash": "9686a20",
+    "commit_date": "2026-01-28 15:15:47",
+    "commit_message": "Docs: Create roadmap with prioritized TODO list",
     "branch": "main",
-    "remote_url": "https://github.com/javierb507/yoga-school-management.git",
+    "remote_url": "https://github.com/javierb507/yoga-school-management",
     "available": true
   },
   "app_name": "Atma Suddhi",

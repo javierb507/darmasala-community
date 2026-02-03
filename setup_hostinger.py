@@ -46,6 +46,7 @@ def main():
             print("\n📱 Funcionalidades incluidas:")
             print("   ✅ 20 alumnos con estados diversos")
             print("   ✅ 8 tipos de clases configuradas")
+            print("   ✅ 3 instructores registrados")
             print("   ✅ 26 horarios semanales")
             print("   ✅ 138 pagos de ejemplo")
             print("   ✅ 22 sesiones de yogaterapia")

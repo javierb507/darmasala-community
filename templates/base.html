@@ -1,255 +1,254 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}ATMA SUDDHI - Espacio de Yoga{% endblock %}</title>
+    <title>{% block title %}{{ config.get('nombre_escuela', 'ATMA SUDDHI') }}{% endblock %}</title>
 
-    <!-- Favicon -->
+    <!-- Favicon dinámico -->
+    {% if config and config.get('logo_escuela') %}
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename=config.get('logo_escuela')) }}">
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename=config.get('logo_escuela')) }}">
+    {% else %}
     <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
-    <link rel="icon" type="image/png" sizes="32x32"
-        href="{{ url_for('static', filename='images/logo_20250921_235340.png') }}">
-    <link rel="icon" type="image/png" sizes="16x16"
-        href="{{ url_for('static', filename='images/logo_20250921_235340.png') }}">
-    <link rel="apple-touch-icon" href="{{ url_for('static', filename='images/logo_20250921_235340.png') }}">
+    {% endif %}
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link
-        href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;500;600;700&display=swap"
         rel="stylesheet">
+
     <style>
         :root {
-            --primary-purple: #8B5FBF;
-            --light-purple: #B19CD9;
-            --dark-purple: #6B4C93;
-            --accent-yellow: #FFD700;
-            --light-green: #90EE90;
-            --pale-yellow: #FFF8DC;
-            --gradient-bg: linear-gradient(135deg, #E6E6FA 0%, #D8BFD8 100%);
+            --primary-color: {
+                    {
+                    config.get('color_primario', '#6b4c9a')
+                }
+            }
+
+            ;
+
+            --secondary-color: {
+                    {
+                    config.get('color_secundario', '#8B5FBF')
+                }
+            }
+
+            ;
+
+            --accent-color: {
+                    {
+                    config.get('color_acento', '#FFD700')
+                }
+            }
+
+            ;
+            --bg-light: #f4f7f9;
+            --navbar-text: #ffffff;
         }
 
         body {
             font-family: 'Inter', sans-serif;
-            background: var(--gradient-bg);
+            background-color: var(--bg-light);
+            color: #2d3436;
             min-height: 100vh;
         }
 
+        /* Navbar COMPLETAMENTE sólida y opaca */
         .navbar {
-            background: linear-gradient(135deg, var(--primary-purple) 0%, var(--dark-purple) 100%) !important;
-            box-shadow: 0 2px 10px rgba(139, 95, 191, 0.3);
+            background-color: #6b4c9a;
+
+            /* Color de respaldo seguro */
+            background-color: {
+                    {
+                    config.get('color_primario') or '#6b4c9a'
+                }
+            }
+
+            !important;
+
+            background: {
+                    {
+                    config.get('color_primario') or '#6b4c9a'
+                }
+            }
+
+            !important;
+            background-image: none !important;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4) !important;
+            border-bottom: 2px solid rgba(0, 0, 0, 0.1) !important;
+            padding: 0.8rem 0 !important;
+            opacity: 1 !important;
+            z-index: 9999 !important;
+        }
+
+        .navbar.sticky-top {
+            position: sticky !important;
+            top: 0 !important;
+
+            background-color: {
+                    {
+                    config.get('color_primario') or '#6b4c9a'
+                }
+            }
+
+            !important;
+            opacity: 1 !important;
+            backdrop-filter: none !important;
+            -webkit-backdrop-filter: none !important;
+        }
+
+        .navbar-brand,
+        .nav-link {
+            color: #ffffff !important;
+            font-weight: 700 !important;
+            opacity: 1 !important;
         }
 
         .navbar-brand {
             font-family: 'Playfair Display', serif;
-            font-weight: 700;
-            color: white !important;
-            font-size: 1.5rem;
+            font-size: 1.6rem;
+            letter-spacing: 0.5px;
         }
 
         .navbar-brand i {
-            color: var(--accent-yellow);
-            margin-right: 8px;
+            color: var(--accent-color);
+            margin-right: 10px;
         }
 
         .nav-link {
-            color: rgba(255, 255, 255, 0.9) !important;
-            font-weight: 500;
-            transition: all 0.3s ease;
+            margin: 0 10px;
+            transition: all 0.2s ease;
         }
 
         .nav-link:hover {
-            color: var(--accent-yellow) !important;
+            color: var(--accent-color) !important;
             transform: translateY(-1px);
+        }
+
+        .navbar-logo {
+            height: 42px;
+            width: auto;
+            margin-right: 12px;
+            border-radius: 8px;
+            background: white;
+            padding: 3px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
 
         .card {
             border: none;
-            border-radius: 15px;
-            box-shadow: 0 4px 15px rgba(139, 95, 191, 0.1);
-            transition: all 0.3s ease;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            background: #ffffff;
+            margin-bottom: 30px;
         }
 
-        .card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(139, 95, 191, 0.15);
+        .card-header {
+            background: #ffffff;
+            border-bottom: 1px solid #edf2f7;
+            padding: 1.25rem;
+            font-weight: 700;
+            color: #1a202c;
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, var(--primary-purple), var(--dark-purple));
-            border: none;
-            border-radius: 25px;
-            padding: 10px 25px;
-            font-weight: 500;
-            transition: all 0.3s ease;
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            font-weight: 600;
+            padding: 0.6rem 1.2rem;
+            border-radius: 10px;
         }
 
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(139, 95, 191, 0.4);
-        }
-
-        .btn-success {
-            background: linear-gradient(135deg, #28a745, #20c997);
-            border: none;
-            border-radius: 25px;
-            padding: 10px 25px;
-            font-weight: 500;
-        }
-
-        .btn-warning {
-            background: linear-gradient(135deg, #ffc107, #fd7e14);
-            border: none;
-            border-radius: 25px;
-            padding: 10px 25px;
-            font-weight: 500;
-        }
-
-        .btn-info {
-            background: linear-gradient(135deg, #17a2b8, #007bff);
-            border: none;
-            border-radius: 25px;
-            padding: 10px 25px;
+        footer {
+            background: #ffffff;
+            border-top: 1px solid #e2e8f0;
+            color: #718096;
             font-weight: 500;
         }
     </style>
+    {% block extra_css %}{% endblock %}
 </head>
 
-<body>
-    <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-dark">
+<body class="d-flex flex-column">
+    <nav class="navbar navbar-expand-lg sticky-top">
         <div class="container">
-            <a class="navbar-brand" href="{{ url_for('index') }}">
-                {% if config and config.logo_escuela %}
-                <img src="{{ url_for('static', filename=config.logo_escuela) }}" alt="ATMA SUDDHI" height="40"
-                    class="me-2">
+            <a class="navbar-brand d-flex align-items-center" href="{{ url_for('index') }}">
+                {% if config and config.get('logo_escuela') %}
+                <img src="{{ url_for('static', filename=config.get('logo_escuela')) }}" alt="Logo" class="navbar-logo">
                 {% else %}
-                <img src="{{ url_for('static', filename='images/logo.svg') }}" alt="ATMA SUDDHI" height="40"
-                    class="me-2">
+                <i class="fas fa-om"></i>
                 {% endif %}
-                ATMA SUDDHI
+                <span>{{ config.get('nombre_escuela', 'ATMA SUDDHI') }}</span>
             </a>
 
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
+                <i class="fas fa-bars text-white"></i>
             </button>
 
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
+                <ul class="navbar-nav ms-auto align-items-center">
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('index') }}">
-                            <i class="fas fa-home"></i> Inicio
+                        <a class="nav-link" href="{{ url_for('calendario_unificado') }}">
+                            <i class="fas fa-calendar-alt me-1"></i> Calendario
                         </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('alumnos') }}">
-                            <i class="fas fa-users"></i> Alumnos
+                            <i class="fas fa-users me-1"></i> Alumnos
                         </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('calendario') }}">
-                            <i class="fas fa-calendar"></i> Calendario
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('horarios') }}">
-                            <i class="fas fa-clock"></i> Horarios
-                        </a>
-                    </li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                            <i class="fas fa-calculator"></i> Contabilidad
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="{{ url_for('economia') }}">
-                                    <i class="fas fa-tachometer-alt"></i> Dashboard
-                                </a></li>
-                            <li>
-                                <hr class="dropdown-divider">
-                            </li>
-                            <li><a class="dropdown-item" href="{{ url_for('gastos_mensuales') }}">
-                                    <i class="fas fa-receipt"></i> Gastos Mensuales
-                                </a></li>
-                            <li><a class="dropdown-item" href="{{ url_for('facturas') }}">
-                                    <i class="fas fa-file-invoice"></i> Facturas
-                                </a></li>
-                            <li><a class="dropdown-item" href="{{ url_for('proveedores') }}">
-                                    <i class="fas fa-building"></i> Proveedores
-                                </a></li>
-                        </ul>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('configuracion') }}">
-                            <i class="fas fa-cog"></i> Configuración
+                            <i class="fas fa-cog me-1"></i> Configuración
                         </a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="http://atmasuddhi.es" target="_blank">
-                            <i class="fas fa-external-link-alt"></i> Web
-                        </a>
+
+                    {% if session.get('username') %}
+                    <li class="nav-item ms-lg-4">
+                        <div class="d-flex align-items-center bg-white rounded-pill px-3 py-1 shadow-sm">
+                            <span class="small me-2 text-dark font-weight-bold">
+                                <i class="fas fa-user-circle text-primary"></i> {{ session.username }}
+                            </span>
+                            <div class="vr mx-2"></div>
+                            <a class="text-danger opacity-75 hover-opacity-100" href="{{ url_for('logout') }}"
+                                title="Cerrar Sesión">
+                                <i class="fas fa-sign-out-alt"></i>
+                            </a>
+                        </div>
                     </li>
+                    {% endif %}
                 </ul>
             </div>
         </div>
     </nav>
 
-    <!-- Main Content -->
-    <div class="container mt-4">
-        <!-- Flash Messages -->
+    <div class="container mt-4 pb-5 flex-grow-1">
         {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
         {% for category, message in messages %}
-        <div class="alert alert-{{ 'danger' if category == 'error' else 'success' }} alert-dismissible fade show"
-            role="alert">
-            {{ message }}
+        <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show shadow-sm border-0 mb-4"
+            style="border-radius: 12px;">
+            <i class="fas fa-info-circle me-2"></i> {{ message }}
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
         {% endfor %}
         {% endif %}
         {% endwith %}
 
-        <!-- Page Content -->
         {% block content %}{% endblock %}
     </div>
 
-    <!-- Footer -->
-    <footer class="bg-dark text-light py-4 mt-5">
-        <div class="container">
-            <div class="row">
-                <div class="col-md-4">
-                    <h6>ATMA SUDDHI - Espacio de Yoga</h6>
-                    <p class="mb-0">Sistema de gestión para escuela de yoga</p>
-                </div>
-                <div class="col-md-4 text-center">
-                    <small>
-                        <strong>Versión {{ version_info.version }}</strong><br>
-                        {% if version_info.git_info.available %}
-                        <span class="text-muted">
-                            <i class="fab fa-git-alt"></i> {{ version_info.git_info.commit_hash }}
-                            | {{ version_info.git_info.branch }}
-                        </span><br>
-                        <span class="text-muted">{{ version_info.git_info.commit_date }}</span>
-                        {% else %}
-                        <span class="text-muted">Build: {{ version_info.build_date }}</span>
-                        {% endif %}
-                    </small>
-                </div>
-                <div class="col-md-4 text-md-end">
-                    <p class="mb-0">
-                        <small>
-                            Desarrollado por <strong>Javier Ballesteros</strong><br>
-                            Licencia <a href="https://www.gnu.org/licenses/gpl-3.0.html" target="_blank"
-                                class="text-light">GNU GPL v3</a>
-                        </small>
-                    </p>
-                </div>
-            </div>
+    <footer class="py-4 text-center">
+        <div class="container text-muted small">
+            &copy; 2026 <strong>{{ config.get('nombre_escuela', 'ATMA SUDDHI') }}</strong> - Gestión Profesional de Yoga
         </div>
     </footer>
 
-    <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    {% block extra_js %}{% endblock %}
 </body>
 
 </html>

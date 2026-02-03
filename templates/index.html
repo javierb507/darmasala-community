@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Atma suddhi - Gestión de Escuela de Yoga{% endblock %}
+{% block title %}{{ config.get('nombre_escuela', 'Atma Suddhi') }} - Gestión de Escuela de Yoga{% endblock %}
 
 {% block content %}
 <div class="container mt-4">
@@ -9,7 +9,7 @@
         <div class="col-12 text-center">
             <h1 class="display-4 mb-3">
                 <i class="fas fa-om text-warning"></i>
-                Atma Suddhi
+                {{ config.get('nombre_escuela', 'Atma Suddhi') }}
             </h1>
             <p class="lead text-muted">Sistema de Gestión para Escuela de Yoga</p>
         </div>
