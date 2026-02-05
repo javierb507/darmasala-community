@@ -32,7 +32,7 @@
 
         <!-- SECCIÓN 1: IDENTIDAD Y CONTACTO -->
         <div class="row mb-4">
-            <div class="col-lg-7">
+            <div class="col-lg-8">
                 <div class="card shadow-sm border-0 h-100">
                     <div class="card-header bg-white py-3">
                         <h5 class="mb-0 text-primary"><i class="fas fa-school me-2"></i> Identidad y Escuela</h5>
@@ -60,13 +60,42 @@
                                 </div>
                             </div>
                             <div class="row mb-3">
-                                <div class="col-md-9">
+                                <div class="col-md-8">
                                     <label class="form-label small">Dirección Fiscal</label>
                                     <input type="text" class="form-control" name="direccion_escuela"
                                         value="{{ config.get('direccion_escuela', '') }}">
                                 </div>
+                                <div class="col-md-4">
+                                    <label class="form-label small">CIF / NIF</label>
+                                    <input type="text" class="form-control" name="cif_escuela"
+                                        value="{{ config.get('cif_escuela', '') }}">
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-md-4">
+                                    <label class="form-label small">Teléfono</label>
+                                    <input type="text" class="form-control" name="telefono_escuela"
+                                        value="{{ config.get('telefono_escuela', '') }}">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label small">Email de Contacto</label>
+                                    <input type="email" class="form-control" name="email_escuela"
+                                        value="{{ config.get('email_escuela', '') }}">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label small">Sitio Web</label>
+                                    <input type="text" class="form-control" name="web_escuela"
+                                        value="{{ config.get('web_escuela', '') }}">
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-md-9">
+                                    <label class="form-label small">Cuenta Bancaria (IBAN)</label>
+                                    <input type="text" class="form-control" name="numero_cuenta"
+                                        value="{{ config.get('numero_cuenta', '') }}" placeholder="ES00 0000...">
+                                </div>
                                 <div class="col-md-3">
-                                    <label class="form-label small">Capacidad Total</label>
+                                    <label class="form-label small">Capacidad Centro</label>
                                     <input type="number" class="form-control" name="capacidad_centro"
                                         value="{{ config.get('capacidad_centro', '50') }}">
                                 </div>
@@ -88,85 +117,167 @@
                                         name="color_acento" value="{{ config.get('color_acento', '#FFD700') }}">
                                 </div>
                             </div>
-                            <button type="submit" class="btn btn-primary w-100">Guardar Identidad</button>
+                            <button type="submit" class="btn btn-primary w-100">Guardar Configuración General</button>
                         </form>
                     </div>
                 </div>
             </div>
 
-            <div class="col-lg-5">
-                <!-- INSTRUCTORES -->
-                <div class="card shadow-sm border-0 h-100">
-                    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0 text-success"><i class="fas fa-user-tie me-2"></i> Equipo de Instructores</h5>
-                        <button class="btn btn-sm btn-outline-success" data-bs-toggle="modal"
-                            data-bs-target="#nuevoInstructorModal">
-                            <i class="fas fa-plus"></i> Añadir
-                        </button>
+            <div class="col-lg-4">
+                <!-- PRECIOS GENERALES -->
+                <div class="card shadow-sm border-0 mb-4">
+                    <div class="card-header bg-white py-3">
+                        <h5 class="mb-0 text-warning"><i class="fas fa-coins me-2"></i> Tarifas Base</h5>
                     </div>
-                    <div class="card-body p-3">
-                        <div class="row row-cols-1 g-3">
-                            {% if instructores %}
-                            {% for inst in instructores %}
-                            <div class="col">
-                                <div class="card h-100 border shadow-none instructor-card" style="border-radius: 12px;">
-                                    <div class="card-body p-3">
-                                        <div class="d-flex justify-content-between align-items-start mb-2">
-                                            <div>
-                                                <h6 class="mb-0 font-weight-bold">{{ inst.nombre }}</h6>
-                                                <small class="text-success">{{ inst.especialidad or 'Instructor de Yoga'
-                                                    }}</small>
-                                            </div>
-                                            <div class="dropdown">
-                                                <button class="btn btn-sm btn-light p-1" data-bs-toggle="dropdown">
-                                                    <i class="fas fa-ellipsis-v"></i>
-                                                </button>
-                                                <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0">
-                                                    <li><button class="dropdown-item btn-editar-instructor"
-                                                            data-id="{{ inst.id }}" data-nombre="{{ inst.nombre }}"
-                                                            data-email="{{ inst.email or '' }}"
-                                                            data-telefono="{{ inst.telefono or '' }}"
-                                                            data-especialidad="{{ inst.especialidad or '' }}">
-                                                            <i class="fas fa-edit me-2 text-primary"></i> Editar
-                                                            Ficha</button></li>
-                                                    <li>
-                                                        <hr class="dropdown-divider">
-                                                    </li>
-                                                    <li>
-                                                        <form method="POST"
-                                                            action="{{ url_for('eliminar_instructor', instructor_id=inst.id) }}"
-                                                            onsubmit="return confirm('¿Desactivar instructor? Permanecerá en el histórico.')">
-                                                            <button class="dropdown-item text-danger">
-                                                                <i class="fas fa-user-slash me-2"></i>
-                                                                Desactivar</button>
-                                                        </form>
-                                                    </li>
-                                                </ul>
-                                            </div>
-                                        </div>
-                                        <div class="small">
-                                            <div class="mb-1 text-muted"><i class="fas fa-envelope me-2"></i>{{
-                                                inst.email or 'Sin email' }}</div>
-                                            <div class="text-muted"><i class="fas fa-phone me-2"></i>{{ inst.telefono or
-                                                'Sin teléfono' }}</div>
-                                        </div>
-                                    </div>
+                    <div class="card-body">
+                        <form method="POST" action="{{ url_for('guardar_configuracion') }}">
+                            <div class="mb-3">
+                                <label class="form-label small">Matrícula</label>
+                                <div class="input-group input-group-sm">
+                                    <span class="input-group-text">€</span>
+                                    <input type="number" step="0.01" class="form-control" name="precio_matricula"
+                                        value="{{ config.get('precio_matricula', '0') }}">
                                 </div>
                             </div>
-                            {% endfor %}
-                            {% else %}
-                            <div class="col-12 text-center py-4 text-muted">
-                                <i class="fas fa-users-slash fa-2x mb-2 opacity-25"></i>
-                                <p>No hay instructores activos</p>
+                            <div class="mb-3">
+                                <label class="form-label small">Clase Suelta</label>
+                                <div class="input-group input-group-sm">
+                                    <span class="input-group-text">€</span>
+                                    <input type="number" step="0.01" class="form-control" name="precio_clase_suelta"
+                                        value="{{ config.get('precio_clase_suelta', '15') }}">
+                                </div>
                             </div>
-                            {% endif %}
-                        </div>
+                            <div class="mb-3">
+                                <label class="form-label small">1 Clase/Semana</label>
+                                <div class="input-group input-group-sm">
+                                    <span class="input-group-text">€</span>
+                                    <input type="number" step="0.01" class="form-control" name="precio_1_clase_semanal"
+                                        value="{{ config.get('precio_1_clase_semanal', '45') }}">
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label small">2 Clases/Semana</label>
+                                <div class="input-group input-group-sm">
+                                    <span class="input-group-text">€</span>
+                                    <input type="number" step="0.01" class="form-control" name="precio_2_clases_semanal"
+                                        value="{{ config.get('precio_2_clases_semanal', '65') }}">
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label small">1 Clase/Bimensual</label>
+                                <div class="input-group input-group-sm">
+                                    <span class="input-group-text">€</span>
+                                    <input type="number" step="0.01" class="form-control"
+                                        name="precio_1_clase_bimensual"
+                                        value="{{ config.get('precio_1_clase_bimensual', '80') }}">
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label small">2 Clases/Bimensual</label>
+                                <div class="input-group input-group-sm">
+                                    <span class="input-group-text">€</span>
+                                    <input type="number" step="0.01" class="form-control"
+                                        name="precio_2_clases_bimensual"
+                                        value="{{ config.get('precio_2_clases_bimensual', '120') }}">
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label small">Tarifa Plana</label>
+                                <div class="input-group input-group-sm">
+                                    <span class="input-group-text">€</span>
+                                    <input type="number" step="0.01" class="form-control" name="precio_tarifa_plana"
+                                        value="{{ config.get('precio_tarifa_plana', '85') }}">
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-outline-warning btn-sm w-100">Actualizar
+                                Tarifas</button>
+                        </form>
                     </div>
                 </div>
             </div>
         </div>
+        <!-- SECCIÓN 2: EQUIPO DE INSTRUCTORES -->
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                <h5 class="mb-0 text-success"><i class="fas fa-user-tie me-2"></i> Equipo de Instructores</h5>
+                <button class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#nuevoInstructorModal">
+                    <i class="fas fa-plus"></i> Registrar Nuevo Instructor
+                </button>
+            </div>
+            <div class="card-body">
+                <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                    {% if instructores %}
+                    {% for inst in instructores %}
+                    <div class="col">
+                        <div class="card h-100 border shadow-none instructor-card"
+                            style="border-radius: 12px; border: 1px solid #eee !important;">
+                            <div class="card-body p-3">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <div class="d-flex align-items-center">
+                                        <div class="bg-light rounded-circle p-2 me-2 text-primary"
+                                            style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+                                            <i class="fas fa-user"></i>
+                                        </div>
+                                        <div>
+                                            <h6 class="mb-0 font-weight-bold">{{ inst.nombre }}</h6>
+                                            <small
+                                                class="{% if inst.activo %}text-success{% else %}text-muted{% endif %}">
+                                                {{ 'Activo' if inst.activo else 'Inactivo' }}
+                                            </small>
+                                        </div>
+                                    </div>
+                                    <div class="dropdown">
+                                        <button class="btn btn-sm btn-light p-1" data-bs-toggle="dropdown">
+                                            <i class="fas fa-ellipsis-v"></i>
+                                        </button>
+                                        <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0">
+                                            <li><button class="dropdown-item btn-editar-instructor"
+                                                    data-id="{{ inst.id }}" data-nombre="{{ inst.nombre }}"
+                                                    data-email="{{ inst.email or '' }}"
+                                                    data-telefono="{{ inst.telefono or '' }}"
+                                                    data-especialidad="{{ inst.especialidad or '' }}">
+                                                    <i class="fas fa-edit me-2 text-primary"></i> Editar Ficha</button>
+                                            </li>
+                                            <li>
+                                                <hr class="dropdown-divider">
+                                            </li>
+                                            <li>
+                                                <form method="POST"
+                                                    action="{{ url_for('eliminar_instructor', instructor_id=inst.id) }}"
+                                                    onsubmit="return confirm('¿Cambiar estado del instructor?')">
+                                                    <button class="dropdown-item text-danger">
+                                                        <i class="fas fa-power-off me-2"></i> {{ 'Desactivar' if
+                                                        inst.activo else 'Activar' }}
+                                                    </button>
+                                                </form>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <div class="small text-muted mb-2" style="min-height: 40px;">
+                                    {{ inst.especialidad or 'Instructor de Yoga' }}
+                                </div>
+                                <div class="small border-top pt-2">
+                                    <div class="text-muted"><i class="fas fa-envelope me-2"></i>{{ inst.email or 'Sin
+                                        email' }}</div>
+                                    <div class="text-muted"><i class="fas fa-phone me-2"></i>{{ inst.telefono or 'Sin
+                                        teléfono' }}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    {% else %}
+                    <div class="col-12 text-center py-4 text-muted">
+                        <i class="fas fa-users-slash fa-2x mb-2 opacity-25"></i>
+                        <p>No hay instructores registrados</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
 
-        <!-- SECCIÓN 2: TARIFAS PERSONALIZADAS -->
+        <!-- SECCIÓN 3: TARIFAS PERSONALIZADAS -->
         <div class="card shadow-sm border-0 mb-4">
             <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
                 <h5 class="mb-0 text-dark"><i class="fas fa-tags text-warning me-2"></i> Tarifas Personalizadas</h5>
@@ -224,7 +335,7 @@
             </div>
         </div>
 
-        <!-- SECCIÓN 3: GESTIÓN DE CLASES Y HORARIOS -->
+        <!-- SECCIÓN 4: GESTIÓN DE CLASES Y HORARIOS -->
         <div class="card shadow-sm border-0 mb-5">
             <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
                 <h5 class="mb-0 text-dark"><i class="fas fa-om text-info me-2"></i> Gestión de Clases y Horarios</h5>
@@ -254,7 +365,8 @@
                                 </td>
                                 <td>
                                     {% if clase.instructor %}
-                                    {% set active_names = instructores|map(attribute='nombre')|list %}
+                                    {% set active_names = instructores|selectattr('activo', 'equalto',
+                                    True)|map(attribute='nombre')|list %}
                                     <span class="badge bg-light text-dark border">
                                         <i class="fas fa-user-tie me-1"></i>
                                         {{ clase.instructor }}{% if clase.instructor != 'Minouche' and clase.instructor
@@ -299,7 +411,8 @@
                                         data-id="{{ clase.id }}" data-nombre="{{ clase.nombre }}"
                                         data-color="{{ clase.color }}" data-duracion="{{ clase.duracion_minutos }}"
                                         data-periodicidad="{{ clase.periodicidad }}"
-                                        data-instructor="{{ clase.instructor }}">
+                                        data-instructor="{{ clase.instructor }}"
+                                        data-descripcion="{{ clase.descripcion or '' }}">
                                         <i class="fas fa-edit"></i>
                                     </button>
                                     <form method="POST" action="{{ url_for('eliminar_clase', clase_id=clase.id) }}"
@@ -316,24 +429,19 @@
             </div>
         </div>
 
-        <!-- SECCIÓN 4: BASE DE DATOS Y DESARROLLADOR (DISCRETO) -->
-        <hr class="my-5">
-        <div class="row mb-5 opacity-75">
-            <div class="col-md-6 mb-3">
-                <div class="card bg-light border-0">
-                    <div class="card-body d-flex justify-content-between align-items-center py-2">
-                        <div class="small"><i class="fas fa-database me-2"></i> Copia de seguridad del sistema (.db)
-                        </div>
-                        <a href="{{ url_for('descargar_db') }}" class="btn btn-sm btn-outline-secondary">DESCARGAR</a>
-                    </div>
+        <!-- SECCIÓN 5: SISTEMA Y DESARROLLADOR (DISCRETO) -->
+        <div class="mt-5 pt-5 border-top opacity-50">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <p class="small text-muted mb-0">Atma Suddhi Yoga Management System &copy; 2026</p>
                 </div>
-            </div>
-            <div class="col-md-6 mb-3 text-end">
-                <div class="d-inline-block">
-                    <a href="{{ url_for('modo_pruebas') }}" class="btn btn-sm btn-link text-muted"><i
-                            class="fas fa-flask me-1"></i> Modo Desarrollador</a>
-                    <button class="btn btn-sm btn-link text-muted" onclick="crearBackup()"><i
-                            class="fas fa-history me-1"></i> Punto de Restauración</button>
+                <div class="col-md-6 text-end">
+                    <button class="btn btn-sm btn-link text-muted p-0 me-3" onclick="crearBackup()">Backup
+                        Local</button>
+                    <a href="{{ url_for('descargar_db') }}" class="btn btn-sm btn-link text-muted p-0 me-3">Descargar
+                        .DB</a>
+                    <a href="{{ url_for('modo_pruebas') }}" class="btn btn-sm btn-link text-muted p-0">Panel de Control
+                        (Modo Pruebas)</a>
                 </div>
             </div>
         </div>
@@ -397,7 +505,7 @@
                 </div>
                 <div class="modal-body">
                     <div class="mb-3"><label class="form-label">Nombre de la Clase *</label><input type="text"
-                            class="form-control" name="nombre" required></div>
+                            class="form-control" name="nombre" required placeholder="Ej: Hatha Yoga Avanzado"></div>
                     <div class="row">
                         <div class="col-md-6 mb-3"><label class="form-label">Duración (min)</label><input type="number"
                                 class="form-control" name="duracion_minutos" value="75"></div>
@@ -405,17 +513,31 @@
                                 class="form-control form-control-color w-100" name="color" value="#4ECDC4"></div>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Instructor por Defecto</label>
+                        <label class="form-label">Instructor Principal</label>
                         <select class="form-select" name="instructor">
-                            {% for inst in instructores %}
+                            {% for inst in instructores if inst.activo %}
                             <option value="{{ inst.nombre }}">{{ inst.nombre }}</option>
                             {% endfor %}
-                            <option value="Minouche">Minouche (Defecto)</option>
+                            <option value="Minouche">Minouche (Directora)</option>
                         </select>
                     </div>
+                    <div class="mb-3">
+                        <label class="form-label">Periodicidad</label>
+                        <select class="form-select" name="periodicidad">
+                            <option value="semanal">Semanal</option>
+                            <option value="quincenal">Quincenal</option>
+                            <option value="mensual">Mensual</option>
+                            <option value="especial">Evento Especial</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Descripción</label>
+                        <textarea class="form-control" name="descripcion" rows="2"></textarea>
+                    </div>
                 </div>
-                <div class="modal-footer"><button type="submit" class="btn btn-info text-white w-100">Crear
+                <div class="modal-footer"><button type="submit" class="btn btn-info text-white w-100">Registrar
                         Clase</button></div>
+
             </form>
         </div>
     </div>
@@ -430,28 +552,44 @@
                     <h5>Editar Clase</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <div class="mb-3"><label class="form-label">Nombre *</label><input type="text" class="form-control"
-                            id="edit_clase_nombre" name="nombre" required></div>
+                    <div class="mb-3"><label class="form-label font-weight-bold">Nombre de la Clase *</label><input
+                            type="text" class="form-control" id="edit_clase_nombre" name="nombre" required></div>
                     <div class="row">
-                        <div class="col-md-6 mb-3"><label class="form-label">Duración (min)</label><input type="number"
-                                class="form-control" id="edit_clase_duracion" name="duracion_minutos"></div>
-                        <div class="col-md-6 mb-3"><label class="form-label">Color</label><input type="color"
-                                class="form-control form-control-color w-100" id="edit_clase_color" name="color"></div>
+                        <div class="col-md-6 mb-3"><label class="form-label small">Duración (min)</label><input
+                                type="number" class="form-control" id="edit_clase_duracion" name="duracion_minutos">
+                        </div>
+                        <div class="col-md-6 mb-3"><label class="form-label small">Color en Calendario</label><input
+                                type="color" class="form-control form-control-color w-100" id="edit_clase_color"
+                                name="color"></div>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Instructor Titular</label>
+                        <label class="form-label small">Instructor Titular</label>
                         <select class="form-select" id="edit_clase_instructor" name="instructor">
-                            {% for inst in instructores %}
+                            {% for inst in instructores if inst.activo %}
                             <option value="{{ inst.nombre }}">{{ inst.nombre }}</option>
                             {% endfor %}
-                            <option value="Minouche">Minouche</option>
+                            <option value="Minouche">Minouche (Directora)</option>
                         </select>
                     </div>
-                    <div class="mb-3"><label class="form-label small">Periodicidad</label><input type="text"
-                            class="form-control" id="edit_clase_periodicidad" name="periodicidad"></div>
+                    <div class="mb-3">
+                        <label class="form-label small">Periodicidad</label>
+                        <select class="form-select" id="edit_clase_periodicidad" name="periodicidad">
+                            <option value="semanal">Semanal</option>
+                            <option value="quincenal">Quincenal</option>
+                            <option value="mensual">Mensual</option>
+                            <option value="especial">Evento Especial</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small">Descripción para Alumnos</label>
+                        <textarea class="form-control" id="edit_clase_descripcion" name="descripcion"
+                            rows="2"></textarea>
+                    </div>
                 </div>
-                <div class="modal-footer"><button type="submit" class="btn btn-primary w-100">Actualizar Clase</button>
+                <div class="modal-footer"><button type="submit" class="btn btn-primary w-100">Guardar Cambios de la
+                        Clase</button>
                 </div>
+
             </form>
         </div>
     </div>
@@ -596,9 +734,11 @@
             document.getElementById('edit_clase_duracion').value = data.duracion;
             document.getElementById('edit_clase_periodicidad').value = data.periodicidad;
             document.getElementById('edit_clase_instructor').value = data.instructor;
+            document.getElementById('edit_clase_descripcion').value = data.descripcion || '';
             new bootstrap.Modal(document.getElementById('editarClaseModal')).show();
         });
     });
+
 
     document.querySelectorAll('.btn-nuevo-horario').forEach(btn => {
         btn.addEventListener('click', function () {
