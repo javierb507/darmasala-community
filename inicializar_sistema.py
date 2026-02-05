@@ -13,7 +13,7 @@ from werkzeug.security import generate_password_hash
 # Asegurarse de que el directorio actual esté en el path
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-from app import app, db, Usuario, Clase, CategoriaGasto, Sutra
+from app import app, db, Usuario, Clase, CategoriaGasto, Sutra, Configuracion
 
 def main():
     print("🧘‍♀️ INICIALIZACIÓN DEL SISTEMA ATMA SUDDHI")
