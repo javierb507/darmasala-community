@@ -96,8 +96,40 @@ def main():
         else:
             print("✅ Categorías de gastos ya configuradas.")
 
-        # 5. Cargar Sutras si es necesario
-        print("\n📜 5. Verificando Sutras...")
+        # 5. Inicializar configuración por defecto si está vacía
+        print("\n⚙️ 5. Configurando valores por defecto...")
+        if Configuracion.query.count() == 0:
+            config_defaults = [
+                Configuracion(clave='nombre_escuela', valor='Atma Suddhi', descripcion='Nombre de la escuela'),
+                Configuracion(clave='email_escuela', valor='info@atmasuddhi.es', descripcion='Email de contacto'),
+                Configuracion(clave='color_primario', valor='#8B5FBF', descripcion='Color principal de la marca'),
+                Configuracion(clave='color_secundario', valor='#B19CD9', descripcion='Color secundario'),
+                Configuracion(clave='capacidad_centro', valor='20', descripcion='Capacidad máxima de alumnos')
+            ]
+            for conf in config_defaults:
+                db.session.add(conf)
+            
+            # También configuración fiscal básica
+            from app import ConfiguracionFiscal
+            if ConfiguracionFiscal.query.count() == 0:
+                cf = ConfiguracionFiscal(
+                    nombre_titular='Tu Nombre/Empresa',
+                    cif_nif='00000000X',
+                    serie_factura_default='A'
+                )
+                db.session.add(cf)
+                
+            try:
+                db.session.commit()
+                print("✅ Configuración inicial generada.")
+            except Exception as e:
+                print(f"❌ Error al guardar configuración: {e}")
+                db.session.rollback()
+        else:
+            print("✅ La configuración ya tiene datos.")
+
+        # 6. Cargar Sutras si es necesario
+        print("\n📜 6. Verificando Sutras...")
         if Sutra.query.count() == 0:
             print("ℹ️ No hay sutras cargados. Puedes cargarlos ejecutando 'cargar_sutras_produccion.py'.")
         else:
