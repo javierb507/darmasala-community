@@ -4,11 +4,25 @@ Sistema completo de gestión para una escuela de yoga que incluye gestión de al
 
 **Desarrollado por:** Javier Ballesteros para Atma Suddhi - Espacio de Yoga  
 **Licencia:** GNU GPL v3  
-**Versión:** 2.0.0
+**Versión:** 2.0.0-final  
+
+## 🌿 Inspiración (Poem & Reflection)
+
+> "I exist as I am, that is enough,  
+> If no other in the world be aware I sit content,  
+> And if each and all be aware I sit content.  
+> One world is aware and by far the largest to me, and that is myself,  
+> And whether I come to my own to-day or in ten thousand or ten million years,  
+> I can cheerfully take it now, or with equal cheerfulness I can wait."  
+> — *Walt Whitman, Leaves of Grass*
+
+**Reflexión:**  
+Este sistema, Atma Suddhi, ha sido diseñado para aportar orden y serenidad a la gestión de un santuario de yoga. Al igual que Whitman celebra la suficiencia inherente del ser, este software busca simplificar las cargas administrativas para que practicantes y maestros puedan centrarse en el presente. Al organizar lo múltiple (alumnos, clases, finanzas) en una estructura armónica, el sistema actúa como un compañero silencioso en el camino hacia el equilibrio y el autoconocimiento.
 
 ## 📋 Tabla de Contenidos
 
 - [Visualización](#-visualización)
+- [Inspiración](#-inspiración)
 - [Características Principales](#-características-principales)
 - [Funcionalidades Detalladas](#-funcionalidades-detalladas)
 - [Tecnologías Utilizadas](#-tecnologías-utilizadas)
@@ -21,21 +35,21 @@ Sistema completo de gestión para una escuela de yoga que incluye gestión de al
 ## 📸 Visualización
 
 ### 🏠 Inicio (Dashboard Principal)
-Interfaz simplificada con acceso directo a las áreas más importantes: Alumnos, Calendario, Yogaterapia y Economía.
-![Pantalla de Inicio](documentation/screenshots/inicio.png)
+Interfaz premium con el tema "Deep Purple & Enchanted Gold", acceso directo a Alumnos, Calendario, Yogaterapia y Economía.
+![Pantalla de Inicio](documentation/screenshots/01_dashboard.png)
 
 ### 📅 Calendario y Gestión de Asistencias
-Vista unificada de clases con capacidad de pasar lista diariamente de forma sencilla.
-![Calendario](documentation/screenshots/calendario.png)
-![Gestión de Asistencia](documentation/screenshots/asistencia.png)
+Vista unificada de clases con capacidad de pasar lista de forma visual y moderna.
+![Calendario](documentation/screenshots/04_calendario.png)
+![Gestión de Asistencia](documentation/screenshots/05_asistencia_modal.png)
 
 ### 👤 Perfil del Alumno
-Historial completo de asistencias, estadísticas y sesiones de yogaterapia.
-![Perfil de Alumno](documentation/screenshots/alumno.png)
+Historial completo de asistencias, estadísticas y sesiones de yogaterapia integradas.
+![Perfil de Alumno](documentation/screenshots/03_perfil_alumno.png)
 
 ### 📊 Gestión Económica
-Dashboard de contabilidad, gastos y facturación.
-![Economía](documentation/screenshots/economia.png)
+Dashboard de contabilidad avanzado con resumen de ingresos, gastos y balance mensual/anual.
+![Economía](documentation/screenshots/02_economia.png)
 
 ## 🌟 Características Principales
 

@@ -40,6 +40,12 @@ def index():
                          sutra_semanal=sutra_semanal,
                          today=hoy)
 
+@main_bp.route('/dashboard')
+@login_required
+def dashboard_redirect():
+    """Redirección para compatibilidad con la URL /dashboard"""
+    return redirect(url_for('main.index'))
+
 @main_bp.route('/uploads/<filename>')
 @login_required
 def uploaded_file(filename):

@@ -413,8 +413,7 @@
     });
 
     function cargarAsistenciasAlumno() {
-        const alumnoId = {{ alumno.id }
-    };
+        const alumnoId = {{ alumno.id }};
 
     fetch(`/api/alumno/${alumnoId}/asistencias`)
         .then(response => response.json())

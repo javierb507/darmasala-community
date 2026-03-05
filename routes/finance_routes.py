@@ -14,8 +14,12 @@ def economia():
     current_year = date.today().year
 
     # INGRESOS - Facturas emitidas a clientes
+    start_of_year = date(current_year, 1, 1)
+    end_of_year = date(current_year, 12, 31)
+    
     facturas_emitidas_año = FacturaEmitida.query.filter(
-        db.extract('year', FacturaEmitida.fecha_emision) == current_year,
+        FacturaEmitida.fecha_emision >= start_of_year,
+        FacturaEmitida.fecha_emision <= end_of_year,
         FacturaEmitida.estado != 'anulada'
     ).all()
 
@@ -41,10 +45,16 @@ def economia():
             gastos_fijos_mensuales += gasto.importe / 12
 
     # GASTOS VARIABLES - Facturas de proveedores
+    start_of_month = date(current_year, current_month, 1)
+    if current_month == 12:
+        end_of_month = date(current_year + 1, 1, 1) - timedelta(days=1)
+    else:
+        end_of_month = date(current_year, current_month + 1, 1) - timedelta(days=1)
+
     gastos_mes = db.session.query(db.func.sum(FacturaProveedor.importe_total)).filter(
         FacturaProveedor.estado == 'pagada',
-        db.extract('month', FacturaProveedor.fecha_pago) == current_month,
-        db.extract('year', FacturaProveedor.fecha_pago) == current_year
+        FacturaProveedor.fecha_pago >= start_of_month,
+        FacturaProveedor.fecha_pago <= end_of_month
     ).scalar() or 0
 
     facturas_proveedores_pendientes = FacturaProveedor.query.filter_by(estado='pendiente').count()
