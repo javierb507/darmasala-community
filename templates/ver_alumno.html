@@ -14,10 +14,11 @@
                     <button class="btn btn-sm btn-success" onclick="abrirModalAgregarAClase({{ alumno.id }})">
                         <i class="fas fa-calendar-plus"></i> Agregar a Clase
                     </button>
-                    <a href="{{ url_for('editar_alumno', alumno_id=alumno.id) }}" class="btn btn-sm btn-outline-secondary">
+                    <a href="{{ url_for('students.editar_alumno', alumno_id=alumno.id) }}"
+                        class="btn btn-sm btn-outline-secondary">
                         <i class="fas fa-edit"></i> Editar
                     </a>
-                    <a href="{{ url_for('alumnos') }}" class="btn btn-sm btn-outline-primary">
+                    <a href="{{ url_for('students.alumnos') }}" class="btn btn-sm btn-outline-primary">
                         <i class="fas fa-arrow-left"></i> Volver a Alumnos
                     </a>
                 </div>
@@ -45,7 +46,8 @@
                             </tr>
                             <tr>
                                 <td><strong>Fecha de Nacimiento:</strong></td>
-                                <td>{{ alumno.fecha_nacimiento.strftime('%d/%m/%Y') if alumno.fecha_nacimiento else 'No proporcionado' }}</td>
+                                <td>{{ alumno.fecha_nacimiento.strftime('%d/%m/%Y') if alumno.fecha_nacimiento else 'No
+                                    proporcionado' }}</td>
                             </tr>
                             <tr>
                                 <td><strong>Fecha de Registro:</strong></td>
@@ -80,14 +82,15 @@
                                 <td><strong>Tipo de Cuota:</strong></td>
                                 <td>
                                     {% if alumno.tipo_cuota == 'pendiente' %}
-                                        <span class="badge bg-warning text-dark">
-                                            <i class="fas fa-clock"></i> {{ alumno.get_tipo_cuota_display() }}
-                                        </span>
-                                        <br><small class="text-muted">Sin precio asignado hasta definir cuota</small>
+                                    <span class="badge bg-warning text-dark">
+                                        <i class="fas fa-clock"></i> {{ alumno.get_tipo_cuota_display() }}
+                                    </span>
+                                    <br><small class="text-muted">Sin precio asignado hasta definir cuota</small>
                                     {% else %}
-                                        <span class="badge bg-info">
-                                            {{ alumno.get_tipo_cuota_display() }} - €{{ "%.2f"|format(alumno.get_precio_cuota()) }}
-                                        </span>
+                                    <span class="badge bg-info">
+                                        {{ alumno.get_tipo_cuota_display() }} - €{{
+                                        "%.2f"|format(alumno.get_precio_cuota()) }}
+                                    </span>
                                     {% endif %}
                                 </td>
                             </tr>
@@ -95,9 +98,11 @@
                                 <td><strong>Matrícula:</strong></td>
                                 <td>
                                     {% if alumno.matricula_pagada %}
-                                        <span class="badge bg-success">Pagada</span> ({{ alumno.fecha_matricula.strftime('%d/%m/%Y') if alumno.fecha_matricula else 'Fecha no disponible' }})
+                                    <span class="badge bg-success">Pagada</span> ({{
+                                    alumno.fecha_matricula.strftime('%d/%m/%Y') if alumno.fecha_matricula else 'Fecha no
+                                    disponible' }})
                                     {% else %}
-                                        <span class="badge bg-warning">Pendiente</span>
+                                    <span class="badge bg-warning">Pendiente</span>
                                     {% endif %}
                                 </td>
                             </tr>
@@ -105,16 +110,16 @@
                                 <td><strong>Estado:</strong></td>
                                 <td>
                                     {% if alumno.activo %}
-                                        <span class="badge bg-success">Activo</span>
+                                    <span class="badge bg-success">Activo</span>
                                     {% else %}
-                                        <span class="badge bg-secondary">Inactivo</span>
+                                    <span class="badge bg-secondary">Inactivo</span>
                                     {% endif %}
                                 </td>
                             </tr>
                         </table>
                     </div>
                 </div>
-                
+
                 <!-- Información Médica y Física -->
                 <div class="mt-4">
                     <h6>Información Médica y Física</h6>
@@ -129,7 +134,7 @@
                                 </div>
                             </div>
                             {% endif %}
-                            
+
                             {% if alumno.medicamentos and alumno.medicamentos != 'Ninguno' %}
                             <div class="mb-3">
                                 <strong>Medicamentos:</strong>
@@ -150,7 +155,7 @@
                                 </div>
                             </div>
                             {% endif %}
-                            
+
                             {% if alumno.estado_fisico %}
                             <div class="mb-3">
                                 <strong>Estado Físico:</strong>
@@ -160,7 +165,7 @@
                                 </div>
                             </div>
                             {% endif %}
-                            
+
                             {% if alumno.motivacion %}
                             <div class="mb-3">
                                 <strong>Motivación:</strong>
@@ -182,7 +187,7 @@
                 <h5 class="mb-0">
                     <i class="fas fa-credit-card"></i> Historial de Pagos
                 </h5>
-                <a href="{{ url_for('agregar_pago', alumno_id=alumno.id) }}" class="btn btn-success btn-sm">
+                <a href="{{ url_for('finance.agregar_pago', alumno_id=alumno.id) }}" class="btn btn-success btn-sm">
                     <i class="fas fa-plus"></i> Agregar Pago
                 </a>
             </div>
@@ -202,14 +207,15 @@
                             {% for pago in pagos %}
                             <tr>
                                 <td><strong>
-                                    {% if pago.tipo_pago == 'matricula' %}
+                                        {% if pago.tipo_pago == 'matricula' %}
                                         {{ pago.año }}
-                                    {% else %}
+                                        {% else %}
                                         {{ pago.mes }}
-                                    {% endif %}
-                                </strong></td>
+                                        {% endif %}
+                                    </strong></td>
                                 <td>
-                                    <span class="badge bg-{% if pago.tipo_pago == 'cuota' %}primary{% elif pago.tipo_pago == 'matricula' %}success{% else %}info{% endif %}">
+                                    <span
+                                        class="badge bg-{% if pago.tipo_pago == 'cuota' %}primary{% elif pago.tipo_pago == 'matricula' %}success{% else %}info{% endif %}">
                                         {{ pago.descripcion or pago.tipo_pago }}
                                     </span>
                                 </td>
@@ -224,113 +230,117 @@
                 <div class="text-center py-4">
                     <i class="fas fa-credit-card fa-3x text-muted mb-3"></i>
                     <p class="text-muted">No hay pagos registrados para este alumno.</p>
-                    <a href="{{ url_for('agregar_pago', alumno_id=alumno.id) }}" class="btn btn-success">
+                    <a href="{{ url_for('finance.agregar_pago', alumno_id=alumno.id) }}" class="btn btn-success">
                         <i class="fas fa-plus"></i> Agregar Primer Pago
                     </a>
                 </div>
                 {% endif %}
             </div>
         </div>
-        
+
         <!-- Sección de Yogaterapia -->
         <div class="card mt-4">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h5 class="mb-0">
                     <i class="fas fa-spa"></i> Sesiones de Yogaterapia
                 </h5>
-                <a href="{{ url_for('nueva_yogaterapia_alumno', alumno_id=alumno.id) }}" class="btn btn-success btn-sm">
+                <a href="{{ url_for('yogatherapia.nueva_yogaterapia_alumno', alumno_id=alumno.id) }}"
+                    class="btn btn-success btn-sm">
                     <i class="fas fa-plus"></i> Nueva Sesión
                 </a>
             </div>
             <div class="card-body">
                 {% if sesiones_yogaterapia %}
-                    <div class="table-responsive">
-                        <table class="table table-striped">
-                            <thead>
-                                <tr>
-                                    <th>Fecha</th>
-                                    <th>Hora</th>
-                                    <th>Duración</th>
-                                    <th>Notas</th>
-                                    <th>Archivos</th>
-                                    <th>Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for sesion in sesiones_yogaterapia %}
-                                <tr>
-                                    <td>{{ sesion.fecha_sesion.strftime('%d/%m/%Y') }}</td>
-                                    <td>
-                                        {% if sesion.hora_inicio %}
-                                            {{ sesion.hora_inicio.strftime('%H:%M') }}
-                                            {% if sesion.hora_fin %}
-                                                - {{ sesion.hora_fin.strftime('%H:%M') }}
-                                            {% endif %}
-                                        {% else %}
-                                            <span class="text-muted">Sin hora</span>
-                                        {% endif %}
-                                    </td>
-                                    <td>
-                                        {% if sesion.hora_inicio and sesion.hora_fin %}
-                                            {% set inicio_minutos = sesion.hora_inicio.hour * 60 + sesion.hora_inicio.minute %}
-                                            {% set fin_minutos = sesion.hora_fin.hour * 60 + sesion.hora_fin.minute %}
-                                            {% set duracion = fin_minutos - inicio_minutos %}
-                                            {{ duracion }} min
-                                        {% else %}
-                                            <span class="text-muted">-</span>
-                                        {% endif %}
-                                    </td>
-                                    <td>
-                                        {% if sesion.notas %}
-                                            <span class="text-truncate d-inline-block" style="max-width: 200px;" title="{{ sesion.notas }}">
-                                                {{ sesion.notas[:50] }}{% if sesion.notas|length > 50 %}...{% endif %}
-                                            </span>
-                                        {% else %}
-                                            <span class="text-muted">Sin notas</span>
-                                        {% endif %}
-                                    </td>
-                                    <td>
-                                        {% set archivos_count = sesion.archivos|length %}
-                                        {% if archivos_count > 0 %}
-                                            <span class="badge bg-info">{{ archivos_count }} archivo{{ 's' if archivos_count > 1 else '' }}</span>
-                                        {% else %}
-                                            <span class="text-muted">Sin archivos</span>
-                                        {% endif %}
-                                    </td>
-                                    <td>
-                                        <div class="btn-group btn-group-sm">
-                                            <a href="{{ url_for('ver_sesion_yogaterapia', sesion_id=sesion.id) }}" 
-                                               class="btn btn-outline-primary" title="Ver detalles">
-                                                <i class="fas fa-eye"></i>
-                                            </a>
-                                            <a href="{{ url_for('editar_sesion_yogaterapia', sesion_id=sesion.id) }}" 
-                                               class="btn btn-outline-warning" title="Editar">
-                                                <i class="fas fa-edit"></i>
-                                            </a>
-                                            <a href="{{ url_for('eliminar_sesion_yogaterapia', sesion_id=sesion.id) }}" 
-                                               class="btn btn-outline-danger" title="Eliminar"
-                                               onclick="return confirm('¿Estás seguro de que quieres eliminar esta sesión?')">
-                                                <i class="fas fa-trash"></i>
-                                            </a>
-                                        </div>
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Hora</th>
+                                <th>Duración</th>
+                                <th>Notas</th>
+                                <th>Archivos</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for sesion in sesiones_yogaterapia %}
+                            <tr>
+                                <td>{{ sesion.fecha_sesion.strftime('%d/%m/%Y') }}</td>
+                                <td>
+                                    {% if sesion.hora_inicio %}
+                                    {{ sesion.hora_inicio.strftime('%H:%M') }}
+                                    {% if sesion.hora_fin %}
+                                    - {{ sesion.hora_fin.strftime('%H:%M') }}
+                                    {% endif %}
+                                    {% else %}
+                                    <span class="text-muted">Sin hora</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if sesion.hora_inicio and sesion.hora_fin %}
+                                    {% set inicio_minutos = sesion.hora_inicio.hour * 60 + sesion.hora_inicio.minute %}
+                                    {% set fin_minutos = sesion.hora_fin.hour * 60 + sesion.hora_fin.minute %}
+                                    {% set duracion = fin_minutos - inicio_minutos %}
+                                    {{ duracion }} min
+                                    {% else %}
+                                    <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if sesion.notas %}
+                                    <span class="text-truncate d-inline-block" style="max-width: 200px;"
+                                        title="{{ sesion.notas }}">
+                                        {{ sesion.notas[:50] }}{% if sesion.notas|length > 50 %}...{% endif %}
+                                    </span>
+                                    {% else %}
+                                    <span class="text-muted">Sin notas</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% set archivos_count = sesion.archivos|length %}
+                                    {% if archivos_count > 0 %}
+                                    <span class="badge bg-info">{{ archivos_count }} archivo{{ 's' if archivos_count > 1
+                                        else '' }}</span>
+                                    {% else %}
+                                    <span class="text-muted">Sin archivos</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="btn-group btn-group-sm">
+                                        <a href="{{ url_for('yogatherapia.ver_sesion_yogaterapia', sesion_id=sesion.id) }}"
+                                            class="btn btn-outline-primary" title="Ver detalles">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a href="{{ url_for('yogatherapia.editar_sesion_yogaterapia', sesion_id=sesion.id) }}"
+                                            class="btn btn-outline-warning" title="Editar">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <a href="{{ url_for('yogatherapia.eliminar_sesion_yogaterapia', sesion_id=sesion.id) }}"
+                                            class="btn btn-outline-danger" title="Eliminar"
+                                            onclick="return confirm('¿Estás seguro de que quieres eliminar esta sesión?')">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
                 {% else %}
-                    <div class="text-center py-4">
-                        <i class="fas fa-spa fa-3x text-muted mb-3"></i>
-                        <p class="text-muted">No hay sesiones de yogaterapia registradas para este alumno.</p>
-                        <a href="{{ url_for('nueva_yogaterapia_alumno', alumno_id=alumno.id) }}" class="btn btn-success">
-                            <i class="fas fa-plus"></i> Agregar Primera Sesión
-                        </a>
-                    </div>
+                <div class="text-center py-4">
+                    <i class="fas fa-spa fa-3x text-muted mb-3"></i>
+                    <p class="text-muted">No hay sesiones de yogaterapia registradas para este alumno.</p>
+                    <a href="{{ url_for('yogatherapia.nueva_yogaterapia_alumno', alumno_id=alumno.id) }}"
+                        class="btn btn-success">
+                        <i class="fas fa-plus"></i> Agregar Primera Sesión
+                    </a>
+                </div>
                 {% endif %}
             </div>
         </div>
-        
+
         <!-- Sección de Asistencias -->
         <div class="card mt-4">
             <div class="card-header d-flex justify-content-between align-items-center">
@@ -355,7 +365,7 @@
                         <i class="fas fa-spinner fa-spin"></i> Cargando asistencias...
                     </div>
                 </div>
-                
+
                 <!-- Estadísticas de asistencia -->
                 <div class="row mt-4" id="estadisticasAsistencia" style="display: none;">
                     <div class="col-md-3">
@@ -397,14 +407,15 @@
 </div>
 
 <script>
-// Cargar asistencias del alumno al cargar la página
-document.addEventListener('DOMContentLoaded', function() {
-    cargarAsistenciasAlumno();
-});
+    // Cargar asistencias del alumno al cargar la página
+    document.addEventListener('DOMContentLoaded', function () {
+        cargarAsistenciasAlumno();
+    });
 
-function cargarAsistenciasAlumno() {
-    const alumnoId = {{ alumno.id }};
-    
+    function cargarAsistenciasAlumno() {
+        const alumnoId = {{ alumno.id }
+    };
+
     fetch(`/api/alumno/${alumnoId}/asistencias`)
         .then(response => response.json())
         .then(data => {
@@ -412,33 +423,33 @@ function cargarAsistenciasAlumno() {
                 mostrarAsistenciasAlumno(data.asistencias);
                 mostrarEstadisticasAsistencia(data.estadisticas);
             } else {
-                document.getElementById('asistenciasContainer').innerHTML = 
+                document.getElementById('asistenciasContainer').innerHTML =
                     '<div class="alert alert-warning">Error al cargar asistencias</div>';
             }
         })
         .catch(error => {
             console.error('Error:', error);
-            document.getElementById('asistenciasContainer').innerHTML = 
+            document.getElementById('asistenciasContainer').innerHTML =
                 '<div class="alert alert-danger">Error de conexión</div>';
         });
 }
 
-function mostrarAsistenciasAlumno(asistencias) {
-    const container = document.getElementById('asistenciasContainer');
-    
-    if (asistencias.length === 0) {
-        container.innerHTML = `
+    function mostrarAsistenciasAlumno(asistencias) {
+        const container = document.getElementById('asistenciasContainer');
+
+        if (asistencias.length === 0) {
+            container.innerHTML = `
             <div class="text-center py-4">
                 <i class="fas fa-calendar-times fa-3x text-muted mb-3"></i>
                 <h5 class="text-muted">No hay asistencias registradas</h5>
                 <p class="text-muted">Las asistencias aparecerán aquí cuando el alumno participe en clases</p>
             </div>
         `;
-        return;
-    }
-    
-    let html = '<div class="table-responsive"><table class="table table-hover" id="tablaAsistencias">';
-    html += `
+            return;
+        }
+
+        let html = '<div class="table-responsive"><table class="table table-hover" id="tablaAsistencias">';
+        html += `
         <thead>
             <tr>
                 <th>Fecha</th>
@@ -450,28 +461,28 @@ function mostrarAsistenciasAlumno(asistencias) {
         </thead>
         <tbody>
     `;
-    
-    asistencias.forEach(asistencia => {
-        const fecha = new Date(asistencia.fecha).toLocaleDateString('es-ES', {
-            weekday: 'short',
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric'
-        });
-        
-        let estadoHtml, estadoClass;
-        if (asistencia.asistio === null) {
-            estadoHtml = '<span class="badge bg-warning"><i class="fas fa-clock me-1"></i>Pendiente</span>';
-            estadoClass = 'pendiente';
-        } else if (asistencia.asistio) {
-            estadoHtml = '<span class="badge bg-success"><i class="fas fa-check me-1"></i>Presente</span>';
-            estadoClass = 'presente';
-        } else {
-            estadoHtml = '<span class="badge bg-danger"><i class="fas fa-times me-1"></i>Ausente</span>';
-            estadoClass = 'ausente';
-        }
-        
-        html += `
+
+        asistencias.forEach(asistencia => {
+            const fecha = new Date(asistencia.fecha).toLocaleDateString('es-ES', {
+                weekday: 'short',
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric'
+            });
+
+            let estadoHtml, estadoClass;
+            if (asistencia.asistio === null) {
+                estadoHtml = '<span class="badge bg-warning"><i class="fas fa-clock me-1"></i>Pendiente</span>';
+                estadoClass = 'pendiente';
+            } else if (asistencia.asistio) {
+                estadoHtml = '<span class="badge bg-success"><i class="fas fa-check me-1"></i>Presente</span>';
+                estadoClass = 'presente';
+            } else {
+                estadoHtml = '<span class="badge bg-danger"><i class="fas fa-times me-1"></i>Ausente</span>';
+                estadoClass = 'ausente';
+            }
+
+            html += `
             <tr class="asistencia-row" data-estado="${estadoClass}">
                 <td><strong>${fecha}</strong></td>
                 <td>
@@ -485,97 +496,97 @@ function mostrarAsistenciasAlumno(asistencias) {
                 <td>${asistencia.evento.instructor}</td>
             </tr>
         `;
-    });
-    
-    html += '</tbody></table></div>';
-    container.innerHTML = html;
-}
-
-function mostrarEstadisticasAsistencia(estadisticas) {
-    document.getElementById('totalPresentes').textContent = estadisticas.presentes;
-    document.getElementById('totalAusentes').textContent = estadisticas.ausentes;
-    document.getElementById('totalPendientes').textContent = estadisticas.pendientes;
-    document.getElementById('porcentajeAsistencia').textContent = estadisticas.porcentaje_asistencia + '%';
-    
-    document.getElementById('estadisticasAsistencia').style.display = 'flex';
-}
-
-function filtrarAsistencias(filtro) {
-    const filas = document.querySelectorAll('.asistencia-row');
-    const botones = document.querySelectorAll('.btn-group .btn');
-    
-    // Actualizar botones activos
-    botones.forEach(btn => btn.classList.remove('active'));
-    event.target.classList.add('active');
-    
-    // Filtrar filas
-    filas.forEach(fila => {
-        if (filtro === 'todas') {
-            fila.style.display = '';
-        } else {
-            const estado = fila.dataset.estado;
-            fila.style.display = estado === filtro ? '' : 'none';
-        }
-    });
-}
-
-// ===================== FUNCIONALIDAD PARA AGREGAR A CLASE =====================
-
-function abrirModalAgregarAClase(alumnoId) {
-    const modal = new bootstrap.Modal(document.getElementById('modalAgregarAClase'));
-    cargarEventosDisponibles(alumnoId);
-    modal.show();
-}
-
-function cargarEventosDisponibles(alumnoId) {
-    const fechaHoy = new Date();
-    const fechaInicio = fechaHoy.toISOString().split('T')[0];
-    const fechaFin = new Date(fechaHoy.getTime() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]; // 30 días
-    
-    fetch(`/api/eventos-disponibles?alumno_id=${alumnoId}&inicio=${fechaInicio}&fin=${fechaFin}`)
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                mostrarEventosDisponibles(data.eventos, alumnoId);
-            } else {
-                document.getElementById('listaEventosDisponibles').innerHTML = 
-                    '<p class="text-muted">No se pudieron cargar los eventos disponibles</p>';
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            document.getElementById('listaEventosDisponibles').innerHTML = 
-                '<p class="text-danger">Error de conexión</p>';
         });
-}
 
-function mostrarEventosDisponibles(eventos, alumnoId) {
-    const container = document.getElementById('listaEventosDisponibles');
-    
-    if (eventos.length === 0) {
-        container.innerHTML = `
+        html += '</tbody></table></div>';
+        container.innerHTML = html;
+    }
+
+    function mostrarEstadisticasAsistencia(estadisticas) {
+        document.getElementById('totalPresentes').textContent = estadisticas.presentes;
+        document.getElementById('totalAusentes').textContent = estadisticas.ausentes;
+        document.getElementById('totalPendientes').textContent = estadisticas.pendientes;
+        document.getElementById('porcentajeAsistencia').textContent = estadisticas.porcentaje_asistencia + '%';
+
+        document.getElementById('estadisticasAsistencia').style.display = 'flex';
+    }
+
+    function filtrarAsistencias(filtro) {
+        const filas = document.querySelectorAll('.asistencia-row');
+        const botones = document.querySelectorAll('.btn-group .btn');
+
+        // Actualizar botones activos
+        botones.forEach(btn => btn.classList.remove('active'));
+        event.target.classList.add('active');
+
+        // Filtrar filas
+        filas.forEach(fila => {
+            if (filtro === 'todas') {
+                fila.style.display = '';
+            } else {
+                const estado = fila.dataset.estado;
+                fila.style.display = estado === filtro ? '' : 'none';
+            }
+        });
+    }
+
+    // ===================== FUNCIONALIDAD PARA AGREGAR A CLASE =====================
+
+    function abrirModalAgregarAClase(alumnoId) {
+        const modal = new bootstrap.Modal(document.getElementById('modalAgregarAClase'));
+        cargarEventosDisponibles(alumnoId);
+        modal.show();
+    }
+
+    function cargarEventosDisponibles(alumnoId) {
+        const fechaHoy = new Date();
+        const fechaInicio = fechaHoy.toISOString().split('T')[0];
+        const fechaFin = new Date(fechaHoy.getTime() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]; // 30 días
+
+        fetch(`/api/eventos-disponibles?alumno_id=${alumnoId}&inicio=${fechaInicio}&fin=${fechaFin}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    mostrarEventosDisponibles(data.eventos, alumnoId);
+                } else {
+                    document.getElementById('listaEventosDisponibles').innerHTML =
+                        '<p class="text-muted">No se pudieron cargar los eventos disponibles</p>';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('listaEventosDisponibles').innerHTML =
+                    '<p class="text-danger">Error de conexión</p>';
+            });
+    }
+
+    function mostrarEventosDisponibles(eventos, alumnoId) {
+        const container = document.getElementById('listaEventosDisponibles');
+
+        if (eventos.length === 0) {
+            container.innerHTML = `
             <div class="text-center py-4">
                 <i class="fas fa-calendar-times fa-3x text-muted mb-3"></i>
                 <h5 class="text-muted">No hay eventos disponibles</h5>
                 <p class="text-muted">No se encontraron clases con capacidad disponible en los próximos 30 días</p>
             </div>
         `;
-        return;
-    }
-    
-    let html = '<div class="list-group">';
-    eventos.forEach(evento => {
-        const fecha = new Date(evento.fecha).toLocaleDateString('es-ES', {
-            weekday: 'long',
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric'
-        });
-        
-        const capacidadDisponible = (evento.capacidad_maxima || 15) - (evento.asistencias || 0);
-        const capacidadColor = capacidadDisponible > 5 ? 'success' : capacidadDisponible > 2 ? 'warning' : 'danger';
-        
-        html += `
+            return;
+        }
+
+        let html = '<div class="list-group">';
+        eventos.forEach(evento => {
+            const fecha = new Date(evento.fecha).toLocaleDateString('es-ES', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+
+            const capacidadDisponible = (evento.capacidad_maxima || 15) - (evento.asistencias || 0);
+            const capacidadColor = capacidadDisponible > 5 ? 'success' : capacidadDisponible > 2 ? 'warning' : 'danger';
+
+            html += `
             <div class="list-group-item">
                 <div class="d-flex justify-content-between align-items-start">
                     <div class="flex-grow-1">
@@ -609,62 +620,62 @@ function mostrarEventosDisponibles(eventos, alumnoId) {
                 </div>
             </div>
         `;
-    });
-    html += '</div>';
-    
-    container.innerHTML = html;
-}
+        });
+        html += '</div>';
 
-function inscribirAlumnoEnEvento(alumnoId, eventoId) {
-    fetch('/api/evento/agregar-alumno', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            evento_id: eventoId,
-            alumno_id: alumnoId
+        container.innerHTML = html;
+    }
+
+    function inscribirAlumnoEnEvento(alumnoId, eventoId) {
+        fetch('/api/evento/agregar-alumno', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                evento_id: eventoId,
+                alumno_id: alumnoId
+            })
         })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            bootstrap.Modal.getInstance(document.getElementById('modalAgregarAClase')).hide();
-            mostrarNotificacion('Alumno inscrito exitosamente en la clase', 'success');
-            // Recargar asistencias si está visible
-            if (document.getElementById('historialAsistencias').style.display !== 'none') {
-                cargarAsistenciasAlumno(alumnoId);
-            }
-        } else {
-            mostrarNotificacion('Error: ' + data.message, 'error');
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        mostrarNotificacion('Error de conexión', 'error');
-    });
-}
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    bootstrap.Modal.getInstance(document.getElementById('modalAgregarAClase')).hide();
+                    mostrarNotificacion('Alumno inscrito exitosamente en la clase', 'success');
+                    // Recargar asistencias si está visible
+                    if (document.getElementById('historialAsistencias').style.display !== 'none') {
+                        cargarAsistenciasAlumno(alumnoId);
+                    }
+                } else {
+                    mostrarNotificacion('Error: ' + data.message, 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                mostrarNotificacion('Error de conexión', 'error');
+            });
+    }
 
-function mostrarNotificacion(mensaje, tipo) {
-    const alertClass = tipo === 'success' ? 'alert-success' : 'alert-danger';
-    const icono = tipo === 'success' ? 'fa-check-circle' : 'fa-exclamation-triangle';
-    
-    const alert = document.createElement('div');
-    alert.className = `alert ${alertClass} alert-dismissible fade show position-fixed`;
-    alert.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
-    alert.innerHTML = `
+    function mostrarNotificacion(mensaje, tipo) {
+        const alertClass = tipo === 'success' ? 'alert-success' : 'alert-danger';
+        const icono = tipo === 'success' ? 'fa-check-circle' : 'fa-exclamation-triangle';
+
+        const alert = document.createElement('div');
+        alert.className = `alert ${alertClass} alert-dismissible fade show position-fixed`;
+        alert.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+        alert.innerHTML = `
         <i class="fas ${icono} me-2"></i>${mensaje}
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     `;
-    
-    document.body.appendChild(alert);
-    
-    setTimeout(() => {
-        if (alert.parentNode) {
-            alert.parentNode.removeChild(alert);
-        }
-    }, 5000);
-}
+
+        document.body.appendChild(alert);
+
+        setTimeout(() => {
+            if (alert.parentNode) {
+                alert.parentNode.removeChild(alert);
+            }
+        }, 5000);
+    }
 </script>
 
 <!-- Modal para Agregar a Clase -->
@@ -696,7 +707,7 @@ function mostrarNotificacion(mensaje, tipo) {
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                <a href="{{ url_for('calendario_completo') }}" class="btn btn-primary">
+                <a href="{{ url_for('classes.calendario_unificado') }}" class="btn btn-primary">
                     <i class="fas fa-calendar-alt"></i> Ver Calendario Completo
                 </a>
             </div>
@@ -705,17 +716,17 @@ function mostrarNotificacion(mensaje, tipo) {
 </div>
 
 <style>
-.color-indicator {
-    display: inline-block;
-    flex-shrink: 0;
-}
+    .color-indicator {
+        display: inline-block;
+        flex-shrink: 0;
+    }
 
-.list-group-item:hover {
-    background-color: #f8f9fa;
-}
+    .list-group-item:hover {
+        background-color: #f8f9fa;
+    }
 
-.badge {
-    font-size: 0.75em;
-}
+    .badge {
+        font-size: 0.75em;
+    }
 </style>
 {% endblock %}

@@ -13,7 +13,9 @@
                 {% if not config_fiscal or not config_fiscal.nif or config_fiscal.nif == '12345678Z' %}
                 <div class="alert alert-warning">
                     <i class="fas fa-exclamation-triangle"></i>
-                    <strong>Atención:</strong> Debe completar la <a href="{{ url_for('configuracion_fiscal') }}">configuración fiscal</a> con los datos reales de su negocio antes de emitir facturas.
+                    <strong>Atención:</strong> Debe completar la <a
+                        href="{{ url_for('finance.configuracion_fiscal') }}">configuración fiscal</a> con los datos
+                    reales de su negocio antes de emitir facturas.
                 </div>
                 {% endif %}
 
@@ -32,7 +34,7 @@
                                 {% endfor %}
                             </select>
                             <small class="form-text text-muted">
-                                <a href="{{ url_for('nuevo_cliente') }}" target="_blank">
+                                <a href="{{ url_for('finance.nuevo_cliente') }}" target="_blank">
                                     <i class="fas fa-plus"></i> Crear nuevo cliente
                                 </a>
                             </small>
@@ -40,18 +42,18 @@
                         <div class="col-md-2 mb-3">
                             <label for="serie" class="form-label">Serie *</label>
                             <input type="text" class="form-control" id="serie" name="serie"
-                                   value="{{ config_fiscal.serie_factura_default if config_fiscal else 'A' }}"
-                                   required maxlength="10">
+                                value="{{ config_fiscal.serie_factura_default if config_fiscal else 'A' }}" required
+                                maxlength="10">
                         </div>
                         <div class="col-md-3 mb-3">
                             <label for="fecha_emision" class="form-label">Fecha Emisión *</label>
                             <input type="date" class="form-control" id="fecha_emision" name="fecha_emision"
-                                   value="{{ fecha_hoy }}" required>
+                                value="{{ fecha_hoy }}" required>
                         </div>
                         <div class="col-md-3 mb-3">
                             <label for="fecha_prestacion" class="form-label">Fecha Prestación *</label>
                             <input type="date" class="form-control" id="fecha_prestacion" name="fecha_prestacion"
-                                   value="{{ fecha_hoy }}" required>
+                                value="{{ fecha_hoy }}" required>
                         </div>
                     </div>
 
@@ -70,7 +72,7 @@
                         <label class="form-label">Tarifas Rápidas:</label><br>
                         {% for tarifa in tarifas %}
                         <button type="button" class="btn btn-outline-info btn-sm me-1 mb-1"
-                                onclick="agregarLineaDesdeTarifa('{{ tarifa.nombre }}', {{ tarifa.precio }})">
+                            onclick="agregarLineaDesdeTarifa('{{ tarifa.nombre }}', {{ tarifa.precio }})">
                             {{ tarifa.nombre }} (€{{ "%.2f"|format(tarifa.precio) }})
                         </button>
                         {% endfor %}
@@ -82,9 +84,9 @@
                     <div class="row">
                         <div class="col-md-4 mb-3">
                             <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="exenta_iva" name="exenta_iva"
-                                       {% if config_fiscal and config_fiscal.exento_iva %}checked{% endif %}
-                                       onchange="toggleIVA()">
+                                <input class="form-check-input" type="checkbox" id="exenta_iva" name="exenta_iva" {% if
+                                    config_fiscal and config_fiscal.exento_iva %}checked{% endif %}
+                                    onchange="toggleIVA()">
                                 <label class="form-check-label" for="exenta_iva">
                                     <strong>Exenta de IVA</strong>
                                 </label>
@@ -104,10 +106,13 @@
                         </div>
                         <div class="col-md-4 mb-3">
                             <label for="tipo_retencion" class="form-label">IRPF Retención (%)</label>
-                            <select class="form-select" id="tipo_retencion" name="tipo_retencion" onchange="calcularTotales()">
+                            <select class="form-select" id="tipo_retencion" name="tipo_retencion"
+                                onchange="calcularTotales()">
                                 <option value="0">0% (Sin retención)</option>
-                                <option value="7" {% if config_fiscal and config_fiscal.tipo_retencion_default == 7 %}selected{% endif %}>7% (Profesionales)</option>
-                                <option value="15" {% if config_fiscal and config_fiscal.tipo_retencion_default == 15 %}selected{% endif %}>15% (Actividades)</option>
+                                <option value="7" {% if config_fiscal and config_fiscal.tipo_retencion_default==7
+                                    %}selected{% endif %}>7% (Profesionales)</option>
+                                <option value="15" {% if config_fiscal and config_fiscal.tipo_retencion_default==15
+                                    %}selected{% endif %}>15% (Actividades)</option>
                             </select>
                         </div>
                     </div>
@@ -134,11 +139,14 @@
                                         </tr>
                                         <tr id="rowRetencion">
                                             <td>IRPF Retención (<span id="porcentajeRetencion">7</span>%):</td>
-                                            <td class="text-end text-danger">-<span id="cuotaRetencion">€0.00</span></td>
+                                            <td class="text-end text-danger">-<span id="cuotaRetencion">€0.00</span>
+                                            </td>
                                         </tr>
                                         <tr class="border-top">
                                             <td><strong>TOTAL:</strong></td>
-                                            <td class="text-end"><h4 class="mb-0"><span id="totalFactura">€0.00</span></h4></td>
+                                            <td class="text-end">
+                                                <h4 class="mb-0"><span id="totalFactura">€0.00</span></h4>
+                                            </td>
                                         </tr>
                                     </table>
                                 </div>
@@ -149,7 +157,7 @@
                     <input type="hidden" id="lineas_count" name="lineas_count" value="0">
 
                     <div class="d-flex justify-content-between mt-4">
-                        <a href="{{ url_for('facturacion') }}" class="btn btn-secondary">
+                        <a href="{{ url_for('finance.economia') }}" class="btn btn-secondary">
                             <i class="fas fa-arrow-left"></i> Cancelar
                         </a>
                         <button type="submit" class="btn btn-primary">
@@ -163,15 +171,15 @@
 </div>
 
 <script>
-let lineasCount = 0;
+    let lineasCount = 0;
 
-function agregarLinea(descripcion = '', cantidad = 1, precio = 0) {
-    const container = document.getElementById('lineasContainer');
-    const lineaDiv = document.createElement('div');
-    lineaDiv.className = 'row mb-2 linea-factura';
-    lineaDiv.id = `linea_${lineasCount}`;
+    function agregarLinea(descripcion = '', cantidad = 1, precio = 0) {
+        const container = document.getElementById('lineasContainer');
+        const lineaDiv = document.createElement('div');
+        lineaDiv.className = 'row mb-2 linea-factura';
+        lineaDiv.id = `linea_${lineasCount}`;
 
-    lineaDiv.innerHTML = `
+        lineaDiv.innerHTML = `
         <div class="col-md-5">
             <input type="text" class="form-control" name="linea_${lineasCount}_descripcion"
                    placeholder="Descripción del servicio/producto" value="${descripcion}" required>
@@ -197,106 +205,106 @@ function agregarLinea(descripcion = '', cantidad = 1, precio = 0) {
         </div>
     `;
 
-    container.appendChild(lineaDiv);
-    lineasCount++;
-    document.getElementById('lineas_count').value = lineasCount;
+        container.appendChild(lineaDiv);
+        lineasCount++;
+        document.getElementById('lineas_count').value = lineasCount;
 
-    calcularTotales();
-}
-
-function agregarLineaDesdeTarifa(nombre, precio) {
-    agregarLinea(nombre, 1, precio);
-}
-
-function eliminarLinea(index) {
-    const linea = document.getElementById(`linea_${index}`);
-    if (linea) {
-        linea.remove();
         calcularTotales();
     }
-}
 
-function calcularTotales() {
-    let baseImponible = 0;
+    function agregarLineaDesdeTarifa(nombre, precio) {
+        agregarLinea(nombre, 1, precio);
+    }
 
-    // Calcular subtotales de cada línea
-    for (let i = 0; i < lineasCount; i++) {
-        const cantidadInput = document.querySelector(`input[name="linea_${i}_cantidad"]`);
-        const precioInput = document.querySelector(`input[name="linea_${i}_precio"]`);
-        const subtotalInput = document.getElementById(`linea_${i}_subtotal`);
-
-        if (cantidadInput && precioInput && subtotalInput) {
-            const cantidad = parseFloat(cantidadInput.value) || 0;
-            const precio = parseFloat(precioInput.value) || 0;
-            const subtotal = cantidad * precio;
-            subtotalInput.value = `€${subtotal.toFixed(2)}`;
-            baseImponible += subtotal;
+    function eliminarLinea(index) {
+        const linea = document.getElementById(`linea_${index}`);
+        if (linea) {
+            linea.remove();
+            calcularTotales();
         }
     }
 
-    // Mostrar base imponible
-    document.getElementById('baseImponible').textContent = `€${baseImponible.toFixed(2)}`;
+    function calcularTotales() {
+        let baseImponible = 0;
 
-    // Calcular IVA
-    const exentaIVA = document.getElementById('exenta_iva').checked;
-    const tipoIVA = parseFloat(document.getElementById('tipo_iva').value) || 0;
-    const cuotaIVA = exentaIVA ? 0 : (baseImponible * tipoIVA / 100);
+        // Calcular subtotales de cada línea
+        for (let i = 0; i < lineasCount; i++) {
+            const cantidadInput = document.querySelector(`input[name="linea_${i}_cantidad"]`);
+            const precioInput = document.querySelector(`input[name="linea_${i}_precio"]`);
+            const subtotalInput = document.getElementById(`linea_${i}_subtotal`);
 
-    document.getElementById('porcentajeIVA').textContent = tipoIVA;
-    document.getElementById('cuotaIVA').textContent = `€${cuotaIVA.toFixed(2)}`;
-    document.getElementById('rowIVA').style.display = exentaIVA ? 'none' : 'table-row';
+            if (cantidadInput && precioInput && subtotalInput) {
+                const cantidad = parseFloat(cantidadInput.value) || 0;
+                const precio = parseFloat(precioInput.value) || 0;
+                const subtotal = cantidad * precio;
+                subtotalInput.value = `€${subtotal.toFixed(2)}`;
+                baseImponible += subtotal;
+            }
+        }
 
-    // Calcular retención IRPF
-    const tipoRetencion = parseFloat(document.getElementById('tipo_retencion').value) || 0;
-    const cuotaRetencion = baseImponible * tipoRetencion / 100;
+        // Mostrar base imponible
+        document.getElementById('baseImponible').textContent = `€${baseImponible.toFixed(2)}`;
 
-    document.getElementById('porcentajeRetencion').textContent = tipoRetencion;
-    document.getElementById('cuotaRetencion').textContent = `€${cuotaRetencion.toFixed(2)}`;
-    document.getElementById('rowRetencion').style.display = tipoRetencion > 0 ? 'table-row' : 'none';
+        // Calcular IVA
+        const exentaIVA = document.getElementById('exenta_iva').checked;
+        const tipoIVA = parseFloat(document.getElementById('tipo_iva').value) || 0;
+        const cuotaIVA = exentaIVA ? 0 : (baseImponible * tipoIVA / 100);
 
-    // Calcular total
-    const total = baseImponible + cuotaIVA - cuotaRetencion;
-    document.getElementById('totalFactura').textContent = `€${total.toFixed(2)}`;
-}
+        document.getElementById('porcentajeIVA').textContent = tipoIVA;
+        document.getElementById('cuotaIVA').textContent = `€${cuotaIVA.toFixed(2)}`;
+        document.getElementById('rowIVA').style.display = exentaIVA ? 'none' : 'table-row';
 
-function toggleIVA() {
-    const exentaIVA = document.getElementById('exenta_iva').checked;
-    const tipoIVASelect = document.getElementById('tipo_iva');
+        // Calcular retención IRPF
+        const tipoRetencion = parseFloat(document.getElementById('tipo_retencion').value) || 0;
+        const cuotaRetencion = baseImponible * tipoRetencion / 100;
 
-    if (exentaIVA) {
-        tipoIVASelect.value = '0';
-        tipoIVASelect.disabled = true;
-    } else {
-        tipoIVASelect.disabled = false;
-        tipoIVASelect.value = '21';
+        document.getElementById('porcentajeRetencion').textContent = tipoRetencion;
+        document.getElementById('cuotaRetencion').textContent = `€${cuotaRetencion.toFixed(2)}`;
+        document.getElementById('rowRetencion').style.display = tipoRetencion > 0 ? 'table-row' : 'none';
+
+        // Calcular total
+        const total = baseImponible + cuotaIVA - cuotaRetencion;
+        document.getElementById('totalFactura').textContent = `€${total.toFixed(2)}`;
     }
 
-    calcularTotales();
-}
+    function toggleIVA() {
+        const exentaIVA = document.getElementById('exenta_iva').checked;
+        const tipoIVASelect = document.getElementById('tipo_iva');
 
-// Configurar retención automática según tipo de cliente
-document.getElementById('cliente_id').addEventListener('change', function() {
-    const selectedOption = this.options[this.selectedIndex];
-    const tipoCliente = selectedOption.dataset.tipo;
-    const retencionSelect = document.getElementById('tipo_retencion');
+        if (exentaIVA) {
+            tipoIVASelect.value = '0';
+            tipoIVASelect.disabled = true;
+        } else {
+            tipoIVASelect.disabled = false;
+            tipoIVASelect.value = '21';
+        }
 
-    if (tipoCliente === 'empresa' || tipoCliente === 'autonomo') {
-        {% if config_fiscal and config_fiscal.tipo_retencion_default %}
-        retencionSelect.value = '{{ config_fiscal.tipo_retencion_default }}';
-        {% else %}
-        retencionSelect.value = '7';
-        {% endif %}
-    } else {
-        retencionSelect.value = '0';
+        calcularTotales();
     }
 
-    calcularTotales();
-});
+    // Configurar retención automática según tipo de cliente
+    document.getElementById('cliente_id').addEventListener('change', function () {
+        const selectedOption = this.options[this.selectedIndex];
+        const tipoCliente = selectedOption.dataset.tipo;
+        const retencionSelect = document.getElementById('tipo_retencion');
 
-// Agregar primera línea al cargar
-document.addEventListener('DOMContentLoaded', function() {
-    agregarLinea();
-    toggleIVA();
-});
+        if (tipoCliente === 'empresa' || tipoCliente === 'autonomo') {
+            {% if config_fiscal and config_fiscal.tipo_retencion_default %}
+            retencionSelect.value = '{{ config_fiscal.tipo_retencion_default }}';
+            {% else %}
+            retencionSelect.value = '7';
+            {% endif %}
+        } else {
+            retencionSelect.value = '0';
+        }
+
+        calcularTotales();
+    });
+
+    // Agregar primera línea al cargar
+    document.addEventListener('DOMContentLoaded', function () {
+        agregarLinea();
+        toggleIVA();
+    });
 </script>
 {% endblock %}

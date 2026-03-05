@@ -8,10 +8,10 @@
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h2><i class="fas fa-user"></i> {{ usuario.nombre }} {{ usuario.apellido }}</h2>
             <div>
-                <a href="{{ url_for('editar_usuario', usuario_id=usuario.id) }}" class="btn btn-warning me-2">
+                <a href="{{ url_for('users.editar_usuario', usuario_id=usuario.id) }}" class="btn btn-warning me-2">
                     <i class="fas fa-edit"></i> Editar
                 </a>
-                <a href="{{ url_for('usuarios') }}" class="btn btn-secondary">
+                <a href="{{ url_for('users.usuarios') }}" class="btn btn-secondary">
                     <i class="fas fa-arrow-left"></i> Volver
                 </a>
             </div>
@@ -48,11 +48,11 @@
                         <strong>Rol:</strong>
                         <p class="mt-1">
                             {% if usuario.rol == 'admin' %}
-                                <span class="badge bg-danger fs-6">{{ usuario.get_rol_display() }}</span>
+                            <span class="badge bg-danger fs-6">{{ usuario.get_rol_display() }}</span>
                             {% elif usuario.rol == 'instructor' %}
-                                <span class="badge bg-primary fs-6">{{ usuario.get_rol_display() }}</span>
+                            <span class="badge bg-primary fs-6">{{ usuario.get_rol_display() }}</span>
                             {% else %}
-                                <span class="badge bg-info fs-6">{{ usuario.get_rol_display() }}</span>
+                            <span class="badge bg-info fs-6">{{ usuario.get_rol_display() }}</span>
                             {% endif %}
                         </p>
                     </div>
@@ -63,9 +63,9 @@
                         <strong>Estado:</strong>
                         <p class="mt-1">
                             {% if usuario.activo %}
-                                <span class="badge bg-success fs-6">Activo</span>
+                            <span class="badge bg-success fs-6">Activo</span>
                             {% else %}
-                                <span class="badge bg-secondary fs-6">Inactivo</span>
+                            <span class="badge bg-secondary fs-6">Inactivo</span>
                             {% endif %}
                         </p>
                     </div>
@@ -80,9 +80,9 @@
                         <strong>Último Acceso:</strong>
                         <p class="mt-1">
                             {% if usuario.ultimo_acceso %}
-                                {{ usuario.ultimo_acceso.strftime('%d/%m/%Y %H:%M') }}
+                            {{ usuario.ultimo_acceso.strftime('%d/%m/%Y %H:%M') }}
                             {% else %}
-                                <span class="text-muted">Nunca ha accedido</span>
+                            <span class="text-muted">Nunca ha accedido</span>
                             {% endif %}
                         </p>
                     </div>
@@ -99,39 +99,43 @@
             <div class="card-body">
                 <ul class="list-unstyled">
                     <li class="mb-2">
-                        <i class="fas fa-{% if usuario.can_manage_users() %}check text-success{% else %}times text-muted{% endif %}"></i>
+                        <i
+                            class="fas fa-{% if usuario.can_manage_users() %}check text-success{% else %}times text-muted{% endif %}"></i>
                         <strong>Gestionar Usuarios:</strong>
                         {% if usuario.can_manage_users() %}
-                            <span class="text-success">Sí</span>
+                        <span class="text-success">Sí</span>
                         {% else %}
-                            <span class="text-muted">No</span>
+                        <span class="text-muted">No</span>
                         {% endif %}
                     </li>
                     <li class="mb-2">
-                        <i class="fas fa-{% if usuario.can_manage_payments() %}check text-success{% else %}times text-muted{% endif %}"></i>
+                        <i
+                            class="fas fa-{% if usuario.can_manage_payments() %}check text-success{% else %}times text-muted{% endif %}"></i>
                         <strong>Gestionar Pagos:</strong>
                         {% if usuario.can_manage_payments() %}
-                            <span class="text-success">Sí</span>
+                        <span class="text-success">Sí</span>
                         {% else %}
-                            <span class="text-muted">No</span>
+                        <span class="text-muted">No</span>
                         {% endif %}
                     </li>
                     <li class="mb-2">
-                        <i class="fas fa-{% if usuario.can_manage_yogaterapia() %}check text-success{% else %}times text-muted{% endif %}"></i>
+                        <i
+                            class="fas fa-{% if usuario.can_manage_yogaterapia() %}check text-success{% else %}times text-muted{% endif %}"></i>
                         <strong>Gestionar Yogaterapia:</strong>
                         {% if usuario.can_manage_yogaterapia() %}
-                            <span class="text-success">Sí</span>
+                        <span class="text-success">Sí</span>
                         {% else %}
-                            <span class="text-muted">No</span>
+                        <span class="text-muted">No</span>
                         {% endif %}
                     </li>
                     <li class="mb-2">
-                        <i class="fas fa-{% if usuario.is_instructor() %}check text-success{% else %}times text-muted{% endif %}"></i>
+                        <i
+                            class="fas fa-{% if usuario.is_instructor() %}check text-success{% else %}times text-muted{% endif %}"></i>
                         <strong>Gestionar Clases:</strong>
                         {% if usuario.is_instructor() %}
-                            <span class="text-success">Sí</span>
+                        <span class="text-success">Sí</span>
                         {% else %}
-                            <span class="text-muted">No</span>
+                        <span class="text-muted">No</span>
                         {% endif %}
                     </li>
                 </ul>
@@ -147,21 +151,21 @@
                     <a href="{{ url_for('editar_usuario', usuario_id=usuario.id) }}" class="btn btn-warning">
                         <i class="fas fa-edit"></i> Editar Usuario
                     </a>
-                    
+
                     {% if usuario.activo %}
-                        <form method="POST" action="{{ url_for('eliminar_usuario', usuario_id=usuario.id) }}">
-                            <button type="submit" class="btn btn-danger w-100" 
-                                    onclick="return confirm('¿Desactivar este usuario?')">
-                                <i class="fas fa-user-times"></i> Desactivar
-                            </button>
-                        </form>
+                    <form method="POST" action="{{ url_for('users.eliminar_usuario', usuario_id=usuario.id) }}">
+                        <button type="submit" class="btn btn-danger w-100"
+                            onclick="return confirm('¿Desactivar este usuario?')">
+                            <i class="fas fa-user-times"></i> Desactivar
+                        </button>
+                    </form>
                     {% else %}
-                        <form method="POST" action="{{ url_for('reactivar_usuario', usuario_id=usuario.id) }}">
-                            <button type="submit" class="btn btn-success w-100" 
-                                    onclick="return confirm('¿Reactivar este usuario?')">
-                                <i class="fas fa-user-check"></i> Reactivar
-                            </button>
-                        </form>
+                    <form method="POST" action="{{ url_for('users.reactivar_usuario', usuario_id=usuario.id) }}">
+                        <button type="submit" class="btn btn-success w-100"
+                            onclick="return confirm('¿Reactivar este usuario?')">
+                            <i class="fas fa-user-check"></i> Reactivar
+                        </button>
+                    </form>
                     {% endif %}
                 </div>
             </div>

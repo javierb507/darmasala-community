@@ -9,25 +9,28 @@
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <h2><i class="fas fa-calendar-alt"></i> Calendario Unificado</h2>
                 <div class="btn-group">
-                    <a href="{{ url_for('calendario_unificado', año=año, mes=mes-1) }}" class="btn btn-outline-secondary">
+                    <a href="{{ url_for('classes.calendario_unificado', año=año, mes=mes-1) }}"
+                        class="btn btn-outline-secondary">
                         <i class="fas fa-chevron-left"></i> Mes Anterior
                     </a>
-                    <a href="{{ url_for('calendario_unificado', año=año, mes=mes+1) }}" class="btn btn-outline-secondary">
+                    <a href="{{ url_for('classes.calendario_unificado', año=año, mes=mes+1) }}"
+                        class="btn btn-outline-secondary">
                         Mes Siguiente <i class="fas fa-chevron-right"></i>
                     </a>
-                    <a href="{{ url_for('calendario_unificado') }}" class="btn btn-info">
+                    <a href="{{ url_for('classes.calendario_unificado') }}" class="btn btn-info">
                         <i class="fas fa-calendar-day"></i> Mes Actual
                     </a>
-                    <a href="{{ url_for('calendario_unificado', vista='semana') }}" class="btn btn-outline-info">
+                    <a href="{{ url_for('classes.calendario_unificado', vista='semana') }}"
+                        class="btn btn-outline-info">
                         <i class="fas fa-calendar-week"></i> Vista Semanal
                     </a>
-                    <a href="{{ url_for('calendario_anual') }}" class="btn btn-outline-success">
+                    <a href="{{ url_for('classes.calendario_anual') }}" class="btn btn-outline-success">
                         <i class="fas fa-calendar-alt"></i> Vista Anual
                     </a>
-                    <a href="{{ url_for('nueva_yogaterapia') }}" class="btn btn-primary">
+                    <a href="{{ url_for('yogatherapia.nueva_yogaterapia') }}" class="btn btn-primary">
                         <i class="fas fa-plus"></i> Nueva Cita Individual
                     </a>
-                    <a href="{{ url_for('nuevo_horario') }}" class="btn btn-success">
+                    <a href="{{ url_for('classes.nuevo_horario') }}" class="btn btn-success">
                         <i class="fas fa-clock"></i> Nuevo Horario
                     </a>
                 </div>
@@ -77,7 +80,7 @@
             <div class="card">
                 <div class="card-header">
                     <h5 class="mb-0">
-                        <i class="fas fa-calendar"></i> 
+                        <i class="fas fa-calendar"></i>
                         {{ nombre_mes }} {{ año }}
                     </h5>
                 </div>
@@ -93,33 +96,34 @@
                             <div class="calendar-day-header">Sábado</div>
                             <div class="calendar-day-header">Domingo</div>
                         </div>
-                        
+
                         <!-- Días del mes -->
                         <div class="calendar-grid">
-                            
+
                             <!-- Espacios vacíos para alinear el primer día -->
                             {% for i in range(primer_dia) %}
                             <div class="calendar-day empty"></div>
                             {% endfor %}
-                            
+
                             <!-- Días del mes -->
                             {% for fecha_actual in dias_calendario %}
-                            {% set sesiones_dia = sesiones_yogaterapia|selectattr('fecha_sesion', 'equalto', fecha_actual)|list %}
+                            {% set sesiones_dia = sesiones_yogaterapia|selectattr('fecha_sesion', 'equalto',
+                            fecha_actual)|list %}
                             {% set dia_semana = fecha_actual.weekday() %}
                             {% set horarios_dia = horarios|selectattr('dia_semana', 'equalto', dia_semana)|list %}
-                            
-                        <div class="calendar-day {% if sesiones_dia %}has-appointments{% endif %} {% if horarios_dia %}has-schedule{% endif %} {% if fecha_actual == today %}today{% endif %}" 
-                             data-fecha="{{ fecha_actual.isoformat() }}"
-                             data-sesiones="{{ sesiones_dia|length }}"
-                             data-horarios="{{ horarios_dia|length }}">
-                            
-                            <div class="day-number">{{ fecha_actual.day }}</div>
-                                
+
+                            <div class="calendar-day {% if sesiones_dia %}has-appointments{% endif %} {% if horarios_dia %}has-schedule{% endif %} {% if fecha_actual == today %}today{% endif %}"
+                                data-fecha="{{ fecha_actual.isoformat() }}" data-sesiones="{{ sesiones_dia|length }}"
+                                data-horarios="{{ horarios_dia|length }}">
+
+                                <div class="day-number">{{ fecha_actual.day }}</div>
+
                                 <!-- Actividades periódicas (horarios semanales) -->
                                 {% if horarios_dia %}
                                 <div class="schedule-events">
                                     {% for horario in horarios_dia %}
-                                    <div class="schedule-event" title="{{ horario.clase.nombre }} - {{ horario.hora_inicio.strftime('%H:%M') }}-{{ horario.hora_fin.strftime('%H:%M') }}">
+                                    <div class="schedule-event"
+                                        title="{{ horario.clase.nombre }} - {{ horario.hora_inicio.strftime('%H:%M') }}-{{ horario.hora_fin.strftime('%H:%M') }}">
                                         <i class="fas fa-clock text-primary"></i>
                                         <small>{{ horario.hora_inicio.strftime('%H:%M') }}</small>
                                         <br><small>{{ horario.clase.nombre }}</small>
@@ -127,20 +131,23 @@
                                     {% endfor %}
                                 </div>
                                 {% endif %}
-                                
+
                                 <!-- Citas individuales -->
                                 {% if sesiones_dia %}
                                 <div class="appointment-events">
                                     {% for sesion in sesiones_dia %}
-                                    <div class="appointment-event" title="{{ sesion.alumno.nombre }} {{ sesion.alumno.apellido }} - {{ sesion.duracion_minutos }}min - {{ "%.2f"|format(sesion.precio) }}€">
+                                    <div class="appointment-event"
+                                        title="{{ sesion.alumno.nombre }} {{ sesion.alumno.apellido }} - {{ sesion.duracion_minutos }}min - {{ "
+                                        %.2f"|format(sesion.precio) }}€">
                                         <i class="fas fa-heart text-danger"></i>
-                                        <small>{{ sesion.hora_inicio.strftime('%H:%M') if sesion.hora_inicio else 'Sin hora' }}</small>
+                                        <small>{{ sesion.hora_inicio.strftime('%H:%M') if sesion.hora_inicio else 'Sin
+                                            hora' }}</small>
                                         <br><small>{{ sesion.alumno.nombre }} {{ sesion.alumno.apellido }}</small>
                                     </div>
                                     {% endfor %}
                                 </div>
                                 {% endif %}
-                                
+
                                 <!-- Indicador de clic para crear nueva cita -->
                                 <div class="add-appointment" title="Crear nueva cita individual">
                                     <i class="fas fa-plus-circle text-muted"></i>
@@ -172,7 +179,7 @@
                                 <strong>{{ sesion.fecha_sesion.strftime('%d/%m/%Y') }}</strong>
                                 <br><small>{{ sesion.alumno.nombre }} {{ sesion.alumno.apellido }}</small>
                                 {% if sesion.alumno.email %}
-                                    <br><small class="text-muted">{{ sesion.alumno.email }}</small>
+                                <br><small class="text-muted">{{ sesion.alumno.email }}</small>
                                 {% endif %}
                             </div>
                             <div class="text-end">
@@ -181,10 +188,12 @@
                                 </span>
                                 <br><small>{{ "%.2f"|format(sesion.precio) }}€</small>
                                 <div class="btn-group btn-group-sm mt-1">
-                                    <a href="{{ url_for('ver_sesion_yogaterapia', sesion_id=sesion.id) }}" class="btn btn-outline-primary btn-sm">
+                                    <a href="{{ url_for('yogatherapia.ver_sesion_yogaterapia', sesion_id=sesion.id) }}"
+                                        class="btn btn-outline-primary btn-sm">
                                         <i class="fas fa-eye"></i>
                                     </a>
-                                    <a href="{{ url_for('editar_sesion_yogaterapia', sesion_id=sesion.id) }}" class="btn btn-outline-warning btn-sm">
+                                    <a href="{{ url_for('yogatherapia.editar_sesion_yogaterapia', sesion_id=sesion.id) }}"
+                                        class="btn btn-outline-warning btn-sm">
                                         <i class="fas fa-edit"></i>
                                     </a>
                                 </div>
@@ -196,7 +205,7 @@
                     <div class="text-center py-3">
                         <i class="fas fa-calendar-times fa-3x text-muted mb-3"></i>
                         <p class="text-muted">No hay citas individuales este mes</p>
-                        <a href="{{ url_for('nueva_yogaterapia') }}" class="btn btn-primary">
+                        <a href="{{ url_for('yogatherapia.nueva_yogaterapia') }}" class="btn btn-primary">
                             <i class="fas fa-plus"></i> Nueva Cita
                         </a>
                     </div>
@@ -204,7 +213,7 @@
                 </div>
             </div>
         </div>
-        
+
         <div class="col-md-6">
             <div class="card">
                 <div class="card-header bg-success text-white">
@@ -220,16 +229,19 @@
                             <div>
                                 <strong>{{ horario.get_dia_display() }}</strong>
                                 <br><small>{{ horario.clase.nombre }}</small>
-                                <br><small class="text-muted">{{ horario.hora_inicio.strftime('%H:%M') }} - {{ horario.hora_fin.strftime('%H:%M') }}</small>
+                                <br><small class="text-muted">{{ horario.hora_inicio.strftime('%H:%M') }} - {{
+                                    horario.hora_fin.strftime('%H:%M') }}</small>
                             </div>
                             <div class="text-end">
                                 <span class="badge bg-success">Activo</span>
                                 <div class="btn-group btn-group-sm mt-1">
-                                    <a href="{{ url_for('editar_horario', horario_id=horario.id) }}" class="btn btn-outline-warning btn-sm">
+                                    <a href="{{ url_for('classes.editar_horario', horario_id=horario.id) }}"
+                                        class="btn btn-outline-warning btn-sm">
                                         <i class="fas fa-edit"></i>
                                     </a>
-                                    <a href="{{ url_for('eliminar_horario', horario_id=horario.id) }}" class="btn btn-outline-danger btn-sm" 
-                                       onclick="return confirm('¿Desactivar este horario?')">
+                                    <a href="{{ url_for('classes.eliminar_horario', horario_id=horario.id) }}"
+                                        class="btn btn-outline-danger btn-sm"
+                                        onclick="return confirm('¿Desactivar este horario?')">
                                         <i class="fas fa-trash"></i>
                                     </a>
                                 </div>
@@ -241,7 +253,7 @@
                     <div class="text-center py-3">
                         <i class="fas fa-clock fa-3x text-muted mb-3"></i>
                         <p class="text-muted">No hay horarios configurados</p>
-                        <a href="{{ url_for('nuevo_horario') }}" class="btn btn-success">
+                        <a href="{{ url_for('classes.nuevo_horario') }}" class="btn btn-success">
                             <i class="fas fa-plus"></i> Nuevo Horario
                         </a>
                     </div>
@@ -253,149 +265,151 @@
 </div>
 
 <style>
-.calendar-container {
-    background: white;
-    border-radius: 8px;
-    overflow: hidden;
-}
+    .calendar-container {
+        background: white;
+        border-radius: 8px;
+        overflow: hidden;
+    }
 
-.calendar-header {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    background-color: #f8f9fa;
-    border-bottom: 2px solid #dee2e6;
-}
+    .calendar-header {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        background-color: #f8f9fa;
+        border-bottom: 2px solid #dee2e6;
+    }
 
-.calendar-day-header {
-    padding: 12px 8px;
-    text-align: center;
-    font-weight: bold;
-    color: #495057;
-    border-right: 1px solid #dee2e6;
-}
+    .calendar-day-header {
+        padding: 12px 8px;
+        text-align: center;
+        font-weight: bold;
+        color: #495057;
+        border-right: 1px solid #dee2e6;
+    }
 
-.calendar-day-header:last-child {
-    border-right: none;
-}
+    .calendar-day-header:last-child {
+        border-right: none;
+    }
 
-.calendar-grid {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 1px;
-    background-color: #dee2e6;
-}
+    .calendar-grid {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 1px;
+        background-color: #dee2e6;
+    }
 
-.calendar-day {
-    min-height: 120px;
-    background: white;
-    padding: 8px;
-    position: relative;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    border: 1px solid #e9ecef;
-    border-radius: 8px;
-    margin: 1px;
-}
+    .calendar-day {
+        min-height: 120px;
+        background: white;
+        padding: 8px;
+        position: relative;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border: 1px solid #e9ecef;
+        border-radius: 8px;
+        margin: 1px;
+    }
 
-.calendar-day:hover {
-    background-color: #e3f2fd;
-    border-color: #007bff;
-    transform: scale(1.02);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    z-index: 10;
-}
+    .calendar-day:hover {
+        background-color: #e3f2fd;
+        border-color: #007bff;
+        transform: scale(1.02);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        z-index: 10;
+    }
 
-.calendar-day.empty {
-    background-color: #f8f9fa;
-    cursor: default;
-    border: 1px solid #e9ecef;
-}
+    .calendar-day.empty {
+        background-color: #f8f9fa;
+        cursor: default;
+        border: 1px solid #e9ecef;
+    }
 
-.calendar-day.has-appointments {
-    background-color: #ffebee;
-    border-color: #ffcdd2;
-    box-shadow: 0 2px 8px rgba(244, 67, 54, 0.2);
-}
+    .calendar-day.has-appointments {
+        background-color: #ffebee;
+        border-color: #ffcdd2;
+        box-shadow: 0 2px 8px rgba(244, 67, 54, 0.2);
+    }
 
-.calendar-day.has-schedule {
-    background-color: #e8f5e8;
-    border-color: #c8e6c9;
-    box-shadow: 0 2px 8px rgba(76, 175, 80, 0.2);
-}
+    .calendar-day.has-schedule {
+        background-color: #e8f5e8;
+        border-color: #c8e6c9;
+        box-shadow: 0 2px 8px rgba(76, 175, 80, 0.2);
+    }
 
-.calendar-day.has-appointments.has-schedule {
-    background: linear-gradient(135deg, #ffebee 50%, #e8f5e8 50%);
-    border-color: #ffcdd2;
-    box-shadow: 0 2px 8px rgba(244, 67, 54, 0.2), 0 2px 8px rgba(76, 175, 80, 0.2);
-}
+    .calendar-day.has-appointments.has-schedule {
+        background: linear-gradient(135deg, #ffebee 50%, #e8f5e8 50%);
+        border-color: #ffcdd2;
+        box-shadow: 0 2px 8px rgba(244, 67, 54, 0.2), 0 2px 8px rgba(76, 175, 80, 0.2);
+    }
 
-.calendar-day.today {
-    background-color: #fff3e0;
-    border-color: #ffcc02;
-    box-shadow: 0 4px 12px rgba(255, 193, 7, 0.3);
-    font-weight: bold;
-}
+    .calendar-day.today {
+        background-color: #fff3e0;
+        border-color: #ffcc02;
+        box-shadow: 0 4px 12px rgba(255, 193, 7, 0.3);
+        font-weight: bold;
+    }
 
-.day-number {
-    font-weight: bold;
-    font-size: 1.1rem;
-    margin-bottom: 4px;
-}
+    .day-number {
+        font-weight: bold;
+        font-size: 1.1rem;
+        margin-bottom: 4px;
+    }
 
-.schedule-events, .appointment-events {
-    margin-top: 4px;
-}
+    .schedule-events,
+    .appointment-events {
+        margin-top: 4px;
+    }
 
-.schedule-event, .appointment-event {
-    background: rgba(255, 255, 255, 0.8);
-    border-radius: 4px;
-    padding: 2px 4px;
-    margin-bottom: 2px;
-    font-size: 0.75rem;
-    border-left: 3px solid;
-}
+    .schedule-event,
+    .appointment-event {
+        background: rgba(255, 255, 255, 0.8);
+        border-radius: 4px;
+        padding: 2px 4px;
+        margin-bottom: 2px;
+        font-size: 0.75rem;
+        border-left: 3px solid;
+    }
 
-.schedule-event {
-    border-left-color: #007bff;
-}
+    .schedule-event {
+        border-left-color: #007bff;
+    }
 
-.appointment-event {
-    border-left-color: #dc3545;
-}
+    .appointment-event {
+        border-left-color: #dc3545;
+    }
 
-.add-appointment {
-    position: absolute;
-    bottom: 4px;
-    right: 4px;
-    opacity: 0;
-    transition: opacity 0.2s;
-}
+    .add-appointment {
+        position: absolute;
+        bottom: 4px;
+        right: 4px;
+        opacity: 0;
+        transition: opacity 0.2s;
+    }
 
-.calendar-day:hover .add-appointment {
-    opacity: 1;
-}
+    .calendar-day:hover .add-appointment {
+        opacity: 1;
+    }
 
-.list-group-item {
-    border: none;
-    border-bottom: 1px solid #dee2e6;
-}
+    .list-group-item {
+        border: none;
+        border-bottom: 1px solid #dee2e6;
+    }
 
-.list-group-item:last-child {
-    border-bottom: none;
-}
+    .list-group-item:last-child {
+        border-bottom: none;
+    }
 </style>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Agregar funcionalidad de clic en días del calendario
-    document.querySelectorAll('.calendar-day:not(.empty)').forEach(function(day) {
-        day.addEventListener('click', function() {
-            const fecha = this.dataset.fecha;
-            const sesiones = parseInt(this.dataset.sesiones);
-            const horarios = parseInt(this.dataset.horarios);
-            
-            // Crear modal de información del día
-            let modalContent = `<div class="modal fade" id="dayModal" tabindex="-1">
+    document.addEventListener('DOMContentLoaded', function () {
+        // Agregar funcionalidad de clic en días del calendario
+        document.querySelectorAll('.calendar-day:not(.empty)').forEach(function (day) {
+            day.addEventListener('click', function () {
+                const fecha = this.dataset.fecha;
+                const sesiones = parseInt(this.dataset.sesiones);
+                const horarios = parseInt(this.dataset.horarios);
+
+                // Crear modal de información del día
+                let modalContent = `<div class="modal fade" id="dayModal" tabindex="-1">
                 <div class="modal-dialog">
                     <div class="modal-content">
                         <div class="modal-header">
@@ -405,51 +419,51 @@ document.addEventListener('DOMContentLoaded', function() {
                         <div class="modal-body">
                             <h6>Actividades del día:</h6>
                             <ul class="list-group list-group-flush">`;
-            
-            if (horarios > 0) {
-                modalContent += `<li class="list-group-item d-flex justify-content-between align-items-center">
+
+                if (horarios > 0) {
+                    modalContent += `<li class="list-group-item d-flex justify-content-between align-items-center">
                     <span><i class="fas fa-clock text-primary"></i> Horarios semanales</span>
                     <span class="badge bg-primary">${horarios}</span>
                 </li>`;
-            }
-            
-            if (sesiones > 0) {
-                modalContent += `<li class="list-group-item d-flex justify-content-between align-items-center">
+                }
+
+                if (sesiones > 0) {
+                    modalContent += `<li class="list-group-item d-flex justify-content-between align-items-center">
                     <span><i class="fas fa-heart text-danger"></i> Citas individuales</span>
                     <span class="badge bg-danger">${sesiones}</span>
                 </li>`;
-            }
-            
-            if (horarios === 0 && sesiones === 0) {
-                modalContent += `<li class="list-group-item text-muted">No hay actividades programadas</li>`;
-            }
-            
-            modalContent += `</ul>
+                }
+
+                if (horarios === 0 && sesiones === 0) {
+                    modalContent += `<li class="list-group-item text-muted">No hay actividades programadas</li>`;
+                }
+
+                modalContent += `</ul>
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                            <a href="{{ url_for('nueva_yogaterapia') }}?fecha=${fecha}" class="btn btn-primary">
+                            <a href="{{ url_for('yogatherapia.nueva_yogaterapia') }}?fecha=${fecha}" class="btn btn-primary">
                                 <i class="fas fa-plus"></i> Nueva Cita Individual
                             </a>
                         </div>
                     </div>
                 </div>
             </div>`;
-            
-            // Remover modal existente si hay uno
-            const existingModal = document.getElementById('dayModal');
-            if (existingModal) {
-                existingModal.remove();
-            }
-            
-            // Agregar modal al DOM
-            document.body.insertAdjacentHTML('beforeend', modalContent);
-            
-            // Mostrar modal
-            const modal = new bootstrap.Modal(document.getElementById('dayModal'));
-            modal.show();
+
+                // Remover modal existente si hay uno
+                const existingModal = document.getElementById('dayModal');
+                if (existingModal) {
+                    existingModal.remove();
+                }
+
+                // Agregar modal al DOM
+                document.body.insertAdjacentHTML('beforeend', modalContent);
+
+                // Mostrar modal
+                const modal = new bootstrap.Modal(document.getElementById('dayModal'));
+                modal.show();
+            });
         });
     });
-});
 </script>
 {% endblock %}

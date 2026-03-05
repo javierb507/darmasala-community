@@ -1,0 +1,283 @@
+{% extends "base.html" %}
+
+{% block title %}Factura {{ factura.numero_completo }} - Atma suddhi{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-10 mx-auto">
+        <!-- Cabecera con acciones -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2><i class="fas fa-file-invoice"></i> Factura {{ factura.numero_completo }}</h2>
+            <div>
+                {% if factura.estado == 'emitida' %}
+                <button type="button" class="btn btn-success" data-bs-toggle="modal"
+                    data-bs-target="#marcarPagadaModal">
+                    <i class="fas fa-check-circle"></i> Marcar como Pagada
+                </button>
+                {% endif %}
+                {% if factura.estado != 'anulada' %}
+                <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal"
+                    data-bs-target="#anularModal">
+                    <i class="fas fa-ban"></i> Anular Factura
+                </button>
+                {% endif %}
+                <a href="{{ url_for('finance.descargar_factura_pdf', factura_id=factura.id) }}" class="btn btn-primary">
+                    <i class="fas fa-file-pdf"></i> Descargar PDF
+                </a>
+                <a href="#" class="btn btn-outline-primary" onclick="window.print(); return false;">
+                    <i class="fas fa-print"></i> Imprimir
+                </a>
+                <a href="{{ url_for('finance.economia_historico') }}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left"></i> Volver
+                </a>
+            </div>
+        </div>
+
+        <!-- Estado de la factura -->
+        <div
+            class="alert {% if factura.estado == 'pagada' %}alert-success{% elif factura.estado == 'anulada' %}alert-danger{% else %}alert-warning{% endif %}">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <strong>Estado:</strong>
+                    {% if factura.estado == 'emitida' %}
+                    <span class="badge bg-warning text-dark">PENDIENTE DE PAGO</span>
+                    {% elif factura.estado == 'pagada' %}
+                    <span class="badge bg-success">PAGADA</span>
+                    - Fecha de pago: {{ factura.fecha_pago.strftime('%d/%m/%Y') if factura.fecha_pago else 'N/A' }}
+                    {% if factura.metodo_pago %}
+                    - Método: {{ factura.metodo_pago|capitalize }}
+                    {% endif %}
+                    {% elif factura.estado == 'anulada' %}
+                    <span class="badge bg-danger">ANULADA</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Factura en formato imprimible -->
+        <div class="card print-area">
+            <div class="card-body p-5">
+                <!-- Cabecera de la factura -->
+                <div class="row mb-5">
+                    <div class="col-md-6">
+                        {% if config_fiscal %}
+                        <h3 class="text-primary">{{ config_fiscal.nombre_empresa }}</h3>
+                        <p class="mb-1">
+                            <strong>NIF:</strong> {{ config_fiscal.nif }}<br>
+                            {{ config_fiscal.direccion_fiscal }}<br>
+                            {% if config_fiscal.codigo_postal %}{{ config_fiscal.codigo_postal }}{% endif %}
+                            {% if config_fiscal.ciudad %}{{ config_fiscal.ciudad }}{% endif %}
+                            {% if config_fiscal.provincia %}({{ config_fiscal.provincia }}){% endif %}<br>
+                            {% if config_fiscal.telefono %}<i class="fas fa-phone"></i> {{ config_fiscal.telefono
+                            }}<br>{% endif %}
+                            {% if config_fiscal.email %}<i class="fas fa-envelope"></i> {{ config_fiscal.email }}{%
+                            endif %}
+                        </p>
+                        {% if config_fiscal.epigrafe_iae %}
+                        <p class="mb-0"><small>Epígrafe IAE: {{ config_fiscal.epigrafe_iae }}</small></p>
+                        {% endif %}
+                        {% else %}
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle"></i> Configure los datos fiscales
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-6 text-end">
+                        <h1 class="text-primary mb-3">FACTURA</h1>
+                        <h3>{{ factura.numero_completo }}</h3>
+                        <p class="mb-0">
+                            <strong>Fecha emisión:</strong> {{ factura.fecha_emision.strftime('%d/%m/%Y') }}<br>
+                            <strong>Fecha prestación:</strong> {{ factura.fecha_prestacion.strftime('%d/%m/%Y') }}
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Datos del cliente -->
+                <div class="row mb-4">
+                    <div class="col-md-12">
+                        <div class="border p-3 bg-light">
+                            <h5 class="mb-2">Cliente:</h5>
+                            <p class="mb-0">
+                                <strong>{{ factura.cliente.nombre }}</strong><br>
+                                NIF/CIF: {{ factura.cliente.nif_cif }}<br>
+                                {{ factura.cliente.direccion }}<br>
+                                {% if factura.cliente.codigo_postal %}{{ factura.cliente.codigo_postal }}{% endif %}
+                                {% if factura.cliente.ciudad %}{{ factura.cliente.ciudad }}{% endif %}
+                                {% if factura.cliente.provincia %}({{ factura.cliente.provincia }}){% endif %}
+                                {% if factura.cliente.pais %}- {{ factura.cliente.pais }}{% endif %}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Líneas de factura -->
+                <div class="row mb-4">
+                    <div class="col-md-12">
+                        <table class="table table-bordered">
+                            <thead class="table-primary">
+                                <tr>
+                                    <th>Descripción</th>
+                                    <th class="text-center" width="10%">Cantidad</th>
+                                    <th class="text-end" width="15%">Precio Unitario</th>
+                                    <th class="text-end" width="15%">Subtotal</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for linea in factura.lineas %}
+                                <tr>
+                                    <td>{{ linea.descripcion }}</td>
+                                    <td class="text-center">{{ linea.cantidad }}</td>
+                                    <td class="text-end">€{{ "%.2f"|format(linea.precio_unitario) }}</td>
+                                    <td class="text-end"><strong>€{{ "%.2f"|format(linea.subtotal) }}</strong></td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Totales -->
+                <div class="row">
+                    <div class="col-md-7">
+                        {% if factura.observaciones %}
+                        <div class="mb-3">
+                            <strong>Observaciones:</strong><br>
+                            {{ factura.observaciones }}
+                        </div>
+                        {% endif %}
+
+                        {% if factura.exenta_iva and factura.motivo_exencion %}
+                        <div class="alert alert-info mb-0">
+                            <small><i class="fas fa-info-circle"></i> {{ factura.motivo_exencion }}</small>
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-5">
+                        <table class="table">
+                            <tr>
+                                <td><strong>Base Imponible:</strong></td>
+                                <td class="text-end"><strong>€{{ "%.2f"|format(factura.base_imponible) }}</strong></td>
+                            </tr>
+                            {% if not factura.exenta_iva and factura.cuota_iva > 0 %}
+                            <tr>
+                                <td>IVA ({{ factura.tipo_iva }}%):</td>
+                                <td class="text-end">€{{ "%.2f"|format(factura.cuota_iva) }}</td>
+                            </tr>
+                            {% endif %}
+                            {% if factura.cuota_retencion > 0 %}
+                            <tr class="text-danger">
+                                <td>IRPF Retención ({{ factura.tipo_retencion }}%):</td>
+                                <td class="text-end">-€{{ "%.2f"|format(factura.cuota_retencion) }}</td>
+                            </tr>
+                            {% endif %}
+                            <tr class="table-primary">
+                                <td>
+                                    <h5 class="mb-0">TOTAL A PAGAR:</h5>
+                                </td>
+                                <td class="text-end">
+                                    <h4 class="mb-0">€{{ "%.2f"|format(factura.total) }}</h4>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Pie de factura -->
+                {% if config_fiscal and config_fiscal.pie_factura %}
+                <div class="row mt-5">
+                    <div class="col-md-12">
+                        <hr>
+                        <p class="text-muted text-center mb-0">
+                            <small>{{ config_fiscal.pie_factura }}</small>
+                        </p>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para marcar como pagada -->
+<div class="modal fade" id="marcarPagadaModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="POST" action="{{ url_for('finance.marcar_factura_emitida_pagada', factura_id=factura.id) }}">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title"><i class="fas fa-check-circle"></i> Marcar Factura como Pagada</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="fecha_pago" class="form-label">Fecha de Pago *</label>
+                        <input type="date" class="form-control" id="fecha_pago" name="fecha_pago"
+                            value="{{ fecha_hoy }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="metodo_pago" class="form-label">Método de Pago</label>
+                        <select class="form-select" id="metodo_pago" name="metodo_pago">
+                            <option value="transferencia">Transferencia Bancaria</option>
+                            <option value="efectivo">Efectivo</option>
+                            <option value="tarjeta">Tarjeta</option>
+                            <option value="bizum">Bizum</option>
+                            <option value="otro">Otro</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-success">Confirmar Pago</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para anular factura -->
+<div class="modal fade" id="anularModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="POST" action="{{ url_for('finance.anular_factura_emitida', factura_id=factura.id) }}">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title"><i class="fas fa-ban"></i> Anular Factura</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <strong>Atención:</strong> Esta acción marcará la factura como anulada. La factura permanecerá
+                        en el sistema por motivos fiscales pero se excluirá de los cálculos.
+                    </div>
+                    <p>¿Está seguro de que desea anular la factura <strong>{{ factura.numero_completo }}</strong>?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-danger">Anular Factura</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    @media print {
+
+        .navbar,
+        .btn,
+        .modal,
+        .alert,
+        .no-print {
+            display: none !important;
+        }
+
+        .print-area {
+            border: none !important;
+            box-shadow: none !important;
+        }
+
+        body {
+            background: white;
+        }
+    }
+</style>
+{% endblock %}

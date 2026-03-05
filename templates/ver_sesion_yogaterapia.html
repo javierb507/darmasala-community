@@ -8,10 +8,11 @@
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h2><i class="fas fa-heart"></i> Sesión de Yogaterapia</h2>
             <div>
-                <a href="{{ url_for('editar_sesion_yogaterapia', sesion_id=sesion.id) }}" class="btn btn-warning me-2">
+                <a href="{{ url_for('yogatherapia.editar_sesion_yogaterapia', sesion_id=sesion.id) }}"
+                    class="btn btn-warning me-2">
                     <i class="fas fa-edit"></i> Editar
                 </a>
-                <a href="{{ url_for('yogaterapia') }}" class="btn btn-secondary">
+                <a href="{{ url_for('yogatherapia.yogaterapia') }}" class="btn btn-secondary">
                     <i class="fas fa-arrow-left"></i> Volver
                 </a>
             </div>
@@ -24,7 +25,8 @@
         <div class="card">
             <div class="card-header bg-success text-white">
                 <h5 class="mb-0">
-                    <i class="fas fa-leaf"></i> {{ sesion.alumno.nombre }} {{ sesion.alumno.apellido }} - {{ sesion.fecha_sesion.strftime('%d/%m/%Y') }}
+                    <i class="fas fa-leaf"></i> {{ sesion.alumno.nombre }} {{ sesion.alumno.apellido }} - {{
+                    sesion.fecha_sesion.strftime('%d/%m/%Y') }}
                 </h5>
             </div>
             <div class="card-body">
@@ -37,15 +39,15 @@
                         <strong>Duración:</strong> {{ sesion.duracion_minutos }} minutos
                     </div>
                     <div class="col-md-3">
-                        <strong>Tipo:</strong> 
+                        <strong>Tipo:</strong>
                         <span class="badge bg-info">{{ sesion.tipo_sesion.replace('_', ' ').title() }}</span>
                     </div>
                     <div class="col-md-3">
                         <strong>Estado:</strong>
                         {% if sesion.pagado %}
-                            <span class="badge bg-success">Pagado</span>
+                        <span class="badge bg-success">Pagado</span>
                         {% else %}
-                            <span class="badge bg-warning">Pendiente</span>
+                        <span class="badge bg-warning">Pendiente</span>
                         {% endif %}
                     </div>
                 </div>
@@ -72,7 +74,7 @@
                             <p class="mt-1">{{ sesion.motivo_consulta }}</p>
                         </div>
                         {% endif %}
-                        
+
                         {% if sesion.objetivos_terapeuticos %}
                         <div class="mb-3">
                             <strong>Objetivos Terapéuticos:</strong>
@@ -109,7 +111,8 @@
                 {% endif %}
 
                 <!-- Técnicas aplicadas -->
-                {% if sesion.posturas_trabajadas or sesion.respiracion_pranayama or sesion.meditacion_relajacion or sesion.tecnicas_aplicadas %}
+                {% if sesion.posturas_trabajadas or sesion.respiracion_pranayama or sesion.meditacion_relajacion or
+                sesion.tecnicas_aplicadas %}
                 <div class="card mb-4">
                     <div class="card-header bg-light">
                         <h6 class="mb-0"><i class="fas fa-om"></i> Técnicas Aplicadas</h6>
@@ -121,21 +124,21 @@
                             <p class="mt-1">{{ sesion.posturas_trabajadas }}</p>
                         </div>
                         {% endif %}
-                        
+
                         {% if sesion.respiracion_pranayama %}
                         <div class="mb-3">
                             <strong>Respiración y Pranayama:</strong>
                             <p class="mt-1">{{ sesion.respiracion_pranayama }}</p>
                         </div>
                         {% endif %}
-                        
+
                         {% if sesion.meditacion_relajacion %}
                         <div class="mb-3">
                             <strong>Meditación y Relajación:</strong>
                             <p class="mt-1">{{ sesion.meditacion_relajacion }}</p>
                         </div>
                         {% endif %}
-                        
+
                         {% if sesion.tecnicas_aplicadas %}
                         <div class="mb-3">
                             <strong>Otras Técnicas:</strong>
@@ -147,7 +150,8 @@
                 {% endif %}
 
                 <!-- Evaluación y seguimiento -->
-                {% if sesion.respuesta_sesion or sesion.observaciones_terapeuta or sesion.recomendaciones_casa or sesion.proxima_sesion %}
+                {% if sesion.respuesta_sesion or sesion.observaciones_terapeuta or sesion.recomendaciones_casa or
+                sesion.proxima_sesion %}
                 <div class="card mb-4">
                     <div class="card-header bg-light">
                         <h6 class="mb-0"><i class="fas fa-clipboard-list"></i> Evaluación y Seguimiento</h6>
@@ -159,21 +163,21 @@
                             <p class="mt-1">{{ sesion.respuesta_sesion }}</p>
                         </div>
                         {% endif %}
-                        
+
                         {% if sesion.observaciones_terapeuta %}
                         <div class="mb-3">
                             <strong>Observaciones del Terapeuta:</strong>
                             <p class="mt-1">{{ sesion.observaciones_terapeuta }}</p>
                         </div>
                         {% endif %}
-                        
+
                         {% if sesion.recomendaciones_casa %}
                         <div class="mb-3">
                             <strong>Recomendaciones para Casa:</strong>
                             <p class="mt-1">{{ sesion.recomendaciones_casa }}</p>
                         </div>
                         {% endif %}
-                        
+
                         {% if sesion.proxima_sesion %}
                         <div class="mb-3">
                             <strong>Plan para Próxima Sesión:</strong>
@@ -187,8 +191,10 @@
                 <!-- Archivos adjuntos -->
                 <div class="card mb-4">
                     <div class="card-header bg-light d-flex justify-content-between align-items-center">
-                        <h6 class="mb-0"><i class="fas fa-camera"></i> Archivos de la Sesión ({{ archivos|length }})</h6>
-                        <button class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#agregarArchivoModal">
+                        <h6 class="mb-0"><i class="fas fa-camera"></i> Archivos de la Sesión ({{ archivos|length }})
+                        </h6>
+                        <button class="btn btn-sm btn-success" data-bs-toggle="modal"
+                            data-bs-target="#agregarArchivoModal">
                             <i class="fas fa-plus"></i> Agregar Archivos
                         </button>
                     </div>
@@ -200,29 +206,32 @@
                                 <div class="card">
                                     <div class="card-body text-center">
                                         {% if archivo.tipo_archivo in ['jpg', 'jpeg', 'png', 'gif'] %}
-                                            <i class="fas fa-image fa-3x text-primary mb-2"></i>
+                                        <i class="fas fa-image fa-3x text-primary mb-2"></i>
                                         {% elif archivo.tipo_archivo == 'pdf' %}
-                                            <i class="fas fa-file-pdf fa-3x text-danger mb-2"></i>
+                                        <i class="fas fa-file-pdf fa-3x text-danger mb-2"></i>
                                         {% elif archivo.tipo_archivo in ['mp4', 'avi', 'mov'] %}
-                                            <i class="fas fa-video fa-3x text-success mb-2"></i>
+                                        <i class="fas fa-video fa-3x text-success mb-2"></i>
                                         {% elif archivo.tipo_archivo in ['mp3', 'wav', 'm4a'] %}
-                                            <i class="fas fa-music fa-3x text-warning mb-2"></i>
+                                        <i class="fas fa-music fa-3x text-warning mb-2"></i>
                                         {% else %}
-                                            <i class="fas fa-file fa-3x text-secondary mb-2"></i>
+                                        <i class="fas fa-file fa-3x text-secondary mb-2"></i>
                                         {% endif %}
-                                        
+
                                         <h6 class="card-title">{{ archivo.nombre_archivo }}</h6>
                                         <p class="card-text small text-muted">
                                             {{ (archivo.tamaño_bytes / 1024)|round(1) }} KB
                                         </p>
                                         <div class="btn-group" role="group">
-                                            <a href="{{ url_for('uploaded_file', filename=archivo.ruta_archivo) }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                            <a href="{{ url_for('main.uploaded_file', filename=archivo.ruta_archivo) }}"
+                                                target="_blank" class="btn btn-sm btn-outline-primary">
                                                 <i class="fas fa-external-link-alt"></i> Ver
                                             </a>
-                                            <button class="btn btn-sm btn-outline-info" onclick="verArchivo('{{ url_for('uploaded_file', filename=archivo.ruta_archivo) }}', '{{ archivo.tipo_archivo }}')">
+                                            <button class="btn btn-sm btn-outline-info"
+                                                onclick="verArchivo('{{ url_for('main.uploaded_file', filename=archivo.ruta_archivo) }}', '{{ archivo.tipo_archivo }}')">
                                                 <i class="fas fa-eye"></i> Vista Previa
                                             </button>
-                                            <button class="btn btn-sm btn-outline-danger" onclick="eliminarArchivo({{ archivo.id }})">
+                                            <button class="btn btn-sm btn-outline-danger"
+                                                onclick="eliminarArchivo({{ archivo.id }})">
                                                 <i class="fas fa-trash"></i> Eliminar
                                             </button>
                                         </div>
@@ -235,7 +244,8 @@
                         <div class="text-center text-muted py-4">
                             <i class="fas fa-folder-open fa-3x mb-3"></i>
                             <p>No hay archivos adjuntos a esta sesión</p>
-                            <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#agregarArchivoModal">
+                            <button class="btn btn-success" data-bs-toggle="modal"
+                                data-bs-target="#agregarArchivoModal">
                                 <i class="fas fa-plus"></i> Agregar Primer Archivo
                             </button>
                         </div>
@@ -261,7 +271,8 @@
 </div>
 
 <!-- Modal para visor de archivos -->
-<div class="modal fade" id="visorArchivoModal" tabindex="-1" aria-labelledby="visorArchivoModalLabel" aria-hidden="true">
+<div class="modal fade" id="visorArchivoModal" tabindex="-1" aria-labelledby="visorArchivoModalLabel"
+    aria-hidden="true">
     <div class="modal-dialog modal-xl">
         <div class="modal-content">
             <div class="modal-header">
@@ -286,95 +297,95 @@
 </div>
 
 <style>
-.visor-imagen {
-    max-width: 100%;
-    max-height: 70vh;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-}
+    .visor-imagen {
+        max-width: 100%;
+        max-height: 70vh;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
 
-.visor-video {
-    max-width: 100%;
-    max-height: 70vh;
-    border-radius: 8px;
-}
+    .visor-video {
+        max-width: 100%;
+        max-height: 70vh;
+        border-radius: 8px;
+    }
 
-.visor-pdf {
-    width: 100%;
-    height: 70vh;
-    border: none;
-    border-radius: 8px;
-}
+    .visor-pdf {
+        width: 100%;
+        height: 70vh;
+        border: none;
+        border-radius: 8px;
+    }
 
-.visor-audio {
-    width: 100%;
-    max-width: 500px;
-}
+    .visor-audio {
+        width: 100%;
+        max-width: 500px;
+    }
 
-.visor-texto {
-    text-align: left;
-    background: #f8f9fa;
-    padding: 20px;
-    border-radius: 8px;
-    max-height: 70vh;
-    overflow-y: auto;
-}
+    .visor-texto {
+        text-align: left;
+        background: #f8f9fa;
+        padding: 20px;
+        border-radius: 8px;
+        max-height: 70vh;
+        overflow-y: auto;
+    }
 </style>
 
 <script>
-function verArchivo(url, tipo) {
-    const modal = new bootstrap.Modal(document.getElementById('visorArchivoModal'));
-    const contenido = document.getElementById('contenidoArchivo');
-    const descargar = document.getElementById('descargarArchivo');
-    
-    // Configurar enlace de descarga
-    descargar.href = url;
-    
-    // Limpiar contenido anterior
-    contenido.innerHTML = '';
-    
-    // Mostrar contenido según el tipo de archivo
-    if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(tipo.toLowerCase())) {
-        contenido.innerHTML = `<img src="${url}" class="visor-imagen" alt="Imagen">`;
-    } else if (['mp4', 'avi', 'mov', 'webm'].includes(tipo.toLowerCase())) {
-        contenido.innerHTML = `
+    function verArchivo(url, tipo) {
+        const modal = new bootstrap.Modal(document.getElementById('visorArchivoModal'));
+        const contenido = document.getElementById('contenidoArchivo');
+        const descargar = document.getElementById('descargarArchivo');
+
+        // Configurar enlace de descarga
+        descargar.href = url;
+
+        // Limpiar contenido anterior
+        contenido.innerHTML = '';
+
+        // Mostrar contenido según el tipo de archivo
+        if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(tipo.toLowerCase())) {
+            contenido.innerHTML = `<img src="${url}" class="visor-imagen" alt="Imagen">`;
+        } else if (['mp4', 'avi', 'mov', 'webm'].includes(tipo.toLowerCase())) {
+            contenido.innerHTML = `
             <video controls class="visor-video">
                 <source src="${url}" type="video/${tipo}">
                 Tu navegador no soporta la reproducción de video.
             </video>
         `;
-    } else if (tipo.toLowerCase() === 'pdf') {
-        contenido.innerHTML = `<iframe src="${url}" class="visor-pdf"></iframe>`;
-    } else if (['mp3', 'wav', 'm4a', 'ogg'].includes(tipo.toLowerCase())) {
-        contenido.innerHTML = `
+        } else if (tipo.toLowerCase() === 'pdf') {
+            contenido.innerHTML = `<iframe src="${url}" class="visor-pdf"></iframe>`;
+        } else if (['mp3', 'wav', 'm4a', 'ogg'].includes(tipo.toLowerCase())) {
+            contenido.innerHTML = `
             <audio controls class="visor-audio">
                 <source src="${url}" type="audio/${tipo}">
                 Tu navegador no soporta la reproducción de audio.
             </audio>
         `;
-    } else if (['txt', 'md'].includes(tipo.toLowerCase())) {
-        // Para archivos de texto, cargar el contenido
-        fetch(url)
-            .then(response => response.text())
-            .then(text => {
-                contenido.innerHTML = `<pre class="visor-texto">${text}</pre>`;
-            })
-            .catch(error => {
-                contenido.innerHTML = `<div class="alert alert-warning">No se pudo cargar el archivo de texto.</div>`;
-            });
-    } else {
-        contenido.innerHTML = `
+        } else if (['txt', 'md'].includes(tipo.toLowerCase())) {
+            // Para archivos de texto, cargar el contenido
+            fetch(url)
+                .then(response => response.text())
+                .then(text => {
+                    contenido.innerHTML = `<pre class="visor-texto">${text}</pre>`;
+                })
+                .catch(error => {
+                    contenido.innerHTML = `<div class="alert alert-warning">No se pudo cargar el archivo de texto.</div>`;
+                });
+        } else {
+            contenido.innerHTML = `
             <div class="alert alert-info">
                 <i class="fas fa-info-circle"></i>
                 <p>Vista previa no disponible para archivos de tipo ${tipo.toUpperCase()}</p>
                 <p>Puedes descargar el archivo para verlo con una aplicación externa.</p>
             </div>
         `;
+        }
+
+        modal.show();
     }
-    
-    modal.show();
-    }
-    
+
     function eliminarArchivo(archivoId) {
         if (confirm('¿Estás seguro de que quieres eliminar este archivo?')) {
             const form = document.createElement('form');
@@ -394,12 +405,15 @@ function verArchivo(url, tipo) {
                 <h5 class="modal-title">Agregar Archivos a la Sesión</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <form method="POST" action="{{ url_for('agregar_archivo_yogaterapia', sesion_id=sesion.id) }}" enctype="multipart/form-data">
+            <form method="POST" action="{{ url_for('yogatherapia.agregar_archivo_yogaterapia', sesion_id=sesion.id) }}"
+                enctype="multipart/form-data">
                 <div class="modal-body">
                     <div class="mb-3">
                         <label for="archivos" class="form-label">Seleccionar Archivos</label>
-                        <input type="file" class="form-control" id="archivos" name="archivos" multiple accept="image/*,video/*,audio/*,.pdf,.txt,.doc,.docx">
-                        <div class="form-text">Puedes seleccionar múltiples archivos. Formatos soportados: imágenes, videos, audio, PDF, documentos de texto.</div>
+                        <input type="file" class="form-control" id="archivos" name="archivos" multiple
+                            accept="image/*,video/*,audio/*,.pdf,.txt,.doc,.docx">
+                        <div class="form-text">Puedes seleccionar múltiples archivos. Formatos soportados: imágenes,
+                            videos, audio, PDF, documentos de texto.</div>
                     </div>
                 </div>
                 <div class="modal-footer">

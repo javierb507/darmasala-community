@@ -12,7 +12,8 @@
             <div class="card-body">
                 <div class="alert alert-danger">
                     <i class="fas fa-exclamation-triangle"></i>
-                    <strong>¡ATENCIÓN!</strong> Esta sección es solo para administradores y permite modificar todos los datos del sistema.
+                    <strong>¡ATENCIÓN!</strong> Esta sección es solo para administradores y permite modificar todos los
+                    datos del sistema.
                     Use estas opciones con precaución.
                 </div>
 
@@ -37,10 +38,12 @@
                                 </ul>
 
                                 <div class="alert alert-info">
-                                    <small><i class="fas fa-info-circle"></i> Los datos de prueba incluyen información realista para simular una escuela en funcionamiento.</small>
+                                    <small><i class="fas fa-info-circle"></i> Los datos de prueba incluyen información
+                                        realista para simular una escuela en funcionamiento.</small>
                                 </div>
 
-                                <form method="POST" action="{{ url_for('cargar_datos_prueba') }}" onsubmit="return confirm('¿Desea cargar datos de prueba? Esto añadirá información de ejemplo al sistema.');">
+                                <form method="POST" action="{{ url_for('settings.cargar_datos_prueba') }}"
+                                    onsubmit="return confirm('¿Desea cargar datos de prueba? Esto añadirá información de ejemplo al sistema.');">
                                     <button type="submit" class="btn btn-success w-100">
                                         <i class="fas fa-database"></i> Cargar Datos de Prueba
                                     </button>
@@ -75,10 +78,12 @@
                                 </ul>
 
                                 <div class="alert alert-warning">
-                                    <small><i class="fas fa-exclamation-triangle"></i> <strong>Esta acción NO SE PUEDE DESHACER.</strong> Use solo para empezar con un sistema limpio.</small>
+                                    <small><i class="fas fa-exclamation-triangle"></i> <strong>Esta acción NO SE PUEDE
+                                            DESHACER.</strong> Use solo para empezar con un sistema limpio.</small>
                                 </div>
 
-                                <form method="POST" action="{{ url_for('resetear_sistema') }}" onsubmit="return confirm('¡ADVERTENCIA! Esta acción eliminará TODOS los datos del sistema. ¿Está completamente seguro?') && confirm('¿REALMENTE desea eliminar TODOS los datos? Esta acción NO SE PUEDE DESHACER.');">
+                                <form method="POST" action="{{ url_for('settings.resetear_sistema') }}"
+                                    onsubmit="return confirm('¡ADVERTENCIA! Esta acción eliminará TODOS los datos del sistema. ¿Está completamente seguro?') && confirm('¿REALMENTE desea eliminar TODOS los datos? Esta acción NO SE PUEDE DESHACER.');">
                                     <button type="submit" class="btn btn-danger w-100">
                                         <i class="fas fa-exclamation-triangle"></i> RESETEAR TODO EL SISTEMA
                                     </button>
@@ -153,7 +158,7 @@
                 </div>
 
                 <div class="mt-4">
-                    <a href="{{ url_for('configuracion') }}" class="btn btn-outline-secondary">
+                    <a href="{{ url_for('settings.configuracion') }}" class="btn btn-outline-secondary">
                         <i class="fas fa-arrow-left"></i> Volver a Configuración
                     </a>
                 </div>

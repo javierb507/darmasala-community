@@ -15,8 +15,9 @@ from werkzeug.security import generate_password_hash
 # Agregar el directorio actual al path para importar app
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-from app import (
-    app, db, Usuario, Alumno, Pago, SesionYogaterapia, HorarioSemanal, 
+from app import app
+from models import (
+    db, Usuario, Alumno, Pago, SesionYogaterapia, HorarioSemanal, 
     Clase, Asistencia, CategoriaGasto, Proveedor, GastoFijo, 
     FacturaProveedor, GastoMensual, Sutra, TipoClase, EventoCalendario, Instructor
 )

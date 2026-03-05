@@ -22,7 +22,7 @@
                 <p class="text-muted">
                     Crea una copia de seguridad completa de todos los datos de la aplicación.
                 </p>
-                
+
                 <div class="alert alert-info">
                     <i class="fas fa-info-circle"></i>
                     <strong>¿Qué se incluye?</strong>
@@ -34,20 +34,20 @@
                         <li>Datos económicos</li>
                     </ul>
                 </div>
-                
-                <form method="POST" action="{{ url_for('crear_backup') }}">
+
+                <form method="POST" action="{{ url_for('settings.crear_backup') }}">
                     <button type="submit" class="btn btn-primary btn-lg w-100">
                         <i class="fas fa-download"></i> Crear Backup Ahora
                     </button>
                 </form>
-                
+
                 <small class="text-muted mt-2 d-block">
                     <i class="fas fa-clock"></i> El backup se guardará en la carpeta 'backups' con fecha y hora actual.
                 </small>
             </div>
         </div>
     </div>
-    
+
     <!-- Restaurar Backup -->
     <div class="col-md-6">
         <div class="card">
@@ -58,27 +58,28 @@
                 <p class="text-muted">
                     Restaura los datos desde un archivo de backup anterior.
                 </p>
-                
+
                 <div class="alert alert-warning">
                     <i class="fas fa-exclamation-triangle"></i>
                     <strong>¡Atención!</strong> Restaurar un backup reemplazará todos los datos actuales.
                 </div>
-                
-                <form method="POST" action="{{ url_for('restaurar_backup') }}" enctype="multipart/form-data">
+
+                <form method="POST" action="{{ url_for('settings.restaurar_backup') }}" enctype="multipart/form-data">
                     <div class="mb-3">
                         <label for="backup_file" class="form-label">Seleccionar archivo de backup</label>
-                        <input type="file" class="form-control" id="backup_file" name="backup_file" 
-                               accept=".db" required>
+                        <input type="file" class="form-control" id="backup_file" name="backup_file" accept=".db"
+                            required>
                         <div class="form-text">Solo archivos .db son permitidos</div>
                     </div>
-                    
+
                     <div class="form-check mb-3">
-                        <input class="form-check-input" type="checkbox" id="confirm_restore" name="confirm_restore" required>
+                        <input class="form-check-input" type="checkbox" id="confirm_restore" name="confirm_restore"
+                            required>
                         <label class="form-check-label" for="confirm_restore">
                             Confirmo que quiero reemplazar todos los datos actuales
                         </label>
                     </div>
-                    
+
                     <button type="submit" class="btn btn-warning btn-lg w-100">
                         <i class="fas fa-upload"></i> Restaurar Backup
                     </button>
@@ -105,23 +106,23 @@
 </div>
 
 <script>
-// Cargar lista de backups al cargar la página
-document.addEventListener('DOMContentLoaded', function() {
-    cargarListaBackups();
-});
+    // Cargar lista de backups al cargar la página
+    document.addEventListener('DOMContentLoaded', function () {
+        cargarListaBackups();
+    });
 
-function cargarListaBackups() {
-    fetch('/api/backups')
-        .then(response => response.json())
-        .then(data => {
-            const container = document.getElementById('backup-list');
-            
-            if (data.backups && data.backups.length > 0) {
-                let html = '<div class="table-responsive"><table class="table table-striped">';
-                html += '<thead><tr><th>Archivo</th><th>Fecha</th><th>Tamaño</th><th>Acciones</th></tr></thead><tbody>';
-                
-                data.backups.forEach(backup => {
-                    html += `<tr>
+    function cargarListaBackups() {
+        fetch('/api/backups')
+            .then(response => response.json())
+            .then(data => {
+                const container = document.getElementById('backup-list');
+
+                if (data.backups && data.backups.length > 0) {
+                    let html = '<div class="table-responsive"><table class="table table-striped">';
+                    html += '<thead><tr><th>Archivo</th><th>Fecha</th><th>Tamaño</th><th>Acciones</th></tr></thead><tbody>';
+
+                    data.backups.forEach(backup => {
+                        html += `<tr>
                         <td><i class="fas fa-database"></i> ${backup.filename}</td>
                         <td>${backup.date}</td>
                         <td>${backup.size}</td>
@@ -131,23 +132,23 @@ function cargarListaBackups() {
                             </button>
                         </td>
                     </tr>`;
-                });
-                
-                html += '</tbody></table></div>';
-                container.innerHTML = html;
-            } else {
-                container.innerHTML = '<p class="text-muted text-center">No hay backups disponibles</p>';
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            document.getElementById('backup-list').innerHTML = 
-                '<p class="text-danger text-center">Error al cargar la lista de backups</p>';
-        });
-}
+                    });
 
-function descargarBackup(filename) {
-    window.location.href = `/backup/descargar/${filename}`;
-}
+                    html += '</tbody></table></div>';
+                    container.innerHTML = html;
+                } else {
+                    container.innerHTML = '<p class="text-muted text-center">No hay backups disponibles</p>';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('backup-list').innerHTML =
+                    '<p class="text-danger text-center">Error al cargar la lista de backups</p>';
+            });
+    }
+
+    function descargarBackup(filename) {
+        window.location.href = `/backup/descargar/${filename}`;
+    }
 </script>
 {% endblock %}

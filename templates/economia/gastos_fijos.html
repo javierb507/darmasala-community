@@ -8,10 +8,10 @@
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h2><i class="fas fa-sync-alt"></i> Gastos Fijos (Recurrentes)</h2>
             <div>
-                <a href="{{ url_for('nuevo_gasto_fijo') }}" class="btn btn-primary">
+                <a href="{{ url_for('finance.nuevo_gasto_fijo') }}" class="btn btn-primary">
                     <i class="fas fa-plus"></i> Nuevo Gasto Fijo
                 </a>
-                <a href="{{ url_for('economia') }}" class="btn btn-outline-secondary">
+                <a href="{{ url_for('finance.economia_historico') }}" class="btn btn-outline-secondary">
                     <i class="fas fa-arrow-left"></i> Volver
                 </a>
             </div>
@@ -33,9 +33,10 @@
                         <h6>Total Mensual</h6>
                         <h3>
                             €{{ "%.2f"|format(gastos|sum(attribute='importe') if gastos[0].frecuencia == 'mensual' else
-                                              (gastos|selectattr('frecuencia', 'equalto', 'mensual')|sum(attribute='importe') or 0) +
-                                              (gastos|selectattr('frecuencia', 'equalto', 'trimestral')|sum(attribute='importe') or 0) / 3 +
-                                              (gastos|selectattr('frecuencia', 'equalto', 'anual')|sum(attribute='importe') or 0) / 12) }}
+                            (gastos|selectattr('frecuencia', 'equalto', 'mensual')|sum(attribute='importe') or 0) +
+                            (gastos|selectattr('frecuencia', 'equalto', 'trimestral')|sum(attribute='importe') or 0) / 3
+                            +
+                            (gastos|selectattr('frecuencia', 'equalto', 'anual')|sum(attribute='importe') or 0) / 12) }}
                         </h3>
                     </div>
                 </div>
@@ -45,9 +46,11 @@
                     <div class="card-body">
                         <h6>Total Anual Estimado</h6>
                         <h3>
-                            €{{ "%.2f"|format((gastos|selectattr('frecuencia', 'equalto', 'mensual')|sum(attribute='importe') or 0) * 12 +
-                                              (gastos|selectattr('frecuencia', 'equalto', 'trimestral')|sum(attribute='importe') or 0) * 4 +
-                                              (gastos|selectattr('frecuencia', 'equalto', 'anual')|sum(attribute='importe') or 0)) }}
+                            €{{ "%.2f"|format((gastos|selectattr('frecuencia', 'equalto',
+                            'mensual')|sum(attribute='importe') or 0) * 12 +
+                            (gastos|selectattr('frecuencia', 'equalto', 'trimestral')|sum(attribute='importe') or 0) * 4
+                            +
+                            (gastos|selectattr('frecuencia', 'equalto', 'anual')|sum(attribute='importe') or 0)) }}
                         </h3>
                     </div>
                 </div>
@@ -88,29 +91,30 @@
                                 <td>
                                     <strong>{{ gasto.nombre }}</strong>
                                     {% if gasto.descripcion %}
-                                    <br><small class="text-muted">{{ gasto.descripcion[:50] }}{% if gasto.descripcion|length > 50 %}...{% endif %}</small>
+                                    <br><small class="text-muted">{{ gasto.descripcion[:50] }}{% if
+                                        gasto.descripcion|length > 50 %}...{% endif %}</small>
                                     {% endif %}
                                 </td>
                                 <td>
                                     {% if gasto.proveedor %}
-                                        {{ gasto.proveedor.nombre }}
+                                    {{ gasto.proveedor.nombre }}
                                     {% else %}
-                                        <span class="text-muted">-</span>
+                                    <span class="text-muted">-</span>
                                     {% endif %}
                                 </td>
                                 <td>
-                                    <span class="badge" style="background-color: {{ gasto.categoria.color }}">
+                                    <span class="badge badge-categoria" data-color="{{ gasto.categoria.color }}">
                                         {{ gasto.categoria.nombre }}
                                     </span>
                                 </td>
                                 <td><strong>€{{ "%.2f"|format(gasto.importe) }}</strong></td>
                                 <td>
                                     {% if gasto.frecuencia == 'mensual' %}
-                                        <span class="badge bg-primary">Mensual</span>
+                                    <span class="badge bg-primary">Mensual</span>
                                     {% elif gasto.frecuencia == 'trimestral' %}
-                                        <span class="badge bg-info">Trimestral</span>
+                                    <span class="badge bg-info">Trimestral</span>
                                     {% elif gasto.frecuencia == 'anual' %}
-                                        <span class="badge bg-success">Anual</span>
+                                    <span class="badge bg-success">Anual</span>
                                     {% endif %}
                                 </td>
                                 <td>Día {{ gasto.dia_cargo }}</td>
@@ -141,7 +145,7 @@
                     Los gastos fijos son gastos recurrentes como alquiler, suministros, seguros, etc.<br>
                     Una vez configurados, se pueden controlar fácilmente mes a mes.
                 </p>
-                <a href="{{ url_for('nuevo_gasto_fijo') }}" class="btn btn-primary">
+                <a href="{{ url_for('finance.nuevo_gasto_fijo') }}" class="btn btn-primary">
                     <i class="fas fa-plus"></i> Crear Primer Gasto Fijo
                 </a>
             </div>
@@ -155,13 +159,29 @@
             </div>
             <div class="card-body">
                 <ul class="mb-0">
-                    <li><strong>Gastos Fijos:</strong> Son predecibles y se repiten regularmente (alquiler, luz, agua, seguros, cuota de autónomo)</li>
-                    <li><strong>Gastos Variables:</strong> Son ocasionales y no predecibles (compra de material, formaciones, reparaciones)</li>
-                    <li><strong>Ventaja:</strong> Conociendo tus gastos fijos mensuales puedes calcular fácilmente el punto de equilibrio de tu negocio</li>
+                    <li><strong>Gastos Fijos:</strong> Son predecibles y se repiten regularmente (alquiler, luz, agua,
+                        seguros, cuota de autónomo)</li>
+                    <li><strong>Gastos Variables:</strong> Son ocasionales y no predecibles (compra de material,
+                        formaciones, reparaciones)</li>
+                    <li><strong>Ventaja:</strong> Conociendo tus gastos fijos mensuales puedes calcular fácilmente el
+                        punto de equilibrio de tu negocio</li>
                     <li><strong>Recomendación:</strong> Revisa tus gastos fijos cada 6 meses para optimizar costes</li>
                 </ul>
             </div>
         </div>
     </div>
 </div>
+</div>
+</div>
+
+<script>
+    // Aplicar colores de categoría
+    document.querySelectorAll('.badge-categoria').forEach(badge => {
+        const color = badge.dataset.color;
+        if (color) {
+            badge.style.backgroundColor = color;
+            badge.style.color = 'white';
+        }
+    });
+</script>
 {% endblock %}

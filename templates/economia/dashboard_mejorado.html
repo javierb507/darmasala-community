@@ -8,11 +8,11 @@
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h2><i class="fas fa-calculator"></i> Dashboard de Contabilidad</h2>
             <div class="btn-group">
-                <a href="{{ url_for('reporte_contabilidad_pdf') }}?periodo={{ periodo }}&año={{ año }}&mes={{ mes }}" 
-                   class="btn btn-primary" target="_blank">
+                <a href="{{ url_for('finance.reporte_contabilidad_pdf') }}?periodo={{ periodo }}&año={{ año }}&mes={{ mes }}"
+                    class="btn btn-primary" target="_blank">
                     <i class="fas fa-file-pdf"></i> Generar PDF
                 </a>
-                <a href="{{ url_for('gastos_mensuales') }}" class="btn btn-success">
+                <a href="{{ url_for('finance.gastos_mensuales') }}" class="btn btn-success">
                     <i class="fas fa-receipt"></i> Gastos del Mes
                 </a>
             </div>
@@ -29,16 +29,18 @@
                     <div class="col-md-3">
                         <label for="periodo" class="form-label">Período</label>
                         <select class="form-select" id="periodo" name="periodo" onchange="this.form.submit()">
-                            <option value="mes_actual" {{ 'selected' if periodo == 'mes_actual' else '' }}>Mes Actual</option>
-                            <option value="trimestre" {{ 'selected' if periodo == 'trimestre' else '' }}>Trimestre</option>
-                            <option value="año" {{ 'selected' if periodo == 'año' else '' }}>Año Completo</option>
+                            <option value="mes_actual" {{ 'selected' if periodo=='mes_actual' else '' }}>Mes Actual
+                            </option>
+                            <option value="trimestre" {{ 'selected' if periodo=='trimestre' else '' }}>Trimestre
+                            </option>
+                            <option value="año" {{ 'selected' if periodo=='año' else '' }}>Año Completo</option>
                         </select>
                     </div>
                     <div class="col-md-2">
                         <label for="año" class="form-label">Año</label>
                         <select class="form-select" id="año" name="año" onchange="this.form.submit()">
                             {% for y in range(2023, 2027) %}
-                            <option value="{{ y }}" {{ 'selected' if y == año else '' }}>{{ y }}</option>
+                            <option value="{{ y }}" {{ 'selected' if y==año else '' }}>{{ y }}</option>
                             {% endfor %}
                         </select>
                     </div>
@@ -46,17 +48,18 @@
                     <div class="col-md-3">
                         <label for="mes" class="form-label">Mes</label>
                         <select class="form-select" id="mes" name="mes" onchange="this.form.submit()">
-                            {% set meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 
-                                           'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'] %}
+                            {% set meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+                            'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'] %}
                             {% for m in range(1, 13) %}
-                            <option value="{{ m }}" {{ 'selected' if m == mes else '' }}>{{ meses[m-1] }}</option>
+                            <option value="{{ m }}" {{ 'selected' if m==mes else '' }}>{{ meses[m-1] }}</option>
                             {% endfor %}
                         </select>
                     </div>
                     {% endif %}
                     <div class="col-md-4">
                         <div class="text-muted">
-                            <small><strong>Período:</strong> {{ fecha_inicio.strftime('%d/%m/%Y') }} - {{ fecha_fin.strftime('%d/%m/%Y') }}</small>
+                            <small><strong>Período:</strong> {{ fecha_inicio.strftime('%d/%m/%Y') }} - {{
+                                fecha_fin.strftime('%d/%m/%Y') }}</small>
                         </div>
                     </div>
                 </form>
@@ -139,7 +142,7 @@
             </div>
         </div>
     </div>
-    
+
     <div class="col-md-6">
         <div class="card">
             <div class="card-header bg-danger text-white">
@@ -173,28 +176,31 @@
             </div>
             <div class="card-body">
                 <div class="list-group list-group-flush">
-                    <a href="{{ url_for('gastos_mensuales') }}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                    <a href="{{ url_for('finance.gastos_mensuales') }}"
+                        class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
                         <div>
                             <i class="fas fa-receipt text-primary"></i>
                             <span class="ms-2">Gestionar Gastos del Mes</span>
                         </div>
                         <span class="badge bg-warning rounded-pill">{{ gastos_pendientes }}</span>
                     </a>
-                    
-                    <a href="{{ url_for('facturas') }}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+
+                    <a href="{{ url_for('finance.facturas') }}"
+                        class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
                         <div>
                             <i class="fas fa-file-invoice text-danger"></i>
                             <span class="ms-2">Facturas Pendientes</span>
                         </div>
                         <span class="badge bg-danger rounded-pill">{{ facturas_pendientes }}</span>
                     </a>
-                    
-                    <a href="{{ url_for('proveedores') }}" class="list-group-item list-group-item-action">
+
+                    <a href="{{ url_for('finance.proveedores') }}" class="list-group-item list-group-item-action">
                         <i class="fas fa-building text-success"></i>
                         <span class="ms-2">Gestionar Proveedores</span>
                     </a>
-                    
-                    <a href="{{ url_for('exportar') }}" class="list-group-item list-group-item-action">
+
+                    <a href="{{ url_for('finance.exportar_datos', tipo='todo') }}"
+                        class="list-group-item list-group-item-action">
                         <i class="fas fa-download text-info"></i>
                         <span class="ms-2">Exportar Datos</span>
                     </a>
@@ -202,7 +208,7 @@
             </div>
         </div>
     </div>
-    
+
     <div class="col-md-6">
         <div class="card">
             <div class="card-header">
@@ -220,14 +226,14 @@
                     <strong>Atención:</strong> El balance del período es negativo.
                 </div>
                 {% endif %}
-                
+
                 {% if facturas_vencidas > 0 %}
                 <div class="alert alert-danger">
                     <i class="fas fa-clock"></i>
                     <strong>Urgente:</strong> Hay {{ facturas_vencidas }} facturas vencidas.
                 </div>
                 {% endif %}
-                
+
                 <div class="mt-3">
                     <h6>Datos Fiscales:</h6>
                     <ul class="list-unstyled">
@@ -244,23 +250,23 @@
 <!-- Scripts para gráficos -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-// Gráfico de Ingresos
-const ingresosCtx = document.getElementById('ingresosChart').getContext('2d');
-new Chart(ingresosCtx, {
-    type: 'doughnut',
-    data: {
-        labels: ['Cuotas', 'Matrículas', 'Clases Sueltas', 'Yogaterapia'],
-        datasets: [{
-            data: [
-                {{ ingresos_detalle.cuotas }},
-                {{ ingresos_detalle.matriculas }},
+    // Gráfico de Ingresos
+    const ingresosCtx = document.getElementById('ingresosChart').getContext('2d');
+    new Chart(ingresosCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Cuotas', 'Matrículas', 'Clases Sueltas', 'Yogaterapia'],
+            datasets: [{
+                data: [
+                    {{ ingresos_detalle.cuotas }},
+            {{ ingresos_detalle.matriculas }},
                 {{ ingresos_detalle.clases_sueltas }},
-                {{ ingresos_detalle.yogaterapia }}
+        {{ ingresos_detalle.yogaterapia }}
             ],
-            backgroundColor: ['#28a745', '#17a2b8', '#ffc107', '#6f42c1']
+        backgroundColor: ['#28a745', '#17a2b8', '#ffc107', '#6f42c1']
         }]
     },
-    options: {
+        options: {
         responsive: true,
         maintainAspectRatio: false,
         plugins: {
@@ -271,21 +277,21 @@ new Chart(ingresosCtx, {
     }
 });
 
-// Gráfico de Gastos
-const gastosCtx = document.getElementById('gastosChart').getContext('2d');
-new Chart(gastosCtx, {
-    type: 'doughnut',
-    data: {
-        labels: ['Gastos Mensuales', 'Facturas'],
-        datasets: [{
-            data: [
-                {{ gastos_detalle.gastos_mensuales }},
-                {{ gastos_detalle.facturas }}
+    // Gráfico de Gastos
+    const gastosCtx = document.getElementById('gastosChart').getContext('2d');
+    new Chart(gastosCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Gastos Mensuales', 'Facturas'],
+            datasets: [{
+                data: [
+                    {{ gastos_detalle.gastos_mensuales }},
+            {{ gastos_detalle.facturas }}
             ],
-            backgroundColor: ['#dc3545', '#fd7e14']
-        }]
+        backgroundColor: ['#dc3545', '#fd7e14']
+    }]
     },
-    options: {
+        options: {
         responsive: true,
         maintainAspectRatio: false,
         plugins: {

@@ -1,10 +1,10 @@
 {
   "version": "1.0.0",
-  "build_date": "2026-02-03 21:15:20",
+  "build_date": "2026-03-04 15:26:46",
   "git_info": {
-    "commit_hash": "9686a20",
-    "commit_date": "2026-01-28 15:15:47",
-    "commit_message": "Docs: Create roadmap with prioritized TODO list",
+    "commit_hash": "73b3a02",
+    "commit_date": "2026-02-05 12:05:52",
+    "commit_message": "Corregido error de importación de Configuracion en inicializar_sistema.py",
     "branch": "main",
     "remote_url": "https://github.com/javierb507/yoga-school-management",
     "available": true

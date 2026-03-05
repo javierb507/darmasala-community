@@ -19,11 +19,12 @@
                             <select class="form-select" id="proveedor_id" name="proveedor_id" required>
                                 <option value="">Seleccione un proveedor...</option>
                                 {% for proveedor in proveedores %}
-                                <option value="{{ proveedor.id }}">{{ proveedor.nombre }} ({{ proveedor.cif_nif }})</option>
+                                <option value="{{ proveedor.id }}">{{ proveedor.nombre }} ({{ proveedor.cif_nif }})
+                                </option>
                                 {% endfor %}
                             </select>
                             <small class="form-text text-muted">
-                                <a href="{{ url_for('nuevo_proveedor') }}" target="_blank">
+                                <a href="{{ url_for('finance.nuevo_proveedor') }}" target="_blank">
                                     <i class="fas fa-plus"></i> Crear nuevo proveedor
                                 </a>
                             </small>
@@ -45,13 +46,13 @@
                         <div class="col-md-6 mb-3">
                             <label for="numero_factura" class="form-label">Número de Factura *</label>
                             <input type="text" class="form-control" id="numero_factura" name="numero_factura"
-                                   placeholder="Ej: F-2025-001" required>
+                                placeholder="Ej: F-2025-001" required>
                             <small class="form-text text-muted">El número de factura del proveedor</small>
                         </div>
                         <div class="col-md-3 mb-3">
                             <label for="fecha_factura" class="form-label">Fecha Factura *</label>
                             <input type="date" class="form-control" id="fecha_factura" name="fecha_factura"
-                                   value="{{ fecha_hoy if fecha_hoy else '' }}" required>
+                                value="{{ fecha_hoy if fecha_hoy else '' }}" required>
                         </div>
                         <div class="col-md-3 mb-3">
                             <label for="fecha_vencimiento" class="form-label">Fecha Vencimiento</label>
@@ -62,7 +63,7 @@
                     <div class="mb-3">
                         <label for="descripcion" class="form-label">Descripción</label>
                         <textarea class="form-control" id="descripcion" name="descripcion" rows="2"
-                                  placeholder="Descripción del servicio o producto facturado"></textarea>
+                            placeholder="Descripción del servicio o producto facturado"></textarea>
                     </div>
 
                     <h5 class="border-bottom pb-2 mb-3 mt-4">Importes</h5>
@@ -73,7 +74,7 @@
                             <div class="input-group">
                                 <span class="input-group-text">€</span>
                                 <input type="number" class="form-control" id="importe_sin_iva" name="importe_sin_iva"
-                                       step="0.01" min="0" required onchange="calcularTotal()">
+                                    step="0.01" min="0" required onchange="calcularTotal()">
                             </div>
                         </div>
                         <div class="col-md-4 mb-3">
@@ -89,8 +90,8 @@
                             <label for="importe_total" class="form-label">Importe Total</label>
                             <div class="input-group">
                                 <span class="input-group-text">€</span>
-                                <input type="text" class="form-control bg-light" id="importe_total_display"
-                                       readonly value="0.00">
+                                <input type="text" class="form-control bg-light" id="importe_total_display" readonly
+                                    value="0.00">
                             </div>
                         </div>
                     </div>
@@ -117,11 +118,11 @@
                     <div class="mb-3">
                         <label for="notas" class="form-label">Notas Internas</label>
                         <textarea class="form-control" id="notas" name="notas" rows="2"
-                                  placeholder="Notas o comentarios adicionales (uso interno)"></textarea>
+                            placeholder="Notas o comentarios adicionales (uso interno)"></textarea>
                     </div>
 
                     <div class="d-flex justify-content-between mt-4">
-                        <a href="{{ url_for('facturas') }}" class="btn btn-secondary">
+                        <a href="{{ url_for('finance.facturas') }}" class="btn btn-secondary">
                             <i class="fas fa-arrow-left"></i> Cancelar
                         </a>
                         <button type="submit" class="btn btn-danger">
@@ -149,35 +150,35 @@
 </div>
 
 <script>
-function calcularTotal() {
-    const importeSinIva = parseFloat(document.getElementById('importe_sin_iva').value) || 0;
-    const iva = parseFloat(document.getElementById('iva').value) || 0;
+    function calcularTotal() {
+        const importeSinIva = parseFloat(document.getElementById('importe_sin_iva').value) || 0;
+        const iva = parseFloat(document.getElementById('iva').value) || 0;
 
-    const cuotaIva = importeSinIva * (iva / 100);
-    const total = importeSinIva + cuotaIva;
+        const cuotaIva = importeSinIva * (iva / 100);
+        const total = importeSinIva + cuotaIva;
 
-    document.getElementById('base_display').textContent = `€${importeSinIva.toFixed(2)}`;
-    document.getElementById('cuota_iva_display').textContent = `€${cuotaIva.toFixed(2)}`;
-    document.getElementById('total_display').textContent = `€${total.toFixed(2)}`;
-    document.getElementById('importe_total_display').value = total.toFixed(2);
-}
-
-// Calcular fecha de vencimiento automáticamente (30 días después de la fecha de factura)
-document.getElementById('fecha_factura').addEventListener('change', function() {
-    const fechaFactura = new Date(this.value);
-    if (!isNaN(fechaFactura.getTime())) {
-        const fechaVencimiento = new Date(fechaFactura);
-        fechaVencimiento.setDate(fechaVencimiento.getDate() + 30);
-
-        const año = fechaVencimiento.getFullYear();
-        const mes = String(fechaVencimiento.getMonth() + 1).padStart(2, '0');
-        const dia = String(fechaVencimiento.getDate()).padStart(2, '0');
-
-        document.getElementById('fecha_vencimiento').value = `${año}-${mes}-${dia}`;
+        document.getElementById('base_display').textContent = `€${importeSinIva.toFixed(2)}`;
+        document.getElementById('cuota_iva_display').textContent = `€${cuotaIva.toFixed(2)}`;
+        document.getElementById('total_display').textContent = `€${total.toFixed(2)}`;
+        document.getElementById('importe_total_display').value = total.toFixed(2);
     }
-});
 
-// Calcular total al cargar la página
-document.addEventListener('DOMContentLoaded', calcularTotal);
+    // Calcular fecha de vencimiento automáticamente (30 días después de la fecha de factura)
+    document.getElementById('fecha_factura').addEventListener('change', function () {
+        const fechaFactura = new Date(this.value);
+        if (!isNaN(fechaFactura.getTime())) {
+            const fechaVencimiento = new Date(fechaFactura);
+            fechaVencimiento.setDate(fechaVencimiento.getDate() + 30);
+
+            const año = fechaVencimiento.getFullYear();
+            const mes = String(fechaVencimiento.getMonth() + 1).padStart(2, '0');
+            const dia = String(fechaVencimiento.getDate()).padStart(2, '0');
+
+            document.getElementById('fecha_vencimiento').value = `${año}-${mes}-${dia}`;
+        }
+    });
+
+    // Calcular total al cargar la página
+    document.addEventListener('DOMContentLoaded', calcularTotal);
 </script>
 {% endblock %}

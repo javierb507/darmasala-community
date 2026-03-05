@@ -11,7 +11,7 @@
                 <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#nuevoGastoModal">
                     <i class="fas fa-plus"></i> Nuevo Gasto
                 </button>
-                <a href="{{ url_for('economia') }}" class="btn btn-secondary">
+                <a href="{{ url_for('finance.economia') }}" class="btn btn-secondary">
                     <i class="fas fa-arrow-left"></i> Volver
                 </a>
             </div>
@@ -64,59 +64,61 @@
             </div>
             <div class="card-body">
                 {% if gastos %}
-                    <div class="table-responsive">
-                        <table class="table table-striped">
-                            <thead>
-                                <tr>
-                                    <th>Fecha</th>
-                                    <th>Concepto</th>
-                                    <th>Categoría</th>
-                                    <th>Importe</th>
-                                    <th>Estado</th>
-                                    <th>Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for gasto in gastos %}
-                                <tr>
-                                    <td>{{ gasto.fecha.strftime('%d/%m') }}</td>
-                                    <td>{{ gasto.concepto }}</td>
-                                    <td>
-                                        <span class="badge" style="background-color: {{ gasto.categoria_color }}; color: white;">
-                                            {{ gasto.categoria_nombre }}
-                                        </span>
-                                    </td>
-                                    <td><strong>{{ "%.2f"|format(gasto.importe) }}€</strong></td>
-                                    <td>
-                                        {% if gasto.pagado %}
-                                            <span class="badge bg-success">Pagado</span>
-                                        {% else %}
-                                            <span class="badge bg-warning">Pendiente</span>
-                                        {% endif %}
-                                    </td>
-                                    <td>
-                                        {% if not gasto.pagado %}
-                                        <button class="btn btn-sm btn-success" onclick="marcarPagado({{ gasto.id }})">
-                                            <i class="fas fa-check"></i>
-                                        </button>
-                                        {% endif %}
-                                        <button class="btn btn-sm btn-outline-primary" onclick="editarGasto({{ gasto.id }})">
-                                            <i class="fas fa-edit"></i>
-                                        </button>
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Concepto</th>
+                                <th>Categoría</th>
+                                <th>Importe</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for gasto in gastos %}
+                            <tr>
+                                <td>{{ gasto.fecha.strftime('%d/%m') }}</td>
+                                <td>{{ gasto.concepto }}</td>
+                                <td>
+                                    <span class="badge"
+                                        style="background-color: {{ gasto.categoria_color }}; color: white;">
+                                        {{ gasto.categoria_nombre }}
+                                    </span>
+                                </td>
+                                <td><strong>{{ "%.2f"|format(gasto.importe) }}€</strong></td>
+                                <td>
+                                    {% if gasto.pagado %}
+                                    <span class="badge bg-success">Pagado</span>
+                                    {% else %}
+                                    <span class="badge bg-warning">Pendiente</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if not gasto.pagado %}
+                                    <button class="btn btn-sm btn-success" onclick="marcarPagado({{ gasto.id }})">
+                                        <i class="fas fa-check"></i>
+                                    </button>
+                                    {% endif %}
+                                    <button class="btn btn-sm btn-outline-primary"
+                                        onclick="editarGasto({{ gasto.id }})">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
                 {% else %}
-                    <div class="text-center py-4">
-                        <i class="fas fa-receipt fa-3x text-muted mb-3"></i>
-                        <p class="text-muted">No hay gastos registrados para este mes.</p>
-                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#nuevoGastoModal">
-                            <i class="fas fa-plus"></i> Registrar Primer Gasto
-                        </button>
-                    </div>
+                <div class="text-center py-4">
+                    <i class="fas fa-receipt fa-3x text-muted mb-3"></i>
+                    <p class="text-muted">No hay gastos registrados para este mes.</p>
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#nuevoGastoModal">
+                        <i class="fas fa-plus"></i> Registrar Primer Gasto
+                    </button>
+                </div>
                 {% endif %}
             </div>
         </div>
@@ -131,20 +133,20 @@
                 <h5 class="modal-title">Nuevo Gasto</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <form method="POST" action="{{ url_for('agregar_gasto_mensual') }}">
+            <form method="POST" action="{{ url_for('finance.agregar_gasto_mensual') }}">
                 <div class="modal-body">
                     <div class="mb-3">
                         <label for="fecha" class="form-label">Fecha</label>
-                        <input type="date" class="form-control" id="fecha" name="fecha" 
-                               value="{{ date.today().isoformat() }}" required>
+                        <input type="date" class="form-control" id="fecha" name="fecha"
+                            value="{{ date.today().isoformat() }}" required>
                     </div>
-                    
+
                     <div class="mb-3">
                         <label for="concepto" class="form-label">Concepto *</label>
-                        <input type="text" class="form-control" id="concepto" name="concepto" 
-                               placeholder="Ej: Factura de luz, Material de yoga..." required>
+                        <input type="text" class="form-control" id="concepto" name="concepto"
+                            placeholder="Ej: Factura de luz, Material de yoga..." required>
                     </div>
-                    
+
                     <div class="mb-3">
                         <label for="categoria" class="form-label">Categoría</label>
                         <select class="form-select" id="categoria" name="categoria" required>
@@ -159,7 +161,7 @@
                             <option value="Otros">📋 Otros</option>
                         </select>
                     </div>
-                    
+
                     <div class="mb-3">
                         <label for="importe" class="form-label">Importe *</label>
                         <div class="input-group">
@@ -167,7 +169,7 @@
                             <span class="input-group-text">€</span>
                         </div>
                     </div>
-                    
+
                     <div class="mb-3">
                         <label for="metodo_pago" class="form-label">Método de Pago</label>
                         <select class="form-select" id="metodo_pago" name="metodo_pago">
@@ -178,11 +180,11 @@
                             <option value="domiciliacion">Domiciliación</option>
                         </select>
                     </div>
-                    
+
                     <div class="mb-3">
                         <label for="notas" class="form-label">Notas</label>
-                        <textarea class="form-control" id="notas" name="notas" rows="2" 
-                                  placeholder="Información adicional..."></textarea>
+                        <textarea class="form-control" id="notas" name="notas" rows="2"
+                            placeholder="Información adicional..."></textarea>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -197,28 +199,28 @@
 </div>
 
 <script>
-// Auto-marcar como pagado si se selecciona método de pago
-document.getElementById('metodo_pago').addEventListener('change', function() {
-    // Lógica para manejar el estado de pago
-});
+    // Auto-marcar como pagado si se selecciona método de pago
+    document.getElementById('metodo_pago').addEventListener('change', function () {
+        // Lógica para manejar el estado de pago
+    });
 
-function marcarPagado(gastoId) {
-    if (confirm('¿Marcar este gasto como pagado?')) {
-        fetch(`/api/gastos/${gastoId}/pagar`, { method: 'POST' })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    location.reload();
-                } else {
-                    alert('Error al marcar como pagado');
-                }
-            });
+    function marcarPagado(gastoId) {
+        if (confirm('¿Marcar este gasto como pagado?')) {
+            fetch(`/api/gastos/${gastoId}/pagar`, { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload();
+                    } else {
+                        alert('Error al marcar como pagado');
+                    }
+                });
+        }
     }
-}
 
-function editarGasto(gastoId) {
-    // Implementar edición de gasto
-    alert('Función de edición en desarrollo');
-}
+    function editarGasto(gastoId) {
+        // Implementar edición de gasto
+        alert('Función de edición en desarrollo');
+    }
 </script>
 {% endblock %}

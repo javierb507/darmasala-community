@@ -8,16 +8,16 @@
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h2><i class="fas fa-history"></i> Histórico de Horarios</h2>
             <div class="btn-group">
-                <a href="{{ url_for('horarios') }}" class="btn btn-outline-primary">
-                    <i class="fas fa-list"></i> Vista Lista
+                <a href="{{ url_for('classes.horarios') }}" class="btn btn-outline-primary">
+                    <i class="fas fa-clock"></i> Horarios
                 </a>
-                <a href="{{ url_for('horarios_calendario') }}" class="btn btn-outline-primary">
-                    <i class="fas fa-calendar"></i> Vista Calendario
+                <a href="{{ url_for('classes.horarios_calendario') }}" class="btn btn-outline-primary">
+                    <i class="fas fa-calendar-alt"></i> Calendario
                 </a>
-                <a href="{{ url_for('horarios_historico') }}" class="btn btn-primary">
+                <a href="{{ url_for('classes.horarios_historico') }}" class="btn btn-primary">
                     <i class="fas fa-history"></i> Histórico
                 </a>
-                <a href="{{ url_for('asistencias_historico') }}" class="btn btn-outline-info">
+                <a href="{{ url_for('classes.asistencias_historico') }}" class="btn btn-outline-info">
                     <i class="fas fa-chart-bar"></i> Asistencias
                 </a>
             </div>
@@ -36,7 +36,7 @@
                         <select class="form-select" id="clase_id" name="clase_id">
                             <option value="">Todas las clases</option>
                             {% for clase in clases %}
-                            <option value="{{ clase.id }}" {{ 'selected' if clase_id == clase.id else '' }}>
+                            <option value="{{ clase.id }}" {{ 'selected' if clase_id==clase.id else '' }}>
                                 {{ clase.nombre }}
                             </option>
                             {% endfor %}
@@ -44,13 +44,13 @@
                     </div>
                     <div class="col-md-3">
                         <label for="fecha_desde" class="form-label">Desde</label>
-                        <input type="date" class="form-control" id="fecha_desde" name="fecha_desde" 
-                               value="{{ fecha_desde or '' }}">
+                        <input type="date" class="form-control" id="fecha_desde" name="fecha_desde"
+                            value="{{ fecha_desde or '' }}">
                     </div>
                     <div class="col-md-3">
                         <label for="fecha_hasta" class="form-label">Hasta</label>
-                        <input type="date" class="form-control" id="fecha_hasta" name="fecha_hasta" 
-                               value="{{ fecha_hasta or '' }}">
+                        <input type="date" class="form-control" id="fecha_hasta" name="fecha_hasta"
+                            value="{{ fecha_hasta or '' }}">
                     </div>
                     <div class="col-md-2">
                         <label class="form-label">&nbsp;</label>
@@ -75,49 +75,50 @@
             </div>
             <div class="card-body">
                 {% if horarios %}
-                    <div class="table-responsive">
-                        <table class="table table-striped">
-                            <thead class="table-dark">
-                                <tr>
-                                    <th>Fecha Creación</th>
-                                    <th>Clase</th>
-                                    <th>Día</th>
-                                    <th>Horario</th>
-                                    <th>Instructor</th>
-                                    <th>Estado</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for horario in horarios %}
-                                <tr class="{{ 'table-secondary' if not horario.activo else '' }}">
-                                    <td>{{ horario.fecha_creacion.strftime('%d/%m/%Y %H:%M') }}</td>
-                                    <td>
-                                        <i class="fas fa-om text-primary"></i> {{ horario.clase.nombre }}
-                                    </td>
-                                    <td><strong>{{ horario.get_dia_display() }}</strong></td>
-                                    <td>
-                                        <i class="fas fa-clock"></i> 
-                                        {{ horario.hora_inicio.strftime('%H:%M') }} - {{ horario.hora_fin.strftime('%H:%M') }}
-                                    </td>
-                                    <td>{{ horario.instructor }}</td>
-                                    <td>
-                                        {% if horario.activo %}
-                                            <span class="badge bg-success">Activo</span>
-                                        {% else %}
-                                            <span class="badge bg-secondary">Inactivo</span>
-                                        {% endif %}
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Fecha Creación</th>
+                                <th>Clase</th>
+                                <th>Día</th>
+                                <th>Horario</th>
+                                <th>Instructor</th>
+                                <th>Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for horario in horarios %}
+                            <tr class="{{ 'table-secondary' if not horario.activo else '' }}">
+                                <td>{{ horario.fecha_creacion.strftime('%d/%m/%Y %H:%M') }}</td>
+                                <td>
+                                    <i class="fas fa-om text-primary"></i> {{ horario.clase.nombre }}
+                                </td>
+                                <td><strong>{{ horario.get_dia_display() }}</strong></td>
+                                <td>
+                                    <i class="fas fa-clock"></i>
+                                    {{ horario.hora_inicio.strftime('%H:%M') }} - {{ horario.hora_fin.strftime('%H:%M')
+                                    }}
+                                </td>
+                                <td>{{ horario.instructor }}</td>
+                                <td>
+                                    {% if horario.activo %}
+                                    <span class="badge bg-success">Activo</span>
+                                    {% else %}
+                                    <span class="badge bg-secondary">Inactivo</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
                 {% else %}
-                    <div class="text-center py-5">
-                        <i class="fas fa-history fa-5x text-muted mb-3"></i>
-                        <h3 class="text-muted">No hay horarios en el histórico</h3>
-                        <p class="text-muted">Los horarios aparecerán aquí cuando se creen o modifiquen.</p>
-                    </div>
+                <div class="text-center py-5">
+                    <i class="fas fa-history fa-5x text-muted mb-3"></i>
+                    <h3 class="text-muted">No hay horarios en el histórico</h3>
+                    <p class="text-muted">Los horarios aparecerán aquí cuando se creen o modifiquen.</p>
+                </div>
                 {% endif %}
             </div>
         </div>

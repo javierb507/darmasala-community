@@ -1,0 +1,180 @@
+{% extends "base.html" %}
+
+{% block title %}Configuración Fiscal - Atma suddhi{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-10 mx-auto">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h4><i class="fas fa-cog"></i> Configuración Fiscal del Negocio</h4>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i>
+                    <strong>Importante:</strong> Esta información se utilizará en todas las facturas emitidas. Asegúrate
+                    de que los datos sean correctos y estén actualizados.
+                </div>
+
+                <form method="POST">
+                    <h5 class="border-bottom pb-2 mb-3">Datos de la Empresa</h5>
+
+                    <div class="row">
+                        <div class="col-md-8 mb-3">
+                            <label for="nombre_empresa" class="form-label">Nombre de la Empresa *</label>
+                            <input type="text" class="form-control" id="nombre_empresa" name="nombre_empresa"
+                                value="{{ config.nombre_empresa if config else '' }}" required>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="nif" class="form-label">NIF *</label>
+                            <input type="text" class="form-control" id="nif" name="nif"
+                                value="{{ config.nif if config else '' }}" required>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="direccion_fiscal" class="form-label">Dirección Fiscal *</label>
+                        <textarea class="form-control" id="direccion_fiscal" name="direccion_fiscal" rows="2"
+                            required>{{ config.direccion_fiscal if config else '' }}</textarea>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-3 mb-3">
+                            <label for="codigo_postal" class="form-label">Código Postal</label>
+                            <input type="text" class="form-control" id="codigo_postal" name="codigo_postal"
+                                value="{{ config.codigo_postal if config else '' }}">
+                        </div>
+                        <div class="col-md-5 mb-3">
+                            <label for="ciudad" class="form-label">Ciudad</label>
+                            <input type="text" class="form-control" id="ciudad" name="ciudad"
+                                value="{{ config.ciudad if config else '' }}">
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="provincia" class="form-label">Provincia</label>
+                            <input type="text" class="form-control" id="provincia" name="provincia"
+                                value="{{ config.provincia if config else '' }}">
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="telefono" class="form-label">Teléfono</label>
+                            <input type="tel" class="form-control" id="telefono" name="telefono"
+                                value="{{ config.telefono if config else '' }}">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="email" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="email" name="email"
+                                value="{{ config.email if config else '' }}">
+                        </div>
+                    </div>
+
+                    <h5 class="border-bottom pb-2 mb-3 mt-4">Configuración Fiscal</h5>
+
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label for="epigrafe_iae" class="form-label">Epígrafe IAE</label>
+                            <input type="text" class="form-control" id="epigrafe_iae" name="epigrafe_iae"
+                                value="{{ config.epigrafe_iae if config else '' }}" placeholder="Ej: 933.1">
+                            <small class="form-text text-muted">Actividades de enseñanza: 933</small>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="regimen_iva" class="form-label">Régimen de IVA</label>
+                            <select class="form-select" id="regimen_iva" name="regimen_iva">
+                                <option value="exento" {% if config and config.regimen_iva=='exento' %}selected{% endif
+                                    %}>Exento</option>
+                                <option value="general" {% if config and config.regimen_iva=='general' %}selected{%
+                                    endif %}>General</option>
+                                <option value="recargo_equivalencia" {% if config and
+                                    config.regimen_iva=='recargo_equivalencia' %}selected{% endif %}>Recargo de
+                                    Equivalencia</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="tipo_retencion_default" class="form-label">Retención IRPF (%)</label>
+                            <select class="form-select" id="tipo_retencion_default" name="tipo_retencion_default">
+                                <option value="0" {% if config and config.tipo_retencion_default==0 %}selected{% endif
+                                    %}>0% (Sin retención)</option>
+                                <option value="7" {% if config and config.tipo_retencion_default==7 or not config
+                                    %}selected{% endif %}>7% (Actividades profesionales)</option>
+                                <option value="15" {% if config and config.tipo_retencion_default==15 %}selected{% endif
+                                    %}>15% (Actividades artísticas/deportivas)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="exento_iva" name="exento_iva" {% if
+                                config and config.exento_iva %}checked{% endif %}>
+                            <label class="form-check-label" for="exento_iva">
+                                <strong>Exento de IVA</strong> (Art. 20.Uno.9º Ley 37/1992)
+                            </label>
+                        </div>
+                        <small class="form-text text-muted">
+                            Las clases de yoga y meditación están exentas de IVA según la legislación española
+                        </small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="texto_exencion_iva" class="form-label">Texto de Exención de IVA</label>
+                        <input type="text" class="form-control" id="texto_exencion_iva" name="texto_exencion_iva"
+                            value="{{ config.texto_exencion_iva if config else 'Exento de IVA según art. 20.Uno.9º de la Ley 37/1992' }}">
+                        <small class="form-text text-muted">Este texto aparecerá en las facturas exentas de IVA</small>
+                    </div>
+
+                    <h5 class="border-bottom pb-2 mb-3 mt-4">Configuración de Facturas</h5>
+
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label for="serie_factura_default" class="form-label">Serie de Factura por Defecto</label>
+                            <input type="text" class="form-control" id="serie_factura_default"
+                                name="serie_factura_default"
+                                value="{{ config.serie_factura_default if config else 'A' }}" maxlength="10">
+                            <small class="form-text text-muted">Ej: A, B, 2025, etc.</small>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="pie_factura" class="form-label">Pie de Factura (Texto Legal)</label>
+                        <textarea class="form-control" id="pie_factura" name="pie_factura"
+                            rows="3">{{ config.pie_factura if config else 'Conserve esta factura durante 4 años según la normativa fiscal vigente.' }}</textarea>
+                        <small class="form-text text-muted">Texto que aparecerá al final de todas las facturas</small>
+                    </div>
+
+                    <div class="d-flex justify-content-between mt-4">
+                        <a href="{{ url_for('finance.economia_historico') }}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Volver
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Guardar Configuración
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        {% if config %}
+        <div class="card mt-4">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0"><i class="fas fa-info-circle"></i> Información Adicional</h5>
+            </div>
+            <div class="card-body">
+                <p><strong>Última actualización:</strong> {{ config.fecha_actualizacion.strftime('%d/%m/%Y %H:%M') if
+                    config.fecha_actualizacion else 'N/A' }}</p>
+
+                <div class="alert alert-warning">
+                    <h6><i class="fas fa-exclamation-triangle"></i> Recordatorios Fiscales:</h6>
+                    <ul class="mb-0">
+                        <li>Las facturas deben conservarse durante 4 años</li>
+                        <li>Presenta el modelo 303 (IVA) trimestralmente</li>
+                        <li>Presenta el modelo 130 (IRPF) trimestralmente</li>
+                        <li>Mantén actualizados tus datos en la Agencia Tributaria</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

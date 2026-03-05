@@ -17,19 +17,18 @@
                         <div class="col-md-8 mb-3">
                             <label for="nombre" class="form-label">Nombre / Razón Social *</label>
                             <input type="text" class="form-control" id="nombre" name="nombre"
-                                   placeholder="Nombre del proveedor o empresa" required>
+                                placeholder="Nombre del proveedor o empresa" required>
                         </div>
                         <div class="col-md-4 mb-3">
                             <label for="cif_nif" class="form-label">NIF / CIF</label>
-                            <input type="text" class="form-control" id="cif_nif" name="cif_nif"
-                                   placeholder="B12345678">
+                            <input type="text" class="form-control" id="cif_nif" name="cif_nif" placeholder="B12345678">
                         </div>
                     </div>
 
                     <div class="mb-3">
                         <label for="direccion" class="form-label">Dirección</label>
                         <textarea class="form-control" id="direccion" name="direccion" rows="2"
-                                  placeholder="Dirección completa del proveedor"></textarea>
+                            placeholder="Dirección completa del proveedor"></textarea>
                     </div>
 
                     <h5 class="border-bottom pb-2 mb-3 mt-4">Datos de Contacto</h5>
@@ -38,29 +37,29 @@
                         <div class="col-md-6 mb-3">
                             <label for="contacto_principal" class="form-label">Persona de Contacto</label>
                             <input type="text" class="form-control" id="contacto_principal" name="contacto_principal"
-                                   placeholder="Nombre de la persona de contacto">
+                                placeholder="Nombre de la persona de contacto">
                         </div>
                         <div class="col-md-6 mb-3">
                             <label for="telefono" class="form-label">Teléfono</label>
                             <input type="tel" class="form-control" id="telefono" name="telefono"
-                                   placeholder="912345678">
+                                placeholder="912345678">
                         </div>
                     </div>
 
                     <div class="mb-3">
                         <label for="email" class="form-label">Email</label>
                         <input type="email" class="form-control" id="email" name="email"
-                               placeholder="contacto@proveedor.com">
+                            placeholder="contacto@proveedor.com">
                     </div>
 
                     <div class="mb-3">
                         <label for="notas" class="form-label">Notas</label>
                         <textarea class="form-control" id="notas" name="notas" rows="3"
-                                  placeholder="Notas adicionales sobre el proveedor (condiciones de pago, horarios, etc.)"></textarea>
+                            placeholder="Notas adicionales sobre el proveedor (condiciones de pago, horarios, etc.)"></textarea>
                     </div>
 
                     <div class="d-flex justify-content-between mt-4">
-                        <a href="{{ url_for('proveedores') }}" class="btn btn-secondary">
+                        <a href="{{ url_for('finance.proveedores') }}" class="btn btn-secondary">
                             <i class="fas fa-arrow-left"></i> Cancelar
                         </a>
                         <button type="submit" class="btn btn-success">

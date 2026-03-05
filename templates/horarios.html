@@ -128,14 +128,12 @@
                         </td>
                         <td>
                             <div class="btn-group" role="group">
-                                <a href="{{ url_for('registrar_asistencia') }}?horario_id={{ horario.id }}"
-                                   class="btn btn-sm btn-outline-primary"
-                                   title="Registrar Asistencia">
+                                <a href="{{ url_for('classes.registrar_asistencia') }}?horario_id={{ horario.id }}"
+                                    class="btn btn-sm btn-outline-primary" title="Registrar Asistencia">
                                     <i class="fas fa-clipboard-check"></i>
                                 </a>
                                 <button class="btn btn-sm btn-outline-danger"
-                                        onclick="eliminarHorario({{ horario.id }})"
-                                        title="Eliminar">
+                                    onclick="eliminarHorario({{ horario.id }})" title="Eliminar">
                                     <i class="fas fa-trash"></i>
                                 </button>
                             </div>
@@ -180,19 +178,20 @@
                         <td class="schedule-cell">
                             {% set horarios_dia_hora = horarios | selectattr('dia_semana', 'equalto', dia) | list %}
                             {% for horario in horarios_dia_hora %}
-                                {% if horario.hora_inicio.hour == hora %}
-                                <div class="clase-badge"
-                                     style="background: linear-gradient(135deg, {{ horario.clase.color }} 0%, {{ horario.clase.color }}dd 100%);">
-                                    <div class="clase-nombre">{{ horario.clase.nombre }}</div>
-                                    <div class="clase-hora">
-                                        <i class="fas fa-clock"></i>
-                                        {{ horario.hora_inicio.strftime('%H:%M') }} - {{ horario.hora_fin.strftime('%H:%M') }}
-                                    </div>
-                                    <div class="clase-instructor">
-                                        <i class="fas fa-user"></i> {{ horario.instructor }}
-                                    </div>
+                            {% if horario.hora_inicio.hour == hora %}
+                            <div class="clase-badge"
+                                style="background: linear-gradient(135deg, {{ horario.clase.color }} 0%, {{ horario.clase.color }}dd 100%);">
+                                <div class="clase-nombre">{{ horario.clase.nombre }}</div>
+                                <div class="clase-hora">
+                                    <i class="fas fa-clock"></i>
+                                    {{ horario.hora_inicio.strftime('%H:%M') }} - {{ horario.hora_fin.strftime('%H:%M')
+                                    }}
                                 </div>
-                                {% endif %}
+                                <div class="clase-instructor">
+                                    <i class="fas fa-user"></i> {{ horario.instructor }}
+                                </div>
+                            </div>
+                            {% endif %}
                             {% endfor %}
                         </td>
                         {% endfor %}
@@ -225,7 +224,7 @@
                 </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
-            <form action="{{ url_for('nuevo_horario') }}" method="POST">
+            <form action="{{ url_for('classes.nuevo_horario') }}" method="POST">
                 <div class="modal-body">
                     <div class="row">
                         <div class="col-md-6 mb-3">
@@ -235,9 +234,8 @@
                             <select class="form-select" id="clase_id" name="clase_id" required>
                                 <option value="">Seleccionar clase...</option>
                                 {% for clase in clases %}
-                                <option value="{{ clase.id }}"
-                                        data-duracion="{{ clase.duracion_minutos }}"
-                                        data-periodicidad="{{ clase.periodicidad }}">
+                                <option value="{{ clase.id }}" data-duracion="{{ clase.duracion_minutos }}"
+                                    data-periodicidad="{{ clase.periodicidad }}">
                                     {{ clase.nombre }} ({{ clase.duracion_minutos }} min - {{ clase.periodicidad }})
                                 </option>
                                 {% endfor %}
@@ -282,13 +280,14 @@
                         <label for="instructor" class="form-label">
                             <i class="fas fa-user-tie"></i> Instructor
                         </label>
-                        <input type="text" class="form-control" id="instructor" name="instructor"
-                               value="Minouche" required>
+                        <input type="text" class="form-control" id="instructor" name="instructor" value="Minouche"
+                            required>
                     </div>
 
                     <div class="alert alert-info">
                         <i class="fas fa-info-circle"></i>
-                        <strong>Nota:</strong> Este horario se repetirá automáticamente cada semana en el día seleccionado.
+                        <strong>Nota:</strong> Este horario se repetirá automáticamente cada semana en el día
+                        seleccionado.
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -303,131 +302,131 @@
 </div>
 
 <style>
-.stats-card {
-    transition: transform 0.2s;
-    border: none;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
+    .stats-card {
+        transition: transform 0.2s;
+        border: none;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
 
-.stats-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-}
+    .stats-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
 
-.bg-gradient-purple {
-    background: linear-gradient(135deg, #8B5FBF 0%, #6f4a99 100%);
-}
+    .bg-gradient-purple {
+        background: linear-gradient(135deg, #8B5FBF 0%, #6f4a99 100%);
+    }
 
-.clase-summary-card {
-    padding: 15px;
-    background: white;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    height: 100%;
-}
+    .clase-summary-card {
+        padding: 15px;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        height: 100%;
+    }
 
-.schedule-grid {
-    font-size: 0.85rem;
-}
+    .schedule-grid {
+        font-size: 0.85rem;
+    }
 
-.schedule-cell {
-    height: 70px;
-    vertical-align: top;
-    padding: 5px !important;
-    position: relative;
-}
+    .schedule-cell {
+        height: 70px;
+        vertical-align: top;
+        padding: 5px !important;
+        position: relative;
+    }
 
-.time-cell {
-    font-size: 0.75rem;
-    vertical-align: middle;
-}
+    .time-cell {
+        font-size: 0.75rem;
+        vertical-align: middle;
+    }
 
-.clase-badge {
-    color: white;
-    padding: 8px;
-    border-radius: 6px;
-    font-size: 0.75rem;
-    text-align: center;
-    display: block;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-    height: 100%;
-}
+    .clase-badge {
+        color: white;
+        padding: 8px;
+        border-radius: 6px;
+        font-size: 0.75rem;
+        text-align: center;
+        display: block;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        height: 100%;
+    }
 
-.clase-nombre {
-    font-weight: 600;
-    margin-bottom: 2px;
-}
+    .clase-nombre {
+        font-weight: 600;
+        margin-bottom: 2px;
+    }
 
-.clase-hora {
-    font-size: 0.7rem;
-    opacity: 0.9;
-    margin-bottom: 2px;
-}
+    .clase-hora {
+        font-size: 0.7rem;
+        opacity: 0.9;
+        margin-bottom: 2px;
+    }
 
-.clase-instructor {
-    font-size: 0.65rem;
-    opacity: 0.8;
-}
+    .clase-instructor {
+        font-size: 0.65rem;
+        opacity: 0.8;
+    }
 
-.clase-badge i {
-    font-size: 0.7rem;
-    margin-right: 2px;
-}
+    .clase-badge i {
+        font-size: 0.7rem;
+        margin-right: 2px;
+    }
 </style>
 
 <script>
-// Calcular automáticamente hora de fin basado en duración
-document.getElementById('clase_id').addEventListener('change', function() {
-    const selectedOption = this.options[this.selectedIndex];
-    const duracion = parseInt(selectedOption.dataset.duracion) || 75;
-    const periodicidad = selectedOption.dataset.periodicidad || 'semanal';
+    // Calcular automáticamente hora de fin basado en duración
+    document.getElementById('clase_id').addEventListener('change', function () {
+        const selectedOption = this.options[this.selectedIndex];
+        const duracion = parseInt(selectedOption.dataset.duracion) || 75;
+        const periodicidad = selectedOption.dataset.periodicidad || 'semanal';
 
-    calcularHoraFin(duracion);
-});
+        calcularHoraFin(duracion);
+    });
 
-document.getElementById('hora_inicio').addEventListener('change', function() {
-    const claseSelect = document.getElementById('clase_id');
-    const selectedOption = claseSelect.options[claseSelect.selectedIndex];
-    const duracion = parseInt(selectedOption.dataset.duracion) || 75;
+    document.getElementById('hora_inicio').addEventListener('change', function () {
+        const claseSelect = document.getElementById('clase_id');
+        const selectedOption = claseSelect.options[claseSelect.selectedIndex];
+        const duracion = parseInt(selectedOption.dataset.duracion) || 75;
 
-    calcularHoraFin(duracion);
-});
+        calcularHoraFin(duracion);
+    });
 
-function calcularHoraFin(duracionMinutos) {
-    const horaInicio = document.getElementById('hora_inicio').value;
-    if (!horaInicio) return;
+    function calcularHoraFin(duracionMinutos) {
+        const horaInicio = document.getElementById('hora_inicio').value;
+        if (!horaInicio) return;
 
-    const [horas, minutos] = horaInicio.split(':').map(Number);
-    const inicioDate = new Date(2000, 0, 1, horas, minutos);
-    const finDate = new Date(inicioDate.getTime() + duracionMinutos * 60000);
+        const [horas, minutos] = horaInicio.split(':').map(Number);
+        const inicioDate = new Date(2000, 0, 1, horas, minutos);
+        const finDate = new Date(inicioDate.getTime() + duracionMinutos * 60000);
 
-    const horaFin = String(finDate.getHours()).padStart(2, '0') + ':' +
-                    String(finDate.getMinutes()).padStart(2, '0');
+        const horaFin = String(finDate.getHours()).padStart(2, '0') + ':' +
+            String(finDate.getMinutes()).padStart(2, '0');
 
-    document.getElementById('hora_fin').value = horaFin;
-}
-
-function eliminarHorario(id) {
-    if (confirm('¿Estás seguro de que quieres eliminar este horario? Esto no afectará a las asistencias ya registradas.')) {
-        fetch(`/horarios/${id}/eliminar`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                location.reload();
-            } else {
-                alert('Error al eliminar el horario');
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Error al eliminar el horario');
-        });
+        document.getElementById('hora_fin').value = horaFin;
     }
-}
+
+    function eliminarHorario(id) {
+        if (confirm('¿Estás seguro de que quieres eliminar este horario? Esto no afectará a las asistencias ya registradas.')) {
+            fetch(`/horarios/${id}/eliminar`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload();
+                    } else {
+                        alert('Error al eliminar el horario');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error al eliminar el horario');
+                });
+        }
+    }
 </script>
 {% endblock %}

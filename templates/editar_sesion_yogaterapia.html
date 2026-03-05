@@ -8,10 +8,11 @@
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h2><i class="fas fa-edit"></i> Editar Sesión de Yogaterapia</h2>
             <div>
-                <a href="{{ url_for('ver_sesion_yogaterapia', sesion_id=sesion.id) }}" class="btn btn-info me-2">
-                    <i class="fas fa-eye"></i> Ver
+                <a href="{{ url_for('yogatherapia.ver_sesion_yogaterapia', sesion_id=sesion.id) }}"
+                    class="btn btn-info me-2">
+                    <i class="fas fa-eye"></i> Ver Sesión
                 </a>
-                <a href="{{ url_for('yogaterapia') }}" class="btn btn-secondary">
+                <a href="{{ url_for('yogatherapia.yogaterapia') }}" class="btn btn-secondary">
                     <i class="fas fa-arrow-left"></i> Volver
                 </a>
             </div>
@@ -24,7 +25,8 @@
         <div class="card">
             <div class="card-header bg-warning text-dark">
                 <h5 class="mb-0">
-                    <i class="fas fa-edit"></i> Editando sesión de {{ sesion.alumno.nombre }} {{ sesion.alumno.apellido }}
+                    <i class="fas fa-edit"></i> Editando sesión de {{ sesion.alumno.nombre }} {{ sesion.alumno.apellido
+                    }}
                 </h5>
             </div>
             <div class="card-body">
@@ -34,17 +36,20 @@
                         <div class="col-md-4">
                             <div class="mb-3">
                                 <label for="fecha_sesion" class="form-label">Fecha de la Sesión *</label>
-                                <input type="date" class="form-control" id="fecha_sesion" name="fecha_sesion" 
-                                       value="{{ sesion.fecha_sesion.isoformat() }}" required>
+                                <input type="date" class="form-control" id="fecha_sesion" name="fecha_sesion"
+                                    value="{{ sesion.fecha_sesion.isoformat() }}" required>
                             </div>
                         </div>
                         <div class="col-md-4">
                             <div class="mb-3">
                                 <label for="duracion_minutos" class="form-label">Duración (minutos)</label>
                                 <select class="form-select" id="duracion_minutos" name="duracion_minutos">
-                                    <option value="60" {% if sesion.duracion_minutos == 60 %}selected{% endif %}>60 minutos</option>
-                                    <option value="75" {% if sesion.duracion_minutos == 75 %}selected{% endif %}>75 minutos</option>
-                                    <option value="90" {% if sesion.duracion_minutos == 90 %}selected{% endif %}>90 minutos</option>
+                                    <option value="60" {% if sesion.duracion_minutos==60 %}selected{% endif %}>60
+                                        minutos</option>
+                                    <option value="75" {% if sesion.duracion_minutos==75 %}selected{% endif %}>75
+                                        minutos</option>
+                                    <option value="90" {% if sesion.duracion_minutos==90 %}selected{% endif %}>90
+                                        minutos</option>
                                 </select>
                             </div>
                         </div>
@@ -52,8 +57,10 @@
                             <div class="mb-3">
                                 <label for="tipo_sesion" class="form-label">Tipo de Sesión</label>
                                 <select class="form-select" id="tipo_sesion" name="tipo_sesion">
-                                    <option value="individual" {% if sesion.tipo_sesion == 'individual' %}selected{% endif %}>Individual</option>
-                                    <option value="pareja" {% if sesion.tipo_sesion == 'pareja' %}selected{% endif %}>En pareja</option>
+                                    <option value="individual" {% if sesion.tipo_sesion=='individual' %}selected{% endif
+                                        %}>Individual</option>
+                                    <option value="pareja" {% if sesion.tipo_sesion=='pareja' %}selected{% endif %}>En
+                                        pareja</option>
                                 </select>
                             </div>
                         </div>
@@ -67,29 +74,31 @@
                         <div class="card-body">
                             <div class="mb-3">
                                 <label for="motivo_consulta" class="form-label">Motivo de Consulta</label>
-                                <textarea class="form-control" id="motivo_consulta" name="motivo_consulta" rows="2" 
-                                          placeholder="¿Por qué viene el alumno? ¿Qué problema o necesidad tiene?">{{ sesion.motivo_consulta or '' }}</textarea>
+                                <textarea class="form-control" id="motivo_consulta" name="motivo_consulta" rows="2"
+                                    placeholder="¿Por qué viene el alumno? ¿Qué problema o necesidad tiene?">{{ sesion.motivo_consulta or '' }}</textarea>
                             </div>
 
                             <div class="mb-3">
                                 <label for="objetivos_terapeuticos" class="form-label">Objetivos Terapéuticos</label>
-                                <textarea class="form-control" id="objetivos_terapeuticos" name="objetivos_terapeuticos" rows="2" 
-                                          placeholder="¿Qué se quiere conseguir con esta sesión?">{{ sesion.objetivos_terapeuticos or '' }}</textarea>
+                                <textarea class="form-control" id="objetivos_terapeuticos" name="objetivos_terapeuticos"
+                                    rows="2"
+                                    placeholder="¿Qué se quiere conseguir con esta sesión?">{{ sesion.objetivos_terapeuticos or '' }}</textarea>
                             </div>
 
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="mb-3">
                                         <label for="estado_inicial" class="form-label">Estado Inicial</label>
-                                        <textarea class="form-control" id="estado_inicial" name="estado_inicial" rows="3" 
-                                                  placeholder="¿Cómo llegó el alumno? Estado físico, emocional, mental...">{{ sesion.estado_inicial or '' }}</textarea>
+                                        <textarea class="form-control" id="estado_inicial" name="estado_inicial"
+                                            rows="3"
+                                            placeholder="¿Cómo llegó el alumno? Estado físico, emocional, mental...">{{ sesion.estado_inicial or '' }}</textarea>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="mb-3">
                                         <label for="estado_final" class="form-label">Estado Final</label>
-                                        <textarea class="form-control" id="estado_final" name="estado_final" rows="3" 
-                                                  placeholder="¿Cómo se fue el alumno? Cambios observados...">{{ sesion.estado_final or '' }}</textarea>
+                                        <textarea class="form-control" id="estado_final" name="estado_final" rows="3"
+                                            placeholder="¿Cómo se fue el alumno? Cambios observados...">{{ sesion.estado_final or '' }}</textarea>
                                     </div>
                                 </div>
                             </div>
@@ -104,26 +113,30 @@
                         <div class="card-body">
                             <div class="mb-3">
                                 <label for="posturas_trabajadas" class="form-label">Posturas Trabajadas (Asanas)</label>
-                                <textarea class="form-control" id="posturas_trabajadas" name="posturas_trabajadas" rows="3" 
-                                          placeholder="Ej: Balasana, Marjaryasana, Bhujangasana, adaptaciones específicas...">{{ sesion.posturas_trabajadas or '' }}</textarea>
+                                <textarea class="form-control" id="posturas_trabajadas" name="posturas_trabajadas"
+                                    rows="3"
+                                    placeholder="Ej: Balasana, Marjaryasana, Bhujangasana, adaptaciones específicas...">{{ sesion.posturas_trabajadas or '' }}</textarea>
                             </div>
 
                             <div class="mb-3">
                                 <label for="respiracion_pranayama" class="form-label">Respiración y Pranayama</label>
-                                <textarea class="form-control" id="respiracion_pranayama" name="respiracion_pranayama" rows="2" 
-                                          placeholder="Ej: Respiración abdominal, Ujjayi, Nadi Shodhana...">{{ sesion.respiracion_pranayama or '' }}</textarea>
+                                <textarea class="form-control" id="respiracion_pranayama" name="respiracion_pranayama"
+                                    rows="2"
+                                    placeholder="Ej: Respiración abdominal, Ujjayi, Nadi Shodhana...">{{ sesion.respiracion_pranayama or '' }}</textarea>
                             </div>
 
                             <div class="mb-3">
                                 <label for="meditacion_relajacion" class="form-label">Meditación y Relajación</label>
-                                <textarea class="form-control" id="meditacion_relajacion" name="meditacion_relajacion" rows="2" 
-                                          placeholder="Ej: Yoga Nidra, meditación mindfulness, relajación progresiva...">{{ sesion.meditacion_relajacion or '' }}</textarea>
+                                <textarea class="form-control" id="meditacion_relajacion" name="meditacion_relajacion"
+                                    rows="2"
+                                    placeholder="Ej: Yoga Nidra, meditación mindfulness, relajación progresiva...">{{ sesion.meditacion_relajacion or '' }}</textarea>
                             </div>
 
                             <div class="mb-3">
                                 <label for="tecnicas_aplicadas" class="form-label">Otras Técnicas</label>
-                                <textarea class="form-control" id="tecnicas_aplicadas" name="tecnicas_aplicadas" rows="2" 
-                                          placeholder="Masaje, acupresión, uso de props, etc.">{{ sesion.tecnicas_aplicadas or '' }}</textarea>
+                                <textarea class="form-control" id="tecnicas_aplicadas" name="tecnicas_aplicadas"
+                                    rows="2"
+                                    placeholder="Masaje, acupresión, uso de props, etc.">{{ sesion.tecnicas_aplicadas or '' }}</textarea>
                             </div>
                         </div>
                     </div>
@@ -136,26 +149,29 @@
                         <div class="card-body">
                             <div class="mb-3">
                                 <label for="respuesta_sesion" class="form-label">Respuesta Durante la Sesión</label>
-                                <textarea class="form-control" id="respuesta_sesion" name="respuesta_sesion" rows="3" 
-                                          placeholder="¿Cómo respondió el alumno? Dificultades, facilidades, reacciones...">{{ sesion.respuesta_sesion or '' }}</textarea>
+                                <textarea class="form-control" id="respuesta_sesion" name="respuesta_sesion" rows="3"
+                                    placeholder="¿Cómo respondió el alumno? Dificultades, facilidades, reacciones...">{{ sesion.respuesta_sesion or '' }}</textarea>
                             </div>
 
                             <div class="mb-3">
-                                <label for="observaciones_terapeuta" class="form-label">Observaciones del Terapeuta</label>
-                                <textarea class="form-control" id="observaciones_terapeuta" name="observaciones_terapeuta" rows="3" 
-                                          placeholder="Observaciones profesionales, patrones detectados, áreas de mejora...">{{ sesion.observaciones_terapeuta or '' }}</textarea>
+                                <label for="observaciones_terapeuta" class="form-label">Observaciones del
+                                    Terapeuta</label>
+                                <textarea class="form-control" id="observaciones_terapeuta"
+                                    name="observaciones_terapeuta" rows="3"
+                                    placeholder="Observaciones profesionales, patrones detectados, áreas de mejora...">{{ sesion.observaciones_terapeuta or '' }}</textarea>
                             </div>
 
                             <div class="mb-3">
                                 <label for="recomendaciones_casa" class="form-label">Recomendaciones para Casa</label>
-                                <textarea class="form-control" id="recomendaciones_casa" name="recomendaciones_casa" rows="3" 
-                                          placeholder="Ejercicios, posturas o técnicas para practicar en casa...">{{ sesion.recomendaciones_casa or '' }}</textarea>
+                                <textarea class="form-control" id="recomendaciones_casa" name="recomendaciones_casa"
+                                    rows="3"
+                                    placeholder="Ejercicios, posturas o técnicas para practicar en casa...">{{ sesion.recomendaciones_casa or '' }}</textarea>
                             </div>
 
                             <div class="mb-3">
                                 <label for="proxima_sesion" class="form-label">Plan para Próxima Sesión</label>
-                                <textarea class="form-control" id="proxima_sesion" name="proxima_sesion" rows="2" 
-                                          placeholder="¿Qué trabajar en la siguiente sesión?">{{ sesion.proxima_sesion or '' }}</textarea>
+                                <textarea class="form-control" id="proxima_sesion" name="proxima_sesion" rows="2"
+                                    placeholder="¿Qué trabajar en la siguiente sesión?">{{ sesion.proxima_sesion or '' }}</textarea>
                             </div>
                         </div>
                     </div>
@@ -166,8 +182,8 @@
                             <div class="mb-3">
                                 <label for="precio" class="form-label">Precio de la Sesión</label>
                                 <div class="input-group">
-                                    <input type="number" step="0.01" class="form-control" id="precio" name="precio" 
-                                           value="{{ sesion.precio }}">
+                                    <input type="number" step="0.01" class="form-control" id="precio" name="precio"
+                                        value="{{ sesion.precio }}">
                                     <span class="input-group-text">€</span>
                                 </div>
                             </div>
@@ -177,18 +193,22 @@
                                 <label for="metodo_pago" class="form-label">Método de Pago</label>
                                 <select class="form-select" id="metodo_pago" name="metodo_pago">
                                     <option value="">Seleccionar...</option>
-                                    <option value="efectivo" {% if sesion.metodo_pago == 'efectivo' %}selected{% endif %}>Efectivo</option>
-                                    <option value="transferencia" {% if sesion.metodo_pago == 'transferencia' %}selected{% endif %}>Transferencia</option>
-                                    <option value="tarjeta" {% if sesion.metodo_pago == 'tarjeta' %}selected{% endif %}>Tarjeta</option>
-                                    <option value="bizum" {% if sesion.metodo_pago == 'bizum' %}selected{% endif %}>Bizum</option>
+                                    <option value="efectivo" {% if sesion.metodo_pago=='efectivo' %}selected{% endif %}>
+                                        Efectivo</option>
+                                    <option value="transferencia" {% if sesion.metodo_pago=='transferencia' %}selected{%
+                                        endif %}>Transferencia</option>
+                                    <option value="tarjeta" {% if sesion.metodo_pago=='tarjeta' %}selected{% endif %}>
+                                        Tarjeta</option>
+                                    <option value="bizum" {% if sesion.metodo_pago=='bizum' %}selected{% endif %}>Bizum
+                                    </option>
                                 </select>
                             </div>
                         </div>
                         <div class="col-md-4">
                             <div class="mb-3">
                                 <label for="instructor" class="form-label">Terapeuta</label>
-                                <input type="text" class="form-control" id="instructor" name="instructor" 
-                                       value="{{ sesion.instructor }}">
+                                <input type="text" class="form-control" id="instructor" name="instructor"
+                                    value="{{ sesion.instructor }}">
                             </div>
                         </div>
                     </div>
@@ -197,7 +217,8 @@
                     {% if archivos %}
                     <div class="card mb-4">
                         <div class="card-header bg-light">
-                            <h6 class="mb-0"><i class="fas fa-camera"></i> Archivos Actuales ({{ archivos|length }})</h6>
+                            <h6 class="mb-0"><i class="fas fa-camera"></i> Archivos Actuales ({{ archivos|length }})
+                            </h6>
                         </div>
                         <div class="card-body">
                             <div class="row">
@@ -206,22 +227,23 @@
                                     <div class="card">
                                         <div class="card-body text-center">
                                             {% if archivo.tipo_archivo in ['jpg', 'jpeg', 'png', 'gif'] %}
-                                                <i class="fas fa-image fa-2x text-primary mb-2"></i>
+                                            <i class="fas fa-image fa-2x text-primary mb-2"></i>
                                             {% elif archivo.tipo_archivo == 'pdf' %}
-                                                <i class="fas fa-file-pdf fa-2x text-danger mb-2"></i>
+                                            <i class="fas fa-file-pdf fa-2x text-danger mb-2"></i>
                                             {% elif archivo.tipo_archivo in ['mp4', 'avi', 'mov'] %}
-                                                <i class="fas fa-video fa-2x text-success mb-2"></i>
+                                            <i class="fas fa-video fa-2x text-success mb-2"></i>
                                             {% elif archivo.tipo_archivo in ['mp3', 'wav', 'm4a'] %}
-                                                <i class="fas fa-music fa-2x text-warning mb-2"></i>
+                                            <i class="fas fa-music fa-2x text-warning mb-2"></i>
                                             {% else %}
-                                                <i class="fas fa-file fa-2x text-secondary mb-2"></i>
+                                            <i class="fas fa-file fa-2x text-secondary mb-2"></i>
                                             {% endif %}
-                                            
+
                                             <h6 class="card-title small">{{ archivo.nombre_archivo }}</h6>
                                             <p class="card-text small text-muted">
                                                 {{ (archivo.tamaño_bytes / 1024)|round(1) }} KB
                                             </p>
-                                            <a href="/{{ archivo.ruta_archivo }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                            <a href="/{{ archivo.ruta_archivo }}" target="_blank"
+                                                class="btn btn-sm btn-outline-primary">
                                                 <i class="fas fa-download"></i> Ver
                                             </a>
                                         </div>
@@ -241,10 +263,10 @@
                         <div class="card-body">
                             <div class="mb-3">
                                 <label for="archivos" class="form-label">Fotos y Documentos</label>
-                                <input type="file" class="form-control" id="archivos" name="archivos" multiple 
-                                       accept=".jpg,.jpeg,.png,.pdf,.mp4,.mp3">
+                                <input type="file" class="form-control" id="archivos" name="archivos" multiple
+                                    accept=".jpg,.jpeg,.png,.pdf,.mp4,.mp3">
                                 <div class="form-text">
-                                    <i class="fas fa-info-circle"></i> 
+                                    <i class="fas fa-info-circle"></i>
                                     Puedes añadir más archivos a esta sesión.
                                     <br><strong>Formatos permitidos:</strong> JPG, PNG, PDF, MP4, MP3
                                 </div>
@@ -255,7 +277,8 @@
                     <!-- Estado de pago -->
                     <div class="mb-3">
                         <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="pagado" name="pagado" {% if sesion.pagado %}checked{% endif %}>
+                            <input class="form-check-input" type="checkbox" id="pagado" name="pagado" {% if
+                                sesion.pagado %}checked{% endif %}>
                             <label class="form-check-label" for="pagado">
                                 Sesión pagada
                             </label>
@@ -263,7 +286,8 @@
                     </div>
 
                     <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                        <a href="{{ url_for('ver_sesion_yogaterapia', sesion_id=sesion.id) }}" class="btn btn-secondary me-md-2">
+                        <a href="{{ url_for('yogatherapia.ver_sesion_yogaterapia', sesion_id=sesion.id) }}"
+                            class="btn btn-secondary me-md-2">
                             Cancelar
                         </a>
                         <button type="submit" class="btn btn-warning">
@@ -277,22 +301,22 @@
 </div>
 
 <script>
-// Calcular precio según tipo de sesión
-document.getElementById('tipo_sesion').addEventListener('change', function() {
-    const precios = {
-        'individual': 50.00,
-        'pareja': 70.00
-    };
-    
-    const precio = precios[this.value] || 50.00;
-    document.getElementById('precio').value = precio.toFixed(2);
-});
+    // Calcular precio según tipo de sesión
+    document.getElementById('tipo_sesion').addEventListener('change', function () {
+        const precios = {
+            'individual': 50.00,
+            'pareja': 70.00
+        };
 
-// Auto-habilitar pago si se selecciona método
-document.getElementById('metodo_pago').addEventListener('change', function() {
-    if (this.value) {
-        document.getElementById('pagado').checked = true;
-    }
-});
+        const precio = precios[this.value] || 50.00;
+        document.getElementById('precio').value = precio.toFixed(2);
+    });
+
+    // Auto-habilitar pago si se selecciona método
+    document.getElementById('metodo_pago').addEventListener('change', function () {
+        if (this.value) {
+            document.getElementById('pagado').checked = true;
+        }
+    });
 </script>
 {% endblock %}

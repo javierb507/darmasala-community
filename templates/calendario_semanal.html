@@ -9,13 +9,13 @@
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <h2><i class="fas fa-calendar-week"></i> Vista Semanal</h2>
                 <div class="btn-group">
-                    <a href="{{ url_for('calendario_unificado') }}" class="btn btn-outline-info">
+                    <a href="{{ url_for('classes.calendario_unificado') }}" class="btn btn-outline-info">
                         <i class="fas fa-calendar-alt"></i> Vista Mensual
                     </a>
-                    <a href="{{ url_for('nueva_yogaterapia') }}" class="btn btn-primary">
+                    <a href="{{ url_for('yogatherapia.nueva_yogaterapia') }}" class="btn btn-primary">
                         <i class="fas fa-plus"></i> Nueva Cita Individual
                     </a>
-                    <a href="{{ url_for('nuevo_horario') }}" class="btn btn-success">
+                    <a href="{{ url_for('classes.nuevo_horario') }}" class="btn btn-success">
                         <i class="fas fa-clock"></i> Nuevo Horario
                     </a>
                 </div>
@@ -92,7 +92,8 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-header">
-                    <h5 class="mb-0">Semana del {{ dias_semana[0].strftime('%d/%m/%Y') }} al {{ dias_semana[6].strftime('%d/%m/%Y') }}</h5>
+                    <h5 class="mb-0">Semana del {{ dias_semana[0].strftime('%d/%m/%Y') }} al {{
+                        dias_semana[6].strftime('%d/%m/%Y') }}</h5>
                 </div>
                 <div class="card-body p-0">
                     <div class="table-responsive">
@@ -117,20 +118,24 @@
                                                 <h6 class="mb-0">{{ dia.day }}</h6>
                                                 <small class="text-muted">{{ dia.strftime('%b') }}</small>
                                             </div>
-                                            
+
                                             <!-- Citas individuales del día -->
-                                            {% set sesiones_dia = sesiones_yogaterapia | selectattr('fecha_sesion', 'equalto', dia) | list %}
+                                            {% set sesiones_dia = sesiones_yogaterapia | selectattr('fecha_sesion',
+                                            'equalto', dia) | list %}
                                             {% if sesiones_dia %}
                                             <div class="mb-2">
                                                 {% for sesion in sesiones_dia %}
                                                 <div class="alert alert-danger alert-sm p-2 mb-1">
                                                     <div class="d-flex justify-content-between align-items-center">
                                                         <div>
-                                                            <strong>{{ sesion.alumno.nombre }} {{ sesion.alumno.apellido }}</strong>
+                                                            <strong>{{ sesion.alumno.nombre }} {{ sesion.alumno.apellido
+                                                                }}</strong>
                                                             <br>
-                                                            <small>{{ sesion.hora_inicio.strftime('%H:%M') if sesion.hora_inicio else 'Sin hora' }}</small>
+                                                            <small>{{ sesion.hora_inicio.strftime('%H:%M') if
+                                                                sesion.hora_inicio else 'Sin hora' }}</small>
                                                         </div>
-                                                        <a href="{{ url_for('ver_sesion_yogaterapia', sesion_id=sesion.id) }}" class="btn btn-sm btn-outline-light">
+                                                        <a href="{{ url_for('yogatherapia.ver_sesion_yogaterapia', sesion_id=sesion.id) }}"
+                                                            class="btn btn-sm btn-outline-light">
                                                             <i class="fas fa-eye"></i>
                                                         </a>
                                                     </div>
@@ -138,9 +143,10 @@
                                                 {% endfor %}
                                             </div>
                                             {% endif %}
-                                            
+
                                             <!-- Horarios semanales del día -->
-                                            {% set horarios_dia = horarios | selectattr('dia_semana', 'equalto', dia.weekday()) | list %}
+                                            {% set horarios_dia = horarios | selectattr('dia_semana', 'equalto',
+                                            dia.weekday()) | list %}
                                             {% if horarios_dia %}
                                             <div class="mb-2">
                                                 {% for horario in horarios_dia %}
@@ -149,9 +155,11 @@
                                                         <div>
                                                             <strong>{{ horario.clase.nombre }}</strong>
                                                             <br>
-                                                            <small>{{ horario.hora_inicio.strftime('%H:%M') }} - {{ horario.hora_fin.strftime('%H:%M') }}</small>
+                                                            <small>{{ horario.hora_inicio.strftime('%H:%M') }} - {{
+                                                                horario.hora_fin.strftime('%H:%M') }}</small>
                                                         </div>
-                                                        <a href="{{ url_for('editar_horario', horario_id=horario.id) }}" class="btn btn-sm btn-outline-light">
+                                                        <a href="{{ url_for('classes.editar_horario', horario_id=horario.id) }}"
+                                                            class="btn btn-sm btn-outline-light">
                                                             <i class="fas fa-edit"></i>
                                                         </a>
                                                     </div>
@@ -159,11 +167,11 @@
                                                 {% endfor %}
                                             </div>
                                             {% endif %}
-                                            
+
                                             <!-- Botón para agregar cita -->
                                             <div class="text-center">
-                                                <a href="{{ url_for('nueva_yogaterapia') }}?fecha={{ dia.isoformat() }}" 
-                                                   class="btn btn-sm btn-outline-primary">
+                                                <a href="{{ url_for('yogatherapia.nueva_yogaterapia') }}?fecha={{ dia.isoformat() }}"
+                                                    class="btn btn-sm btn-outline-primary">
                                                     <i class="fas fa-plus"></i> Nueva Cita
                                                 </a>
                                             </div>
@@ -225,10 +233,12 @@
                                     </td>
                                     <td>
                                         <div class="btn-group btn-group-sm">
-                                            <a href="{{ url_for('ver_sesion_yogaterapia', sesion_id=sesion.id) }}" class="btn btn-outline-primary">
+                                            <a href="{{ url_for('ver_sesion_yogaterapia', sesion_id=sesion.id) }}"
+                                                class="btn btn-outline-primary">
                                                 <i class="fas fa-eye"></i>
                                             </a>
-                                            <a href="{{ url_for('editar_sesion_yogaterapia', sesion_id=sesion.id) }}" class="btn btn-outline-warning">
+                                            <a href="{{ url_for('yogatherapia.editar_sesion_yogaterapia', sesion_id=sesion.id) }}"
+                                                class="btn btn-outline-warning">
                                                 <i class="fas fa-edit"></i>
                                             </a>
                                         </div>
@@ -246,24 +256,24 @@
 </div>
 
 <style>
-.calendar-day-cell {
-    border: 1px solid #dee2e6;
-    position: relative;
-}
+    .calendar-day-cell {
+        border: 1px solid #dee2e6;
+        position: relative;
+    }
 
-.calendar-day-cell:hover {
-    background-color: #f8f9fa;
-}
+    .calendar-day-cell:hover {
+        background-color: #f8f9fa;
+    }
 
-.alert-sm {
-    padding: 0.25rem 0.5rem;
-    font-size: 0.875rem;
-}
+    .alert-sm {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.875rem;
+    }
 
-.table th {
-    border-top: none;
-    font-weight: 600;
-    color: #495057;
-}
+    .table th {
+        border-top: none;
+        font-weight: 600;
+        color: #495057;
+    }
 </style>
 {% endblock %}

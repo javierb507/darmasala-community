@@ -2,7 +2,7 @@
 <div class="card border-info">
     <div class="card-header bg-info text-white">
         <h6 class="mb-0">
-            <i class="fas fa-info-circle"></i> 
+            <i class="fas fa-info-circle"></i>
             Estado del Sistema
             {% if alerts_summary and alerts_summary.total > 0 %}
             <span class="badge bg-warning ms-2">{{ alerts_summary.total }}</span>
@@ -11,93 +11,91 @@
     </div>
     <div class="card-body">
         {% if not alerts_summary or alerts_summary.total == 0 %}
-            <div class="text-center text-success">
-                <i class="fas fa-check-circle fa-2x mb-2"></i>
-                <p class="mb-0">¡Todo en orden!</p>
-                <small class="text-muted">Sistema funcionando correctamente</small>
-            </div>
+        <div class="text-center text-success">
+            <i class="fas fa-check-circle fa-2x mb-2"></i>
+            <p class="mb-0">¡Todo en orden!</p>
+            <small class="text-muted">Sistema funcionando correctamente</small>
+        </div>
         {% else %}
-            <!-- Resumen de alertas por prioridad -->
-            <div class="row mb-3">
-                {% if alerts_summary.high > 0 %}
-                <div class="col-4 text-center">
-                    <div class="text-danger">
-                        <i class="fas fa-exclamation-circle"></i>
-                        <strong>{{ alerts_summary.high }}</strong>
-                    </div>
-                    <small class="text-muted">Críticas</small>
+        <!-- Resumen de alertas por prioridad -->
+        <div class="row mb-3">
+            {% if alerts_summary.high > 0 %}
+            <div class="col-4 text-center">
+                <div class="text-danger">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <strong>{{ alerts_summary.high }}</strong>
                 </div>
-                {% endif %}
-                
-                {% if alerts_summary.medium > 0 %}
-                <div class="col-4 text-center">
-                    <div class="text-warning">
-                        <i class="fas fa-exclamation-triangle"></i>
-                        <strong>{{ alerts_summary.medium }}</strong>
-                    </div>
-                    <small class="text-muted">Importantes</small>
-                </div>
-                {% endif %}
-                
-                {% if alerts_summary.low > 0 %}
-                <div class="col-4 text-center">
-                    <div class="text-info">
-                        <i class="fas fa-info-circle"></i>
-                        <strong>{{ alerts_summary.low }}</strong>
-                    </div>
-                    <small class="text-muted">Informativas</small>
-                </div>
-                {% endif %}
-            </div>
-            
-            <!-- Lista de alertas recientes -->
-            <div class="list-group list-group-flush">
-                {% for alert in alerts_summary.recent %}
-                <div class="list-group-item list-group-item-action p-2 border-0">
-                    <div class="d-flex w-100 justify-content-between align-items-start">
-                        <div class="flex-grow-1">
-                            <h6 class="mb-1">
-                                {% if alert.type == 'danger' %}
-                                    <i class="fas fa-exclamation-circle text-danger"></i>
-                                {% elif alert.type == 'warning' %}
-                                    <i class="fas fa-exclamation-triangle text-warning"></i>
-                                {% else %}
-                                    <i class="fas fa-info-circle text-info"></i>
-                                {% endif %}
-                                {{ alert.title }}
-                            </h6>
-                            <p class="mb-1 small">{{ alert.message }}</p>
-                        </div>
-                        <div class="ms-2">
-                            {% if alert.get('alumno_id') %}
-                                <a href="{{ url_for('ver_alumno', alumno_id=alert.alumno_id) }}" 
-                                   class="btn btn-sm btn-outline-primary">
-                                    <i class="fas fa-eye"></i>
-                                </a>
-                            {% elif alert.get('factura_id') %}
-                                <a href="{{ url_for('facturas') }}" 
-                                   class="btn btn-sm btn-outline-primary">
-                                    <i class="fas fa-file-invoice"></i>
-                                </a>
-                            {% elif alert.get('action') == 'backup' %}
-                                <button onclick="createBackup()" 
-                                        class="btn btn-sm btn-outline-warning">
-                                    <i class="fas fa-download"></i>
-                                </button>
-                            {% endif %}
-                        </div>
-                    </div>
-                </div>
-                {% endfor %}
-            </div>
-            
-            {% if alerts_summary.total > 3 %}
-            <div class="text-center mt-2">
-                <button class="btn btn-sm btn-outline-secondary" onclick="showAllAlerts()">
-                    Ver todas las alertas ({{ alerts_summary.total }})
-                </button>
+                <small class="text-muted">Críticas</small>
             </div>
             {% endif %}
+
+            {% if alerts_summary.medium > 0 %}
+            <div class="col-4 text-center">
+                <div class="text-warning">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <strong>{{ alerts_summary.medium }}</strong>
+                </div>
+                <small class="text-muted">Importantes</small>
+            </div>
+            {% endif %}
+
+            {% if alerts_summary.low > 0 %}
+            <div class="col-4 text-center">
+                <div class="text-info">
+                    <i class="fas fa-info-circle"></i>
+                    <strong>{{ alerts_summary.low }}</strong>
+                </div>
+                <small class="text-muted">Informativas</small>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Lista de alertas recientes -->
+        <div class="list-group list-group-flush">
+            {% for alert in alerts_summary.recent %}
+            <div class="list-group-item list-group-item-action p-2 border-0">
+                <div class="d-flex w-100 justify-content-between align-items-start">
+                    <div class="flex-grow-1">
+                        <h6 class="mb-1">
+                            {% if alert.type == 'danger' %}
+                            <i class="fas fa-exclamation-circle text-danger"></i>
+                            {% elif alert.type == 'warning' %}
+                            <i class="fas fa-exclamation-triangle text-warning"></i>
+                            {% else %}
+                            <i class="fas fa-info-circle text-info"></i>
+                            {% endif %}
+                            {{ alert.title }}
+                        </h6>
+                        <p class="mb-1 small">{{ alert.message }}</p>
+                    </div>
+                    <div class="ms-2">
+                        {% if alert.get('alumno_id') %}
+                        <a href="{{ url_for('students.ver_alumno', alumno_id=alert.alumno_id) }}"
+                            class="btn btn-sm btn-outline-primary">
+                            <i class="fas fa-eye"></i>
+                        </a>
+                        {% elif alert.get('factura_id') %}
+                        <a href="{{ url_for('finance.facturas') }}" class="btn btn-sm btn-outline-primary">
+                            <i class="fas fa-file-invoice"></i>
+                        </a>
+                        {% elif alert.get('action') == 'backup' %}
+                        <button onclick="createBackup()" class="btn btn-sm btn-outline-warning">
+                            <i class="fas fa-download"></i>
+                        </button>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        {% if alerts_summary.total > 3 %}
+        <div class="text-center mt-2">
+            <button class="btn btn-sm btn-outline-secondary" onclick="showAllAlerts()">
+                Ver todas las alertas ({{ alerts_summary.total }})
+            </button>
+        </div>
+        {% endif %}
         {% endif %}
     </div>
 </div>
@@ -130,23 +128,23 @@
 </div>
 
 <script>
-function showAllAlerts() {
-    const modal = new bootstrap.Modal(document.getElementById('allAlertsModal'));
-    modal.show();
-    
-    // Cargar todas las alertas
-    fetch('/api/alerts')
-        .then(response => response.json())
-        .then(data => {
-            const content = document.getElementById('allAlertsContent');
-            if (data.alerts && data.alerts.length > 0) {
-                let html = '<div class="list-group">';
-                data.alerts.forEach(alert => {
-                    const iconClass = alert.type === 'danger' ? 'fas fa-exclamation-circle text-danger' :
-                                    alert.type === 'warning' ? 'fas fa-exclamation-triangle text-warning' :
-                                    'fas fa-info-circle text-info';
-                    
-                    html += `
+    function showAllAlerts() {
+        const modal = new bootstrap.Modal(document.getElementById('allAlertsModal'));
+        modal.show();
+
+        // Cargar todas las alertas
+        fetch('/api/alerts')
+            .then(response => response.json())
+            .then(data => {
+                const content = document.getElementById('allAlertsContent');
+                if (data.alerts && data.alerts.length > 0) {
+                    let html = '<div class="list-group">';
+                    data.alerts.forEach(alert => {
+                        const iconClass = alert.type === 'danger' ? 'fas fa-exclamation-circle text-danger' :
+                            alert.type === 'warning' ? 'fas fa-exclamation-triangle text-warning' :
+                                'fas fa-info-circle text-info';
+
+                        html += `
                         <div class="list-group-item">
                             <div class="d-flex w-100 justify-content-between">
                                 <h6 class="mb-1">
@@ -159,38 +157,38 @@ function showAllAlerts() {
                             <p class="mb-1">${alert.message}</p>
                         </div>
                     `;
-                });
-                html += '</div>';
-                content.innerHTML = html;
-            } else {
-                content.innerHTML = '<div class="text-center text-success"><i class="fas fa-check-circle fa-3x mb-3"></i><h5>¡Todo en orden!</h5><p>No hay alertas pendientes</p></div>';
-            }
-        })
-        .catch(error => {
-            document.getElementById('allAlertsContent').innerHTML = 
-                '<div class="alert alert-danger">Error al cargar alertas: ' + error + '</div>';
-        });
-}
-
-function refreshAlerts() {
-    location.reload();
-}
-
-function createBackup() {
-    if (confirm('¿Crear backup de la base de datos?')) {
-        fetch('/api/backup', { method: 'POST' })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert('✅ Backup creado exitosamente: ' + data.filename);
-                    refreshAlerts();
+                    });
+                    html += '</div>';
+                    content.innerHTML = html;
                 } else {
-                    alert('❌ Error al crear backup: ' + data.error);
+                    content.innerHTML = '<div class="text-center text-success"><i class="fas fa-check-circle fa-3x mb-3"></i><h5>¡Todo en orden!</h5><p>No hay alertas pendientes</p></div>';
                 }
             })
             .catch(error => {
-                alert('❌ Error de conexión: ' + error);
+                document.getElementById('allAlertsContent').innerHTML =
+                    '<div class="alert alert-danger">Error al cargar alertas: ' + error + '</div>';
             });
     }
-}
+
+    function refreshAlerts() {
+        location.reload();
+    }
+
+    function createBackup() {
+        if (confirm('¿Crear backup de la base de datos?')) {
+            fetch('/api/backup', { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('✅ Backup creado exitosamente: ' + data.filename);
+                        refreshAlerts();
+                    } else {
+                        alert('❌ Error al crear backup: ' + data.error);
+                    }
+                })
+                .catch(error => {
+                    alert('❌ Error de conexión: ' + error);
+                });
+        }
+    }
 </script>

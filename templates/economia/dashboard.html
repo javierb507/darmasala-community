@@ -9,7 +9,7 @@
             <h2><i class="fas fa-chart-line"></i> Gestión Económica</h2>
             <div>
                 {% if not config_fiscal or not config_fiscal.nif or config_fiscal.nif == '12345678Z' %}
-                <a href="{{ url_for('configuracion_fiscal') }}" class="btn btn-warning">
+                <a href="{{ url_for('finance.configuracion_fiscal') }}" class="btn btn-warning">
                     <i class="fas fa-exclamation-triangle"></i> Configurar Datos Fiscales
                 </a>
                 {% endif %}
@@ -27,7 +27,8 @@
                     <div>
                         <h6 class="card-title">Facturado ({{ current_year }})</h6>
                         <h3 class="mb-0">€{{ "%.2f"|format(total_facturado_año) }}</h3>
-                        <small>{{ facturas_emitidas_pagadas }} pagadas / {{ facturas_emitidas_pendientes }} pendientes</small>
+                        <small>{{ facturas_emitidas_pagadas }} pagadas / {{ facturas_emitidas_pendientes }}
+                            pendientes</small>
                     </div>
                     <div class="align-self-center">
                         <i class="fas fa-file-invoice fa-3x opacity-50"></i>
@@ -55,22 +56,24 @@
     </div>
 
     <div class="col-md-4">
-        <div class="card {% if facturas_proveedores_vencidas > 0 %}bg-warning text-dark{% else %}bg-success text-white{% endif %}">
+        <div
+            class="card {% if facturas_proveedores_vencidas > 0 %}bg-warning text-dark{% else %}bg-success text-white{% endif %}">
             <div class="card-body">
                 <div class="d-flex justify-content-between">
                     <div>
                         <h6 class="card-title">Estado de Pagos</h6>
                         <h3 class="mb-0">
                             {% if facturas_proveedores_vencidas > 0 %}
-                                {{ facturas_proveedores_vencidas }} Vencidas
+                            {{ facturas_proveedores_vencidas }} Vencidas
                             {% else %}
-                                Al Día
+                            Al Día
                             {% endif %}
                         </h3>
                         <small>{{ facturas_proveedores_pendientes }} por pagar</small>
                     </div>
                     <div class="align-self-center">
-                        <i class="fas {% if facturas_proveedores_vencidas > 0 %}fa-exclamation-triangle{% else %}fa-check-circle{% endif %} fa-3x opacity-50"></i>
+                        <i
+                            class="fas {% if facturas_proveedores_vencidas > 0 %}fa-exclamation-triangle{% else %}fa-check-circle{% endif %} fa-3x opacity-50"></i>
                     </div>
                 </div>
             </div>
@@ -85,16 +88,16 @@
         <div class="card mb-4">
             <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
                 <h5 class="mb-0"><i class="fas fa-file-invoice"></i> Facturas Emitidas (Ingresos)</h5>
-                <a href="{{ url_for('nueva_factura_emitida') }}" class="btn btn-sm btn-light">
+                <a href="{{ url_for('finance.nueva_factura_emitida') }}" class="btn btn-sm btn-light">
                     <i class="fas fa-plus"></i> Nueva
                 </a>
             </div>
             <div class="card-body">
                 <div class="mb-3">
-                    <a href="{{ url_for('clientes_facturacion') }}" class="btn btn-outline-primary btn-sm me-2">
+                    <a href="{{ url_for('finance.clientes_facturacion') }}" class="btn btn-outline-primary btn-sm me-2">
                         <i class="fas fa-users"></i> Clientes
                     </a>
-                    <a href="{{ url_for('configuracion_fiscal') }}" class="btn btn-outline-info btn-sm">
+                    <a href="{{ url_for('finance.configuracion_fiscal') }}" class="btn btn-outline-info btn-sm">
                         <i class="fas fa-cog"></i> Config. Fiscal
                     </a>
                 </div>
@@ -115,7 +118,7 @@
                             {% for factura in ultimas_facturas_emitidas %}
                             <tr>
                                 <td>
-                                    <a href="{{ url_for('ver_factura_emitida', factura_id=factura.id) }}">
+                                    <a href="{{ url_for('finance.ver_factura_emitida', factura_id=factura.id) }}">
                                         {{ factura.numero_completo }}
                                     </a>
                                 </td>
@@ -123,11 +126,11 @@
                                 <td>€{{ "%.2f"|format(factura.total) }}</td>
                                 <td>
                                     {% if factura.estado == 'emitida' %}
-                                        <span class="badge bg-warning text-dark">Pendiente</span>
+                                    <span class="badge bg-warning text-dark">Pendiente</span>
                                     {% elif factura.estado == 'pagada' %}
-                                        <span class="badge bg-success">Pagada</span>
+                                    <span class="badge bg-success">Pagada</span>
                                     {% elif factura.estado == 'anulada' %}
-                                        <span class="badge bg-danger">Anulada</span>
+                                    <span class="badge bg-danger">Anulada</span>
                                     {% endif %}
                                 </td>
                             </tr>
@@ -139,7 +142,7 @@
                 <div class="text-center text-muted py-4">
                     <i class="fas fa-file-invoice fa-3x mb-3"></i>
                     <p>No hay facturas emitidas aún</p>
-                    <a href="{{ url_for('nueva_factura_emitida') }}" class="btn btn-primary btn-sm">
+                    <a href="{{ url_for('finance.nueva_factura_emitida') }}" class="btn btn-primary btn-sm">
                         <i class="fas fa-plus"></i> Emitir Primera Factura
                     </a>
                 </div>
@@ -159,7 +162,7 @@
                 <div class="mb-4">
                     <div class="d-flex justify-content-between align-items-center mb-2">
                         <h6 class="mb-0"><i class="fas fa-sync-alt"></i> Gastos Fijos (Recurrentes)</h6>
-                        <a href="{{ url_for('gastos_fijos') }}" class="btn btn-sm btn-outline-primary">
+                        <a href="{{ url_for('finance.gastos_fijos') }}" class="btn btn-sm btn-outline-primary">
                             <i class="fas fa-cog"></i> Gestionar
                         </a>
                     </div>
@@ -188,7 +191,7 @@
                 <div>
                     <div class="d-flex justify-content-between align-items-center mb-2">
                         <h6 class="mb-0"><i class="fas fa-file-invoice-dollar"></i> Gastos Variables (Puntuales)</h6>
-                        <a href="{{ url_for('nueva_factura') }}" class="btn btn-sm btn-outline-success">
+                        <a href="{{ url_for('finance.nueva_factura') }}" class="btn btn-sm btn-outline-success">
                             <i class="fas fa-plus"></i> Registrar
                         </a>
                     </div>
@@ -204,7 +207,8 @@
                         </div>
                         <div class="col-6">
                             <div class="p-2 bg-light rounded">
-                                <h5 class="{% if facturas_proveedores_vencidas > 0 %}text-danger{% else %}text-success{% endif %} mb-0">
+                                <h5
+                                    class="{% if facturas_proveedores_vencidas > 0 %}text-danger{% else %}text-success{% endif %} mb-0">
                                     {{ facturas_proveedores_vencidas }}
                                 </h5>
                                 <small class="text-muted">Vencidas</small>
@@ -214,10 +218,10 @@
                 </div>
 
                 <div class="mt-3">
-                    <a href="{{ url_for('proveedores') }}" class="btn btn-outline-secondary btn-sm me-2">
+                    <a href="{{ url_for('finance.proveedores') }}" class="btn btn-outline-secondary btn-sm me-2">
                         <i class="fas fa-building"></i> Proveedores
                     </a>
-                    <a href="{{ url_for('facturas') }}" class="btn btn-outline-secondary btn-sm">
+                    <a href="{{ url_for('finance.facturas') }}" class="btn btn-outline-secondary btn-sm">
                         <i class="fas fa-list"></i> Ver Facturas
                     </a>
                 </div>
@@ -236,22 +240,23 @@
             <div class="card-body">
                 <div class="row">
                     <div class="col-md-3">
-                        <a href="{{ url_for('nueva_factura_emitida') }}" class="btn btn-outline-primary w-100 mb-2">
+                        <a href="{{ url_for('finance.nueva_factura_emitida') }}"
+                            class="btn btn-outline-primary w-100 mb-2">
                             <i class="fas fa-plus-circle"></i> Emitir Factura a Cliente
                         </a>
                     </div>
                     <div class="col-md-3">
-                        <a href="{{ url_for('nuevo_cliente') }}" class="btn btn-outline-info w-100 mb-2">
+                        <a href="{{ url_for('finance.nuevo_cliente') }}" class="btn btn-outline-info w-100 mb-2">
                             <i class="fas fa-user-plus"></i> Nuevo Cliente
                         </a>
                     </div>
                     <div class="col-md-3">
-                        <a href="{{ url_for('nueva_factura') }}" class="btn btn-outline-danger w-100 mb-2">
+                        <a href="{{ url_for('finance.nueva_factura') }}" class="btn btn-outline-danger w-100 mb-2">
                             <i class="fas fa-file-invoice-dollar"></i> Registrar Gasto
                         </a>
                     </div>
                     <div class="col-md-3">
-                        <a href="{{ url_for('nuevo_proveedor') }}" class="btn btn-outline-success w-100 mb-2">
+                        <a href="{{ url_for('finance.nuevo_proveedor') }}" class="btn btn-outline-success w-100 mb-2">
                             <i class="fas fa-building"></i> Nuevo Proveedor
                         </a>
                     </div>
@@ -262,18 +267,18 @@
 </div>
 
 <style>
-.card {
-    transition: transform 0.2s;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
+    .card {
+        transition: transform 0.2s;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
 
-.card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-}
+    .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
 
-.opacity-50 {
-    opacity: 0.5;
-}
+    .opacity-50 {
+        opacity: 0.5;
+    }
 </style>
 {% endblock %}

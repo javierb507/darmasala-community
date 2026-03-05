@@ -10,42 +10,45 @@
             <h2><i class="fas fa-file-invoice"></i> Factura {{ factura.numero_completo }}</h2>
             <div>
                 {% if factura.estado == 'emitida' %}
-                <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#marcarPagadaModal">
+                <button type="button" class="btn btn-success" data-bs-toggle="modal"
+                    data-bs-target="#marcarPagadaModal">
                     <i class="fas fa-check-circle"></i> Marcar como Pagada
                 </button>
                 {% endif %}
                 {% if factura.estado != 'anulada' %}
-                <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#anularModal">
+                <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal"
+                    data-bs-target="#anularModal">
                     <i class="fas fa-ban"></i> Anular Factura
                 </button>
                 {% endif %}
-                <a href="{{ url_for('descargar_factura_pdf', factura_id=factura.id) }}" class="btn btn-primary">
+                <a href="{{ url_for('finance.descargar_factura_pdf', factura_id=factura.id) }}" class="btn btn-primary">
                     <i class="fas fa-file-pdf"></i> Descargar PDF
                 </a>
                 <a href="#" class="btn btn-outline-primary" onclick="window.print(); return false;">
                     <i class="fas fa-print"></i> Imprimir
                 </a>
-                <a href="{{ url_for('facturacion') }}" class="btn btn-outline-secondary">
+                <a href="{{ url_for('finance.facturacion') }}" class="btn btn-outline-secondary">
                     <i class="fas fa-arrow-left"></i> Volver
                 </a>
             </div>
         </div>
 
         <!-- Estado de la factura -->
-        <div class="alert {% if factura.estado == 'pagada' %}alert-success{% elif factura.estado == 'anulada' %}alert-danger{% else %}alert-warning{% endif %}">
+        <div
+            class="alert {% if factura.estado == 'pagada' %}alert-success{% elif factura.estado == 'anulada' %}alert-danger{% else %}alert-warning{% endif %}">
             <div class="d-flex justify-content-between align-items-center">
                 <div>
                     <strong>Estado:</strong>
                     {% if factura.estado == 'emitida' %}
-                        <span class="badge bg-warning text-dark">PENDIENTE DE PAGO</span>
+                    <span class="badge bg-warning text-dark">PENDIENTE DE PAGO</span>
                     {% elif factura.estado == 'pagada' %}
-                        <span class="badge bg-success">PAGADA</span>
-                        - Fecha de pago: {{ factura.fecha_pago.strftime('%d/%m/%Y') if factura.fecha_pago else 'N/A' }}
-                        {% if factura.metodo_pago %}
-                        - Método: {{ factura.metodo_pago|capitalize }}
-                        {% endif %}
+                    <span class="badge bg-success">PAGADA</span>
+                    - Fecha de pago: {{ factura.fecha_pago.strftime('%d/%m/%Y') if factura.fecha_pago else 'N/A' }}
+                    {% if factura.metodo_pago %}
+                    - Método: {{ factura.metodo_pago|capitalize }}
+                    {% endif %}
                     {% elif factura.estado == 'anulada' %}
-                        <span class="badge bg-danger">ANULADA</span>
+                    <span class="badge bg-danger">ANULADA</span>
                     {% endif %}
                 </div>
             </div>
@@ -65,8 +68,10 @@
                             {% if config_fiscal.codigo_postal %}{{ config_fiscal.codigo_postal }}{% endif %}
                             {% if config_fiscal.ciudad %}{{ config_fiscal.ciudad }}{% endif %}
                             {% if config_fiscal.provincia %}({{ config_fiscal.provincia }}){% endif %}<br>
-                            {% if config_fiscal.telefono %}<i class="fas fa-phone"></i> {{ config_fiscal.telefono }}<br>{% endif %}
-                            {% if config_fiscal.email %}<i class="fas fa-envelope"></i> {{ config_fiscal.email }}{% endif %}
+                            {% if config_fiscal.telefono %}<i class="fas fa-phone"></i> {{ config_fiscal.telefono
+                            }}<br>{% endif %}
+                            {% if config_fiscal.email %}<i class="fas fa-envelope"></i> {{ config_fiscal.email }}{%
+                            endif %}
                         </p>
                         {% if config_fiscal.epigrafe_iae %}
                         <p class="mb-0"><small>Epígrafe IAE: {{ config_fiscal.epigrafe_iae }}</small></p>
@@ -166,8 +171,12 @@
                             </tr>
                             {% endif %}
                             <tr class="table-primary">
-                                <td><h5 class="mb-0">TOTAL A PAGAR:</h5></td>
-                                <td class="text-end"><h4 class="mb-0">€{{ "%.2f"|format(factura.total) }}</h4></td>
+                                <td>
+                                    <h5 class="mb-0">TOTAL A PAGAR:</h5>
+                                </td>
+                                <td class="text-end">
+                                    <h4 class="mb-0">€{{ "%.2f"|format(factura.total) }}</h4>
+                                </td>
                             </tr>
                         </table>
                     </div>
@@ -193,7 +202,7 @@
 <div class="modal fade" id="marcarPagadaModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
-            <form method="POST" action="{{ url_for('marcar_factura_emitida_pagada', factura_id=factura.id) }}">
+            <form method="POST" action="{{ url_for('finance.marcar_factura_emitida_pagada', factura_id=factura.id) }}">
                 <div class="modal-header bg-success text-white">
                     <h5 class="modal-title"><i class="fas fa-check-circle"></i> Marcar Factura como Pagada</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
@@ -202,7 +211,7 @@
                     <div class="mb-3">
                         <label for="fecha_pago" class="form-label">Fecha de Pago *</label>
                         <input type="date" class="form-control" id="fecha_pago" name="fecha_pago"
-                               value="{{ fecha_hoy }}" required>
+                            value="{{ fecha_hoy }}" required>
                     </div>
                     <div class="mb-3">
                         <label for="metodo_pago" class="form-label">Método de Pago</label>
@@ -228,7 +237,7 @@
 <div class="modal fade" id="anularModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
-            <form method="POST" action="{{ url_for('anular_factura_emitida', factura_id=factura.id) }}">
+            <form method="POST" action="{{ url_for('finance.anular_factura_emitida', factura_id=factura.id) }}">
                 <div class="modal-header bg-danger text-white">
                     <h5 class="modal-title"><i class="fas fa-ban"></i> Anular Factura</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
@@ -236,7 +245,8 @@
                 <div class="modal-body">
                     <div class="alert alert-warning">
                         <i class="fas fa-exclamation-triangle"></i>
-                        <strong>Atención:</strong> Esta acción marcará la factura como anulada. La factura permanecerá en el sistema por motivos fiscales pero se excluirá de los cálculos.
+                        <strong>Atención:</strong> Esta acción marcará la factura como anulada. La factura permanecerá
+                        en el sistema por motivos fiscales pero se excluirá de los cálculos.
                     </div>
                     <p>¿Está seguro de que desea anular la factura <strong>{{ factura.numero_completo }}</strong>?</p>
                 </div>
@@ -250,17 +260,24 @@
 </div>
 
 <style>
-@media print {
-    .navbar, .btn, .modal, .alert, .no-print {
-        display: none !important;
+    @media print {
+
+        .navbar,
+        .btn,
+        .modal,
+        .alert,
+        .no-print {
+            display: none !important;
+        }
+
+        .print-area {
+            border: none !important;
+            box-shadow: none !important;
+        }
+
+        body {
+            background: white;
+        }
     }
-    .print-area {
-        border: none !important;
-        box-shadow: none !important;
-    }
-    body {
-        background: white;
-    }
-}
 </style>
 {% endblock %}

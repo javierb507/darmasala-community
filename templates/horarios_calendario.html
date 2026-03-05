@@ -8,10 +8,10 @@
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h2><i class="fas fa-calendar-alt"></i> Horarios Semanales</h2>
             <div class="btn-group">
-                <a href="{{ url_for('horarios') }}" class="btn btn-outline-primary">
+                <a href="{{ url_for('classes.horarios') }}" class="btn btn-outline-primary">
                     <i class="fas fa-list"></i> Vista Lista
                 </a>
-                <a href="{{ url_for('horarios_calendario') }}" class="btn btn-primary">
+                <a href="{{ url_for('classes.horarios_calendario') }}" class="btn btn-primary">
                     <i class="fas fa-calendar"></i> Vista Calendario
                 </a>
             </div>
@@ -42,37 +42,40 @@
                             </tr>
                         </thead>
                         <tbody>
-                            {% set horas = ['08:00', '08:30', '09:00', '09:30', '10:00', '10:30', '11:00', '11:30', '12:00', '12:30', '17:00', '17:30', '18:00', '18:30', '19:00', '19:30', '20:00', '20:30'] %}
+                            {% set horas = ['08:00', '08:30', '09:00', '09:30', '10:00', '10:30', '11:00', '11:30',
+                            '12:00', '12:30', '17:00', '17:30', '18:00', '18:30', '19:00', '19:30', '20:00', '20:30'] %}
                             {% for hora in horas %}
                             <tr>
                                 <td class="hora-columna"><strong>{{ hora }}</strong></td>
                                 {% for dia in range(7) %}
                                 <td class="celda-horario">
                                     {% for horario in horarios %}
-                                        {% if horario.dia_semana == dia and horario.hora_inicio.strftime('%H:%M') <= hora < horario.hora_fin.strftime('%H:%M') %}
-                                            {% if horario.hora_inicio.strftime('%H:%M') == hora %}
-                                            <div class="clase-card clase-{{ horario.clase.nombre.lower().replace(' ', '-') }}">
-                                                <div class="clase-nombre">{{ horario.clase.nombre }}</div>
-                                                <div class="clase-horario">
-                                                    {{ horario.hora_inicio.strftime('%H:%M') }} - {{ horario.hora_fin.strftime('%H:%M') }}
-                                                </div>
-                                                <div class="clase-instructor">
-                                                    <i class="fas fa-user"></i> {{ horario.instructor }}
-                                                </div>
-                                            </div>
-                                            {% endif %}
-                                        {% endif %}
-                                    {% endfor %}
-                                </td>
-                                {% endfor %}
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+                                    {% if horario.dia_semana == dia and horario.hora_inicio.strftime('%H:%M') <= hora <
+                                        horario.hora_fin.strftime('%H:%M') %} {% if
+                                        horario.hora_inicio.strftime('%H:%M')==hora %} <div
+                                        class="clase-card clase-{{ horario.clase.nombre.lower().replace(' ', '-') }}">
+                                        <div class="clase-nombre">{{ horario.clase.nombre }}</div>
+                                        <div class="clase-horario">
+                                            {{ horario.hora_inicio.strftime('%H:%M') }} - {{
+                                            horario.hora_fin.strftime('%H:%M') }}
+                                        </div>
+                                        <div class="clase-instructor">
+                                            <i class="fas fa-user"></i> {{ horario.instructor }}
+                                        </div>
                 </div>
+                {% endif %}
+                {% endif %}
+                {% endfor %}
+                </td>
+                {% endfor %}
+                </tr>
+                {% endfor %}
+                </tbody>
+                </table>
             </div>
         </div>
     </div>
+</div>
 </div>
 
 <!-- Leyenda de Clases -->
@@ -115,106 +118,106 @@
 </div>
 
 <style>
-.calendario-horarios {
-    font-size: 0.9rem;
-}
-
-.hora-columna {
-    background-color: #f8f9fa;
-    font-weight: bold;
-    text-align: center;
-    vertical-align: middle;
-}
-
-.celda-horario {
-    height: 40px;
-    vertical-align: top;
-    position: relative;
-    padding: 2px;
-}
-
-.clase-card {
-    border-radius: 8px;
-    padding: 4px 6px;
-    margin: 1px;
-    color: white;
-    font-size: 0.75rem;
-    line-height: 1.2;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
-}
-
-.clase-nombre {
-    font-weight: bold;
-    margin-bottom: 2px;
-}
-
-.clase-horario {
-    font-size: 0.7rem;
-    opacity: 0.9;
-}
-
-.clase-instructor {
-    font-size: 0.7rem;
-    opacity: 0.8;
-    margin-top: 2px;
-}
-
-/* Colores por tipo de clase */
-.clase-yoga-integral {
-    background: linear-gradient(135deg, #007bff, #0056b3);
-}
-
-.clase-yoga-menopausia {
-    background: linear-gradient(135deg, #dc3545, #a71e2a);
-}
-
-.clase-yoga-embarazadas {
-    background: linear-gradient(135deg, #28a745, #1e7e34);
-}
-
-.clase-meditación {
-    background: linear-gradient(135deg, #6f42c1, #5a2d91);
-}
-
-/* Leyenda */
-.leyenda-item {
-    display: flex;
-    align-items: center;
-    margin-bottom: 10px;
-}
-
-.color-box {
-    width: 20px;
-    height: 20px;
-    border-radius: 4px;
-    margin-right: 10px;
-}
-
-.color-box.clase-yoga-integral {
-    background: linear-gradient(135deg, #007bff, #0056b3);
-}
-
-.color-box.clase-yoga-menopausia {
-    background: linear-gradient(135deg, #dc3545, #a71e2a);
-}
-
-.color-box.clase-yoga-embarazadas {
-    background: linear-gradient(135deg, #28a745, #1e7e34);
-}
-
-.color-box.clase-meditación {
-    background: linear-gradient(135deg, #6f42c1, #5a2d91);
-}
-
-@media (max-width: 768px) {
     .calendario-horarios {
-        font-size: 0.7rem;
+        font-size: 0.9rem;
     }
-    
+
+    .hora-columna {
+        background-color: #f8f9fa;
+        font-weight: bold;
+        text-align: center;
+        vertical-align: middle;
+    }
+
+    .celda-horario {
+        height: 40px;
+        vertical-align: top;
+        position: relative;
+        padding: 2px;
+    }
+
     .clase-card {
-        padding: 2px 3px;
-        font-size: 0.65rem;
+        border-radius: 8px;
+        padding: 4px 6px;
+        margin: 1px;
+        color: white;
+        font-size: 0.75rem;
+        line-height: 1.2;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
     }
-}
+
+    .clase-nombre {
+        font-weight: bold;
+        margin-bottom: 2px;
+    }
+
+    .clase-horario {
+        font-size: 0.7rem;
+        opacity: 0.9;
+    }
+
+    .clase-instructor {
+        font-size: 0.7rem;
+        opacity: 0.8;
+        margin-top: 2px;
+    }
+
+    /* Colores por tipo de clase */
+    .clase-yoga-integral {
+        background: linear-gradient(135deg, #007bff, #0056b3);
+    }
+
+    .clase-yoga-menopausia {
+        background: linear-gradient(135deg, #dc3545, #a71e2a);
+    }
+
+    .clase-yoga-embarazadas {
+        background: linear-gradient(135deg, #28a745, #1e7e34);
+    }
+
+    .clase-meditación {
+        background: linear-gradient(135deg, #6f42c1, #5a2d91);
+    }
+
+    /* Leyenda */
+    .leyenda-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: 10px;
+    }
+
+    .color-box {
+        width: 20px;
+        height: 20px;
+        border-radius: 4px;
+        margin-right: 10px;
+    }
+
+    .color-box.clase-yoga-integral {
+        background: linear-gradient(135deg, #007bff, #0056b3);
+    }
+
+    .color-box.clase-yoga-menopausia {
+        background: linear-gradient(135deg, #dc3545, #a71e2a);
+    }
+
+    .color-box.clase-yoga-embarazadas {
+        background: linear-gradient(135deg, #28a745, #1e7e34);
+    }
+
+    .color-box.clase-meditación {
+        background: linear-gradient(135deg, #6f42c1, #5a2d91);
+    }
+
+    @media (max-width: 768px) {
+        .calendario-horarios {
+            font-size: 0.7rem;
+        }
+
+        .clase-card {
+            padding: 2px 3px;
+            font-size: 0.65rem;
+        }
+    }
 </style>
 {% endblock %}

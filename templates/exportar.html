@@ -7,7 +7,7 @@
     <div class="col-12">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h2><i class="fas fa-download"></i> Exportar Datos</h2>
-            <a href="{{ url_for('index') }}" class="btn btn-secondary">
+            <a href="{{ url_for('main.index') }}" class="btn btn-secondary">
                 <i class="fas fa-arrow-left"></i> Volver al Inicio
             </a>
         </div>
@@ -25,7 +25,7 @@
             </div>
             <div class="card-body">
                 <p class="text-muted">Exportar información completa de alumnos activos e inactivos.</p>
-                
+
                 <div class="mb-3">
                     <label class="form-label">Filtros:</label>
                     <div class="form-check">
@@ -41,21 +41,21 @@
                         </label>
                     </div>
                 </div>
-                
+
                 <div class="btn-group w-100" role="group">
-                    <a href="{{ url_for('export_data', tipo='alumnos', formato='csv') }}" 
-                       class="btn btn-outline-primary">
+                    <a href="{{ url_for('settings.export_data', tipo='alumnos', formato='csv') }}"
+                        class="btn btn-outline-primary">
                         <i class="fas fa-file-csv"></i> CSV
                     </a>
-                    <a href="{{ url_for('export_data', tipo='alumnos', formato='json') }}" 
-                       class="btn btn-outline-info">
+                    <a href="{{ url_for('settings.export_data', tipo='alumnos', formato='json') }}"
+                        class="btn btn-outline-info">
                         <i class="fas fa-file-code"></i> JSON
                     </a>
                 </div>
             </div>
         </div>
     </div>
-    
+
     <!-- Exportación de Pagos -->
     <div class="col-md-6 mb-4">
         <div class="card">
@@ -66,7 +66,7 @@
             </div>
             <div class="card-body">
                 <p class="text-muted">Exportar historial completo de pagos y matrículas.</p>
-                
+
                 <div class="mb-3">
                     <label for="año_pagos" class="form-label">Año:</label>
                     <select class="form-select" id="año_pagos">
@@ -76,21 +76,21 @@
                         <option value="2023">2023</option>
                     </select>
                 </div>
-                
+
                 <div class="btn-group w-100" role="group">
-                    <a href="{{ url_for('export_data', tipo='pagos', formato='csv') }}" 
-                       class="btn btn-outline-success">
+                    <a href="{{ url_for('settings.export_data', tipo='pagos', formato='csv') }}"
+                        class="btn btn-outline-success">
                         <i class="fas fa-file-csv"></i> CSV
                     </a>
-                    <a href="{{ url_for('export_data', tipo='pagos', formato='json') }}" 
-                       class="btn btn-outline-info">
+                    <a href="{{ url_for('settings.export_data', tipo='pagos', formato='json') }}"
+                        class="btn btn-outline-info">
                         <i class="fas fa-file-code"></i> JSON
                     </a>
                 </div>
             </div>
         </div>
     </div>
-    
+
     <!-- Exportación de Facturas -->
     <div class="col-md-6 mb-4">
         <div class="card">
@@ -101,7 +101,7 @@
             </div>
             <div class="card-body">
                 <p class="text-muted">Exportar facturas de proveedores y gastos.</p>
-                
+
                 <div class="mb-3">
                     <label for="estado_facturas" class="form-label">Estado:</label>
                     <select class="form-select" id="estado_facturas">
@@ -111,21 +111,21 @@
                         <option value="vencida">Solo vencidas</option>
                     </select>
                 </div>
-                
+
                 <div class="btn-group w-100" role="group">
-                    <a href="{{ url_for('export_data', tipo='facturas', formato='csv') }}" 
-                       class="btn btn-outline-warning">
+                    <a href="{{ url_for('settings.export_data', tipo='facturas', formato='csv') }}"
+                        class="btn btn-outline-warning">
                         <i class="fas fa-file-csv"></i> CSV
                     </a>
-                    <a href="{{ url_for('export_data', tipo='facturas', formato='json') }}" 
-                       class="btn btn-outline-info">
+                    <a href="{{ url_for('settings.export_data', tipo='facturas', formato='json') }}"
+                        class="btn btn-outline-info">
                         <i class="fas fa-file-code"></i> JSON
                     </a>
                 </div>
             </div>
         </div>
     </div>
-    
+
     <!-- Exportación de Asistencias -->
     <div class="col-md-6 mb-4">
         <div class="card">
@@ -136,7 +136,7 @@
             </div>
             <div class="card-body">
                 <p class="text-muted">Exportar registro de asistencias a clases.</p>
-                
+
                 <div class="mb-3">
                     <label for="periodo_asistencias" class="form-label">Período:</label>
                     <select class="form-select" id="periodo_asistencias">
@@ -146,14 +146,14 @@
                         <option value="año_actual" selected>Año actual</option>
                     </select>
                 </div>
-                
+
                 <div class="btn-group w-100" role="group">
-                    <a href="{{ url_for('export_data', tipo='asistencias', formato='csv') }}" 
-                       class="btn btn-outline-info">
+                    <a href="{{ url_for('settings.export_data', tipo='asistencias', formato='csv') }}"
+                        class="btn btn-outline-info">
                         <i class="fas fa-file-csv"></i> CSV
                     </a>
-                    <a href="{{ url_for('export_data', tipo='asistencias', formato='json') }}" 
-                       class="btn btn-outline-info">
+                    <a href="{{ url_for('settings.export_data', tipo='asistencias', formato='json') }}"
+                        class="btn btn-outline-info">
                         <i class="fas fa-file-code"></i> JSON
                     </a>
                 </div>
@@ -173,15 +173,16 @@
             </div>
             <div class="card-body">
                 <p class="mb-3">
-                    <strong>Exportación completa</strong> de todos los datos del sistema en formato JSON. 
+                    <strong>Exportación completa</strong> de todos los datos del sistema en formato JSON.
                     Incluye alumnos, pagos, facturas, asistencias y configuración.
                 </p>
-                
+
                 <div class="alert alert-info">
                     <i class="fas fa-info-circle"></i>
-                    <strong>Recomendación:</strong> Realiza un backup completo antes de hacer cambios importantes en el sistema.
+                    <strong>Recomendación:</strong> Realiza un backup completo antes de hacer cambios importantes en el
+                    sistema.
                 </div>
-                
+
                 <div class="d-grid gap-2 d-md-flex">
                     <button class="btn btn-warning" onclick="createFullBackup()">
                         <i class="fas fa-download"></i> Crear Backup Completo
@@ -193,7 +194,7 @@
             </div>
         </div>
     </div>
-    
+
     <!-- Estadísticas de Exportación -->
     <div class="col-md-4">
         <div class="card">
@@ -216,12 +217,12 @@
 </div>
 
 <script>
-// Cargar estadísticas
-document.addEventListener('DOMContentLoaded', function() {
-    fetch('/api/export-stats')
-        .then(response => response.json())
-        .then(data => {
-            const statsHtml = `
+    // Cargar estadísticas
+    document.addEventListener('DOMContentLoaded', function () {
+        fetch('/api/export-stats')
+            .then(response => response.json())
+            .then(data => {
+                const statsHtml = `
                 <ul class="list-unstyled">
                     <li><strong>Alumnos:</strong> ${data.alumnos_activos}/${data.alumnos_total}</li>
                     <li><strong>Pagos:</strong> ${data.pagos_total}</li>
@@ -230,43 +231,43 @@ document.addEventListener('DOMContentLoaded', function() {
                 </ul>
                 <small class="text-muted">Actualizado: ${data.last_export}</small>
             `;
-            document.getElementById('exportStats').innerHTML = statsHtml;
-        })
-        .catch(error => {
-            document.getElementById('exportStats').innerHTML = 
-                '<small class="text-danger">Error al cargar estadísticas</small>';
-        });
-});
-
-function createFullBackup() {
-    if (confirm('¿Crear backup completo del sistema? Esto puede tardar unos minutos.')) {
-        const btn = event.target;
-        const originalText = btn.innerHTML;
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creando...';
-        btn.disabled = true;
-        
-        fetch('/api/backup-full', { method: 'POST' })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert('✅ Backup completo creado exitosamente: ' + data.filename);
-                } else {
-                    alert('❌ Error al crear backup: ' + data.error);
-                }
+                document.getElementById('exportStats').innerHTML = statsHtml;
             })
             .catch(error => {
-                alert('❌ Error de conexión: ' + error);
-            })
-            .finally(() => {
-                btn.innerHTML = originalText;
-                btn.disabled = false;
+                document.getElementById('exportStats').innerHTML =
+                    '<small class="text-danger">Error al cargar estadísticas</small>';
             });
-    }
-}
+    });
 
-function showBackupHistory() {
-    // Implementar modal con historial de backups
-    alert('Funcionalidad de historial de backups en desarrollo');
-}
+    function createFullBackup() {
+        if (confirm('¿Crear backup completo del sistema? Esto puede tardar unos minutos.')) {
+            const btn = event.target;
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creando...';
+            btn.disabled = true;
+
+            fetch('/api/backup-full', { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('✅ Backup completo creado exitosamente: ' + data.filename);
+                    } else {
+                        alert('❌ Error al crear backup: ' + data.error);
+                    }
+                })
+                .catch(error => {
+                    alert('❌ Error de conexión: ' + error);
+                })
+                .finally(() => {
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                });
+        }
+    }
+
+    function showBackupHistory() {
+        // Implementar modal con historial de backups
+        alert('Funcionalidad de historial de backups en desarrollo');
+    }
 </script>
 {% endblock %}

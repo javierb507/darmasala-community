@@ -14,219 +14,146 @@
     <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
     {% endif %}
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Google Fonts -->
     <link
         href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;500;600;700&display=swap"
         rel="stylesheet">
 
-    <style>
-        :root {
-            --primary-color: {
-                    {
-                    config.get('color_primario', '#6b4c9a')
-                }
-            }
+    <!-- CSS Dependencies -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
 
-            ;
-
-            --secondary-color: {
-                    {
-                    config.get('color_secundario', '#8B5FBF')
-                }
-            }
-
-            ;
-
-            --accent-color: {
-                    {
-                    config.get('color_acento', '#FFD700')
-                }
-            }
-
-            ;
-            --bg-light: #f4f7f9;
-            --navbar-text: #ffffff;
-        }
-
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--bg-light);
-            color: #2d3436;
-            min-height: 100vh;
-        }
-
-        /* Navbar COMPLETAMENTE sólida y opaca */
-        .navbar {
-            background-color: var(--primary-color) !important;
-            background: var(--primary-color) !important;
-            background-image: none !important;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4) !important;
-            border-bottom: 2px solid rgba(0, 0, 0, 0.1) !important;
-            padding: 0.8rem 0 !important;
-            opacity: 1 !important;
-            z-index: 9999 !important;
-        }
-
-        .navbar.sticky-top {
-            position: sticky !important;
-            top: 0 !important;
-            background-color: var(--primary-color) !important;
-            opacity: 1 !important;
-            backdrop-filter: none !important;
-            -webkit-backdrop-filter: none !important;
-        }
-        }
-
-        .navbar-brand,
-        .nav-link {
-            color: #ffffff !important;
-            font-weight: 700 !important;
-            opacity: 1 !important;
-        }
-
-        .navbar-brand {
-            font-family: 'Playfair Display', serif;
-            font-size: 1.6rem;
-            letter-spacing: 0.5px;
-        }
-
-        .navbar-brand i {
-            color: var(--accent-color);
-            margin-right: 10px;
-        }
-
-        .nav-link {
-            margin: 0 10px;
-            transition: all 0.2s ease;
-        }
-
-        .nav-link:hover {
-            color: var(--accent-color) !important;
-            transform: translateY(-1px);
-        }
-
-        .navbar-logo {
-            height: 42px;
-            width: auto;
-            margin-right: 12px;
-            border-radius: 8px;
-            background: white;
-            padding: 3px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-        }
-
-        .card {
-            border: none;
-            border-radius: 16px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
-            background: #ffffff;
-            margin-bottom: 30px;
-        }
-
-        .card-header {
-            background: #ffffff;
-            border-bottom: 1px solid #edf2f7;
-            padding: 1.25rem;
-            font-weight: 700;
-            color: #1a202c;
-        }
-
-        .btn-primary {
-            background-color: var(--primary-color);
-            border-color: var(--primary-color);
-            font-weight: 600;
-            padding: 0.6rem 1.2rem;
-            border-radius: 10px;
-        }
-
-        footer {
-            background: #ffffff;
-            border-top: 1px solid #e2e8f0;
-            color: #718096;
-            font-weight: 500;
-        }
-    </style>
     {% block extra_css %}{% endblock %}
 </head>
 
 <body class="d-flex flex-column">
-    <nav class="navbar navbar-expand-lg sticky-top">
-        <div class="container">
-            <a class="navbar-brand d-flex align-items-center" href="{{ url_for('index') }}">
-                {% if config and config.get('logo_escuela') %}
-                <img src="{{ url_for('static', filename=config.get('logo_escuela')) }}" alt="Logo" class="navbar-logo">
-                {% else %}
-                <i class="fas fa-om"></i>
-                {% endif %}
-                <span>{{ config.get('nombre_escuela', 'ATMA SUDDHI') }}</span>
-            </a>
 
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <i class="fas fa-bars text-white"></i>
-            </button>
-
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto align-items-center">
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('calendario_unificado') }}">
-                            <i class="fas fa-calendar-alt me-1"></i> Calendario
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('alumnos') }}">
-                            <i class="fas fa-users me-1"></i> Alumnos
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('configuracion') }}">
-                            <i class="fas fa-cog me-1"></i> Configuración
-                        </a>
-                    </li>
-
-                    {% if session.get('username') %}
-                    <li class="nav-item ms-lg-4">
-                        <div class="d-flex align-items-center bg-white rounded-pill px-3 py-1 shadow-sm">
-                            <span class="small me-2 text-dark font-weight-bold">
-                                <i class="fas fa-user-circle text-primary"></i> {{ session.username }}
-                            </span>
-                            <div class="vr mx-2"></div>
-                            <a class="text-danger opacity-75 hover-opacity-100" href="{{ url_for('logout') }}"
-                                title="Cerrar Sesión">
-                                <i class="fas fa-sign-out-alt"></i>
-                            </a>
-                        </div>
-                    </li>
+    <div class="wrapper">
+        <!-- Sidebar -->
+        <nav id="sidebar">
+            <div class="sidebar-header">
+                <a class="navbar-brand d-flex align-items-center" href="{{ url_for('main.index') }}">
+                    {% if config and config.get('logo_escuela') %}
+                    <img src="{{ url_for('static', filename=config.get('logo_escuela')) }}" alt="Logo"
+                        class="navbar-logo" style="height: 30px; margin-right: 10px;">
+                    {% else %}
+                    <i class="fas fa-om me-2"></i>
                     {% endif %}
-                </ul>
+                    <span class="d-none d-lg-inline">{{ config.get('nombre_escuela', 'ATMA SUDDHI') }}</span>
+                </a>
+            </div>
+
+            <ul class="list-unstyled components">
+                <li class="{% if request.endpoint == 'main.index' %}active{% endif %}">
+                    <a href="{{ url_for('main.index') }}">
+                        <i class="fas fa-tachometer-alt"></i> <span>Dashboard</span>
+                    </a>
+                </li>
+                <li class="{% if 'students' in request.endpoint %}active{% endif %}">
+                    <a href="{{ url_for('students.alumnos') }}">
+                        <i class="fas fa-users"></i> <span>Alumnos</span>
+                    </a>
+                </li>
+                <li class="{% if 'classes' in request.endpoint or 'calendario' in request.endpoint %}active{% endif %}">
+                    <a href="{{ url_for('classes.calendario_unificado') }}">
+                        <i class="fas fa-calendar-alt"></i> <span>Calendario</span>
+                    </a>
+                </li>
+                <li class="{% if 'finance' in request.endpoint %}active{% endif %}">
+                    <a href="{{ url_for('finance.economia_historico') }}">
+                        <i class="fas fa-chart-line"></i> <span>Economía</span>
+                    </a>
+                </li>
+                <li class="{% if 'yogatherapia' in request.endpoint %}active{% endif %}">
+                    <a href="{{ url_for('yogatherapia.yogaterapia') }}">
+                        <i class="fas fa-user-md"></i> <span>Yogaterapia</span>
+                    </a>
+                </li>
+                <li class="{% if 'settings' in request.endpoint %}active{% endif %}">
+                    <a href="{{ url_for('settings.configuracion') }}">
+                        <i class="fas fa-cog"></i> <span>Configuración</span>
+                    </a>
+                </li>
+                {% if session.get('rol') == 'admin' %}
+                <li class="{% if 'users' in request.endpoint %}active{% endif %}">
+                    <a href="{{ url_for('users.usuarios') }}">
+                        <i class="fas fa-user-shield"></i> <span>Usuarios</span>
+                    </a>
+                </li>
+                {% endif %}
+            </ul>
+
+            <div class="sidebar-footer p-3 mt-auto">
+                <a href="{{ url_for('auth.logout') }}" class="btn btn-outline-light btn-sm w-100">
+                    <i class="fas fa-sign-out-alt"></i> <span class="d-none d-lg-inline">Cerrar Sesión</span>
+                </a>
+            </div>
+        </nav>
+
+        <!-- Page Content -->
+        <div id="content">
+            <!-- Top Bar -->
+            <div class="top-bar">
+                <div class="d-flex align-items-center">
+                    <button type="button" id="sidebarCollapse" class="btn btn-premium me-3">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h4 class="mb-0 text-primary">{% block page_title %}Dashboard{% endblock %}</h4>
+                </div>
+
+                <div class="user-info d-flex align-items-center">
+                    {% if session.get('username') %}
+                    <a href="{{ url_for('users.propio_perfil') }}"
+                        class="bg-light rounded-pill px-3 py-2 border d-flex align-items-center shadow-sm text-decoration-none">
+                        <i class="fas fa-user-circle text-primary me-2 fs-5"></i>
+                        <span class="small fw-bold text-dark">{{ session.username }}</span>
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Main Container -->
+            <div class="container-fluid">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                {% for category, message in messages %}
+                <div
+                    class="alert alert-custom alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show shadow-sm border-0 mb-4">
+                    <i class="fas fa-info-circle me-2"></i> {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                {% endfor %}
+                {% endif %}
+                {% endwith %}
+
+                {% block content %}{% endblock %}
             </div>
         </div>
-    </nav>
-
-    <div class="container mt-4 pb-5 flex-grow-1">
-        {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-        {% for category, message in messages %}
-        <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show shadow-sm border-0 mb-4"
-            style="border-radius: 12px;">
-            <i class="fas fa-info-circle me-2"></i> {{ message }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-        {% endfor %}
-        {% endif %}
-        {% endwith %}
-
-        {% block content %}{% endblock %}
     </div>
 
-    <footer class="py-4 text-center">
-        <div class="container text-muted small">
-            &copy; 2026 <strong>{{ config.get('nombre_escuela', 'ATMA SUDDHI') }}</strong> - Gestión Profesional de Yoga
-        </div>
-    </footer>
-
+    <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const sidebarCollapse = document.getElementById('sidebarCollapse');
+            const sidebar = document.getElementById('sidebar');
+            const content = document.getElementById('content');
+
+            if (sidebarCollapse) {
+                sidebarCollapse.addEventListener('click', function () {
+                    if (window.innerWidth > 992) {
+                        sidebar.classList.toggle('collapsed');
+                        content.classList.toggle('expanded');
+                    } else {
+                        sidebar.classList.toggle('active');
+                    }
+                });
+            }
+        });
+    </script>
     {% block extra_js %}{% endblock %}
+    {% block modals %}{% endblock %}
 </body>
 
 </html>

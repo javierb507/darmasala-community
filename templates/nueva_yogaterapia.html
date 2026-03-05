@@ -8,7 +8,7 @@
         <div class="col-12">
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <h2><i class="fas fa-heart"></i> Nueva Sesión de Yogaterapia</h2>
-                <a href="{{ url_for('yogaterapia') }}" class="btn btn-secondary">
+                <a href="{{ url_for('yogatherapia.yogaterapia') }}" class="btn btn-secondary">
                     <i class="fas fa-arrow-left"></i> Volver
                 </a>
             </div>
@@ -24,65 +24,70 @@
                     </h5>
                 </div>
                 <div class="card-body">
-                    <form method="POST" action="{% if from_student %}{{ url_for('nueva_yogaterapia_alumno', alumno_id=alumno.id) }}{% else %}{{ url_for('procesar_yogaterapia_general') }}{% endif %}" enctype="multipart/form-data">
+                    <form method="POST"
+                        action="{% if from_student %}{{ url_for('yogatherapia.nueva_yogaterapia_alumno', alumno_id=alumno.id) }}{% else %}{{ url_for('yogatherapia.procesar_yogaterapia_general') }}{% endif %}"
+                        enctype="multipart/form-data">
                         <div class="row">
-                <!-- Selección de Alumno -->
-                <div class="col-md-6">
-                    <h6 class="text-muted mb-3">Seleccionar Alumno</h6>
-                    
-                    <div class="mb-3">
-                        <label for="alumno_id" class="form-label">Alumno *</label>
-                        <select class="form-select" id="alumno_id" name="alumno_id" required>
-                            <option value="">Seleccionar alumno...</option>
-                            {% for alumno in alumnos %}
-                            <option value="{{ alumno.id }}" {% if from_student and alumno.id == alumno.id %}selected{% endif %}>
-                                {{ alumno.nombre }} {{ alumno.apellido }} - {{ alumno.email }}
-                            </option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    
-                    {% if from_student %}
-                    <div class="alert alert-info">
-                        <i class="fas fa-info-circle"></i>
-                        <strong>Datos del alumno:</strong><br>
-                        <strong>Email:</strong> {{ alumno.email }}<br>
-                        <strong>Teléfono:</strong> {{ alumno.telefono }}
-                    </div>
-                    {% endif %}
-                </div>
+                            <!-- Selección de Alumno -->
+                            <div class="col-md-6">
+                                <h6 class="text-muted mb-3">Seleccionar Alumno</h6>
+
+                                <div class="mb-3">
+                                    <label for="alumno_id" class="form-label">Alumno *</label>
+                                    <select class="form-select" id="alumno_id" name="alumno_id" required>
+                                        <option value="">Seleccionar alumno...</option>
+                                        {% for alumno in alumnos %}
+                                        <option value="{{ alumno.id }}" {% if from_student and alumno.id==alumno.id
+                                            %}selected{% endif %}>
+                                            {{ alumno.nombre }} {{ alumno.apellido }} - {{ alumno.email }}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+
+                                {% if from_student %}
+                                <div class="alert alert-info">
+                                    <i class="fas fa-info-circle"></i>
+                                    <strong>Datos del alumno:</strong><br>
+                                    <strong>Email:</strong> {{ alumno.email }}<br>
+                                    <strong>Teléfono:</strong> {{ alumno.telefono }}
+                                </div>
+                                {% endif %}
+                            </div>
 
                             <!-- Información de la Sesión -->
                             <div class="col-md-6">
                                 <h6 class="text-muted mb-3">Detalles de la Sesión</h6>
-                                
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="mb-3">
-                            <label for="fecha_sesion" class="form-label">Fecha de la Sesión *</label>
-                            <div class="input-group">
-                                <input type="date" class="form-control" id="fecha_sesion" name="fecha_sesion" 
-                                       value="{{ request.args.get('fecha', '') }}" required>
-                                <button type="button" class="btn btn-outline-primary" onclick="abrirCalendario()">
-                                    <i class="fas fa-calendar-alt"></i> Calendario
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="mb-3">
-                            <label for="hora_inicio" class="form-label">Hora de Inicio</label>
-                            <input type="time" class="form-control" id="hora_inicio" name="hora_inicio">
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="mb-3">
-                            <label for="hora_fin" class="form-label">Hora de Fin</label>
-                            <input type="time" class="form-control" id="hora_fin" name="hora_fin">
-                        </div>
-                    </div>
-                </div>
-                                
+
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="fecha_sesion" class="form-label">Fecha de la Sesión *</label>
+                                            <div class="input-group">
+                                                <input type="date" class="form-control" id="fecha_sesion"
+                                                    name="fecha_sesion" value="{{ request.args.get('fecha', '') }}"
+                                                    required>
+                                                <button type="button" class="btn btn-outline-primary"
+                                                    onclick="abrirCalendario()">
+                                                    <i class="fas fa-calendar-alt"></i> Calendario
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="mb-3">
+                                            <label for="hora_inicio" class="form-label">Hora de Inicio</label>
+                                            <input type="time" class="form-control" id="hora_inicio" name="hora_inicio">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="mb-3">
+                                            <label for="hora_fin" class="form-label">Hora de Fin</label>
+                                            <input type="time" class="form-control" id="hora_fin" name="hora_fin">
+                                        </div>
+                                    </div>
+                                </div>
+
                                 <div class="mb-3">
                                     <label for="duracion_minutos" class="form-label">Duración (minutos)</label>
                                     <select class="form-select" id="duracion_minutos" name="duracion_minutos">
@@ -92,7 +97,7 @@
                                         <option value="90">90 minutos</option>
                                     </select>
                                 </div>
-                                
+
                                 <div class="mb-3">
                                     <label for="tipo_sesion" class="form-label">Tipo de Sesión</label>
                                     <select class="form-select" id="tipo_sesion" name="tipo_sesion">
@@ -108,44 +113,46 @@
                             <div class="col-12">
                                 <h6 class="text-muted mb-3">Información Terapéutica</h6>
                             </div>
-                            
+
                             <div class="col-md-6">
                                 <div class="mb-3">
                                     <label for="motivo_consulta" class="form-label">Motivo de Consulta</label>
-                                    <textarea class="form-control" id="motivo_consulta" name="motivo_consulta" rows="3" 
-                                              placeholder="¿Por qué viene la persona? ¿Qué le preocupa?"></textarea>
+                                    <textarea class="form-control" id="motivo_consulta" name="motivo_consulta" rows="3"
+                                        placeholder="¿Por qué viene la persona? ¿Qué le preocupa?"></textarea>
                                 </div>
-                                
+
                                 <div class="mb-3">
-                                    <label for="objetivos_terapeuticos" class="form-label">Objetivos Terapéuticos</label>
-                                    <textarea class="form-control" id="objetivos_terapeuticos" name="objetivos_terapeuticos" rows="3" 
-                                              placeholder="¿Qué objetivos específicos se quieren alcanzar?"></textarea>
+                                    <label for="objetivos_terapeuticos" class="form-label">Objetivos
+                                        Terapéuticos</label>
+                                    <textarea class="form-control" id="objetivos_terapeuticos"
+                                        name="objetivos_terapeuticos" rows="3"
+                                        placeholder="¿Qué objetivos específicos se quieren alcanzar?"></textarea>
                                 </div>
-                                
+
                                 <div class="mb-3">
                                     <label for="estado_inicial" class="form-label">Estado Inicial</label>
-                                    <textarea class="form-control" id="estado_inicial" name="estado_inicial" rows="3" 
-                                              placeholder="¿Cómo llega la persona? ¿Qué síntomas o sensaciones tiene?"></textarea>
+                                    <textarea class="form-control" id="estado_inicial" name="estado_inicial" rows="3"
+                                        placeholder="¿Cómo llega la persona? ¿Qué síntomas o sensaciones tiene?"></textarea>
                                 </div>
                             </div>
-                            
+
                             <div class="col-md-6">
                                 <div class="mb-3">
                                     <label for="tecnicas_aplicadas" class="form-label">Técnicas Aplicadas</label>
-                                    <textarea class="form-control" id="tecnicas_aplicadas" name="tecnicas_aplicadas" rows="3" 
-                                              placeholder="¿Qué técnicas de yoga se utilizaron?"></textarea>
+                                    <textarea class="form-control" id="tecnicas_aplicadas" name="tecnicas_aplicadas"
+                                        rows="3" placeholder="¿Qué técnicas de yoga se utilizaron?"></textarea>
                                 </div>
-                                
+
                                 <div class="mb-3">
                                     <label for="posturas_trabajadas" class="form-label">Posturas Trabajadas</label>
-                                    <textarea class="form-control" id="posturas_trabajadas" name="posturas_trabajadas" rows="3" 
-                                              placeholder="¿Qué asanas específicas se trabajaron?"></textarea>
+                                    <textarea class="form-control" id="posturas_trabajadas" name="posturas_trabajadas"
+                                        rows="3" placeholder="¿Qué asanas específicas se trabajaron?"></textarea>
                                 </div>
-                                
+
                                 <div class="mb-3">
                                     <label for="estado_final" class="form-label">Estado Final</label>
-                                    <textarea class="form-control" id="estado_final" name="estado_final" rows="3" 
-                                              placeholder="¿Cómo se va la persona? ¿Qué cambios nota?"></textarea>
+                                    <textarea class="form-control" id="estado_final" name="estado_final" rows="3"
+                                        placeholder="¿Cómo se va la persona? ¿Qué cambios nota?"></textarea>
                                 </div>
                             </div>
                         </div>
@@ -155,32 +162,39 @@
                             <div class="col-12">
                                 <h6 class="text-muted mb-3">Información Adicional</h6>
                             </div>
-                            
+
                             <div class="col-md-6">
                                 <div class="mb-3">
-                                    <label for="respiracion_pranayama" class="form-label">Respiración y Pranayama</label>
-                                    <textarea class="form-control" id="respiracion_pranayama" name="respiracion_pranayama" rows="3" 
-                                              placeholder="¿Qué ejercicios de respiración se practicaron?"></textarea>
+                                    <label for="respiracion_pranayama" class="form-label">Respiración y
+                                        Pranayama</label>
+                                    <textarea class="form-control" id="respiracion_pranayama"
+                                        name="respiracion_pranayama" rows="3"
+                                        placeholder="¿Qué ejercicios de respiración se practicaron?"></textarea>
                                 </div>
-                                
+
                                 <div class="mb-3">
-                                    <label for="meditacion_relajacion" class="form-label">Meditación y Relajación</label>
-                                    <textarea class="form-control" id="meditacion_relajacion" name="meditacion_relajacion" rows="3" 
-                                              placeholder="¿Qué técnicas de meditación se utilizaron?"></textarea>
+                                    <label for="meditacion_relajacion" class="form-label">Meditación y
+                                        Relajación</label>
+                                    <textarea class="form-control" id="meditacion_relajacion"
+                                        name="meditacion_relajacion" rows="3"
+                                        placeholder="¿Qué técnicas de meditación se utilizaron?"></textarea>
                                 </div>
                             </div>
-                            
+
                             <div class="col-md-6">
                                 <div class="mb-3">
-                                    <label for="observaciones_terapeuta" class="form-label">Observaciones del Terapeuta</label>
-                                    <textarea class="form-control" id="observaciones_terapeuta" name="observaciones_terapeuta" rows="3" 
-                                              placeholder="Observaciones profesionales sobre la sesión"></textarea>
+                                    <label for="observaciones_terapeuta" class="form-label">Observaciones del
+                                        Terapeuta</label>
+                                    <textarea class="form-control" id="observaciones_terapeuta"
+                                        name="observaciones_terapeuta" rows="3"
+                                        placeholder="Observaciones profesionales sobre la sesión"></textarea>
                                 </div>
-                                
+
                                 <div class="mb-3">
-                                    <label for="recomendaciones_casa" class="form-label">Recomendaciones para Casa</label>
-                                    <textarea class="form-control" id="recomendaciones_casa" name="recomendaciones_casa" rows="3" 
-                                              placeholder="¿Qué puede practicar en casa?"></textarea>
+                                    <label for="recomendaciones_casa" class="form-label">Recomendaciones para
+                                        Casa</label>
+                                    <textarea class="form-control" id="recomendaciones_casa" name="recomendaciones_casa"
+                                        rows="3" placeholder="¿Qué puede practicar en casa?"></textarea>
                                 </div>
                             </div>
                         </div>
@@ -191,9 +205,10 @@
                                 <h6 class="text-muted mb-3">Archivos de Práctica</h6>
                                 <div class="mb-3">
                                     <label for="archivos" class="form-label">Subir Archivos de Práctica</label>
-                                    <input type="file" class="form-control" id="archivos" name="archivos" multiple 
-                                           accept=".pdf,.jpg,.jpeg,.png,.doc,.docx">
-                                    <div class="form-text">Puedes subir archivos escaneados de la práctica personal (PDF, imágenes, documentos)</div>
+                                    <input type="file" class="form-control" id="archivos" name="archivos" multiple
+                                        accept=".pdf,.jpg,.jpeg,.png,.doc,.docx">
+                                    <div class="form-text">Puedes subir archivos escaneados de la práctica personal
+                                        (PDF, imágenes, documentos)</div>
                                 </div>
                             </div>
                         </div>
@@ -203,19 +218,21 @@
                             <div class="col-12">
                                 <h6 class="text-muted mb-3">Información Administrativa</h6>
                             </div>
-                            
+
                             <div class="col-md-6">
                                 <div class="mb-3">
                                     <label for="instructor" class="form-label">Instructor</label>
-                                    <input type="text" class="form-control" id="instructor" name="instructor" value="Minouche">
+                                    <input type="text" class="form-control" id="instructor" name="instructor"
+                                        value="Minouche">
                                 </div>
-                                
+
                                 <div class="mb-3">
                                     <label for="precio" class="form-label">Precio (€)</label>
-                                    <input type="number" step="0.01" class="form-control" id="precio" name="precio" value="45.00" min="0">
+                                    <input type="number" step="0.01" class="form-control" id="precio" name="precio"
+                                        value="45.00" min="0">
                                 </div>
                             </div>
-                            
+
                             <div class="col-md-6">
                                 <div class="mb-3">
                                     <label for="metodo_pago" class="form-label">Método de Pago</label>
@@ -227,7 +244,7 @@
                                         <option value="bizum">Bizum</option>
                                     </select>
                                 </div>
-                                
+
                                 <div class="form-check">
                                     <input class="form-check-input" type="checkbox" id="pagado" name="pagado" value="1">
                                     <label class="form-check-label" for="pagado">
@@ -244,7 +261,8 @@
                                     <button type="submit" class="btn btn-primary">
                                         <i class="fas fa-save"></i> Guardar Sesión
                                     </button>
-                                    <a href="{% if from_student %}{{ url_for('ver_alumno', alumno_id=alumno.id) }}{% else %}{{ url_for('yogaterapia') }}{% endif %}" class="btn btn-secondary">
+                                    <a href="{% if from_student %}{{ url_for('students.ver_alumno', alumno_id=alumno.id) }}{% else %}{{ url_for('yogatherapia.yogaterapia') }}{% endif %}"
+                                        class="btn btn-secondary">
                                         <i class="fas fa-times"></i> Cancelar
                                     </a>
                                 </div>
@@ -258,71 +276,71 @@
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const fechaInput = document.getElementById('fecha_sesion');
-    if (!fechaInput.value) {
-        const today = new Date().toISOString().split('T')[0];
-        fechaInput.value = today;
-    }
-    
-    // Verificar conflictos cuando cambien las horas
-    const horaInicioInput = document.getElementById('hora_inicio');
-    const horaFinInput = document.getElementById('hora_fin');
-    
-    function verificarConflictos() {
-        const fecha = fechaInput.value;
-        const horaInicio = horaInicioInput.value;
-        const horaFin = horaFinInput.value;
-        
-        if (fecha && horaInicio && horaFin) {
-            fetch('/api/verificar-conflicto', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    fecha: fecha,
-                    hora_inicio: horaInicio,
-                    hora_fin: horaFin
+    document.addEventListener('DOMContentLoaded', function () {
+        const fechaInput = document.getElementById('fecha_sesion');
+        if (!fechaInput.value) {
+            const today = new Date().toISOString().split('T')[0];
+            fechaInput.value = today;
+        }
+
+        // Verificar conflictos cuando cambien las horas
+        const horaInicioInput = document.getElementById('hora_inicio');
+        const horaFinInput = document.getElementById('hora_fin');
+
+        function verificarConflictos() {
+            const fecha = fechaInput.value;
+            const horaInicio = horaInicioInput.value;
+            const horaFin = horaFinInput.value;
+
+            if (fecha && horaInicio && horaFin) {
+                fetch('/api/verificar-conflicto', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        fecha: fecha,
+                        hora_inicio: horaInicio,
+                        hora_fin: horaFin
+                    })
                 })
-            })
-            .then(response => response.json())
-            .then(data => {
-                // Mostrar/ocultar alerta de conflicto
-                let alertaConflicto = document.getElementById('alerta-conflicto');
-                if (data.conflicto) {
-                    if (!alertaConflicto) {
-                        alertaConflicto = document.createElement('div');
-                        alertaConflicto.id = 'alerta-conflicto';
-                        alertaConflicto.className = 'alert alert-warning alert-dismissible fade show';
-                        alertaConflicto.innerHTML = `
+                    .then(response => response.json())
+                    .then(data => {
+                        // Mostrar/ocultar alerta de conflicto
+                        let alertaConflicto = document.getElementById('alerta-conflicto');
+                        if (data.conflicto) {
+                            if (!alertaConflicto) {
+                                alertaConflicto = document.createElement('div');
+                                alertaConflicto.id = 'alerta-conflicto';
+                                alertaConflicto.className = 'alert alert-warning alert-dismissible fade show';
+                                alertaConflicto.innerHTML = `
                             <i class="fas fa-exclamation-triangle"></i>
                             <span id="mensaje-conflicto"></span>
                             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                         `;
-                        document.querySelector('.card-body').insertBefore(alertaConflicto, document.querySelector('form'));
-                    }
-                    document.getElementById('mensaje-conflicto').textContent = data.mensaje;
-                    alertaConflicto.style.display = 'block';
-                } else if (alertaConflicto) {
-                    alertaConflicto.style.display = 'none';
-                }
-            })
-            .catch(error => console.error('Error verificando conflictos:', error));
+                                document.querySelector('.card-body').insertBefore(alertaConflicto, document.querySelector('form'));
+                            }
+                            document.getElementById('mensaje-conflicto').textContent = data.mensaje;
+                            alertaConflicto.style.display = 'block';
+                        } else if (alertaConflicto) {
+                            alertaConflicto.style.display = 'none';
+                        }
+                    })
+                    .catch(error => console.error('Error verificando conflictos:', error));
+            }
         }
-    }
-    
-    fechaInput.addEventListener('change', verificarConflictos);
-    horaInicioInput.addEventListener('change', verificarConflictos);
-    horaFinInput.addEventListener('change', verificarConflictos);
-});
 
-function abrirCalendario() {
-    {% if from_student and alumno %}
-        window.open('{{ url_for("calendario_seleccion_citas", alumno_id=alumno.id) }}', '_blank', 'width=1200,height=800,scrollbars=yes,resizable=yes');
-    {% else %}
-        window.open('{{ url_for("calendario_seleccion_citas") }}', '_blank', 'width=1200,height=800,scrollbars=yes,resizable=yes');
-    {% endif %}
-}
+        fechaInput.addEventListener('change', verificarConflictos);
+        horaInicioInput.addEventListener('change', verificarConflictos);
+        horaFinInput.addEventListener('change', verificarConflictos);
+    });
+
+    function abrirCalendario() {
+        {% if from_student and alumno %}
+        window.open('{{ url_for("classes.calendario_seleccion_citas", alumno_id=alumno.id) }}', '_blank', 'width=1200,height=800,scrollbars=yes,resizable=yes');
+        {% else %}
+        window.open('{{ url_for("classes.calendario_seleccion_citas") }}', '_blank', 'width=1200,height=800,scrollbars=yes,resizable=yes');
+        {% endif %}
+    }
 </script>
 {% endblock %}

@@ -3,7 +3,9 @@
 Script para ejecutar la aplicación de gestión de escuela de yoga
 """
 
-from app import app, db, inicializar_clases
+from app import app
+from models import db
+from utils.app_utils import inicializar_clases, inicializar_categorias_gastos
 
 if __name__ == '__main__':
     print("🧘‍♀️ Iniciando Atma Suddhi - Gestión de Escuela de Yoga")
@@ -13,11 +15,11 @@ if __name__ == '__main__':
         # Crear tablas si no existen
         db.create_all()
         
-        # Inicializar clases básicas
+        # Inicializar datos básicos
         inicializar_clases()
+        inicializar_categorias_gastos()
         
         print("✅ Base de datos inicializada")
-        print("✅ Clases básicas creadas")
         print("🚀 Aplicación lista en: http://localhost:5000")
         print("=" * 50)
     

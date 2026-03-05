@@ -1,210 +1,192 @@
 {% extends "base.html" %}
 
-{% block title %}{{ config.get('nombre_escuela', 'Atma Suddhi') }} - Gestión de Escuela de Yoga{% endblock %}
+{% block title %}{{ config.get('nombre_escuela', 'Atma Suddhi') }} - Dashboard{% endblock %}
+
+{% block page_title %}Resumen General{% endblock %}
 
 {% block content %}
-<div class="container mt-4">
-    <!-- Hero Section -->
-    <div class="row mb-5">
-        <div class="col-12 text-center">
-            <h1 class="display-4 mb-3">
-                <i class="fas fa-om text-warning"></i>
-                {{ config.get('nombre_escuela', 'Atma Suddhi') }}
-            </h1>
-            <p class="lead text-muted">Sistema de Gestión para Escuela de Yoga</p>
-        </div>
-    </div>
-
-    <!-- Quick Actions -->
+<div class="container-fluid">
+    <!-- Welcome Section -->
     <div class="row mb-4">
-        <div class="col-md-3">
-            <div class="card h-100 text-center shadow-sm">
-                <div class="card-body">
-                    <i class="fas fa-users fa-3x text-primary mb-3"></i>
-                    <h5 class="card-title">Alumnos</h5>
-                    <p class="card-text small text-muted">Gestión de la base de datos de alumnos</p>
-                    <div class="d-grid gap-2">
-                        <a href="{{ url_for('alumnos') }}" class="btn btn-outline-primary btn-sm">
-                            <i class="fas fa-list"></i> Ver Lista
-                        </a>
-                        <a href="{{ url_for('nuevo_alumno') }}" class="btn btn-primary btn-sm">
-                            <i class="fas fa-user-plus"></i> Nuevo
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-3">
-            <div class="card h-100 text-center shadow-sm">
-                <div class="card-body">
-                    <i class="fas fa-calendar-alt fa-3x text-success mb-3"></i>
-                    <h5 class="card-title">Calendario</h5>
-                    <p class="card-text small text-muted">Clases grupales y asistencia</p>
-                    <div class="d-grid gap-2">
-                        <a href="{{ url_for('calendario') }}" class="btn btn-success btn-sm">
-                            <i class="fas fa-calendar"></i> Ver Calendario
-                        </a>
-                        <a href="{{ url_for('horarios') }}" class="btn btn-outline-success btn-sm">
-                            <i class="fas fa-clock"></i> Horarios
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-3">
-            <div class="card h-100 text-center shadow-sm">
-                <div class="card-body">
-                    <i class="fas fa-user-md fa-3x text-info mb-3"></i>
-                    <h5 class="card-title">Yogaterapia</h5>
-                    <p class="card-text small text-muted">Sesiones individuales y clínico</p>
-                    <div class="d-grid gap-2">
-                        <a href="{{ url_for('nueva_yogaterapia') }}" class="btn btn-info btn-sm text-white">
-                            <i class="fas fa-plus"></i> Nueva Sesión
-                        </a>
-                        <a href="{{ url_for('yogaterapia') }}" class="btn btn-outline-info btn-sm">
-                            <i class="fas fa-folder-open"></i> Historial
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-3">
-            <div class="card h-100 text-center shadow-sm">
-                <div class="card-body">
-                    <i class="fas fa-chart-line fa-3x text-warning mb-3"></i>
-                    <h5 class="card-title">Economía</h5>
-                    <p class="card-text small text-muted">Contabilidad y facturación</p>
-                    <div class="d-grid gap-2">
-                        <a href="{{ url_for('economia') }}" class="btn btn-warning btn-sm text-white">
-                            <i class="fas fa-tachometer-alt"></i> Dashboard
-                        </a>
-                        <a href="{{ url_for('facturas') }}" class="btn btn-outline-warning btn-sm">
-                            <i class="fas fa-file-invoice"></i> Facturas
-                        </a>
-                    </div>
-                </div>
-            </div>
+        <div class="col-12">
+            <h2 class="animate-fade-in" style="font-size: 1.8rem; color: var(--primary-color);">
+                Bienvenido de nuevo, {{ session.username }}
+            </h2>
+            <p class="text-muted">Esto es lo que está sucediendo en tu escuela hoy.</p>
         </div>
     </div>
 
-    <!-- Dashboard de Próximas Citas -->
-    <div class="row mt-5">
-        <div class="col-12">
-            <h3><i class="fas fa-calendar-check text-primary"></i> Próximas Citas Individuales</h3>
+    <!-- Summary Cards -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card stat-card animate-fade-in" style="animation-delay: 0.1s;">
+                <div class="stat-icon purple">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div>
+                    <h3 class="mb-0">{{ total_alumnos }}</h3>
+                    <span class="text-muted small">Alumnos Activos</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card stat-card animate-fade-in" style="animation-delay: 0.2s;">
+                <div class="stat-icon gold">
+                    <i class="fas fa-calendar-check"></i>
+                </div>
+                <div>
+                    <h3 class="mb-0">{{ sesiones_count }}</h3>
+                    <span class="text-muted small">Sesiones Hoy</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card stat-card animate-fade-in" style="animation-delay: 0.3s;">
+                <div class="stat-icon success">
+                    <i class="fas fa-euro-sign"></i>
+                </div>
+                <div>
+                    <h3 class="mb-0">€ --</h3>
+                    <span class="text-muted small">Ingresos de este mes</span>
+                </div>
+            </div>
         </div>
     </div>
 
     <div class="row">
-        <div class="col-md-8">
-            <div class="card">
-                <div class="card-header bg-gradient-primary text-white">
-                    <h5 class="mb-0">
-                        <i class="fas fa-heart-pulse"></i> Sesiones de Yogaterapia Programadas
-                    </h5>
+        <!-- Main Column: Schedule and Sutra -->
+        <div class="col-lg-8">
+            <!-- Sutra of the Week -->
+            {% if sutra_semanal %}
+            <div class="card card-gold-accent mb-4 animate-fade-in" style="animation-delay: 0.4s;">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0 text-primary"><i class="fas fa-om me-2"></i> Sutra de la Semana</h5>
+                    <span class="badge bg-gold text-dark rounded-pill shadow-sm px-3">{{ sutra_semanal.numero }}</span>
                 </div>
                 <div class="card-body">
-                    {% if proximas_citas %}
-                    <div class="timeline">
-                        {% for cita in proximas_citas %}
-                        <div class="timeline-item {% if cita.fecha_sesion == today %}timeline-today{% endif %}">
-                            <div class="timeline-marker">
-                                <i
-                                    class="fas fa-{% if cita.fecha_sesion == today %}heart text-danger{% else %}leaf text-success{% endif %}"></i>
-                            </div>
-                            <div class="timeline-content">
-                                <div class="d-flex justify-content-between align-items-start">
+                    <div class="sutra-texts text-center py-3">
+                        <p class="sanskrit-text mb-2">{{ sutra_semanal.sanscrito }}</p>
+                        <p class="transliteration mb-4">{{ sutra_semanal.transliteracion }}</p>
+                        <hr class="w-25 mx-auto mb-4 opacity-10">
+                        <div class="sutra-quote">
+                            {{ sutra_semanal.traduccion }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Today's Sessions -->
+            <div class="card mb-4 animate-fade-in" style="animation-delay: 0.5s;">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0 text-primary"><i class="fas fa-clock me-2"></i> Sesiones para Hoy</h5>
+                    <a href="{{ url_for('classes.calendario_unificado') }}" class="btn btn-sm btn-outline-primary">Ver
+                        Calendario</a>
+                </div>
+                <div class="card-body">
+                    {% if sesiones_hoy %}
+                    <div class="list-group list-group-flush">
+                        {% for sesion in sesiones_hoy %}
+                        <div class="list-group-item px-0 py-3 border-bottom">
+                            <div class="d-flex w-100 justify-content-between align-items-center">
+                                <div class="d-flex align-items-center">
+                                    <div class="me-3 p-2 rounded bg-light text-center" style="min-width: 65px;">
+                                        <div class="fw-bold text-primary">{{ sesion.fecha_inicio.strftime('%H:%M') }}
+                                        </div>
+                                        <div class="small text-muted">{{ sesion.tipo|capitalize }}</div>
+                                    </div>
                                     <div>
-                                        <h6 class="mb-1">
-                                            <strong>{{ cita.alumno.nombre }} {{ cita.alumno.apellido }}</strong>
-                                            {% if cita.fecha_sesion == today %}
-                                            <span class="badge bg-danger pulse-animation">¡HOY!</span>
-                                            {% endif %}
-                                        </h6>
-                                        <p class="mb-1 text-muted">
-                                            <i class="fas fa-calendar"></i> {{
-                                            cita.fecha_sesion.strftime('%d/%m/%Y') }}
-                                            {% if cita.hora_inicio %}
-                                            <i class="fas fa-clock ms-2"></i> {{ cita.hora_inicio.strftime('%H:%M')
-                                            }}
+                                        <h6 class="mb-1 fw-bold">{{ sesion.titulo }}</h6>
+                                        <p class="mb-0 small text-muted">
+                                            <i class="fas fa-user-instructor me-1"></i> {{ sesion.instructor }}
+                                            {% if sesion.alumno %}
+                                            <i class="fas fa-user-graduate ms-2 me-1"></i> {{ sesion.alumno.nombre }}
                                             {% endif %}
                                         </p>
-                                        <small class="text-muted">
-                                            <i class="fas fa-stopwatch"></i> {{ cita.duracion_minutos }} min
-                                            <i class="fas fa-euro-sign ms-2"></i> {{ "%.2f"|format(cita.precio) }}€
-                                            <span
-                                                class="badge bg-{% if cita.pagado %}success{% else %}warning{% endif %} ms-2">
-                                                {% if cita.pagado %}Pagado{% else %}Pendiente{% endif %}
-                                            </span>
-                                        </small>
                                     </div>
-                                    <div class="timeline-actions">
-                                        <a href="{{ url_for('ver_sesion_yogaterapia', sesion_id=cita.id) }}"
-                                            class="btn btn-sm btn-outline-primary">
-                                            <i class="fas fa-eye"></i>
-                                        </a>
-                                        <a href="{{ url_for('editar_sesion_yogaterapia', sesion_id=cita.id) }}"
-                                            class="btn btn-sm btn-outline-warning">
-                                            <i class="fas fa-edit"></i>
-                                        </a>
-                                    </div>
+                                </div>
+                                <div class="text-end">
+                                    <span class="badge rounded-pill bg-light text-dark border">
+                                        {{ (sesion.fecha_fin - sesion.fecha_inicio).total_seconds() / 60 | int }} min
+                                    </span>
                                 </div>
                             </div>
                         </div>
                         {% endfor %}
                     </div>
                     {% else %}
-                    <div class="text-center py-4">
-                        <i class="fas fa-calendar-times fa-3x text-muted mb-3"></i>
-                        <h5 class="text-muted">No hay citas programadas</h5>
-                        <p class="text-muted">Las próximas sesiones de yogaterapia aparecerán aquí</p>
-                        <a href="{{ url_for('nueva_yogaterapia') }}" class="btn btn-primary">
-                            <i class="fas fa-plus"></i> Programar Nueva Cita
-                        </a>
+                    <div class="text-center py-5">
+                        <img src="https://cdni.iconscout.com/illustration/premium/thumb/no-data-found-8867280-7265556.png"
+                            alt="No data" style="height: 120px; opacity: 0.5;" class="mb-3">
+                        <p class="text-muted">No hay sesiones programadas para hoy.</p>
+                        <a href="{{ url_for('classes.nuevo_horario') }}" class="btn btn-premium btn-sm">Programar
+                            Clase</a>
                     </div>
                     {% endif %}
                 </div>
             </div>
         </div>
 
-        <div class="col-md-4">
-            <div class="card">
-                <div class="card-header bg-gradient-info text-white">
-                    <h5 class="mb-0">
-                        <i class="fas fa-chart-pie"></i> Estadísticas Rápidas
-                    </h5>
+        <!-- Right Column: Sidebar Actions & Stats -->
+        <div class="col-lg-4">
+            <!-- Quick Actions -->
+            <div class="card mb-4 animate-fade-in" style="animation-delay: 0.6s;">
+                <div class="card-header">
+                    <h5 class="mb-0 text-primary">Acciones Rápidas</h5>
                 </div>
                 <div class="card-body">
-                    <div class="stat-item">
-                        <div class="stat-icon">
-                            <i class="fas fa-users text-primary"></i>
-                        </div>
-                        <div class="stat-content">
-                            <h4 class="mb-0">{{ total_alumnos }}</h4>
-                            <small class="text-muted">Alumnos Activos</small>
-                        </div>
+                    <div class="d-grid gap-3">
+                        <a href="{{ url_for('students.alumnos') }}"
+                            class="btn btn-premium d-flex align-items-center justify-content-center">
+                            <i class="fas fa-user-plus me-2"></i> Gestionar Alumnos
+                        </a>
+                        <a href="{{ url_for('yogatherapia.nueva_yogaterapia') }}"
+                            class="btn btn-gold d-flex align-items-center justify-content-center text-dark">
+                            <i class="fas fa-notes-medical me-2"></i> Nueva Yogaterapia
+                        </a>
+                        <a href="{{ url_for('finance.nueva_factura') }}"
+                            class="btn btn-outline-primary d-flex align-items-center justify-content-center">
+                            <i class="fas fa-file-invoice-dollar me-2"></i> Crear Factura
+                        </a>
                     </div>
+                </div>
+            </div>
 
-                    <div class="stat-item">
-                        <div class="stat-icon">
-                            <i class="fas fa-heart text-danger"></i>
+            <!-- Upcoming Appointments -->
+            <div class="card mb-4 animate-fade-in" style="animation-delay: 0.7s;">
+                <div class="card-header">
+                    <h5 class="mb-0 text-primary">Próximas Citas</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="list-group list-group-flush">
+                        {% if proximas_citas %}
+                        {% for cita in proximas_citas %}
+                        <a href="{{ url_for('yogatherapia.ver_sesion_yogaterapia', sesion_id=cita.id) }}"
+                            class="list-group-item list-group-item-action border-0 px-4 py-3">
+                            <div class="d-flex align-items-center">
+                                <div class="flex-shrink-0 me-3">
+                                    <div class="rounded-circle bg-light d-flex align-items-center justify-content-center"
+                                        style="width: 40px; height: 40px;">
+                                        <i class="fas fa-calendar-day text-accent"></i>
+                                    </div>
+                                </div>
+                                <div class="flex-grow-1 overflow-hidden">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <h6 class="mb-0 text-truncate fw-bold">{{ cita.alumno.nombre }}</h6>
+                                        <small class="text-muted">{% if cita.fecha_sesion == today %}Hoy{% else %}{{
+                                            cita.fecha_sesion.strftime('%d/%m') }}{% endif %}</small>
+                                    </div>
+                                    <div class="small text-muted">{{ cita.hora_inicio.strftime('%H:%M') if
+                                        cita.hora_inicio else '--:--' }} - Yogaterapia</div>
+                                </div>
+                            </div>
+                        </a>
+                        {% endfor %}
+                        {% else %}
+                        <div class="p-4 text-center">
+                            <small class="text-muted">No hay citas próximas</small>
                         </div>
-                        <div class="stat-content">
-                            <h4 class="mb-0">{{ total_sesiones_hoy }}</h4>
-                            <small class="text-muted">Sesiones Hoy</small>
-                        </div>
-                    </div>
-
-                    <div class="stat-item">
-                        <div class="stat-icon">
-                            <i class="fas fa-calendar-week text-success"></i>
-                        </div>
-                        <div class="stat-content">
-                            <h4 class="mb-0">{{ proximas_citas|length }}</h4>
-                            <small class="text-muted">Próximas Citas</small>
-                        </div>
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -213,230 +195,12 @@
 </div>
 
 <style>
-    .card {
-        transition: transform 0.2s;
-        border: none;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    .bg-gold {
+        background-color: var(--accent-color);
     }
 
-    .card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-    }
-
-    .display-4 {
-        font-family: 'Playfair Display', serif;
-        font-weight: 700;
-    }
-
-    /* Timeline Styles */
-    .timeline {
-        position: relative;
-        padding-left: 30px;
-    }
-
-    .timeline::before {
-        content: '';
-        position: absolute;
-        left: 15px;
-        top: 0;
-        bottom: 0;
-        width: 2px;
-        background: linear-gradient(to bottom, #8B5FBF, #B19CD9);
-    }
-
-    .timeline-item {
-        position: relative;
-        margin-bottom: 20px;
-        padding-left: 20px;
-    }
-
-    .timeline-marker {
-        position: absolute;
-        left: -25px;
-        top: 5px;
-        width: 20px;
-        height: 20px;
-        background: white;
-        border: 3px solid #8B5FBF;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 1;
-    }
-
-    .timeline-today .timeline-marker {
-        border-color: #dc3545;
-        animation: pulse 2s infinite;
-    }
-
-    .timeline-content {
-        background: #f8f9fa;
-        padding: 15px;
-        border-radius: 10px;
-        border-left: 4px solid #8B5FBF;
-        transition: all 0.3s ease;
-    }
-
-    .timeline-today .timeline-content {
-        background: linear-gradient(135deg, #fff5f5, #ffe6e6);
-        border-left-color: #dc3545;
-    }
-
-    .timeline-content:hover {
-        transform: translateX(5px);
-        box-shadow: 0 4px 12px rgba(139, 95, 191, 0.2);
-    }
-
-    /* Statistics Styles */
-    .stat-item {
-        display: flex;
-        align-items: center;
-        padding: 15px 0;
-        border-bottom: 1px solid #e9ecef;
-    }
-
-    .stat-item:last-child {
-        border-bottom: none;
-    }
-
-    .stat-icon {
-        width: 50px;
-        height: 50px;
-        border-radius: 50%;
-        background: linear-gradient(135deg, #8B5FBF, #B19CD9);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin-right: 15px;
-        font-size: 20px;
-        color: white;
-    }
-
-    .stat-content h4 {
-        font-weight: 700;
-        color: #2c3e50;
-    }
-
-    /* Animations */
-    @keyframes pulse {
-        0% {
-            transform: scale(1);
-        }
-
-        50% {
-            transform: scale(1.1);
-        }
-
-        100% {
-            transform: scale(1);
-        }
-    }
-
-    .pulse-animation {
-        animation: pulse 1.5s infinite;
-    }
-
-    @keyframes fadeInUp {
-        from {
-            opacity: 0;
-            transform: translateY(30px);
-        }
-
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
-    .timeline-item {
-        animation: fadeInUp 0.6s ease-out;
-    }
-
-    .timeline-item:nth-child(1) {
-        animation-delay: 0.1s;
-    }
-
-    .timeline-item:nth-child(2) {
-        animation-delay: 0.2s;
-    }
-
-    .timeline-item:nth-child(3) {
-        animation-delay: 0.3s;
-    }
-
-    .timeline-item:nth-child(4) {
-        animation-delay: 0.4s;
-    }
-
-    .timeline-item:nth-child(5) {
-        animation-delay: 0.5s;
-    }
-
-    /* Gradient backgrounds */
-    .bg-gradient-primary {
-        background: linear-gradient(135deg, #8B5FBF, #6B4C93) !important;
-    }
-
-    .bg-gradient-info {
-        background: linear-gradient(135deg, #17a2b8, #007bff) !important;
-    }
-
-    /* Timeline actions */
-    .timeline-actions {
-        display: flex;
-        gap: 5px;
-    }
-
-    .timeline-actions .btn {
-        border-radius: 20px;
-        padding: 5px 10px;
-        font-size: 12px;
-    }
-
-    /* Sutra Card Styles */
-    .sutra-card {
-        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-        border-radius: 12px;
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
-
-    .sutra-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1) !important;
-    }
-
-    .sutra-number {
-        font-size: 0.8rem;
-        padding: 4px 8px;
-        border-radius: 12px;
-    }
-
-    .sutra-texts {
-        margin-top: 8px;
-    }
-
-    .sanskrit-text {
-        font-family: 'Devanagari Sangam MN', 'Noto Sans Devanagari', serif;
-        font-size: 1.2rem;
-        line-height: 1.5;
-        color: #2c3e50;
-        font-weight: 500;
-    }
-
-    .transliteration {
-        color: #6c757d;
-        font-style: italic;
-        font-size: 0.95rem;
-        line-height: 1.4;
-    }
-
-    .translation {
-        color: #495057;
-        font-size: 1rem;
-        line-height: 1.4;
-        font-weight: 500;
+    .text-accent {
+        color: var(--accent-color);
     }
 </style>
 {% endblock %}

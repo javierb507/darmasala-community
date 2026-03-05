@@ -8,11 +8,11 @@
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h2><i class="fas fa-users"></i> Clientes de Facturación</h2>
             <div>
-                <a href="{{ url_for('nuevo_cliente') }}" class="btn btn-success">
+                <a href="{{ url_for('finance.nuevo_cliente') }}" class="btn btn-success">
                     <i class="fas fa-plus"></i> Nuevo Cliente
                 </a>
-                <a href="{{ url_for('facturacion') }}" class="btn btn-outline-secondary">
-                    <i class="fas fa-arrow-left"></i> Volver a Facturación
+                <a href="{{ url_for('finance.facturacion') }}" class="btn btn-outline-secondary">
+                    <i class="fas fa-file-invoice"></i> ir a Facturación
                 </a>
             </div>
         </div>
@@ -41,11 +41,11 @@
                                 <td>{{ cliente.nif_cif }}</td>
                                 <td>
                                     {% if cliente.tipo_cliente == 'particular' %}
-                                        <span class="badge bg-info">Particular</span>
+                                    <span class="badge bg-info">Particular</span>
                                     {% elif cliente.tipo_cliente == 'empresa' %}
-                                        <span class="badge bg-primary">Empresa</span>
+                                    <span class="badge bg-primary">Empresa</span>
                                     {% elif cliente.tipo_cliente == 'autonomo' %}
-                                        <span class="badge bg-warning">Autónomo</span>
+                                    <span class="badge bg-warning">Autónomo</span>
                                     {% endif %}
                                 </td>
                                 <td>{{ cliente.email or '-' }}</td>
@@ -55,7 +55,8 @@
                                     <span class="badge bg-secondary">{{ cliente.facturas|length }}</span>
                                 </td>
                                 <td class="text-end">
-                                    <a href="{{ url_for('editar_cliente', cliente_id=cliente.id) }}" class="btn btn-sm btn-outline-primary">
+                                    <a href="{{ url_for('finance.editar_cliente', cliente_id=cliente.id) }}"
+                                        class="btn btn-sm btn-outline-primary">
                                         <i class="fas fa-edit"></i> Editar
                                     </a>
                                 </td>
@@ -68,7 +69,7 @@
                 <div class="text-center py-5">
                     <i class="fas fa-users fa-4x text-muted mb-3"></i>
                     <p class="text-muted">No hay clientes registrados aún.</p>
-                    <a href="{{ url_for('nuevo_cliente') }}" class="btn btn-success">
+                    <a href="{{ url_for('finance.nuevo_cliente') }}" class="btn btn-success">
                         <i class="fas fa-plus"></i> Crear Primer Cliente
                     </a>
                 </div>

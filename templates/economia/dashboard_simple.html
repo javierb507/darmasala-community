@@ -8,13 +8,13 @@
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h2><i class="fas fa-calculator"></i> Dashboard de Contabilidad</h2>
             <div class="btn-group">
-                <a href="{{ url_for('facturas') }}" class="btn btn-primary">
+                <a href="{{ url_for('finance.facturas') }}" class="btn btn-primary">
                     <i class="fas fa-file-invoice"></i> Facturas
                 </a>
-                <a href="{{ url_for('proveedores') }}" class="btn btn-success">
+                <a href="{{ url_for('finance.proveedores') }}" class="btn btn-success">
                     <i class="fas fa-building"></i> Proveedores
                 </a>
-                <a href="{{ url_for('gastos_fijos') }}" class="btn btn-warning">
+                <a href="{{ url_for('finance.gastos_fijos') }}" class="btn btn-warning">
                     <i class="fas fa-calendar-alt"></i> Gastos Fijos
                 </a>
             </div>
@@ -31,16 +31,18 @@
                     <div class="col-md-3">
                         <label for="periodo" class="form-label">Período</label>
                         <select class="form-select" id="periodo" name="periodo" onchange="this.form.submit()">
-                            <option value="mes_actual" {{ 'selected' if periodo == 'mes_actual' else '' }}>Mes Actual</option>
-                            <option value="trimestre" {{ 'selected' if periodo == 'trimestre' else '' }}>Trimestre</option>
-                            <option value="año" {{ 'selected' if periodo == 'año' else '' }}>Año Completo</option>
+                            <option value="mes_actual" {{ 'selected' if periodo=='mes_actual' else '' }}>Mes Actual
+                            </option>
+                            <option value="trimestre" {{ 'selected' if periodo=='trimestre' else '' }}>Trimestre
+                            </option>
+                            <option value="año" {{ 'selected' if periodo=='año' else '' }}>Año Completo</option>
                         </select>
                     </div>
                     <div class="col-md-2">
                         <label for="año" class="form-label">Año</label>
                         <select class="form-select" id="año" name="año" onchange="this.form.submit()">
                             {% for y in range(2023, 2027) %}
-                            <option value="{{ y }}" {{ 'selected' if y == año else '' }}>{{ y }}</option>
+                            <option value="{{ y }}" {{ 'selected' if y==año else '' }}>{{ y }}</option>
                             {% endfor %}
                         </select>
                     </div>
@@ -48,17 +50,18 @@
                     <div class="col-md-3">
                         <label for="mes" class="form-label">Mes</label>
                         <select class="form-select" id="mes" name="mes" onchange="this.form.submit()">
-                            {% set meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 
-                                           'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'] %}
+                            {% set meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+                            'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'] %}
                             {% for m in range(1, 13) %}
-                            <option value="{{ m }}" {{ 'selected' if m == mes else '' }}>{{ meses[m-1] }}</option>
+                            <option value="{{ m }}" {{ 'selected' if m==mes else '' }}>{{ meses[m-1] }}</option>
                             {% endfor %}
                         </select>
                     </div>
                     {% endif %}
                     <div class="col-md-4">
                         <div class="text-muted">
-                            <small><strong>Período:</strong> {{ fecha_inicio.strftime('%d/%m/%Y') }} - {{ fecha_fin.strftime('%d/%m/%Y') }}</small>
+                            <small><strong>Período:</strong> {{ fecha_inicio.strftime('%d/%m/%Y') }} - {{
+                                fecha_fin.strftime('%d/%m/%Y') }}</small>
                         </div>
                     </div>
                 </form>
@@ -138,7 +141,7 @@
             </div>
         </div>
     </div>
-    
+
     <div class="col-md-6">
         <div class="card">
             <div class="card-header bg-danger text-white">
@@ -180,25 +183,25 @@
             <div class="card-body">
                 <div class="row">
                     <div class="col-md-3 mb-3">
-                        <a href="{{ url_for('nueva_factura') }}" class="btn btn-outline-primary w-100">
+                        <a href="{{ url_for('finance.nueva_factura') }}" class="btn btn-outline-primary w-100">
                             <i class="fas fa-plus"></i><br>
                             Nueva Factura
                         </a>
                     </div>
                     <div class="col-md-3 mb-3">
-                        <a href="{{ url_for('nuevo_proveedor') }}" class="btn btn-outline-success w-100">
+                        <a href="{{ url_for('finance.nuevo_proveedor') }}" class="btn btn-outline-success w-100">
                             <i class="fas fa-building"></i><br>
                             Nuevo Proveedor
                         </a>
                     </div>
                     <div class="col-md-3 mb-3">
-                        <a href="{{ url_for('nuevo_gasto_fijo') }}" class="btn btn-outline-warning w-100">
+                        <a href="{{ url_for('finance.nuevo_gasto_fijo') }}" class="btn btn-outline-warning w-100">
                             <i class="fas fa-calendar-plus"></i><br>
                             Nuevo Gasto Fijo
                         </a>
                     </div>
                     <div class="col-md-3 mb-3">
-                        <a href="{{ url_for('gastos_mensuales') }}" class="btn btn-outline-info w-100">
+                        <a href="{{ url_for('finance.gastos_mensuales') }}" class="btn btn-outline-info w-100">
                             <i class="fas fa-receipt"></i><br>
                             Gastos del Mes
                         </a>
@@ -228,23 +231,30 @@
                     <strong>Atención:</strong> El balance del período es negativo. Revisa los gastos.
                 </div>
                 {% endif %}
-                
+
                 <div class="row">
                     <div class="col-md-6">
                         <h6>Ingresos por Tipo:</h6>
                         <ul class="list-unstyled">
-                            <li><i class="fas fa-circle text-success"></i> Cuotas: {{ "%.2f"|format(ingresos_detalle.cuotas) }}€</li>
-                            <li><i class="fas fa-circle text-info"></i> Matrículas: {{ "%.2f"|format(ingresos_detalle.matriculas) }}€</li>
-                            <li><i class="fas fa-circle text-primary"></i> Clases Sueltas: {{ "%.2f"|format(ingresos_detalle.clases_sueltas) }}€</li>
-                            <li><i class="fas fa-circle text-warning"></i> Yogaterapia: {{ "%.2f"|format(ingresos_detalle.yogaterapia) }}€</li>
+                            <li><i class="fas fa-circle text-success"></i> Cuotas: {{
+                                "%.2f"|format(ingresos_detalle.cuotas) }}€</li>
+                            <li><i class="fas fa-circle text-info"></i> Matrículas: {{
+                                "%.2f"|format(ingresos_detalle.matriculas) }}€</li>
+                            <li><i class="fas fa-circle text-primary"></i> Clases Sueltas: {{
+                                "%.2f"|format(ingresos_detalle.clases_sueltas) }}€</li>
+                            <li><i class="fas fa-circle text-warning"></i> Yogaterapia: {{
+                                "%.2f"|format(ingresos_detalle.yogaterapia) }}€</li>
                         </ul>
                     </div>
                     <div class="col-md-6">
                         <h6>Gastos por Tipo:</h6>
                         <ul class="list-unstyled">
-                            <li><i class="fas fa-circle text-danger"></i> Gastos Mensuales: {{ "%.2f"|format(gastos_detalle.gastos_mensuales) }}€</li>
-                            <li><i class="fas fa-circle text-warning"></i> Facturas Pendientes: {{ "%.2f"|format(gastos_detalle.facturas) }}€</li>
-                            <li><i class="fas fa-circle text-secondary"></i> Gastos Fijos: {{ "%.2f"|format(gastos_detalle.gastos_fijos) }}€</li>
+                            <li><i class="fas fa-circle text-danger"></i> Gastos Mensuales: {{
+                                "%.2f"|format(gastos_detalle.gastos_mensuales) }}€</li>
+                            <li><i class="fas fa-circle text-warning"></i> Facturas Pendientes: {{
+                                "%.2f"|format(gastos_detalle.facturas) }}€</li>
+                            <li><i class="fas fa-circle text-secondary"></i> Gastos Fijos: {{
+                                "%.2f"|format(gastos_detalle.gastos_fijos) }}€</li>
                         </ul>
                     </div>
                 </div>

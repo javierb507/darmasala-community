@@ -7,7 +7,7 @@
     <div class="col-12">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h2><i class="fas fa-edit"></i> Editar Factura</h2>
-            <a href="{{ url_for('facturas') }}" class="btn btn-secondary">
+            <a href="{{ url_for('finance.facturas') }}" class="btn btn-secondary">
                 <i class="fas fa-arrow-left"></i> Volver a Facturas
             </a>
         </div>
@@ -28,8 +28,8 @@
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label for="numero_factura" class="form-label">Número de Factura *</label>
-                                <input type="text" class="form-control" id="numero_factura" name="numero_factura" 
-                                       value="{{ factura.numero_factura }}" required>
+                                <input type="text" class="form-control" id="numero_factura" name="numero_factura"
+                                    value="{{ factura.numero_factura }}" required>
                             </div>
                         </div>
                         <div class="col-md-6">
@@ -38,7 +38,8 @@
                                 <select class="form-select" id="proveedor_id" name="proveedor_id" required>
                                     <option value="">Seleccionar proveedor...</option>
                                     {% for proveedor in proveedores %}
-                                    <option value="{{ proveedor.id }}" {% if proveedor.id == factura.proveedor_id %}selected{% endif %}>
+                                    <option value="{{ proveedor.id }}" {% if proveedor.id==factura.proveedor_id
+                                        %}selected{% endif %}>
                                         {{ proveedor.nombre }}
                                     </option>
                                     {% endfor %}
@@ -54,7 +55,8 @@
                                 <select class="form-select" id="categoria_id" name="categoria_id" required>
                                     <option value="">Seleccionar categoría...</option>
                                     {% for categoria in categorias %}
-                                    <option value="{{ categoria.id }}" {% if categoria.id == factura.categoria_id %}selected{% endif %}>
+                                    <option value="{{ categoria.id }}" {% if categoria.id==factura.categoria_id
+                                        %}selected{% endif %}>
                                         {{ categoria.nombre }}
                                     </option>
                                     {% endfor %}
@@ -64,8 +66,8 @@
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label for="fecha_factura" class="form-label">Fecha de Factura *</label>
-                                <input type="date" class="form-control" id="fecha_factura" name="fecha_factura" 
-                                       value="{{ factura.fecha_factura.strftime('%Y-%m-%d') }}" required>
+                                <input type="date" class="form-control" id="fecha_factura" name="fecha_factura"
+                                    value="{{ factura.fecha_factura.strftime('%Y-%m-%d') }}" required>
                             </div>
                         </div>
                     </div>
@@ -74,15 +76,16 @@
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label for="fecha_vencimiento" class="form-label">Fecha de Vencimiento</label>
-                                <input type="date" class="form-control" id="fecha_vencimiento" name="fecha_vencimiento" 
-                                       value="{{ factura.fecha_vencimiento.strftime('%Y-%m-%d') if factura.fecha_vencimiento else '' }}">
+                                <input type="date" class="form-control" id="fecha_vencimiento" name="fecha_vencimiento"
+                                    value="{{ factura.fecha_vencimiento.strftime('%Y-%m-%d') if factura.fecha_vencimiento else '' }}">
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label for="importe_sin_iva" class="form-label">Importe sin IVA (€) *</label>
-                                <input type="number" class="form-control" id="importe_sin_iva" name="importe_sin_iva" 
-                                       value="{{ factura.importe_sin_iva }}" step="0.01" min="0" required onchange="calcularTotal()">
+                                <input type="number" class="form-control" id="importe_sin_iva" name="importe_sin_iva"
+                                    value="{{ factura.importe_sin_iva }}" step="0.01" min="0" required
+                                    onchange="calcularTotal()">
                             </div>
                         </div>
                     </div>
@@ -91,15 +94,15 @@
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label for="iva" class="form-label">IVA (%)</label>
-                                <input type="number" class="form-control" id="iva" name="iva" 
-                                       value="{{ factura.iva }}" step="0.01" min="0" max="100" onchange="calcularTotal()">
+                                <input type="number" class="form-control" id="iva" name="iva" value="{{ factura.iva }}"
+                                    step="0.01" min="0" max="100" onchange="calcularTotal()">
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label for="importe_total" class="form-label">Importe Total (€)</label>
-                                <input type="number" class="form-control" id="importe_total" name="importe_total" 
-                                       value="{{ factura.importe_total }}" step="0.01" readonly>
+                                <input type="number" class="form-control" id="importe_total" name="importe_total"
+                                    value="{{ factura.importe_total }}" step="0.01" readonly>
                             </div>
                         </div>
                     </div>
@@ -109,9 +112,12 @@
                             <div class="mb-3">
                                 <label for="estado" class="form-label">Estado</label>
                                 <select class="form-select" id="estado" name="estado">
-                                    <option value="pendiente" {% if factura.estado == 'pendiente' %}selected{% endif %}>Pendiente</option>
-                                    <option value="pagada" {% if factura.estado == 'pagada' %}selected{% endif %}>Pagada</option>
-                                    <option value="vencida" {% if factura.estado == 'vencida' %}selected{% endif %}>Vencida</option>
+                                    <option value="pendiente" {% if factura.estado=='pendiente' %}selected{% endif %}>
+                                        Pendiente</option>
+                                    <option value="pagada" {% if factura.estado=='pagada' %}selected{% endif %}>Pagada
+                                    </option>
+                                    <option value="vencida" {% if factura.estado=='vencida' %}selected{% endif %}>
+                                        Vencida</option>
                                 </select>
                             </div>
                         </div>
@@ -120,10 +126,14 @@
                                 <label for="metodo_pago" class="form-label">Método de Pago</label>
                                 <select class="form-select" id="metodo_pago" name="metodo_pago">
                                     <option value="">Seleccionar método...</option>
-                                    <option value="transferencia" {% if factura.metodo_pago == 'transferencia' %}selected{% endif %}>Transferencia</option>
-                                    <option value="efectivo" {% if factura.metodo_pago == 'efectivo' %}selected{% endif %}>Efectivo</option>
-                                    <option value="tarjeta" {% if factura.metodo_pago == 'tarjeta' %}selected{% endif %}>Tarjeta</option>
-                                    <option value="bizum" {% if factura.metodo_pago == 'bizum' %}selected{% endif %}>Bizum</option>
+                                    <option value="transferencia" {% if factura.metodo_pago=='transferencia'
+                                        %}selected{% endif %}>Transferencia</option>
+                                    <option value="efectivo" {% if factura.metodo_pago=='efectivo' %}selected{% endif
+                                        %}>Efectivo</option>
+                                    <option value="tarjeta" {% if factura.metodo_pago=='tarjeta' %}selected{% endif %}>
+                                        Tarjeta</option>
+                                    <option value="bizum" {% if factura.metodo_pago=='bizum' %}selected{% endif %}>Bizum
+                                    </option>
                                 </select>
                             </div>
                         </div>
@@ -131,18 +141,18 @@
 
                     <div class="mb-3">
                         <label for="descripcion" class="form-label">Descripción</label>
-                        <textarea class="form-control" id="descripcion" name="descripcion" rows="3" 
-                                  placeholder="Descripción de los servicios o productos...">{{ factura.descripcion or '' }}</textarea>
+                        <textarea class="form-control" id="descripcion" name="descripcion" rows="3"
+                            placeholder="Descripción de los servicios o productos...">{{ factura.descripcion or '' }}</textarea>
                     </div>
 
                     <div class="mb-3">
                         <label for="notas" class="form-label">Notas</label>
-                        <textarea class="form-control" id="notas" name="notas" rows="2" 
-                                  placeholder="Notas adicionales...">{{ factura.notas or '' }}</textarea>
+                        <textarea class="form-control" id="notas" name="notas" rows="2"
+                            placeholder="Notas adicionales...">{{ factura.notas or '' }}</textarea>
                     </div>
 
                     <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                        <a href="{{ url_for('facturas') }}" class="btn btn-secondary me-md-2">Cancelar</a>
+                        <a href="{{ url_for('finance.facturas') }}" class="btn btn-secondary me-md-2">Cancelar</a>
                         <button type="submit" class="btn btn-warning">
                             <i class="fas fa-save"></i> Actualizar Factura
                         </button>
@@ -162,7 +172,8 @@
             <div class="card-body">
                 <div class="mb-3">
                     <strong>Estado:</strong>
-                    <span class="badge {% if factura.estado == 'pagada' %}bg-success{% elif factura.estado == 'vencida' %}bg-danger{% else %}bg-warning{% endif %}">
+                    <span
+                        class="badge {% if factura.estado == 'pagada' %}bg-success{% elif factura.estado == 'vencida' %}bg-danger{% else %}bg-warning{% endif %}">
                         {{ factura.estado.title() }}
                     </span>
                 </div>
@@ -199,7 +210,8 @@
                     </div>
                     <div class="col-6">
                         <small class="text-muted">Con IVA</small>
-                        <div id="display_con_iva" class="h5 mb-0 text-primary">{{ "%.2f"|format(factura.importe_total) }}€</div>
+                        <div id="display_con_iva" class="h5 mb-0 text-primary">{{ "%.2f"|format(factura.importe_total)
+                            }}€</div>
                     </div>
                 </div>
             </div>
@@ -213,7 +225,7 @@
                 </h6>
             </div>
             <div class="card-body">
-                <form method="POST" action="{{ url_for('marcar_factura_pagada', factura_id=factura.id) }}">
+                <form method="POST" action="{{ url_for('finance.marcar_factura_pagada', factura_id=factura.id) }}">
                     <div class="mb-3">
                         <label for="metodo_pago_rapido" class="form-label">Método de Pago</label>
                         <select class="form-select" id="metodo_pago_rapido" name="metodo_pago" required>
@@ -234,20 +246,20 @@
 </div>
 
 <script>
-function calcularTotal() {
-    const importeSinIva = parseFloat(document.getElementById('importe_sin_iva').value) || 0;
-    const iva = parseFloat(document.getElementById('iva').value) || 0;
-    
-    const importeConIva = importeSinIva * (1 + iva / 100);
-    
-    document.getElementById('importe_total').value = importeConIva.toFixed(2);
-    document.getElementById('display_sin_iva').textContent = importeSinIva.toFixed(2) + '€';
-    document.getElementById('display_con_iva').textContent = importeConIva.toFixed(2) + '€';
-}
+    function calcularTotal() {
+        const importeSinIva = parseFloat(document.getElementById('importe_sin_iva').value) || 0;
+        const iva = parseFloat(document.getElementById('iva').value) || 0;
 
-// Calcular total al cargar la página
-document.addEventListener('DOMContentLoaded', function() {
-    calcularTotal();
-});
+        const importeConIva = importeSinIva * (1 + iva / 100);
+
+        document.getElementById('importe_total').value = importeConIva.toFixed(2);
+        document.getElementById('display_sin_iva').textContent = importeSinIva.toFixed(2) + '€';
+        document.getElementById('display_con_iva').textContent = importeConIva.toFixed(2) + '€';
+    }
+
+    // Calcular total al cargar la página
+    document.addEventListener('DOMContentLoaded', function () {
+        calcularTotal();
+    });
 </script>
 {% endblock %}

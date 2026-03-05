@@ -38,7 +38,7 @@
                         <h5 class="mb-0 text-primary"><i class="fas fa-school me-2"></i> Identidad y Escuela</h5>
                     </div>
                     <div class="card-body">
-                        <form method="POST" action="{{ url_for('guardar_configuracion') }}"
+                        <form method="POST" action="{{ url_for('settings.guardar_configuracion') }}"
                             enctype="multipart/form-data">
                             <div class="row mb-3">
                                 <div class="col-md-8">
@@ -130,7 +130,7 @@
                         <h5 class="mb-0 text-warning"><i class="fas fa-coins me-2"></i> Tarifas Base</h5>
                     </div>
                     <div class="card-body">
-                        <form method="POST" action="{{ url_for('guardar_configuracion') }}">
+                        <form method="POST" action="{{ url_for('settings.guardar_configuracion') }}">
                             <div class="mb-3">
                                 <label class="form-label small">Matrícula</label>
                                 <div class="input-group input-group-sm">
@@ -243,7 +243,7 @@
                                             </li>
                                             <li>
                                                 <form method="POST"
-                                                    action="{{ url_for('eliminar_instructor', instructor_id=inst.id) }}"
+                                                    action="{{ url_for('settings.eliminar_instructor', instructor_id=inst.id) }}"
                                                     onsubmit="return confirm('¿Cambiar estado del instructor?')">
                                                     <button class="dropdown-item text-danger">
                                                         <i class="fas fa-power-off me-2"></i> {{ 'Desactivar' if
@@ -304,7 +304,8 @@
                                 <td><span class="badge bg-primary">€ {{ "%.2f"|format(tarifa.precio) }}</span></td>
                                 <td><small class="text-muted">{{ tarifa.descripcion or 'Sin descripción' }}</small></td>
                                 <td>
-                                    <form method="POST" action="{{ url_for('toggle_tarifa', tarifa_id=tarifa.id) }}"
+                                    <form method="POST"
+                                        action="{{ url_for('settings.toggle_tarifa', tarifa_id=tarifa.id) }}"
                                         class="d-inline">
                                         <button
                                             class="btn btn-sm {% if tarifa.activa %}btn-success{% else %}btn-secondary{% endif %} rounded-pill py-0 px-2"
@@ -320,7 +321,8 @@
                                         data-descripcion="{{ tarifa.descripcion|escape }}">
                                         <i class="fas fa-edit"></i>
                                     </button>
-                                    <form method="POST" action="{{ url_for('eliminar_tarifa', tarifa_id=tarifa.id) }}"
+                                    <form method="POST"
+                                        action="{{ url_for('settings.eliminar_tarifa', tarifa_id=tarifa.id) }}"
                                         class="d-inline"
                                         onsubmit="return confirm('¿Seguro que quieres eliminar esta tarifa?')">
                                         <button class="btn btn-sm btn-outline-danger"><i
@@ -390,7 +392,7 @@
                                             <span>{{ h.get_dia_display() }} {{ h.hora_inicio.strftime('%H:%M') }}-{{
                                                 h.hora_fin.strftime('%H:%M') }}</span>
                                             <form method="POST"
-                                                action="{{ url_for('eliminar_horario_config', horario_id=h.id) }}"
+                                                action="{{ url_for('settings.eliminar_horario_config', horario_id=h.id) }}"
                                                 class="d-inline" onsubmit="return confirm('¿Eliminar este horario?')">
                                                 <button class="btn btn-link text-danger p-0 ms-2"
                                                     style="font-size: 0.8rem;"><i class="fas fa-times"></i></button>
@@ -415,7 +417,8 @@
                                         data-descripcion="{{ clase.descripcion or '' }}">
                                         <i class="fas fa-edit"></i>
                                     </button>
-                                    <form method="POST" action="{{ url_for('eliminar_clase', clase_id=clase.id) }}"
+                                    <form method="POST"
+                                        action="{{ url_for('settings.eliminar_clase', clase_id=clase.id) }}"
                                         class="d-inline" onsubmit="return confirm('¿Eliminar la clase por completo?')">
                                         <button class="btn btn-sm btn-outline-danger"><i
                                                 class="fas fa-trash-alt"></i></button>
@@ -438,9 +441,11 @@
                 <div class="col-md-6 text-end">
                     <button class="btn btn-sm btn-link text-muted p-0 me-3" onclick="crearBackup()">Backup
                         Local</button>
-                    <a href="{{ url_for('descargar_db') }}" class="btn btn-sm btn-link text-muted p-0 me-3">Descargar
+                    <a href="{{ url_for('settings.descargar_db') }}"
+                        class="btn btn-sm btn-link text-muted p-0 me-3">Descargar
                         .DB</a>
-                    <a href="{{ url_for('modo_pruebas') }}" class="btn btn-sm btn-link text-muted p-0">Panel de Control
+                    <a href="{{ url_for('settings.modo_pruebas') }}" class="btn btn-sm btn-link text-muted p-0">Panel de
+                        Control
                         (Modo Pruebas)</a>
                 </div>
             </div>
@@ -453,7 +458,7 @@
 <div class="modal fade" id="nuevaTarifaModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
-            <form method="POST" action="{{ url_for('nueva_tarifa') }}">
+            <form method="POST" action="{{ url_for('settings.nueva_tarifa') }}">
                 <div class="modal-header">
                     <h5>Nueva Tarifa</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
@@ -499,7 +504,7 @@
 <div class="modal fade" id="nuevaClaseModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
-            <form method="POST" action="{{ url_for('nueva_clase') }}">
+            <form method="POST" action="{{ url_for('settings.nueva_clase') }}">
                 <div class="modal-header">
                     <h5>Nueva Clase</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
@@ -599,7 +604,7 @@
 <div class="modal fade" id="nuevoHorarioModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
-            <form method="POST" action="{{ url_for('configuracion_nuevo_horario') }}">
+            <form method="POST" action="{{ url_for('settings.configuracion_nuevo_horario') }}">
                 <div class="modal-header">
                     <h5>Añadir Horario para <span id="nombre_clase_horario"></span></h5><button type="button"
                         class="btn-close" data-bs-dismiss="modal"></button>
@@ -645,7 +650,7 @@
 <div class="modal fade" id="nuevoInstructorModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
-            <form method="POST" action="{{ url_for('nuevo_instructor') }}">
+            <form method="POST" action="{{ url_for('settings.nuevo_instructor') }}">
                 <div class="modal-header">
                     <h5 class="modal-title">Nuevo Instructor</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
@@ -765,7 +770,7 @@
         if (confirm('¿Deseas crear un punto de restauración en el servidor?')) {
             const form = document.createElement('form');
             form.method = 'POST';
-            form.action = "{{ url_for('crear_backup') }}";
+            form.action = "{{ url_for('settings.crear_backup') }}";
             document.body.appendChild(form);
             form.submit();
         }
