@@ -111,16 +111,26 @@
                                             </small>
                                         </div>
                                         <div class="clase-acciones mt-1">
+                                            {% if not horario.es_puntual %}
                                             <button class="btn btn-sm btn-light btn-accion"
                                                 onclick="gestionarAsistencias({{ horario.id }}, {{ dia + 1 }}); event.stopPropagation();"
                                                 title="Gestionar Asistencias">
                                                 <i class="fas fa-users"></i>
                                             </button>
+                                            {% endif %}
+                                            {% if not horario.es_puntual %}
                                             <button class="btn btn-sm btn-warning btn-accion"
                                                 onclick="editarHorario({{ horario.id }}); event.stopPropagation();"
-                                                title="Editar">
+                                                title="Editar Semanal">
                                                 <i class="fas fa-edit"></i>
                                             </button>
+                                            {% else %}
+                                            <!-- Punctual Events just show info, editing punctual not supported from unified yet -->
+                                            <button class="btn btn-sm btn-info btn-accion" title="Información (Puntual)"
+                                                disabled>
+                                                <i class="fas fa-info"></i>
+                                            </button>
+                                            {% endif %}
                                         </div>
                                     </div>
                                     {% endif %}
@@ -197,6 +207,7 @@
                 <div class="modal-body">
                     <input type="hidden" id="horarioId" name="horario_id">
                     <input type="hidden" id="esEdicion" name="es_edicion" value="false">
+                    <input type="hidden" id="fechaSeleccionada" name="fecha_seleccionada">
 
                     <div class="row">
                         <div class="col-md-6">
@@ -244,7 +255,7 @@
                         </div>
                     </div>
 
-                    <div class="mb-3">
+                    <div id="seccionDiasSemana" class="mb-3">
                         <label class="form-label">Días de la Semana *</label>
                         <div class="row">
                             <div class="col-md-12">
@@ -273,6 +284,12 @@
                                 </div>
                             </div>
                         </div>
+                    </div>
+
+                    <div id="avisoPuntual" class="alert alert-info mb-3" style="display:none;">
+                        <i class="fas fa-info-circle me-2"></i> Esta clase (Yogaterapia) se guardará como una
+                        <strong>cita puntual</strong> para el día seleccionado en el calendario. No se repetirá
+                        semanalmente.
                     </div>
 
                     <div class="mb-3">
@@ -437,28 +454,54 @@
     }
 
     function agregarAlumnoAClaseRoster(alumnoId) {
+        if (!horarioActual || !alumnoId) return;
         fetch('/api/horario/agregar-alumno', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ alumno_id: alumnoId, horario_id: horarioActual.id })
-        }).then(() => {
-            cargarRosterActual();
-            // También recargamos la lista de asistencia del fondo si está abierta
-            gestionarAsistencias(horarioActual.id, 0);
-        });
+        })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    cargarRosterActual();
+                    // Si la fecha de asistencia está definida, recargamos la lista de asistencia
+                    if (typeof fechaAsistenciaActual !== 'undefined' && fechaAsistenciaActual) {
+                        actualizarListaAsistencia(horarioActual.id, fechaAsistenciaActual);
+                    }
+                } else {
+                    mostrarNotificacion('Error: ' + data.message, 'error');
+                }
+            });
     }
 
     function quitarAlumnoDeRoster(alumnoId) {
-        if (confirm('¿Quitar alumno del roster permanente?')) {
-            fetch('/api/horario/quitar-alumno', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ alumno_id: alumnoId, horario_id: horarioActual.id })
-            }).then(() => {
-                cargarRosterActual();
-                gestionarAsistencias(horarioActual.id, 0);
+        if (!horarioActual || !alumnoId) return;
+        if (!confirm('¿Seguro que quieres quitar a este alumno del roster permanente?')) return;
+        fetch('/api/horario/quitar-alumno', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ alumno_id: alumnoId, horario_id: horarioActual.id })
+        })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    cargarRosterActual();
+                    if (typeof fechaAsistenciaActual !== 'undefined' && fechaAsistenciaActual) {
+                        actualizarListaAsistencia(horarioActual.id, fechaAsistenciaActual);
+                    }
+                }
             });
-        }
+    }
+
+    // Función auxiliar para recargar la lista de asistencia sin abrir modal
+    function actualizarListaAsistencia(horarioId, fecha) {
+        fetch(`/api/asistencias/clase/${horarioId}/${fecha}`)
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    renderizarTablaAsistencias(data.alumnos);
+                }
+            });
     }
 </script>
 
@@ -733,7 +776,8 @@
 <script>
     let horarioActual = null;
     let vistaActual = 'semanal';
-    let fechaActual = new Date();
+    // Initialize with Jinja date instead of current client date
+    let fechaActual = new Date('{{ fecha_actual.isoformat() }}T12:00:00');
 
     // Variables globales para datos
     let horariosData = [];
@@ -771,18 +815,39 @@
         if (claseSelect) {
             claseSelect.addEventListener('change', function () {
                 const option = this.options[this.selectedIndex];
-                if (option.dataset.precio) {
-                    // Aquí se podría actualizar el precio mostrado en el modal
+                if (!option || !option.value) return;
+
+                const isYogaterapia = option.text.toLowerCase().includes('yogaterapia');
+                const esEdicion = document.getElementById('esEdicion').value === 'true';
+
+                if (isYogaterapia && !esEdicion) {
+                    document.getElementById('seccionDiasSemana').style.display = 'none';
+                    document.getElementById('avisoPuntual').style.display = 'block';
+                    document.getElementById('modalClaseTitulo').innerHTML = '<i class="fas fa-heart"></i> Nueva Yogaterapia (Puntual)';
+                } else {
+                    document.getElementById('seccionDiasSemana').style.display = 'block';
+                    document.getElementById('avisoPuntual').style.display = 'none';
+                    document.getElementById('modalClaseTitulo').innerHTML = esEdicion ? '<i class="fas fa-edit"></i> Editar Clase Semanal' : '<i class="fas fa-plus"></i> Nueva Clase Semanal';
                 }
             });
         }
     });
 
     function clickCelda(dia, hora) {
-        abrirModalNuevaClase(dia, hora);
+        // Encontrar la fecha real de ese día de la semana actual para sesiones puntuales
+        const startOfWeek = new Date(fechaActual);
+        const dayPos = startOfWeek.getDay();
+        const diff = dayPos === 0 ? -6 : 1 - dayPos; // Ajustar a Lunes
+        startOfWeek.setDate(startOfWeek.getDate() + diff);
+
+        const specificDate = new Date(startOfWeek);
+        specificDate.setDate(startOfWeek.getDate() + (dia - 1));
+        const dateStr = specificDate.toISOString().split('T')[0];
+
+        abrirModalNuevaClase(dia, hora, dateStr);
     }
 
-    function abrirModalNuevaClase(dia = null, hora = null) {
+    function abrirModalNuevaClase(dia = null, hora = null, fecha = null) {
         const form = document.getElementById('formClase');
         if (!form || !modalClase) return;
 
@@ -793,6 +858,9 @@
         document.getElementById('btnEliminarHorario').style.display = 'none';
         document.getElementById('esEdicion').value = 'false';
         document.getElementById('horarioId').value = '';
+        document.getElementById('fechaSeleccionada').value = fecha || '';
+        document.getElementById('seccionDiasSemana').style.display = 'block';
+        document.getElementById('avisoPuntual').style.display = 'none';
 
         // Limpiar selección de días
         document.querySelectorAll('.btn-dia').forEach(btn => {
@@ -881,7 +949,10 @@
             diasSeleccionados.push(input.value);
         });
 
-        if (diasSeleccionados.length === 0) {
+        const isYogaterapia = document.getElementById('claseSelect').options[document.getElementById('claseSelect').selectedIndex].text.toLowerCase().includes('yogaterapia');
+        const fecha = formData.get('fecha_seleccionada');
+
+        if (diasSeleccionados.length === 0 && !isYogaterapia) {
             mostrarNotificacion('Debe seleccionar al menos un día de la semana', 'error');
             return;
         }
@@ -898,14 +969,26 @@
             horario_id: formData.get('horario_id')
         };
 
-        const url = data.es_edicion ? '/api/horario/actualizar' : '/api/horario/crear';
+        const url = isYogaterapia && !data.es_edicion ? '/api/calendario/eventos' : (data.es_edicion ? '/api/horario/actualizar' : '/api/horario/crear');
 
+        let bodyData = data;
+        if (isYogaterapia && !data.es_edicion) {
+            bodyData = {
+                clase_id: data.clase_id,
+                fecha_inicio: `${fecha}T${data.hora_inicio}`,
+                fecha_fin: `${fecha}T${data.hora_fin}`,
+                titulo: `Yogaterapia - ${data.hora_inicio}`,
+                instructor: data.instructor,
+                tipo: 'individual',
+                color: '#8B5FBF'
+            };
+        }
         fetch(url, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify(data)
+            body: JSON.stringify(bodyData)
         })
             .then(response => response.json())
             .then(data => {
@@ -1190,8 +1273,7 @@
     }
 
     function abrirModalNuevaYogaterapia() {
-        alert('Esta funcionalidad se gestionará desde el módulo de Yogaterapia');
-        // window.location.href = '/yogaterapia/nueva';
+        window.location.href = '/yogaterapia/nueva';
     }
 
     function cambiarVista(vista) {
@@ -1227,12 +1309,12 @@
     }
 
     function navegarFecha(direccion) {
-        const hoy = new Date();
+        let prevDate = new Date(fechaActual);
 
         switch (direccion) {
             case -1: // Anterior
                 if (vistaActual === 'semanal') {
-                    fechaActual.setDate(fechaActual.getDate() - 7);
+                    prevDate.setDate(prevDate.getDate() - 7);
                 } else if (vistaActual === 'mensual') {
                     fechaActual.setMonth(fechaActual.getMonth() - 1);
                 } else if (vistaActual === 'anual') {
@@ -1240,17 +1322,27 @@
                 }
                 break;
             case 0: // Hoy
-                fechaActual = new Date();
+                if (vistaActual === 'semanal') {
+                    prevDate = new Date();
+                } else {
+                    fechaActual = new Date();
+                }
                 break;
             case 1: // Siguiente
                 if (vistaActual === 'semanal') {
-                    fechaActual.setDate(fechaActual.getDate() + 7);
+                    prevDate.setDate(prevDate.getDate() + 7);
                 } else if (vistaActual === 'mensual') {
                     fechaActual.setMonth(fechaActual.getMonth() + 1);
                 } else if (vistaActual === 'anual') {
                     fechaActual.setFullYear(fechaActual.getFullYear() + 1);
                 }
                 break;
+        }
+
+        if (vistaActual === 'semanal') {
+            const dateStr = prevDate.toISOString().split('T')[0];
+            window.location.href = `?fecha=${dateStr}`;
+            return;
         }
 
         actualizarTituloFecha();

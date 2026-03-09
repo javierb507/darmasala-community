@@ -188,18 +188,87 @@ def eliminar_horario(horario_id):
     flash('Horario desactivado exitosamente', 'success')
     return redirect(url_for('classes.horarios'))
 
+class VirtualHorario:
+    def __init__(self, id, dia_semana, hora_inicio, hora_fin, clase, instructor, capacidad_maxima, es_puntual=False, titulo=None):
+        self.id = id
+        self.dia_semana = dia_semana
+        self.hora_inicio = hora_inicio
+        self.hora_fin = hora_fin
+        self.clase = clase
+        self.instructor = instructor
+        self.capacidad_maxima = capacidad_maxima
+        self.es_puntual = es_puntual
+        self.titulo = titulo
+
 @class_bp.route('/calendario')
 @login_required
 def calendario_unificado():
     """Calendario unificado editable basado en horarios semanales"""
-    horarios = HorarioSemanal.query.filter_by(activo=True).order_by(HorarioSemanal.dia_semana, HorarioSemanal.hora_inicio).all()
+    fecha_str = request.args.get('fecha')
+    if fecha_str:
+        fecha_actual = datetime.strptime(fecha_str, '%Y-%m-%d').date()
+    else:
+        fecha_actual = datetime.now().date()
+        
+    start_of_week = fecha_actual - timedelta(days=fecha_actual.weekday())
+    end_of_week = start_of_week + timedelta(days=6)
+
+    horarios_fijos = HorarioSemanal.query.filter_by(activo=True).order_by(HorarioSemanal.dia_semana, HorarioSemanal.hora_inicio).all()
+    
+    start_dt = datetime.combine(start_of_week, datetime.min.time())
+    end_dt = datetime.combine(end_of_week, datetime.max.time())
+    
+    # Eventos individuales (como Yogaterapia puntual)
+    eventos = EventoCalendario.query.filter(
+        EventoCalendario.activo == True,
+        EventoCalendario.fecha_inicio >= start_dt,
+        EventoCalendario.fecha_inicio <= end_dt
+    ).all()
+
+    horarios_combinados = []
+    for h in horarios_fijos:
+        horarios_combinados.append(VirtualHorario(
+            id=h.id,
+            dia_semana=h.dia_semana,
+            hora_inicio=h.hora_inicio,
+            hora_fin=h.hora_fin,
+            clase=h.clase,
+            instructor=h.instructor,
+            capacidad_maxima=h.capacidad_maxima,
+            es_puntual=False
+        ))
+
+    for e in eventos:
+        if e.clase:
+            clase_obj = e.clase
+        else:
+            # Fake clase object si no tuviera asignada per se
+            class MockClase:
+                nombre = e.titulo
+                color = e.color
+                precio = 0
+            clase_obj = MockClase()
+            
+        horarios_combinados.append(VirtualHorario(
+            id=f"e_{e.id}",
+            dia_semana=e.fecha_inicio.weekday(),
+            hora_inicio=e.fecha_inicio.time(),
+            hora_fin=e.fecha_fin.time(),
+            clase=clase_obj,
+            instructor=e.instructor,
+            capacidad_maxima=1, # Puntuales suelen ser de 1
+            es_puntual=True,
+            titulo=e.titulo
+        ))
+
     clases = Clase.query.filter_by(activa=True).order_by(Clase.nombre).all()
     alumnos = Alumno.query.filter_by(activo=True).order_by(Alumno.nombre, Alumno.apellido).all()
     
     return render_template('calendario_unificado_editable.html', 
-                         horarios=horarios,
+                         horarios=horarios_combinados,
                          clases=clases,
-                         alumnos=alumnos)
+                         alumnos=alumnos,
+                         fecha_actual=fecha_actual)
 
 @class_bp.route('/calendario-viejo')
 @login_required
@@ -468,6 +537,33 @@ def get_eventos_calendario():
             'instructor': evento.instructor,
             'evento_id': evento.id,
             'editable': True
+        })
+
+    # 3. Añadir sesiones de yogaterapia
+    sesiones_yogaterapia = SesionYogaterapia.query.filter(
+        SesionYogaterapia.fecha_sesion >= start_date.date(),
+        SesionYogaterapia.fecha_sesion <= end_date.date()
+    ).all()
+
+    for sesion in sesiones_yogaterapia:
+        # Combinar fecha y hora
+        fecha_inicio = datetime.combine(sesion.fecha_sesion, sesion.hora_inicio) if sesion.hora_inicio else datetime.combine(sesion.fecha_sesion, datetime.min.time())
+        fecha_fin = datetime.combine(sesion.fecha_sesion, sesion.hora_fin) if sesion.hora_fin else (fecha_inicio + timedelta(minutes=sesion.duracion_minutos))
+
+        eventos.append({
+            'id': f'y_{sesion.id}',
+            'title': f"Yogaterapia: {sesion.alumno.nombre} {sesion.alumno.apellido}",
+            'start': fecha_inicio.isoformat(),
+            'end': fecha_fin.isoformat(),
+            'description': sesion.motivo_consulta,
+            'className': 'Yogaterapia',
+            'alumno': f"{sesion.alumno.nombre} {sesion.alumno.apellido}",
+            'tipo': 'yogaterapia',
+            'color': '#8B5FBF',
+            'instructor': sesion.instructor,
+            'sesion_id': sesion.id,
+            'editable': False,
+            'url': url_for('yogatherapia.ver_sesion_yogaterapia', sesion_id=sesion.id)
         })
 
     return jsonify(eventos)
@@ -747,16 +843,13 @@ def api_asistencias_clase(horario_id, fecha):
         horario = HorarioSemanal.query.get_or_404(horario_id)
         fecha_date = datetime.strptime(fecha, '%Y-%m-%d').date()
         
-        # 1. Alumnos en el roster permanente
-        alumnos_roster = Alumno.query.join(
-            'horarios' # Asumiendo relación 'horarios' en Alumno o similar
-        ).filter(HorarioSemanal.id == horario_id).all()
-        
-        # Si la relación no existe o falla, buscar por la tabla intermedia (si existe)
-        # En models.py: class HorarioSemanal: alumnos = db.relationship('Alumno', secondary='alumno_horario')
+        # 1. Alumnos en el roster permanente (Directamente a través de la relación)
+        alumnos_roster = horario.alumnos
         
         alumnos_data = []
+        roster_ids = []
         for alumno in alumnos_roster:
+            roster_ids.append(alumno.id)
             # Buscar si ya tiene registro de asistencia para este día
             asistencia = Asistencia.query.filter_by(
                 alumno_id=alumno.id,
@@ -776,7 +869,12 @@ def api_asistencias_clase(horario_id, fecha):
         asistencias_extra = Asistencia.query.filter_by(
             horario_id=horario_id,
             fecha_clase=fecha_date
-        ).filter(~Asistencia.alumno_id.in_([a.id for a in alumnos_roster])).all()
+        )
+        
+        if roster_ids:
+            asistencias_extra = asistencias_extra.filter(~Asistencia.alumno_id.in_(roster_ids))
+            
+        asistencias_extra = asistencias_extra.all()
         
         for asist in asistencias_extra:
             alumnos_data.append({

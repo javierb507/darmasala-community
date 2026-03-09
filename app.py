@@ -2,6 +2,7 @@ from flask import Flask
 import os
 from utils.calendar_utils import crear_contexto_calendario
 from utils.app_utils import get_version_info
+from datetime import datetime, date
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -54,6 +55,8 @@ def inject_global_vars():
     context = crear_contexto_calendario()
     context['config'] = config_dict
     context['version_info'] = get_version_info()
+    context['today'] = date.today()
+    context['datetime'] = datetime
     return context
 
 # The rest of app.py is now handled by Blueprints

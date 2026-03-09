@@ -304,3 +304,76 @@ def generar_reporte_pdf(facturas, gastos_fijos, ingresos, fecha_inicio, fecha_fi
     except Exception as e:
         flash(f"Error al generar reporte PDF: {e}", "error")
         return redirect(url_for('finance.economia_historico'))
+
+def exportar_datos_tax_excel(facturas_emitidas, facturas_proveedor, gastos_fijos, año):
+    """Exportar datos económicos listos para presentación de impuestos"""
+    try:
+        import pandas as pd
+        from io import BytesIO
+        
+        output = BytesIO()
+        with pd.ExcelWriter(output, engine='openpyxl') as writer:
+            # 1. Ventas e Ingresos (Facturas Emitidas)
+            if facturas_emitidas:
+                data_ventas = []
+                for f in facturas_emitidas:
+                    data_ventas.append({
+                        'Número': f.numero_completo,
+                        'Fecha': f.fecha_emision.strftime('%d/%m/%Y'),
+                        'Cliente': f.cliente.nombre if f.cliente else 'Venta Directa',
+                        'NIF/CIF': f.cliente.nif_cif if f.cliente else '',
+                        'Base Imponible': f.base_imponible,
+                        'IVA %': f.tipo_iva,
+                        'Cuota IVA': f.cuota_iva,
+                        'Retención %': f.tipo_retencion,
+                        'Cuota Retención': f.cuota_retencion,
+                        'Total': f.total,
+                        'Estado': f.estado.upper()
+                    })
+                df_ventas = pd.DataFrame(data_ventas)
+                df_ventas.to_excel(writer, sheet_name='INGRESOS (Ventas)', index=False)
+            
+            # 2. Compras y Gastos (Facturas de Proveedores)
+            if facturas_proveedor:
+                data_gastos = []
+                for f in facturas_proveedor:
+                    data_gastos.append({
+                        'Factura': f.numero_factura,
+                        'Fecha': f.fecha_factura.strftime('%d/%m/%Y'),
+                        'Proveedor': f.proveedor.nombre if f.proveedor else 'Gasto Vario',
+                        'NIF/CIF': f.proveedor.cif_nif if f.proveedor else '',
+                        'Concepto': f.categoria.nombre,
+                        'Base Imponible': f.importe_sin_iva,
+                        'IVA %': f.iva,
+                        'Total': f.importe_total,
+                        'Estado': f.estado.upper(),
+                        'Fecha Pago': f.fecha_pago.strftime('%d/%m/%Y') if f.fecha_pago else ''
+                    })
+                df_gastos = pd.DataFrame(data_gastos)
+                df_gastos.to_excel(writer, sheet_name='GASTOS (Compras)', index=False)
+                
+            # 3. Gastos Fijos (Estimación)
+            if gastos_fijos:
+                data_fijos = []
+                for g in gastos_fijos:
+                    data_fijos.append({
+                        'Concepto': g.nombre,
+                        'Categoría': g.categoria.nombre,
+                        'Importe': g.importe,
+                        'Frecuencia': g.frecuencia.upper(),
+                        'Estado': 'ACTIVO' if g.activo else 'INACTIVO'
+                    })
+                df_fijos = pd.DataFrame(data_fijos)
+                df_fijos.to_excel(writer, sheet_name='GASTOS RECURRENTES', index=False)
+            
+        output.seek(0)
+        
+        response = make_response(output.getvalue())
+        response.headers['Content-Type'] = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        response.headers['Content-Disposition'] = f'attachment; filename=informe_fiscal_{año}_{date.today().strftime("%Y%m%d")}.xlsx'
+        
+        return response
+        
+    except Exception as e:
+        flash(f'Error al generar informe fiscal: {str(e)}', 'error')
+        return redirect(url_for('finance.economia'))

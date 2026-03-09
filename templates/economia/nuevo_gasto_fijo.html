@@ -27,9 +27,9 @@
 
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label for="proveedor_id" class="form-label">Proveedor</label>
+                            <label for="proveedor_id" class="form-label">Acreedor / Origen</label>
                             <select class="form-select" id="proveedor_id" name="proveedor_id">
-                                <option value="">Sin proveedor específico</option>
+                                <option value="">Sin vinculación específica</option>
                                 {% for proveedor in proveedores %}
                                 <option value="{{ proveedor.id }}">{{ proveedor.nombre }}</option>
                                 {% endfor %}

@@ -1,14 +1,1 @@
-{
-  "version": "2.0.0-final",
-  "build_date": "2026-03-05 08:30:00",
-  "git_info": {
-    "commit_hash": "73b3a02",
-    "commit_date": "2026-02-05 12:05:52",
-    "commit_message": "Corregido error de importación de Configuracion en inicializar_sistema.py",
-    "branch": "main",
-    "remote_url": "https://github.com/javierb507/yoga-school-management",
-    "available": true
-  },
-  "app_name": "Atma Suddhi",
-  "description": "Sistema de Gestión de Escuela de Yoga"
-}
+{"version": "1.2.5", "build_date": "2026-03-07 19:45:00", "git_info": {"commit_hash": "a1b2c3d", "branch": "master", "commit_date": "2026-03-07 19:40:00"}}

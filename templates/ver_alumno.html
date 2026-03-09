@@ -3,402 +3,210 @@
 {% block title %}{{ alumno.nombre }} {{ alumno.apellido }} - Atma suddhi{% endblock %}
 
 {% block content %}
-<div class="row">
-    <div class="col-md-8 mx-auto">
-        <div class="card">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <h4 class="mb-0">
-                    <i class="fas fa-user"></i> {{ alumno.nombre }} {{ alumno.apellido }}
-                </h4>
-                <div>
-                    <button class="btn btn-sm btn-success" onclick="abrirModalAgregarAClase({{ alumno.id }})">
-                        <i class="fas fa-calendar-plus"></i> Agregar a Clase
+<div class="container-fluid animate__animated animate__fadeIn">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div class="d-flex align-items-center">
+                    <div class="avatar-large me-3 shadow-sm">
+                        {{ alumno.nombre[0] }}{{ alumno.apellido[0] }}
+                    </div>
+                    <div>
+                        <h2 class="mb-0 fw-bold">{{ alumno.nombre }} {{ alumno.apellido }}</h2>
+                        <span
+                            class="badge rounded-pill {% if alumno.activo %}bg-success-soft text-success{% else %}bg-danger-soft text-danger{% endif %}">
+                            {{ 'Activo' if alumno.activo else 'Inactivo' }}
+                        </span>
+                    </div>
+                </div>
+                <div class="btn-group shadow-sm">
+                    <button class="btn btn-success" onclick="abrirModalAgregarAClase({{ alumno.id }})">
+                        <i class="fas fa-calendar-plus me-2"></i> Inscribir en Clase/Evento
                     </button>
-                    <a href="{{ url_for('students.editar_alumno', alumno_id=alumno.id) }}"
-                        class="btn btn-sm btn-outline-secondary">
-                        <i class="fas fa-edit"></i> Editar
-                    </a>
-                    <a href="{{ url_for('students.alumnos') }}" class="btn btn-sm btn-outline-primary">
-                        <i class="fas fa-arrow-left"></i> Volver a Alumnos
-                    </a>
-                </div>
-            </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-6">
-                        <h6>Información Personal</h6>
-                        <table class="table table-sm">
-                            <tr>
-                                <td><strong>Nombre:</strong></td>
-                                <td>{{ alumno.nombre }} {{ alumno.apellido }}</td>
-                            </tr>
-                            <tr>
-                                <td><strong>DNI/NIE:</strong></td>
-                                <td>{{ alumno.dni or 'No proporcionado' }}</td>
-                            </tr>
-                            <tr>
-                                <td><strong>Email:</strong></td>
-                                <td>{{ alumno.email }}</td>
-                            </tr>
-                            <tr>
-                                <td><strong>Teléfono:</strong></td>
-                                <td>{{ alumno.telefono or 'No proporcionado' }}</td>
-                            </tr>
-                            <tr>
-                                <td><strong>Fecha de Nacimiento:</strong></td>
-                                <td>{{ alumno.fecha_nacimiento.strftime('%d/%m/%Y') if alumno.fecha_nacimiento else 'No
-                                    proporcionado' }}</td>
-                            </tr>
-                            <tr>
-                                <td><strong>Fecha de Registro:</strong></td>
-                                <td>{{ alumno.fecha_registro.strftime('%d/%m/%Y %H:%M') }}</td>
-                            </tr>
-                        </table>
-                    </div>
-                    <div class="col-md-6">
-                        <h6>Información de Cuota y Estado</h6>
-                        <table class="table table-sm">
-                            <tr>
-                                <td><strong>Dirección:</strong></td>
-                                <td>{{ alumno.direccion or 'No proporcionado' }}</td>
-                            </tr>
-                            <tr>
-                                <td><strong>Ciudad:</strong></td>
-                                <td>{{ alumno.ciudad or 'No proporcionado' }}</td>
-                            </tr>
-                            <tr>
-                                <td><strong>Código Postal:</strong></td>
-                                <td>{{ alumno.codigo_postal or 'No proporcionado' }}</td>
-                            </tr>
-                            <tr>
-                                <td><strong>País:</strong></td>
-                                <td>{{ alumno.pais or 'No proporcionado' }}</td>
-                            </tr>
-                            <tr>
-                                <td><strong>Número de Cuenta:</strong></td>
-                                <td>{{ alumno.numero_cuenta or 'No proporcionado' }}</td>
-                            </tr>
-                            <tr>
-                                <td><strong>Tipo de Cuota:</strong></td>
-                                <td>
-                                    {% if alumno.tipo_cuota == 'pendiente' %}
-                                    <span class="badge bg-warning text-dark">
-                                        <i class="fas fa-clock"></i> {{ alumno.get_tipo_cuota_display() }}
-                                    </span>
-                                    <br><small class="text-muted">Sin precio asignado hasta definir cuota</small>
-                                    {% else %}
-                                    <span class="badge bg-info">
-                                        {{ alumno.get_tipo_cuota_display() }} - €{{
-                                        "%.2f"|format(alumno.get_precio_cuota()) }}
-                                    </span>
-                                    {% endif %}
-                                </td>
-                            </tr>
-                            <tr>
-                                <td><strong>Matrícula:</strong></td>
-                                <td>
-                                    {% if alumno.matricula_pagada %}
-                                    <span class="badge bg-success">Pagada</span> ({{
-                                    alumno.fecha_matricula.strftime('%d/%m/%Y') if alumno.fecha_matricula else 'Fecha no
-                                    disponible' }})
-                                    {% else %}
-                                    <span class="badge bg-warning">Pendiente</span>
-                                    {% endif %}
-                                </td>
-                            </tr>
-                            <tr>
-                                <td><strong>Estado:</strong></td>
-                                <td>
-                                    {% if alumno.activo %}
-                                    <span class="badge bg-success">Activo</span>
-                                    {% else %}
-                                    <span class="badge bg-secondary">Inactivo</span>
-                                    {% endif %}
-                                </td>
-                            </tr>
-                        </table>
-                    </div>
-                </div>
-
-                <!-- Información Médica y Física -->
-                <div class="mt-4">
-                    <h6>Información Médica y Física</h6>
-                    <div class="row">
-                        <div class="col-md-6">
-                            {% if alumno.condiciones_medicas and alumno.condiciones_medicas != 'Ninguna' %}
-                            <div class="mb-3">
-                                <strong>Condiciones Médicas:</strong>
-                                <div class="alert alert-warning">
-                                    <i class="fas fa-exclamation-triangle"></i>
-                                    {{ alumno.condiciones_medicas }}
-                                </div>
-                            </div>
-                            {% endif %}
-
-                            {% if alumno.medicamentos and alumno.medicamentos != 'Ninguno' %}
-                            <div class="mb-3">
-                                <strong>Medicamentos:</strong>
-                                <div class="alert alert-info">
-                                    <i class="fas fa-pills"></i>
-                                    {{ alumno.medicamentos }}
-                                </div>
-                            </div>
-                            {% endif %}
-                        </div>
-                        <div class="col-md-6">
-                            {% if alumno.alergias and alumno.alergias != 'Ninguna' %}
-                            <div class="mb-3">
-                                <strong>Alergias:</strong>
-                                <div class="alert alert-danger">
-                                    <i class="fas fa-allergies"></i>
-                                    {{ alumno.alergias }}
-                                </div>
-                            </div>
-                            {% endif %}
-
-                            {% if alumno.estado_fisico %}
-                            <div class="mb-3">
-                                <strong>Estado Físico:</strong>
-                                <div class="alert alert-secondary">
-                                    <i class="fas fa-heartbeat"></i>
-                                    {{ alumno.estado_fisico }}
-                                </div>
-                            </div>
-                            {% endif %}
-
-                            {% if alumno.motivacion %}
-                            <div class="mb-3">
-                                <strong>Motivación:</strong>
-                                <div class="alert alert-primary">
-                                    <i class="fas fa-star"></i>
-                                    {{ alumno.motivacion }}
-                                </div>
-                            </div>
-                            {% endif %}
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Sección de Pagos -->
-        <div class="card mt-4">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <h5 class="mb-0">
-                    <i class="fas fa-credit-card"></i> Historial de Pagos
-                </h5>
-                <a href="{{ url_for('finance.agregar_pago', alumno_id=alumno.id) }}" class="btn btn-success btn-sm">
-                    <i class="fas fa-plus"></i> Agregar Pago
-                </a>
-            </div>
-            <div class="card-body">
-                {% if pagos %}
-                <div class="table-responsive">
-                    <table class="table table-hover">
-                        <thead>
-                            <tr>
-                                <th>Período</th>
-                                <th>Tipo</th>
-                                <th>Monto</th>
-                                <th>Fecha de Registro</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for pago in pagos %}
-                            <tr>
-                                <td><strong>
-                                        {% if pago.tipo_pago == 'matricula' %}
-                                        {{ pago.año }}
-                                        {% else %}
-                                        {{ pago.mes }}
-                                        {% endif %}
-                                    </strong></td>
-                                <td>
-                                    <span
-                                        class="badge bg-{% if pago.tipo_pago == 'cuota' %}primary{% elif pago.tipo_pago == 'matricula' %}success{% else %}info{% endif %}">
-                                        {{ pago.descripcion or pago.tipo_pago }}
-                                    </span>
-                                </td>
-                                <td>€{{ "%.2f"|format(pago.monto) }}</td>
-                                <td>{{ pago.fecha_creacion.strftime('%d/%m/%Y') }}</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-                {% else %}
-                <div class="text-center py-4">
-                    <i class="fas fa-credit-card fa-3x text-muted mb-3"></i>
-                    <p class="text-muted">No hay pagos registrados para este alumno.</p>
-                    <a href="{{ url_for('finance.agregar_pago', alumno_id=alumno.id) }}" class="btn btn-success">
-                        <i class="fas fa-plus"></i> Agregar Primer Pago
-                    </a>
-                </div>
-                {% endif %}
-            </div>
-        </div>
-
-        <!-- Sección de Yogaterapia -->
-        <div class="card mt-4">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <h5 class="mb-0">
-                    <i class="fas fa-spa"></i> Sesiones de Yogaterapia
-                </h5>
-                <a href="{{ url_for('yogatherapia.nueva_yogaterapia_alumno', alumno_id=alumno.id) }}"
-                    class="btn btn-success btn-sm">
-                    <i class="fas fa-plus"></i> Nueva Sesión
-                </a>
-            </div>
-            <div class="card-body">
-                {% if sesiones_yogaterapia %}
-                <div class="table-responsive">
-                    <table class="table table-striped">
-                        <thead>
-                            <tr>
-                                <th>Fecha</th>
-                                <th>Hora</th>
-                                <th>Duración</th>
-                                <th>Notas</th>
-                                <th>Archivos</th>
-                                <th>Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for sesion in sesiones_yogaterapia %}
-                            <tr>
-                                <td>{{ sesion.fecha_sesion.strftime('%d/%m/%Y') }}</td>
-                                <td>
-                                    {% if sesion.hora_inicio %}
-                                    {{ sesion.hora_inicio.strftime('%H:%M') }}
-                                    {% if sesion.hora_fin %}
-                                    - {{ sesion.hora_fin.strftime('%H:%M') }}
-                                    {% endif %}
-                                    {% else %}
-                                    <span class="text-muted">Sin hora</span>
-                                    {% endif %}
-                                </td>
-                                <td>
-                                    {% if sesion.hora_inicio and sesion.hora_fin %}
-                                    {% set inicio_minutos = sesion.hora_inicio.hour * 60 + sesion.hora_inicio.minute %}
-                                    {% set fin_minutos = sesion.hora_fin.hour * 60 + sesion.hora_fin.minute %}
-                                    {% set duracion = fin_minutos - inicio_minutos %}
-                                    {{ duracion }} min
-                                    {% else %}
-                                    <span class="text-muted">-</span>
-                                    {% endif %}
-                                </td>
-                                <td>
-                                    {% if sesion.notas %}
-                                    <span class="text-truncate d-inline-block" style="max-width: 200px;"
-                                        title="{{ sesion.notas }}">
-                                        {{ sesion.notas[:50] }}{% if sesion.notas|length > 50 %}...{% endif %}
-                                    </span>
-                                    {% else %}
-                                    <span class="text-muted">Sin notas</span>
-                                    {% endif %}
-                                </td>
-                                <td>
-                                    {% set archivos_count = sesion.archivos|length %}
-                                    {% if archivos_count > 0 %}
-                                    <span class="badge bg-info">{{ archivos_count }} archivo{{ 's' if archivos_count > 1
-                                        else '' }}</span>
-                                    {% else %}
-                                    <span class="text-muted">Sin archivos</span>
-                                    {% endif %}
-                                </td>
-                                <td>
-                                    <div class="btn-group btn-group-sm">
-                                        <a href="{{ url_for('yogatherapia.ver_sesion_yogaterapia', sesion_id=sesion.id) }}"
-                                            class="btn btn-outline-primary" title="Ver detalles">
-                                            <i class="fas fa-eye"></i>
-                                        </a>
-                                        <a href="{{ url_for('yogatherapia.editar_sesion_yogaterapia', sesion_id=sesion.id) }}"
-                                            class="btn btn-outline-warning" title="Editar">
-                                            <i class="fas fa-edit"></i>
-                                        </a>
-                                        <a href="{{ url_for('yogatherapia.eliminar_sesion_yogaterapia', sesion_id=sesion.id) }}"
-                                            class="btn btn-outline-danger" title="Eliminar"
-                                            onclick="return confirm('¿Estás seguro de que quieres eliminar esta sesión?')">
-                                            <i class="fas fa-trash"></i>
-                                        </a>
-                                    </div>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-                {% else %}
-                <div class="text-center py-4">
-                    <i class="fas fa-spa fa-3x text-muted mb-3"></i>
-                    <p class="text-muted">No hay sesiones de yogaterapia registradas para este alumno.</p>
                     <a href="{{ url_for('yogatherapia.nueva_yogaterapia_alumno', alumno_id=alumno.id) }}"
-                        class="btn btn-success">
-                        <i class="fas fa-plus"></i> Agregar Primera Sesión
+                        class="btn btn-outline-info">
+                        <i class="fas fa-heart me-2"></i> Nueva Yogaterapia
+                    </a>
+                    <a href="{{ url_for('students.editar_alumno', alumno_id=alumno.id) }}" class="btn btn-warning">
+                        <i class="fas fa-edit me-2"></i> Editar Ficha
+                    </a>
+                    <a href="{{ url_for('students.eliminar_alumno', alumno_id=alumno.id, confirm=1) }}"
+                        class="btn btn-outline-danger"
+                        onclick="return confirm('¿Estás seguro de que quieres desactivar a este alumno?')">
+                        <i class="fas fa-user-times me-2"></i> Desactivar
+                    </a>
+                    <a href="{{ url_for('students.alumnos') }}" class="btn btn-outline-primary">
+                        <i class="fas fa-arrow-left me-2"></i> Volver
                     </a>
                 </div>
-                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Main Column: Details -->
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white py-3 border-0">
+                    <h5 class="mb-0 fw-bold"><i class="fas fa-info-circle text-primary me-2"></i> Información Detallada
+                    </h5>
+                </div>
+                <div class="card-body p-4">
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <label class="text-muted small text-uppercase fw-bold">DNI / Identificación</label>
+                            <p class="fs-5">{{ alumno.dni or 'No proporcionado' }}</p>
+
+                            <label class="text-muted small text-uppercase fw-bold">Fecha de Nacimiento</label>
+                            <p class="fs-5">{{ alumno.fecha_nacimiento.strftime('%d/%m/%Y') if alumno.fecha_nacimiento
+                                else 'No proporcionada' }}</p>
+
+                            <label class="text-muted small text-uppercase fw-bold">Número de Cuenta (IBAN)</label>
+                            <p class="fs-6 font-monospace">{{ alumno.numero_cuenta or 'No proporcionado' }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="text-muted small text-uppercase fw-bold">Email</label>
+                            <p class="fs-5 text-primary">{{ alumno.email }}</p>
+
+                            <label class="text-muted small text-uppercase fw-bold">Teléfono móvil</label>
+                            <p class="fs-5">{{ alumno.telefono or 'No proporcionado' }}</p>
+
+                            <label class="text-muted small text-uppercase fw-bold">Dirección de Residencia</label>
+                            <p class="fs-6">{{ alumno.direccion or 'No proporcionada' }}</p>
+                        </div>
+                    </div>
+
+                    <hr class="my-4 opacity-10">
+
+                    <div class="row">
+                        <div class="col-12">
+                            <h6 class="fw-bold mb-3"><i class="fas fa-heartbeat text-danger me-2"></i> Observaciones
+                                Médicas y Motivación</h6>
+                            {% if alumno.condiciones_medicas or alumno.medicamentos or alumno.alergias or
+                            alumno.motivacion %}
+                            <div class="row g-3">
+                                {% if alumno.condiciones_medicas %}
+                                <div class="col-md-6">
+                                    <div class="p-3 rounded bg-warning-soft border-start border-warning border-4">
+                                        <small class="fw-bold text-dark">Condiciones Médicas</small>
+                                        <p class="mb-0 small">{{ alumno.condiciones_medicas }}</p>
+                                    </div>
+                                </div>
+                                {% endif %}
+                                {% if alumno.motivacion %}
+                                <div class="col-md-6">
+                                    <div class="p-3 rounded bg-primary-soft border-start border-primary border-4">
+                                        <small class="fw-bold text-dark">Motivación / Objetivos</small>
+                                        <p class="mb-0 small">{{ alumno.motivacion }}</p>
+                                    </div>
+                                </div>
+                                {% endif %}
+                            </div>
+                            {% else %}
+                            <p class="text-muted italic">Sin observaciones registradas.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Historial de Asistencia -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white py-3 border-0 d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0 fw-bold"><i class="fas fa-check-circle text-success me-2"></i> Historial de
+                        Asistencia Semanal</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="bg-light small text-uppercase text-muted">
+                                <tr>
+                                    <th class="ps-4">Fecha</th>
+                                    <th>Clase / Evento</th>
+                                    <th>Estado</th>
+                                    <th class="text-center">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if asistencias %}
+                                {% for asistencia in asistencias %}
+                                <tr>
+                                    <td class="ps-4">{{ asistencia.fecha_clase.strftime('%d/%m/%Y') }}</td>
+                                    <td>{{ asistencia.horario.clase.nombre if asistencia.horario else
+                                        (asistencia.evento.titulo if asistencia.evento else 'Clase') }}</td>
+                                    <td>
+                                        <span class="badge rounded-pill bg-success-soft text-success">Confirmada</span>
+                                    </td>
+                                    <td class="text-center">
+                                        <button class="btn btn-light btn-sm rounded-circle"><i
+                                                class="fas fa-trash text-danger"></i></button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                                {% else %}
+                                <tr>
+                                    <td colspan="4" class="text-center py-4 text-muted small">No hay registros de
+                                        asistencia en el sistema.</td>
+                                </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <!-- Sección de Asistencias -->
-        <div class="card mt-4">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <h5 class="mb-0">
-                    <i class="fas fa-calendar-check"></i> Historial de Asistencias
-                </h5>
-                <div class="btn-group btn-group-sm">
-                    <button type="button" class="btn btn-outline-primary" onclick="filtrarAsistencias('todas')">
-                        Todas
-                    </button>
-                    <button type="button" class="btn btn-outline-success" onclick="filtrarAsistencias('presente')">
-                        Presentes
-                    </button>
-                    <button type="button" class="btn btn-outline-danger" onclick="filtrarAsistencias('ausente')">
-                        Ausentes
-                    </button>
+        <!-- Sidebar Column -->
+        <div class="col-lg-4">
+            <!-- Cuota Status Card -->
+            <div class="card border-0 shadow-sm mb-4 bg-gradient-primary text-white">
+                <div class="card-body p-4">
+                    <h6 class="text-uppercase fw-bold opacity-75 mb-3">Tipo de Cuota Actual</h6>
+                    <h3 class="fw-bold mb-2">{{ alumno.get_tipo_cuota_display() }}</h3>
+                    <div class="display-6 fw-bold mb-3">€{{ "%.2f"|format(alumno.get_precio_cuota()) }}<small
+                            class="fs-6 opacity-75">/mes</small></div>
+                    <hr class="opacity-25">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <small class="d-block opacity-75">Matrícula</small>
+                            <span class="fw-bold">{% if alumno.matricula_pagada %}PAGADA{% else %}PENDIENTE{% endif
+                                %}</span>
+                        </div>
+                        <i class="fas fa-wallet fa-2x opacity-25"></i>
+                    </div>
                 </div>
             </div>
-            <div class="card-body">
-                <div id="asistenciasContainer">
-                    <div class="text-center">
-                        <i class="fas fa-spinner fa-spin"></i> Cargando asistencias...
-                    </div>
-                </div>
 
-                <!-- Estadísticas de asistencia -->
-                <div class="row mt-4" id="estadisticasAsistencia" style="display: none;">
-                    <div class="col-md-3">
-                        <div class="card text-center bg-success text-white">
-                            <div class="card-body p-3">
-                                <h4 id="totalPresentes">0</h4>
-                                <small>Presentes</small>
+            <!-- Recent Payments -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white py-3 border-0 d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0 fw-bold"><i class="fas fa-history text-muted me-2"></i> Últimos Pagos</h5>
+                    <a href="{{ url_for('finance.agregar_pago', alumno_id=alumno.id) }}"
+                        class="btn btn-success btn-sm rounded-pill">
+                        <i class="fas fa-plus"></i>
+                    </a>
+                </div>
+                <div class="card-body p-0">
+                    <div class="list-group list-group-flush">
+                        {% if pagos %}
+                        {% for pago in pagos[:5] %}
+                        <div class="list-group-item px-4 py-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-0 fw-bold">€{{ "%.2f"|format(pago.monto) }}</h6>
+                                    <small class="text-muted">{{ pago.mes or pago.fecha_creacion.strftime('%d/%m/%Y')
+                                        }}</small>
+                                </div>
+                                <span class="badge rounded-pill bg-light text-dark border small">{{ pago.metodo_pago
+                                    }}</span>
                             </div>
                         </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="card text-center bg-danger text-white">
-                            <div class="card-body p-3">
-                                <h4 id="totalAusentes">0</h4>
-                                <small>Ausentes</small>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="card text-center bg-warning text-white">
-                            <div class="card-body p-3">
-                                <h4 id="totalPendientes">0</h4>
-                                <small>Pendientes</small>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="card text-center bg-info text-white">
-                            <div class="card-body p-3">
-                                <h4 id="porcentajeAsistencia">0%</h4>
-                                <small>% Asistencia</small>
-                            </div>
-                        </div>
+                        {% endfor %}
+                        <a href="#" class="list-group-item list-group-item-action text-center small text-primary">Ver
+                            historial completo</a>
+                        {% else %}
+                        <div class="p-4 text-center text-muted small">Sin registros de pago.</div>
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -406,326 +214,144 @@
     </div>
 </div>
 
-<script>
-    // Cargar asistencias del alumno al cargar la página
-    document.addEventListener('DOMContentLoaded', function () {
-        cargarAsistenciasAlumno();
-    });
-
-    function cargarAsistenciasAlumno() {
-        const alumnoId = {{ alumno.id }};
-
-    fetch(`/api/alumno/${alumnoId}/asistencias`)
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                mostrarAsistenciasAlumno(data.asistencias);
-                mostrarEstadisticasAsistencia(data.estadisticas);
-            } else {
-                document.getElementById('asistenciasContainer').innerHTML =
-                    '<div class="alert alert-warning">Error al cargar asistencias</div>';
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            document.getElementById('asistenciasContainer').innerHTML =
-                '<div class="alert alert-danger">Error de conexión</div>';
-        });
-}
-
-    function mostrarAsistenciasAlumno(asistencias) {
-        const container = document.getElementById('asistenciasContainer');
-
-        if (asistencias.length === 0) {
-            container.innerHTML = `
-            <div class="text-center py-4">
-                <i class="fas fa-calendar-times fa-3x text-muted mb-3"></i>
-                <h5 class="text-muted">No hay asistencias registradas</h5>
-                <p class="text-muted">Las asistencias aparecerán aquí cuando el alumno participe en clases</p>
-            </div>
-        `;
-            return;
-        }
-
-        let html = '<div class="table-responsive"><table class="table table-hover" id="tablaAsistencias">';
-        html += `
-        <thead>
-            <tr>
-                <th>Fecha</th>
-                <th>Clase</th>
-                <th>Horario</th>
-                <th>Estado</th>
-                <th>Instructor</th>
-            </tr>
-        </thead>
-        <tbody>
-    `;
-
-        asistencias.forEach(asistencia => {
-            const fecha = new Date(asistencia.fecha).toLocaleDateString('es-ES', {
-                weekday: 'short',
-                year: 'numeric',
-                month: 'short',
-                day: 'numeric'
-            });
-
-            let estadoHtml, estadoClass;
-            if (asistencia.asistio === null) {
-                estadoHtml = '<span class="badge bg-warning"><i class="fas fa-clock me-1"></i>Pendiente</span>';
-                estadoClass = 'pendiente';
-            } else if (asistencia.asistio) {
-                estadoHtml = '<span class="badge bg-success"><i class="fas fa-check me-1"></i>Presente</span>';
-                estadoClass = 'presente';
-            } else {
-                estadoHtml = '<span class="badge bg-danger"><i class="fas fa-times me-1"></i>Ausente</span>';
-                estadoClass = 'ausente';
-            }
-
-            html += `
-            <tr class="asistencia-row" data-estado="${estadoClass}">
-                <td><strong>${fecha}</strong></td>
-                <td>
-                    <div class="d-flex align-items-center">
-                        <div class="color-indicator me-2" style="background-color: ${asistencia.evento.color}; width: 12px; height: 12px; border-radius: 50%;"></div>
-                        ${asistencia.evento.titulo}
-                    </div>
-                </td>
-                <td>${asistencia.evento.hora_inicio} - ${asistencia.evento.hora_fin}</td>
-                <td>${estadoHtml}</td>
-                <td>${asistencia.evento.instructor}</td>
-            </tr>
-        `;
-        });
-
-        html += '</tbody></table></div>';
-        container.innerHTML = html;
-    }
-
-    function mostrarEstadisticasAsistencia(estadisticas) {
-        document.getElementById('totalPresentes').textContent = estadisticas.presentes;
-        document.getElementById('totalAusentes').textContent = estadisticas.ausentes;
-        document.getElementById('totalPendientes').textContent = estadisticas.pendientes;
-        document.getElementById('porcentajeAsistencia').textContent = estadisticas.porcentaje_asistencia + '%';
-
-        document.getElementById('estadisticasAsistencia').style.display = 'flex';
-    }
-
-    function filtrarAsistencias(filtro) {
-        const filas = document.querySelectorAll('.asistencia-row');
-        const botones = document.querySelectorAll('.btn-group .btn');
-
-        // Actualizar botones activos
-        botones.forEach(btn => btn.classList.remove('active'));
-        event.target.classList.add('active');
-
-        // Filtrar filas
-        filas.forEach(fila => {
-            if (filtro === 'todas') {
-                fila.style.display = '';
-            } else {
-                const estado = fila.dataset.estado;
-                fila.style.display = estado === filtro ? '' : 'none';
-            }
-        });
-    }
-
-    // ===================== FUNCIONALIDAD PARA AGREGAR A CLASE =====================
-
-    function abrirModalAgregarAClase(alumnoId) {
-        const modal = new bootstrap.Modal(document.getElementById('modalAgregarAClase'));
-        cargarEventosDisponibles(alumnoId);
-        modal.show();
-    }
-
-    function cargarEventosDisponibles(alumnoId) {
-        const fechaHoy = new Date();
-        const fechaInicio = fechaHoy.toISOString().split('T')[0];
-        const fechaFin = new Date(fechaHoy.getTime() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]; // 30 días
-
-        fetch(`/api/eventos-disponibles?alumno_id=${alumnoId}&inicio=${fechaInicio}&fin=${fechaFin}`)
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    mostrarEventosDisponibles(data.eventos, alumnoId);
-                } else {
-                    document.getElementById('listaEventosDisponibles').innerHTML =
-                        '<p class="text-muted">No se pudieron cargar los eventos disponibles</p>';
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                document.getElementById('listaEventosDisponibles').innerHTML =
-                    '<p class="text-danger">Error de conexión</p>';
-            });
-    }
-
-    function mostrarEventosDisponibles(eventos, alumnoId) {
-        const container = document.getElementById('listaEventosDisponibles');
-
-        if (eventos.length === 0) {
-            container.innerHTML = `
-            <div class="text-center py-4">
-                <i class="fas fa-calendar-times fa-3x text-muted mb-3"></i>
-                <h5 class="text-muted">No hay eventos disponibles</h5>
-                <p class="text-muted">No se encontraron clases con capacidad disponible en los próximos 30 días</p>
-            </div>
-        `;
-            return;
-        }
-
-        let html = '<div class="list-group">';
-        eventos.forEach(evento => {
-            const fecha = new Date(evento.fecha).toLocaleDateString('es-ES', {
-                weekday: 'long',
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-            });
-
-            const capacidadDisponible = (evento.capacidad_maxima || 15) - (evento.asistencias || 0);
-            const capacidadColor = capacidadDisponible > 5 ? 'success' : capacidadDisponible > 2 ? 'warning' : 'danger';
-
-            html += `
-            <div class="list-group-item">
-                <div class="d-flex justify-content-between align-items-start">
-                    <div class="flex-grow-1">
-                        <h6 class="mb-1 d-flex align-items-center">
-                            <div class="color-indicator me-2" style="background-color: ${evento.color}; width: 12px; height: 12px; border-radius: 50%;"></div>
-                            ${evento.titulo}
-                        </h6>
-                        <p class="mb-1 text-muted">
-                            <i class="fas fa-calendar me-2"></i>${fecha}
-                        </p>
-                        <p class="mb-1 text-muted">
-                            <i class="fas fa-clock me-2"></i>${evento.hora_inicio} - ${evento.hora_fin}
-                            <span class="ms-3">
-                                <i class="fas fa-user-tie me-1"></i>${evento.instructor}
-                            </span>
-                        </p>
-                        <small class="text-muted">
-                            <span class="badge bg-${capacidadColor}">
-                                <i class="fas fa-users me-1"></i>${evento.asistencias || 0}/${evento.capacidad_maxima || 15} inscritos
-                            </span>
-                            ${evento.precio > 0 ? `<span class="badge bg-info ms-2">${evento.precio}€</span>` : ''}
-                        </small>
-                    </div>
-                    <div class="ms-3">
-                        <button class="btn btn-success btn-sm" 
-                                onclick="inscribirAlumnoEnEvento(${alumnoId}, ${evento.id})"
-                                ${capacidadDisponible <= 0 ? 'disabled' : ''}>
-                            <i class="fas fa-plus"></i> Inscribir
-                        </button>
-                    </div>
-                </div>
-            </div>
-        `;
-        });
-        html += '</div>';
-
-        container.innerHTML = html;
-    }
-
-    function inscribirAlumnoEnEvento(alumnoId, eventoId) {
-        fetch('/api/evento/agregar-alumno', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                evento_id: eventoId,
-                alumno_id: alumnoId
-            })
-        })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    bootstrap.Modal.getInstance(document.getElementById('modalAgregarAClase')).hide();
-                    mostrarNotificacion('Alumno inscrito exitosamente en la clase', 'success');
-                    // Recargar asistencias si está visible
-                    if (document.getElementById('historialAsistencias').style.display !== 'none') {
-                        cargarAsistenciasAlumno(alumnoId);
-                    }
-                } else {
-                    mostrarNotificacion('Error: ' + data.message, 'error');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                mostrarNotificacion('Error de conexión', 'error');
-            });
-    }
-
-    function mostrarNotificacion(mensaje, tipo) {
-        const alertClass = tipo === 'success' ? 'alert-success' : 'alert-danger';
-        const icono = tipo === 'success' ? 'fa-check-circle' : 'fa-exclamation-triangle';
-
-        const alert = document.createElement('div');
-        alert.className = `alert ${alertClass} alert-dismissible fade show position-fixed`;
-        alert.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
-        alert.innerHTML = `
-        <i class="fas ${icono} me-2"></i>${mensaje}
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    `;
-
-        document.body.appendChild(alert);
-
-        setTimeout(() => {
-            if (alert.parentNode) {
-                alert.parentNode.removeChild(alert);
-            }
-        }, 5000);
-    }
-</script>
-
-<!-- Modal para Agregar a Clase -->
+<!-- Modal Agregar a Clase -->
 <div class="modal fade" id="modalAgregarAClase" tabindex="-1">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">
-                    <i class="fas fa-calendar-plus"></i> Agregar {{ alumno.nombre }} a una Clase
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+    <div class="modal-dialog">
+        <div class="modal-content shadow-lg border-0">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">Inscribir en Evento/Clase</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body">
-                <div class="mb-3">
-                    <p class="text-muted">
-                        <i class="fas fa-info-circle me-2"></i>
-                        Selecciona una clase de las próximas 4 semanas para inscribir al alumno.
-                        Solo se muestran clases con capacidad disponible.
-                    </p>
-                </div>
-                <div id="listaEventosDisponibles">
-                    <div class="text-center py-4">
-                        <div class="spinner-border text-primary" role="status">
-                            <span class="visually-hidden">Cargando...</span>
-                        </div>
-                        <p class="mt-2 text-muted">Cargando eventos disponibles...</p>
+            <div class="modal-body p-4">
+                <form id="formInscribir">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Fecha</label>
+                        <input type="date" class="form-control" id="fecha_inscripcion" value="{{ today.isoformat() }}"
+                            onchange="cargarEventosDisponibles()" required>
                     </div>
-                </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Seleccionar Actividad</label>
+                        <select class="form-select" id="actividad_selector" required>
+                            <option value="">Seleccione una fecha...</option>
+                        </select>
+                    </div>
+                </form>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                <a href="{{ url_for('classes.calendario_unificado') }}" class="btn btn-primary">
-                    <i class="fas fa-calendar-alt"></i> Ver Calendario Completo
-                </a>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary rounded-pill px-4"
+                    onclick="confirmarInscripcion()">Confirmar</button>
             </div>
         </div>
     </div>
 </div>
 
 <style>
-    .color-indicator {
-        display: inline-block;
-        flex-shrink: 0;
+    .avatar-large {
+        width: 80px;
+        height: 80px;
+        background: var(--primary-gradient);
+        border-radius: 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 2rem;
+        font-weight: bold;
     }
 
-    .list-group-item:hover {
-        background-color: #f8f9fa;
+    .bg-gradient-primary {
+        background: var(--primary-gradient);
     }
 
-    .badge {
-        font-size: 0.75em;
+    .bg-success-soft {
+        background-color: rgba(40, 167, 69, 0.1);
+    }
+
+    .bg-warning-soft {
+        background-color: rgba(255, 193, 7, 0.1);
+    }
+
+    .bg-danger-soft {
+        background-color: rgba(220, 53, 69, 0.1);
+    }
+
+    .bg-primary-soft {
+        background-color: rgba(106, 17, 203, 0.1);
+    }
+
+    .card {
+        border-radius: 1.25rem;
     }
 </style>
+
+<script>
+    function abrirModalAgregarAClase(alumnoId) {
+        window.currentAlumnoId = alumnoId;
+        const modal = new bootstrap.Modal(document.getElementById('modalAgregarAClase'));
+        modal.show();
+        cargarEventosDisponibles();
+    }
+
+    function cargarEventosDisponibles() {
+        const alumnoId = window.currentAlumnoId;
+        const selector = document.getElementById('actividad_selector');
+        const fecha = document.getElementById('fecha_inscripcion').value;
+
+        if (!fecha || !alumnoId) return;
+
+        selector.innerHTML = '<option value="">Cargando actividades...</option>';
+
+        // Usamos el endpoint correcto con guión y parámetros inicio/fin/alumno_id
+        fetch(`/api/eventos-disponibles?alumno_id=${alumnoId}&inicio=${fecha}&fin=${fecha}`)
+            .then(r => {
+                if (!r.ok) throw new Error('Error en la respuesta del servidor');
+                return r.json();
+            })
+            .then(data => {
+                selector.innerHTML = '<option value="">Seleccione una opción...</option>';
+                if (data.eventos && data.eventos.length > 0) {
+                    data.eventos.forEach(ev => {
+                        selector.innerHTML += `<option value="${ev.id}" data-type="${ev.type}">${ev.time} - ${ev.title}</option>`;
+                    });
+                } else {
+                    selector.innerHTML = '<option value="">No hay clases para este día</option>';
+                }
+            })
+            .catch(err => {
+                console.error('Error:', err);
+                selector.innerHTML = '<option value="">Error al cargar datos</option>';
+            });
+    }
+
+    function confirmarInscripcion() {
+        const selector = document.getElementById('actividad_selector');
+        const selected = selector.options[selector.selectedIndex];
+        const type = selected.dataset.type;
+        const id = selector.value;
+        const fecha = document.getElementById('fecha_inscripcion').value;
+
+        const payload = {
+            alumno_id: window.currentAlumnoId,
+            fecha: fecha
+        };
+
+        if (type === 'horario') payload.horario_id = id;
+        else payload.evento_id = id;
+
+        fetch('/api/evento/agregar-alumno', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            });
+    }
+</script>
 {% endblock %}

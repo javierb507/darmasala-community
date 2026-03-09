@@ -4,244 +4,176 @@
 {% block title %}Alumnos - Atma suddhi{% endblock %}
 
 {% block content %}
-<div class="row">
-    <div class="col-12">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2><i class="fas fa-users"></i> Alumnos</h2>
-            <a href="{{ url_for('students.nuevo_alumno') }}" class="btn btn-primary">
-                <i class="fas fa-plus"></i> Nuevo Alumno
-            </a>
-        </div>
-    </div>
-</div>
-
-<div class="row">
-    <div class="col-12">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="mb-0">Lista de Alumnos</h5>
-            </div>
-            <div class="card-body">
-                {% if alumnos %}
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h5><i class="fas fa-user-check text-success"></i> Alumnos Activos</h5>
-                    <a href="{{ url_for('students.alumnos_desactivados') }}" class="btn btn-outline-secondary btn-sm">
-                        <i class="fas fa-user-times"></i> Ver Desactivados
+<div class="container-fluid animate__animated animate__fadeIn">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="display-6 fw-bold text-primary mb-1"><i class="fas fa-users me-2"></i> Gestión de Alumnos
+                    </h2>
+                    <p class="text-muted">Administra la base de datos de practicantes y sus cuotas</p>
+                </div>
+                <div class="d-flex gap-2">
+                    <a href="{{ url_for('students.exportar_alumnos_excel') }}"
+                        class="btn btn-outline-success shadow-sm rounded-pill px-4">
+                        <i class="fas fa-file-excel me-2"></i> Exportar
+                    </a>
+                    <a href="{{ url_for('students.nuevo_alumno') }}"
+                        class="btn btn-primary shadow-sm rounded-pill px-4">
+                        <i class="fas fa-user-plus me-2"></i> Nuevo Alumno
                     </a>
                 </div>
-                <div class="table-responsive">
-                    <table class="table table-striped table-hover">
-                        <thead class="table-dark">
-                            <tr>
-                                <th>Alumno</th>
-                                <th>Contacto</th>
-                                <th>Tipo de Cuota</th>
-                                <th>Estado de Pagos</th>
-                                <th>Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for alumno in alumnos %}
-                            <tr class="clickable-row"
-                                data-href="{{ url_for('students.ver_alumno', alumno_id=alumno.id) }}"
-                                style="cursor: pointer;">
-                                <td>
-                                    <div class="d-flex align-items-center">
-                                        <div class="avatar-circle me-2">
-                                            {{ alumno.nombre[0] }}{{ alumno.apellido[0] }}
-                                        </div>
-                                        <div>
-                                            <strong>{{ alumno.nombre }} {{ alumno.apellido }}</strong>
-                                            <br>
-                                            <small class="text-muted">
-                                                {% if alumno.tipo_cuota.endswith('_bimensual') %}
-                                                <i class="fas fa-calendar-alt"></i> Bimensual
-                                                {% else %}
-                                                <i class="fas fa-calendar"></i> Mensual
-                                                {% endif %}
-                                            </small>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>
-                                    {% if alumno.dni %}
-                                    <div>
-                                        <i class="fas fa-id-card text-muted me-1"></i>
-                                        <small>{{ alumno.dni }}</small>
-                                    </div>
-                                    {% endif %}
-                                    <div>
-                                        <i class="fas fa-envelope text-muted me-1"></i>
-                                        <small>{{ alumno.email }}</small>
-                                    </div>
-                                    {% if alumno.telefono %}
-                                    <div>
-                                        <i class="fas fa-phone text-muted me-1"></i>
-                                        <small>{{ alumno.telefono }}</small>
-                                    </div>
-                                    {% endif %}
-                                </td>
-                                <td>
-                                    <span class="badge bg-info">{{ alumno.get_tipo_cuota_display() }}</span>
-                                    <br>
-                                    <small class="text-muted">{{ alumno.get_precio_cuota() }}€/mes</small>
-                                </td>
-                                <td>
-                                    {{ render_payment_calendar(alumno, calendario, current_year) }}
-                                </td>
-                                <td>
-                                    <div class="btn-group-vertical btn-group-sm" role="group">
-                                        <a href="{{ url_for('students.ver_alumno', alumno_id=alumno.id) }}"
-                                            class="btn btn-outline-primary btn-sm" title="Ver detalles">
-                                            <i class="fas fa-eye"></i>
-                                        </a>
-                                        <a href="{{ url_for('students.editar_alumno', alumno_id=alumno.id) }}"
-                                            class="btn btn-outline-warning btn-sm" title="Editar">
-                                            <i class="fas fa-edit"></i>
-                                        </a>
-                                        <a href="{{ url_for('finance.agregar_pago', alumno_id=alumno.id) }}"
-                                            class="btn btn-outline-success btn-sm" title="Agregar pago">
-                                            <i class="fas fa-plus"></i>
-                                        </a>
-                                        <a href="{{ url_for('students.eliminar_alumno', alumno_id=alumno.id) }}"
-                                            class="btn btn-outline-danger btn-sm" title="Deshabilitar"
-                                            onclick="return confirm('¿Estás seguro de que quieres deshabilitar este alumno?')">
-                                            <i class="fas fa-user-times"></i>
-                                        </a>
-                                    </div>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
             </div>
-            {% else %}
-            <div class="text-center py-4">
-                <i class="fas fa-users fa-3x text-muted mb-3"></i>
-                <p class="text-muted">No hay alumnos registrados.</p>
-                <a href="{{ url_for('students.nuevo_alumno') }}" class="btn btn-primary">
-                    <i class="fas fa-plus"></i> Agregar Primer Alumno
-                </a>
-            </div>
-            {% endif %}
         </div>
     </div>
-</div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm overflow-hidden">
+                <div class="card-header bg-white py-3 border-0 d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0 fw-bold"><i class="fas fa-list text-primary me-2"></i> Listado Activo</h5>
+                    <a href="{{ url_for('students.alumnos_desactivados') }}"
+                        class="btn btn-light btn-sm rounded-pill px-3">
+                        <i class="fas fa-user-slash me-1"></i> Ver Inactivos
+                    </a>
+                </div>
+                <div class="card-body p-0">
+                    {% if alumnos %}
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="bg-light text-muted small text-uppercase">
+                                <tr>
+                                    <th class="ps-4">Alumno</th>
+                                    <th>Contacto (Email / Móvil)</th>
+                                    <th>Cuota y Tarifa</th>
+                                    <th>Estado de Pagos</th>
+                                    <th class="text-center">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for alumno in alumnos %}
+                                <tr class="clickable-row"
+                                    data-href="{{ url_for('students.ver_alumno', alumno_id=alumno.id) }}">
+                                    <td class="ps-4">
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar-sm me-3">
+                                                {{ alumno.nombre[0] }}{{ alumno.apellido[0] }}
+                                            </div>
+                                            <div>
+                                                <div class="fw-bold text-dark">{{ alumno.nombre }} {{ alumno.apellido }}
+                                                </div>
+                                                <small class="text-muted">Nacido: {{
+                                                    alumno.fecha_nacimiento.strftime('%d/%m/%Y') if
+                                                    alumno.fecha_nacimiento else 'N/D' }}</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex flex-column">
+                                            <span class="small text-primary mb-1"><i
+                                                    class="fas fa-envelope me-1 opacity-50"></i> {{ alumno.email
+                                                }}</span>
+                                            <span class="small text-muted"><i
+                                                    class="fas fa-mobile-alt me-1 opacity-50"></i> {{ alumno.telefono or
+                                                'N/D' }}</span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge rounded-pill bg-primary-soft text-primary mb-1">{{
+                                            alumno.get_tipo_cuota_display() }}</span>
+                                        <div class="small fw-bold">€{{ "%.2f"|format(alumno.get_precio_cuota()) }}</div>
+                                    </td>
+                                    <td class="payment-cell">
+                                        {{ render_payment_calendar(alumno, calendario, current_year) }}
+                                    </td>
+                                    <td class="text-center pe-4">
+                                        <div class="btn-group shadow-sm rounded-pill overflow-hidden">
+                                            <a href="{{ url_for('students.ver_alumno', alumno_id=alumno.id) }}"
+                                                class="btn btn-white btn-sm px-3" title="Ver ficha">
+                                                <i class="fas fa-eye text-primary"></i>
+                                            </a>
+                                            <a href="{{ url_for('students.editar_alumno', alumno_id=alumno.id) }}"
+                                                class="btn btn-white btn-sm px-3" title="Editar">
+                                                <i class="fas fa-edit text-warning"></i>
+                                            </a>
+                                            <a href="{{ url_for('finance.agregar_pago', alumno_id=alumno.id) }}"
+                                                class="btn btn-white btn-sm px-3" title="Cobrar">
+                                                <i class="fas fa-euro-sign text-success"></i>
+                                            </a>
+                                            <a href="{{ url_for('students.eliminar_alumno', alumno_id=alumno.id, confirm=1) }}"
+                                                class="btn btn-white btn-sm px-3" title="Desactivar"
+                                                onclick="return confirm('¿Estás seguro de que quieres desactivar a este alumno? Dejará de aparecer en la lista activa.')">
+                                                <i class="fas fa-trash-alt text-danger"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="p-5 text-center">
+                        <i class="fas fa-users fa-4x text-light mb-4"></i>
+                        <h4 class="text-muted">No hay alumnos registrados aún</h4>
+                        <a href="{{ url_for('students.nuevo_alumno') }}" class="btn btn-primary mt-3">Comenzar
+                            registro</a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <style>
-    .avatar-circle {
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        background: linear-gradient(135deg, var(--primary-purple), var(--accent-yellow));
+    .avatar-sm {
+        width: 42px;
+        height: 42px;
+        background: var(--primary-gradient);
+        border-radius: 12px;
         display: flex;
         align-items: center;
         justify-content: center;
         color: white;
-        font-size: 16px;
+        font-weight: bold;
+        font-size: 0.9rem;
     }
 
-    .avatar-circle-inactive {
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        background: linear-gradient(135deg, #6c757d, #adb5bd);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
-        font-size: 16px;
-        opacity: 0.7;
-    }
-
-    .payment-status {
-        min-width: 200px;
-    }
-
-    .monthly-payments {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 2px;
-    }
-
-    .monthly-payments .badge {
-        font-size: 0.65rem;
-        padding: 0.25em 0.35em;
-        min-width: 35px;
-        text-align: center;
-        font-weight: 500;
+    .clickable-row {
+        cursor: pointer;
+        transition: all 0.2s;
     }
 
     .clickable-row:hover {
-        background-color: #f8f9fa !important;
-        transform: translateY(-1px);
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        transition: all 0.2s ease;
+        background-color: #f8f9ff !important;
     }
 
-    .clickable-row:hover td {
-        background-color: transparent !important;
+    .bg-primary-soft {
+        background-color: rgba(106, 17, 203, 0.1);
     }
 
-    .btn-group-vertical .btn {
-        margin-bottom: 2px;
-        width: 32px;
-        height: 32px;
-        padding: 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+    .btn-white {
+        background-color: white;
+        border: 1px solid #eee;
     }
 
-    .table th {
-        border-top: none;
-        font-weight: 600;
+    .btn-white:hover {
+        background-color: #f8f9fa;
+        border-color: #ddd;
     }
 
-    .table td {
-        vertical-align: middle;
+    .payment-cell {
+        min-width: 280px;
     }
 </style>
 
 <script>
-    function reactivarAlumno(alumnoId) {
-        if (confirm('¿Estás seguro de que quieres reactivar este alumno?')) {
-            fetch(`/alumnos/${alumnoId}/reactivar`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                }
-            })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        location.reload();
-                    } else {
-                        alert('Error al reactivar el alumno');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('Error al reactivar el alumno');
-                });
-        }
-    }
-
-    // Hacer las filas clickeables
     document.addEventListener('DOMContentLoaded', function () {
-        const rows = document.querySelectorAll('.clickable-row');
-        rows.forEach(row => {
+        document.querySelectorAll('.clickable-row').forEach(row => {
             row.addEventListener('click', function (e) {
-                // No redirigir si se hace click en un botón o enlace
-                if (e.target.closest('a, button')) {
-                    return;
-                }
-                const href = this.getAttribute('data-href');
-                if (href) {
-                    window.location.href = href;
-                }
+                if (e.target.closest('a, button, .payment-cell')) return;
+                window.location.href = this.dataset.href;
             });
         });
     });

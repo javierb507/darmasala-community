@@ -15,19 +15,20 @@
 
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label for="proveedor_id" class="form-label">Proveedor *</label>
-                            <select class="form-select" id="proveedor_id" name="proveedor_id" required>
-                                <option value="">Seleccione un proveedor...</option>
+                            <label for="proveedor_id" class="form-label">Acreedor / Origen del Gasto</label>
+                            <select class="form-select mb-2" id="proveedor_id" name="proveedor_id"
+                                onchange="toggleProveedorLibre()">
+                                <option value="">+ Especificar nombre manualmente...</option>
                                 {% for proveedor in proveedores %}
                                 <option value="{{ proveedor.id }}">{{ proveedor.nombre }} ({{ proveedor.cif_nif }})
                                 </option>
                                 {% endfor %}
                             </select>
-                            <small class="form-text text-muted">
-                                <a href="{{ url_for('finance.nuevo_proveedor') }}" target="_blank">
-                                    <i class="fas fa-plus"></i> Crear nuevo proveedor
-                                </a>
-                            </small>
+                            <div id="div_proveedor_libre" style="display: block;">
+                                <input type="text" class="form-control" id="nombre_proveedor_libre"
+                                    name="nombre_proveedor_libre"
+                                    placeholder="Nombre (ej: Endesa, Movistar, Alquiler...)">
+                            </div>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label for="categoria_id" class="form-label">Categoría de Gasto *</label>
@@ -178,7 +179,20 @@
         }
     });
 
+    function toggleProveedorLibre() {
+        const val = document.getElementById('proveedor_id').value;
+        const div = document.getElementById('div_proveedor_libre');
+        if (val === "") {
+            div.style.display = 'block';
+        } else {
+            div.style.display = 'none';
+        }
+    }
+
     // Calcular total al cargar la página
-    document.addEventListener('DOMContentLoaded', calcularTotal);
+    document.addEventListener('DOMContentLoaded', () => {
+        calcularTotal();
+        toggleProveedorLibre();
+    });
 </script>
 {% endblock %}

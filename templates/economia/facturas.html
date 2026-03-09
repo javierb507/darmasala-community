@@ -9,10 +9,7 @@
             <h2><i class="fas fa-file-invoice-dollar"></i> Facturas de Proveedores</h2>
             <div>
                 <a href="{{ url_for('finance.nueva_factura') }}" class="btn btn-success">
-                    <i class="fas fa-plus"></i> Nueva Factura
-                </a>
-                <a href="{{ url_for('finance.proveedores') }}" class="btn btn-outline-primary">
-                    <i class="fas fa-building"></i> Proveedores
+                    <i class="fas fa-plus"></i> Registrar Gasto
                 </a>
                 <a href="{{ url_for('finance.economia_historico') }}" class="btn btn-outline-secondary">
                     <i class="fas fa-arrow-left"></i> Volver
@@ -44,7 +41,8 @@
                             {% for factura in facturas %}
                             <tr>
                                 <td><strong>{{ factura.numero_factura }}</strong></td>
-                                <td>{{ factura.proveedor.nombre }}</td>
+                                <td>{{ factura.proveedor.nombre if factura.proveedor else (factura.nombre_proveedor or
+                                    'Gasto Vario') }}</td>
                                 <td>
                                     <span class="badge badge-categoria" data-color="{{ factura.categoria.color }}">
                                         {{ factura.categoria.nombre }}

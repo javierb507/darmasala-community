@@ -61,7 +61,7 @@
                     </a>
                 </li>
                 <li class="{% if 'finance' in request.endpoint %}active{% endif %}">
-                    <a href="{{ url_for('finance.economia_historico') }}">
+                    <a href="{{ url_for('finance.economia') }}">
                         <i class="fas fa-chart-line"></i> <span>Economía</span>
                     </a>
                 </li>
@@ -103,9 +103,16 @@
                 </div>
 
                 <div class="user-info d-flex align-items-center">
+                    {% if version_info %}
+                    <div class="build-info me-3">
+                        <span class="d-block text-uppercase small" style="letter-spacing: 0.5px;">Desplegado:</span>
+                        <span class="version-tag">v{{ version_info.version }}</span> - {{ version_info.build_date }}
+                    </div>
+                    {% endif %}
+
                     {% if session.get('username') %}
                     <a href="{{ url_for('users.propio_perfil') }}"
-                        class="bg-light rounded-pill px-3 py-2 border d-flex align-items-center shadow-sm text-decoration-none">
+                        class="bg-light rounded-pill px-3 py-2 border d-flex align-items-center shadow-sm text-decoration-none transition-all">
                         <i class="fas fa-user-circle text-primary me-2 fs-5"></i>
                         <span class="small fw-bold text-dark">{{ session.username }}</span>
                     </a>

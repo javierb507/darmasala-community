@@ -1,4 +1,6 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify
+from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify, Response
+import io
+import pandas as pd
 from datetime import datetime, date, timedelta
 from models import db, Alumno, Pago, Asistencia
 from utils.auth_utils import login_required
@@ -27,16 +29,37 @@ def alumnos_desactivados():
 def nuevo_alumno():
     if request.method == 'POST':
         try:
+            # Verificar si ya existe un alumno con ese DNI o Email para dar un mensaje más claro
+            dni = request.form.get('dni')
+            email = request.form.get('email')
+            
+            if dni and Alumno.query.filter_by(dni=dni).first():
+                flash(f'Ya existe un alumno con el DNI {dni}.', 'error')
+                return render_template('nuevo_alumno.html')
+            
+            if email and Alumno.query.filter_by(email=email).first():
+                flash(f'Ya existe un alumno con el email {email}.', 'error')
+                return render_template('nuevo_alumno.html')
+
             matricula_pagada = 'matricula_pagada' in request.form
             fecha_matricula = date.today() if matricula_pagada else None
             
+            # Formatear fecha de nacimiento si viene
+            fecha_nac_str = request.form.get('fecha_nacimiento')
+            fecha_nacimiento = None
+            if fecha_nac_str:
+                try:
+                    fecha_nacimiento = datetime.strptime(fecha_nac_str, '%Y-%m-%d').date()
+                except ValueError:
+                    pass # O manejar error si el formato es inválido
+
             alumno = Alumno(
                 nombre=request.form['nombre'],
                 apellido=request.form['apellido'],
-                dni=request.form.get('dni'),
-                email=request.form['email'],
+                dni=dni,
+                email=email,
                 telefono=request.form.get('telefono'),
-                fecha_nacimiento=datetime.strptime(request.form['fecha_nacimiento'], '%Y-%m-%d').date() if request.form.get('fecha_nacimiento') else None,
+                fecha_nacimiento=fecha_nacimiento,
                 direccion=request.form.get('direccion'),
                 condiciones_medicas=request.form.get('condiciones_medicas'),
                 tipo_cuota=request.form.get('tipo_cuota', '1_clase_semanal'),
@@ -108,6 +131,7 @@ def editar_alumno(alumno_id):
             alumno.direccion = request.form.get('direccion')
             alumno.condiciones_medicas = request.form.get('condiciones_medicas')
             alumno.tipo_cuota = request.form.get('tipo_cuota', '1_clase_semanal')
+            alumno.activo = 'activo' in request.form
             
             db.session.commit()
             flash('¡Alumno actualizado exitosamente!', 'success')
@@ -197,3 +221,56 @@ def api_alumnos_disponibles():
         })
     except Exception as e:
         return jsonify({'success': False, 'message': str(e)}), 500
+@student_bp.route('/alumnos/exportar')
+@login_required
+def exportar_alumnos_excel():
+    """Exporta la lista de alumnos a un archivo Excel"""
+    try:
+        alumnos_list = Alumno.query.all()
+        
+        # Preparar datos para el DataFrame
+        data = []
+        for a in alumnos_list:
+            data.append({
+                'ID': a.id,
+                'Nombre': a.nombre,
+                'Apellido': a.apellido,
+                'DNI/NIE': a.dni,
+                'Email': a.email,
+                'Teléfono': a.telefono,
+                'Fecha Nacimiento': a.fecha_nacimiento.strftime('%d/%m/%Y') if a.fecha_nacimiento else '',
+                'Dirección': a.direccion,
+                'Condiciones Médicas': a.condiciones_medicas,
+                'Cuota': a.get_tipo_cuota_display(),
+                'Precio Cuota (€)': a.get_precio_cuota(),
+                'Matrícula Pagada': 'Sí' if a.matricula_pagada else 'No',
+                'Fecha Matrícula': a.fecha_matricula.strftime('%d/%m/%Y') if a.fecha_matricula else '',
+                'Estado': 'Activo' if a.activo else 'Inactivo',
+                'Fecha Registro': a.fecha_registro.strftime('%d/%m/%Y %H:%M')
+            })
+        
+        df = pd.DataFrame(data)
+        
+        # Crear un buffer en memoria para el archivo Excel
+        output = io.BytesIO()
+        with pd.ExcelWriter(output, engine='openpyxl') as writer:
+            df.to_excel(writer, index=False, sheet_name='Alumnos')
+            
+            # Ajustar el ancho de las columnas (opcional pero profesional)
+            worksheet = writer.sheets['Alumnos']
+            for i, col in enumerate(df.columns):
+                # Asegurar que convertimos a string y manejamos posibles valores nulos
+                max_len = df[col].astype(str).apply(len).max()
+                column_len = max(max_len, len(col)) + 2
+                worksheet.column_dimensions[chr(65 + i)].width = column_len
+                
+        output.seek(0)
+        
+        return Response(
+            output,
+            mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            headers={"Content-disposition": f"attachment; filename=Alumnos_AtmaSuddhi_{datetime.now().strftime('%Y%m%d')}.xlsx"}
+        )
+    except Exception as e:
+        flash(f'Error al exportar Excel: {str(e)}', 'error')
+        return redirect(url_for('students.alumnos'))

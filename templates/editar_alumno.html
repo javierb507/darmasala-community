@@ -5,99 +5,119 @@
 {% block content %}
 <div class="container mt-4">
     <div class="row">
-        <div class="col-md-8 mx-auto">
-            <div class="card">
-                <div class="card-header">
-                    <h4><i class="fas fa-user-edit"></i> Editar Alumno - {{ alumno.nombre }} {{ alumno.apellido }}</h4>
+        <div class="col-md-10 mx-auto">
+            <div class="card premium-card border-0 shadow-sm animate__animated animate__fadeIn">
+                <div class="card-header bg-transparent border-0 pt-4 pb-0">
+                    <h3 class="premium-title text-primary"><i class="fas fa-user-edit"></i> Editar Alumno</h3>
+                    <p class="text-muted small">Actualiza la información de {{ alumno.nombre }} {{ alumno.apellido }}
+                    </p>
                 </div>
-                <div class="card-body">
+                <div class="card-body p-4">
                     <form method="POST">
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="nombre" class="form-label">Nombre *</label>
-                                    <input type="text" class="form-control" id="nombre" name="nombre" value="{{ alumno.nombre }}" required>
-                                </div>
+                        <!-- Sección 1: Información Personal -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="section-title"><i class="fas fa-id-card"></i> Información Personal</h5>
+                                <hr class="mt-2 mb-3 opacity-25">
                             </div>
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="apellido" class="form-label">Apellido *</label>
-                                    <input type="text" class="form-control" id="apellido" name="apellido" value="{{ alumno.apellido }}" required>
-                                </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="nombre" class="form-label">Nombre *</label>
+                                <input type="text" class="form-control" id="nombre" name="nombre"
+                                    value="{{ alumno.nombre }}" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="apellido" class="form-label">Apellido *</label>
+                                <input type="text" class="form-control" id="apellido" name="apellido"
+                                    value="{{ alumno.apellido }}" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="dni" class="form-label">DNI/NIE</label>
+                                <input type="text" class="form-control" id="dni" name="dni"
+                                    value="{{ alumno.dni or '' }}" placeholder="12345678A">
+                                <div class="form-text small text-muted">Ejemplo: 12345678A</div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="fecha_nacimiento" class="form-label">Fecha de Nacimiento</label>
+                                <input type="date" class="form-control" id="fecha_nacimiento" name="fecha_nacimiento"
+                                    value="{{ alumno.fecha_nacimiento.strftime('%Y-%m-%d') if alumno.fecha_nacimiento else '' }}">
+                                <small class="text-muted">Acepta entrada manual o selector</small>
                             </div>
                         </div>
-                        
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="email" class="form-label">Email *</label>
-                                    <input type="email" class="form-control" id="email" name="email" value="{{ alumno.email }}" required>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="telefono" class="form-label">Teléfono</label>
-                                    <input type="tel" class="form-control" id="telefono" name="telefono" value="{{ alumno.telefono or '' }}">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label for="dni" class="form-label">DNI/NIE</label>
-                            <input type="text" class="form-control" id="dni" name="dni"
-                                   value="{{ alumno.dni or '' }}" placeholder="12345678A">
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label for="email" class="form-label">Email *</label>
-                            <input type="email" class="form-control" id="email" name="email"
-                                   value="{{ alumno.email }}" required>
-                        </div>
-                    </div>
 
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label for="telefono" class="form-label">Teléfono</label>
-                            <input type="tel" class="form-control" id="telefono" name="telefono"
-                                   value="{{ alumno.telefono or '' }}">
+                        <!-- Sección 2: Contacto -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="section-title"><i class="fas fa-envelope"></i> Contacto y Localización</h5>
+                                <hr class="mt-2 mb-3 opacity-25">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="email" class="form-label">Email *</label>
+                                <input type="email" class="form-control" id="email" name="email"
+                                    value="{{ alumno.email }}" required placeholder="ejemplo@correo.com">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="telefono" class="form-label">Teléfono</label>
+                                <input type="tel" class="form-control" id="telefono" name="telefono"
+                                    value="{{ alumno.telefono or '' }}" placeholder="600000000">
+                            </div>
+                            <div class="col-12 mb-3">
+                                <label for="direccion" class="form-label">Dirección</label>
+                                <textarea class="form-control" id="direccion" name="direccion" rows="2"
+                                    placeholder="Calle, Número, Piso...">{{ alumno.direccion or '' }}</textarea>
+                            </div>
                         </div>
-                        <div class="col-md-6 mb-3">
-                            <label for="fecha_nacimiento" class="form-label">Fecha de Nacimiento</label>
-                            <input type="date" class="form-control" id="fecha_nacimiento" name="fecha_nacimiento"
-                                   value="{{ alumno.fecha_nacimiento.strftime('%Y-%m-%d') if alumno.fecha_nacimiento else '' }}">
+
+                        <!-- Sección 3: Cuota y Salud -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="section-title"><i class="fas fa-heartbeat"></i> Otros Detalles</h5>
+                                <hr class="mt-2 mb-3 opacity-25">
+                            </div>
+                            <div class="col-md-12 mb-3">
+                                <label for="tipo_cuota" class="form-label">Tipo de Cuota *</label>
+                                <select class="form-select" id="tipo_cuota" name="tipo_cuota" required>
+                                    <option value="1_clase_semanal" {% if alumno.tipo_cuota=='1_clase_semanal'
+                                        %}selected{% endif %}>1 clase por semana</option>
+                                    <option value="2_clases_semanal" {% if alumno.tipo_cuota=='2_clases_semanal'
+                                        %}selected{% endif %}>2 clases por semana</option>
+                                    <option value="clase_suelta" {% if alumno.tipo_cuota=='clase_suelta' %}selected{%
+                                        endif %}>Clase suelta</option>
+                                    <option value="plana" {% if alumno.tipo_cuota=='plana' %}selected{% endif %}>Tarifa
+                                        plana</option>
+                                    <option value="yogaterapia_individual" {% if
+                                        alumno.tipo_cuota=='yogaterapia_individual' %}selected{% endif %}>Yogaterapia
+                                        individual</option>
+                                </select>
+                            </div>
+                            <div class="col-md-12 mb-3">
+                                <div class="form-check form-switch p-3 border rounded shadow-sm">
+                                    <input class="form-check-input ms-0" type="checkbox" id="activo" name="activo" {% if
+                                        alumno.activo %}checked{% endif %}>
+                                    <label class="form-check-label fw-bold ms-2" for="activo">
+                                        <i class="fas fa-toggle-on text-success me-2"></i> Alumno Activo
+                                    </label>
+                                    <div class="form-text small opacity-75 ms-4">Desmarca para archivar alumno</div>
+                                </div>
+                            </div>
+                            <div class="col-12 mb-3">
+                                <label for="condiciones_medicas" class="form-label">Condiciones Médicas</label>
+                                <textarea class="form-control" id="condiciones_medicas" name="condiciones_medicas"
+                                    rows="3"
+                                    placeholder="Lesiones, alergias o condiciones que los instructores deban conocer...">{{ alumno.condiciones_medicas or '' }}</textarea>
+                            </div>
                         </div>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label for="direccion" class="form-label">Dirección</label>
-                        <textarea class="form-control" id="direccion" name="direccion" rows="3">{{ alumno.direccion or '' }}</textarea>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label for="tipo_cuota" class="form-label">Tipo de Cuota *</label>
-                        <select class="form-select" id="tipo_cuota" name="tipo_cuota" required>
-                            <option value="1_clase" {% if alumno.tipo_cuota == '1_clase' %}selected{% endif %}>1 clase por semana</option>
-                            <option value="2_clases" {% if alumno.tipo_cuota == '2_clases' %}selected{% endif %}>2 clases por semana</option>
-                            <option value="3_clases" {% if alumno.tipo_cuota == '3_clases' %}selected{% endif %}>3 clases por semana</option>
-                        </select>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label for="condiciones_medicas" class="form-label">Condiciones Médicas</label>
-                        <textarea class="form-control" id="condiciones_medicas" name="condiciones_medicas" rows="3" 
-                                  placeholder="Por favor, lista cualquier condición médica o lesión que los instructores deban conocer...">{{ alumno.condiciones_medicas or '' }}</textarea>
-                    </div>
-                    
-                    <div class="d-flex justify-content-between">
-                        <a href="{{ url_for('students.ver_alumno', alumno_id=alumno.id) }}" class="btn btn-secondary">
-                            <i class="fas fa-arrow-left"></i> Cancelar
-                        </a>
-                        <button type="submit" class="btn btn-success">
-                            <i class="fas fa-save"></i> Actualizar Alumno
-                        </button>
-                    </div>
-                </form>
+
+                        <div class="d-flex justify-content-between pt-3 border-top">
+                            <a href="{{ url_for('students.ver_alumno', alumno_id=alumno.id) }}"
+                                class="btn btn-premium-secondary px-4">
+                                <i class="fas fa-times me-2"></i> Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-premium px-5">
+                                <i class="fas fa-save me-2"></i> Guardar Cambios
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
     </div>

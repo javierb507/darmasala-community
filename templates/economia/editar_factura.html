@@ -34,9 +34,11 @@
                         </div>
                         <div class="col-md-6">
                             <div class="mb-3">
-                                <label for="proveedor_id" class="form-label">Proveedor *</label>
-                                <select class="form-select" id="proveedor_id" name="proveedor_id" required>
-                                    <option value="">Seleccionar proveedor...</option>
+                                <label for="proveedor_id" class="form-label">Acreedor / Origen del Gasto</label>
+                                <select class="form-select mb-2" id="proveedor_id" name="proveedor_id"
+                                    onchange="toggleProveedorLibre()">
+                                    <option value="" {% if not factura.proveedor_id %}selected{% endif %}>+ Especificar
+                                        nombre manualmente...</option>
                                     {% for proveedor in proveedores %}
                                     <option value="{{ proveedor.id }}" {% if proveedor.id==factura.proveedor_id
                                         %}selected{% endif %}>
@@ -44,6 +46,12 @@
                                     </option>
                                     {% endfor %}
                                 </select>
+                                <div id="div_proveedor_libre"
+                                    style="display: {% if not factura.proveedor_id %}block{% else %}none{% endif %};">
+                                    <input type="text" class="form-control" id="nombre_proveedor_libre"
+                                        name="nombre_proveedor_libre" value="{{ factura.nombre_proveedor or '' }}"
+                                        placeholder="Nombre (ej: Endesa, Alquiler...)">
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -257,9 +265,20 @@
         document.getElementById('display_con_iva').textContent = importeConIva.toFixed(2) + '€';
     }
 
+    function toggleProveedorLibre() {
+        const val = document.getElementById('proveedor_id').value;
+        const div = document.getElementById('div_proveedor_libre');
+        if (val === "") {
+            div.style.display = 'block';
+        } else {
+            div.style.display = 'none';
+        }
+    }
+
     // Calcular total al cargar la página
     document.addEventListener('DOMContentLoaded', function () {
         calcularTotal();
+        toggleProveedorLibre();
     });
 </script>
 {% endblock %}

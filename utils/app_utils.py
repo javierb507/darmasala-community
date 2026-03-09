@@ -63,14 +63,45 @@ def obtener_sutra_semanal():
 def obtener_proximas_citas(limite=5):
     """Obtener las próximas citas individuales para el dashboard"""
     hoy = datetime.now().date()
-    proximas = SesionYogaterapia.query.filter(
-        SesionYogaterapia.fecha_sesion >= hoy
-    ).order_by(
-        SesionYogaterapia.fecha_sesion.asc(),
-        SesionYogaterapia.hora_inicio.asc()
-    ).limit(limite).all()
     
-    return proximas
+    from models import EventoCalendario
+    
+    # 1. Citas heredadas (SesionYogaterapia)
+    proximas_yogaterapia = SesionYogaterapia.query.filter(
+        SesionYogaterapia.fecha_sesion >= hoy
+    ).all()
+    
+    # 2. Citas unificadas (EventoCalendario puntuales)
+    hoy_dt = datetime.combine(hoy, datetime.min.time())
+    proximas_evento = EventoCalendario.query.filter(
+        EventoCalendario.fecha_inicio >= hoy_dt,
+        EventoCalendario.activo == True
+    ).all()
+    
+    citas_combinadas = []
+    
+    for s in proximas_yogaterapia:
+        citas_combinadas.append({
+            'id': s.id,
+            'is_evento': False,
+            'alumno_nombre': f"{s.alumno.nombre} {s.alumno.apellido}" if s.alumno else "Desconocido",
+            'fecha_sesion': s.fecha_sesion,
+            'hora_inicio': s.hora_inicio
+        })
+        
+    for e in proximas_evento:
+        citas_combinadas.append({
+            'id': e.id,
+            'is_evento': True,
+            'alumno_nombre': e.titulo,
+            'fecha_sesion': e.fecha_inicio.date(),
+            'hora_inicio': e.fecha_inicio.time()
+        })
+        
+    # Ordenar por fecha y hora
+    citas_combinadas.sort(key=lambda x: (x['fecha_sesion'], x['hora_inicio'] if x['hora_inicio'] else datetime.min.time()))
+    
+    return citas_combinadas[:limite]
 
 def verificar_conflicto_horario(fecha, hora_inicio, hora_fin, sesion_id=None):
     """Verificar si hay conflicto de horarios en una fecha específica"""

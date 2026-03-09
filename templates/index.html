@@ -12,7 +12,7 @@
             <h2 class="animate-fade-in" style="font-size: 1.8rem; color: var(--primary-color);">
                 Bienvenido de nuevo, {{ session.username }}
             </h2>
-            <p class="text-muted">Esto es lo que está sucediendo en tu escuela hoy.</p>
+            <p class="text-muted small">Esto es lo que está sucediendo en tu escuela hoy.</p>
         </div>
     </div>
 
@@ -43,11 +43,16 @@
         <div class="col-md-4">
             <div class="card stat-card animate-fade-in" style="animation-delay: 0.3s;">
                 <div class="stat-icon success">
-                    <i class="fas fa-euro-sign"></i>
+                    <i class="fas fa-user-check"></i>
                 </div>
                 <div>
-                    <h3 class="mb-0">€ --</h3>
-                    <span class="text-muted small">Ingresos de este mes</span>
+                    <h3 class="mb-0">{{ asistencias_semana }}</h3>
+                    <span class="text-muted small">Asistencias esta semana</span>
+                    <div
+                        class="small {% if cambio_asistencia >= 0 %}text-success{% else %}text-danger{% endif %} fw-bold mt-1">
+                        <i class="fas fa-arrow-{% if cambio_asistencia >= 0 %}up{% else %}down{% endif %} me-1"></i>
+                        {{ cambio_asistencia }}% vs semana pasada
+                    </div>
                 </div>
             </div>
         </div>
@@ -59,7 +64,7 @@
             <!-- Sutra of the Week -->
             {% if sutra_semanal %}
             <div class="card card-gold-accent mb-4 animate-fade-in" style="animation-delay: 0.4s;">
-                <div class="card-header d-flex justify-content-between align-items-center">
+                <div class="card-header bg-transparent border-0 d-flex justify-content-between align-items-center">
                     <h5 class="mb-0 text-primary"><i class="fas fa-om me-2"></i> Sutra de la Semana</h5>
                     <span class="badge bg-gold text-dark rounded-pill shadow-sm px-3">{{ sutra_semanal.numero }}</span>
                 </div>
@@ -77,38 +82,60 @@
             {% endif %}
 
             <!-- Today's Sessions -->
-            <div class="card mb-4 animate-fade-in" style="animation-delay: 0.5s;">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0 text-primary"><i class="fas fa-clock me-2"></i> Sesiones para Hoy</h5>
-                    <a href="{{ url_for('classes.calendario_unificado') }}" class="btn btn-sm btn-outline-primary">Ver
-                        Calendario</a>
+            <div class="card mb-4 animate-fade-in border-0 shadow-sm" style="animation-delay: 0.5s;">
+                <div class="card-header bg-transparent border-0 d-flex justify-content-between align-items-center">
+                    <div class="d-flex align-items-center">
+                        <h5 class="mb-0 text-primary me-3"><i class="fas fa-clock me-2"></i> Sesiones</h5>
+                        <input type="date" class="form-control form-control-sm rounded-pill shadow-sm px-3"
+                            id="dashboard-date" value="{{ today.strftime('%Y-%m-%d') }}"
+                            onchange="location.href='?fecha=' + this.value"
+                            style="width: auto; border-color: var(--primary-light); background-color: #f8f9ff;">
+                    </div>
+                    <a href="{{ url_for('classes.calendario_unificado') }}"
+                        class="btn btn-sm btn-outline-primary rounded-pill">Ver Calendario</a>
                 </div>
                 <div class="card-body">
                     {% if sesiones_hoy %}
                     <div class="list-group list-group-flush">
                         {% for sesion in sesiones_hoy %}
-                        <div class="list-group-item px-0 py-3 border-bottom">
-                            <div class="d-flex w-100 justify-content-between align-items-center">
+                        <div class="list-group-item px-0 py-3 border-bottom list-group-item-action border-0 mb-2 rounded-3 shadow-hover transition-all"
+                            style="cursor: pointer; border-left: 5px solid {{ sesion.color }} !important; background: #fff;">
+                            <div class="d-flex w-100 justify-content-between align-items-center ps-3 pe-2">
                                 <div class="d-flex align-items-center">
-                                    <div class="me-3 p-2 rounded bg-light text-center" style="min-width: 65px;">
-                                        <div class="fw-bold text-primary">{{ sesion.fecha_inicio.strftime('%H:%M') }}
-                                        </div>
-                                        <div class="small text-muted">{{ sesion.tipo|capitalize }}</div>
+                                    <div class="me-3 p-2 rounded text-center"
+                                        style="min-width: 70px; background-color: {{ sesion.color }}15;">
+                                        <div class="fw-bold" style="color: {{ sesion.color }};">{{
+                                            sesion.hora_inicio.strftime('%H:%M') }}</div>
+                                        <div class="small text-muted" style="font-size: 0.7rem;">{{
+                                            sesion.tipo|capitalize }}</div>
                                     </div>
                                     <div>
                                         <h6 class="mb-1 fw-bold">{{ sesion.titulo }}</h6>
                                         <p class="mb-0 small text-muted">
-                                            <i class="fas fa-user-instructor me-1"></i> {{ sesion.instructor }}
-                                            {% if sesion.alumno %}
-                                            <i class="fas fa-user-graduate ms-2 me-1"></i> {{ sesion.alumno.nombre }}
+                                            <i class="fas fa-chalkboard-teacher me-1 opacity-75"></i> {{
+                                            sesion.instructor }}
+                                            {% if sesion.tipo == 'recurrente' %}
+                                            <span class="badge bg-soft-primary text-primary ms-2"
+                                                style="font-size: 0.65rem;">Recurrente</span>
+                                            {% else %}
+                                            <span class="badge bg-soft-info text-info ms-2"
+                                                style="font-size: 0.65rem;">Individual</span>
                                             {% endif %}
                                         </p>
                                     </div>
                                 </div>
                                 <div class="text-end">
-                                    <span class="badge rounded-pill bg-light text-dark border">
-                                        {{ (sesion.fecha_fin - sesion.fecha_inicio).total_seconds() / 60 | int }} min
+                                    <span class="badge rounded-pill bg-light text-dark border-0 shadow-sm px-3">
+                                        {% set duracion = (sesion.hora_fin.hour * 60 + sesion.hora_fin.minute) -
+                                        (sesion.hora_inicio.hour * 60 + sesion.hora_inicio.minute) %}
+                                        {{ duracion }} min
                                     </span>
+                                    {% if sesion.tipo == 'recurrente' %}
+                                    <a href="{{ url_for('classes.calendario_unificado') }}?horario_id={{ sesion.horario_id }}&fecha={{ today.strftime('%Y-%m-%d') }}"
+                                        class="btn btn-sm btn-link text-primary p-0 ms-2" title="Gestionar Asistencia">
+                                        <i class="fas fa-clipboard-check fs-5"></i>
+                                    </a>
+                                    {% endif %}
                                 </div>
                             </div>
                         </div>
@@ -119,10 +146,51 @@
                         <img src="https://cdni.iconscout.com/illustration/premium/thumb/no-data-found-8867280-7265556.png"
                             alt="No data" style="height: 120px; opacity: 0.5;" class="mb-3">
                         <p class="text-muted">No hay sesiones programadas para hoy.</p>
-                        <a href="{{ url_for('classes.nuevo_horario') }}" class="btn btn-premium btn-sm">Programar
-                            Clase</a>
+                        <a href="{{ url_for('classes.nuevo_horario') }}"
+                            class="btn btn-premium btn-sm rounded-pill px-4">Programar Clase</a>
                     </div>
                     {% endif %}
+                </div>
+            </div>
+
+            <!-- Attendance Dashboard (NUEVO) -->
+            <div class="card mb-4 animate-fade-in border-0 shadow-sm" style="animation-delay: 0.6s;">
+                <div class="card-header bg-transparent border-0 d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0 text-primary"><i class="fas fa-chart-line me-2"></i> Asistencias de la Semana</h5>
+                    <div class="dropdown">
+                        <button class="btn btn-sm btn-light border dropdown-toggle rounded-pill" type="button"
+                            data-bs-toggle="dropdown">
+                            Esta Semana
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0">
+                            <li><a class="dropdown-item active" href="#">Esta Semana</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('classes.calendario_unificado') }}">Histórico
+                                    Completo</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div style="height: 250px; width: 100%;">
+                        <canvas id="asistenciaChart"></canvas>
+                    </div>
+
+                    <div class="row mt-4 text-center">
+                        <div class="col-4 border-end">
+                            <h4 class="mb-0 fw-bold">{{ asistencias_semana }}</h4>
+                            <span class="text-muted small">Total Semana</span>
+                        </div>
+                        <div class="col-4 border-end">
+                            <h4 class="mb-0 fw-bold">{{ (asistencias_semana / 7) | round(1) }}</h4>
+                            <span class="text-muted small">Promedio Diario</span>
+                        </div>
+                        <div class="col-4">
+                            <h4
+                                class="mb-0 fw-bold {% if cambio_asistencia >= 0 %}text-success{% else %}text-danger{% endif %}">
+                                {{ cambio_asistencia }}%
+                            </h4>
+                            <span class="text-muted small">Evolución</span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -130,22 +198,22 @@
         <!-- Right Column: Sidebar Actions & Stats -->
         <div class="col-lg-4">
             <!-- Quick Actions -->
-            <div class="card mb-4 animate-fade-in" style="animation-delay: 0.6s;">
-                <div class="card-header">
+            <div class="card mb-4 animate-fade-in border-0 shadow-sm" style="animation-delay: 0.6s;">
+                <div class="card-header bg-transparent border-0">
                     <h5 class="mb-0 text-primary">Acciones Rápidas</h5>
                 </div>
                 <div class="card-body">
                     <div class="d-grid gap-3">
                         <a href="{{ url_for('students.alumnos') }}"
-                            class="btn btn-premium d-flex align-items-center justify-content-center">
-                            <i class="fas fa-user-plus me-2"></i> Gestionar Alumnos
+                            class="btn btn-premium d-flex align-items-center justify-content-center py-2">
+                            <i class="fas fa-users me-2"></i> Gestionar Alumnos
                         </a>
                         <a href="{{ url_for('yogatherapia.nueva_yogaterapia') }}"
-                            class="btn btn-gold d-flex align-items-center justify-content-center text-dark">
-                            <i class="fas fa-notes-medical me-2"></i> Nueva Yogaterapia
+                            class="btn btn-gold d-flex align-items-center justify-content-center text-dark py-2">
+                            <i class="fas fa-plus-circle me-2"></i> Nueva Yogaterapia
                         </a>
-                        <a href="{{ url_for('finance.nueva_factura') }}"
-                            class="btn btn-outline-primary d-flex align-items-center justify-content-center">
+                        <a href="{{ url_for('finance.nueva_factura_emitida') }}"
+                            class="btn btn-outline-primary d-flex align-items-center justify-content-center py-2">
                             <i class="fas fa-file-invoice-dollar me-2"></i> Crear Factura
                         </a>
                     </div>
@@ -153,38 +221,39 @@
             </div>
 
             <!-- Upcoming Appointments -->
-            <div class="card mb-4 animate-fade-in" style="animation-delay: 0.7s;">
-                <div class="card-header">
+            <div class="card mb-4 animate-fade-in border-0 shadow-sm" style="animation-delay: 0.7s;">
+                <div class="card-header bg-transparent border-0">
                     <h5 class="mb-0 text-primary">Próximas Citas</h5>
                 </div>
                 <div class="card-body p-0">
                     <div class="list-group list-group-flush">
                         {% if proximas_citas %}
                         {% for cita in proximas_citas %}
-                        <a href="{{ url_for('yogatherapia.ver_sesion_yogaterapia', sesion_id=cita.id) }}"
+                        <a href="{% if cita['is_evento'] %}#{% else %}{{ url_for('yogatherapia.ver_sesion_yogaterapia', sesion_id=cita['id']) }}{% endif %}"
                             class="list-group-item list-group-item-action border-0 px-4 py-3">
                             <div class="d-flex align-items-center">
                                 <div class="flex-shrink-0 me-3">
                                     <div class="rounded-circle bg-light d-flex align-items-center justify-content-center"
                                         style="width: 40px; height: 40px;">
-                                        <i class="fas fa-calendar-day text-accent"></i>
+                                        <i class="fas fa-spa text-accent"></i>
                                     </div>
                                 </div>
                                 <div class="flex-grow-1 overflow-hidden">
                                     <div class="d-flex justify-content-between align-items-center">
-                                        <h6 class="mb-0 text-truncate fw-bold">{{ cita.alumno.nombre }}</h6>
-                                        <small class="text-muted">{% if cita.fecha_sesion == today %}Hoy{% else %}{{
-                                            cita.fecha_sesion.strftime('%d/%m') }}{% endif %}</small>
+                                        <h6 class="mb-0 text-truncate fw-bold text-dark">{{ cita['alumno_nombre'] }}
+                                        </h6>
+                                        <small class="text-muted">{% if cita['fecha_sesion'] == today %}Hoy{% else %}{{
+                                            cita['fecha_sesion'].strftime('%d/%m') }}{% endif %}</small>
                                     </div>
-                                    <div class="small text-muted">{{ cita.hora_inicio.strftime('%H:%M') if
-                                        cita.hora_inicio else '--:--' }} - Yogaterapia</div>
+                                    <div class="small text-muted">{{ cita['hora_inicio'].strftime('%H:%M') if
+                                        cita['hora_inicio'] else '--:--' }} - Yogaterapia</div>
                                 </div>
                             </div>
                         </a>
                         {% endfor %}
                         {% else %}
                         <div class="p-4 text-center">
-                            <small class="text-muted">No hay citas próximas</small>
+                            <p class="text-muted small mb-0">No hay citas próximas</p>
                         </div>
                         {% endif %}
                     </div>
@@ -193,7 +262,54 @@
         </div>
     </div>
 </div>
+{% endblock %}
 
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const ctx = document.getElementById('asistenciaChart').getContext('2d');
+        const dias = [{% for item in grafico_asistencia %}"{{ item.dia }}"{% if not loop.last %}, {% endif %} {% endfor %}];
+    const counts = [{% for item in grafico_asistencia %}{ { item.count } } {% if not loop.last %}, {% endif %} {% endfor %}];
+
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: dias,
+            datasets: [{
+                label: 'Asistencias',
+                data: counts,
+                borderColor: '#8B6DB1',
+                backgroundColor: 'rgba(139, 109, 177, 0.1)',
+                borderWidth: 3,
+                tension: 0.4,
+                fill: true,
+                pointBackgroundColor: '#8B6DB1',
+                pointRadius: 4,
+                pointHoverRadius: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: { stepSize: 1, precision: 0 },
+                    grid: { color: 'rgba(0,0,0,0.05)', drawBorder: false }
+                },
+                x: { grid: { display: false } }
+            }
+        }
+    });
+    });
+</script>
+{% endblock %}
+
+{% block extra_css %}
 <style>
     .bg-gold {
         background-color: var(--accent-color);
@@ -201,6 +317,14 @@
 
     .text-accent {
         color: var(--accent-color);
+    }
+
+    .text-success {
+        color: #2ecc71 !important;
+    }
+
+    .text-danger {
+        color: #e74c3c !important;
     }
 </style>
 {% endblock %}

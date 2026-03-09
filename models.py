@@ -64,7 +64,7 @@ class Alumno(db.Model):
     # Relaciones
     pagos = db.relationship('Pago', backref='alumno', lazy=True)
     cliente = db.relationship('Cliente', backref='alumno', lazy=True, uselist=False)
-    horarios = db.relationship('HorarioSemanal', secondary='inscripciones_horarios', backref='alumnos_inscritos', lazy=True)
+    horarios = db.relationship('HorarioSemanal', secondary='inscripciones_horarios', backref='alumnos', lazy=True)
     
     def __repr__(self):
         return f'<Alumno {self.nombre} {self.apellido}>'
@@ -592,7 +592,8 @@ class CategoriaGasto(db.Model):
 class FacturaProveedor(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     numero_factura = db.Column(db.String(50), nullable=False)
-    proveedor_id = db.Column(db.Integer, db.ForeignKey('proveedor.id'), nullable=False)
+    proveedor_id = db.Column(db.Integer, db.ForeignKey('proveedor.id'), nullable=True)
+    nombre_proveedor = db.Column(db.String(100)) # Nombre libre si no hay objeto proveedor
     categoria_id = db.Column(db.Integer, db.ForeignKey('categoria_gasto.id'), nullable=False)
     fecha_factura = db.Column(db.Date, nullable=False)
     fecha_vencimiento = db.Column(db.Date)
@@ -601,7 +602,7 @@ class FacturaProveedor(db.Model):
     importe_total = db.Column(db.Float, nullable=False)
     descripcion = db.Column(db.Text)
     estado = db.Column(db.String(20), default='pendiente')  # pendiente, pagada, vencida
-    fecha_pago = db.Date
+    fecha_pago = db.Column(db.Date)
     metodo_pago = db.Column(db.String(50))  # transferencia, efectivo, tarjeta, etc.
     notas = db.Column(db.Text)
     archivo_factura = db.Column(db.String(200))  # Ruta al archivo PDF/imagen
@@ -618,14 +619,15 @@ class FacturaProveedor(db.Model):
         return False
     
     def __repr__(self):
-        return f'<FacturaProveedor {self.numero_factura} - {self.proveedor.nombre}>'
+        prov_name = self.proveedor.nombre if self.proveedor else (self.nombre_proveedor or 'Gasto Vario')
+        return f'<FacturaProveedor {self.numero_factura} - {prov_name}>'
 
 # Modelo de Gasto Fijo (Recurrente)
 class GastoFijo(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     nombre = db.Column(db.String(100), nullable=False)
     descripcion = db.Column(db.Text)
-    proveedor_id = db.Column(db.Integer, db.ForeignKey('proveedor.id'))  # Proveedor asociado
+    proveedor_id = db.Column(db.Integer, db.ForeignKey('proveedor.id'), nullable=True)  # Proveedor opcional
     categoria_id = db.Column(db.Integer, db.ForeignKey('categoria_gasto.id'), nullable=False)
     importe = db.Column(db.Float, nullable=False)
     frecuencia = db.Column(db.String(20), default='mensual')  # mensual, trimestral, anual

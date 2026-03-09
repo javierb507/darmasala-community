@@ -6,148 +6,134 @@
 <div class="container mt-4">
     <div class="row">
         <div class="col-md-8 mx-auto">
-            <div class="card">
-                <div class="card-header">
-                    <h4><i class="fas fa-user-plus"></i> Nuevo Alumno</h4>
+            <div class="card shadow-sm animate-fade-in">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="fas fa-user-plus me-2"></i> Nuevo Alumno</h4>
                 </div>
-                <div class="card-body">
+                <div class="card-body p-4">
                     <form method="POST">
+                        <h6 class="text-primary mb-3"><i class="fas fa-id-card me-2"></i> Información Personal</h6>
                         <div class="row">
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="nombre" class="form-label">Nombre *</label>
-                                    <input type="text" class="form-control" id="nombre" name="nombre" required>
-                                </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="nombre" class="form-label">Nombre *</label>
+                                <input type="text" class="form-control" id="nombre" name="nombre" required
+                                    placeholder="Nombre del alumno">
                             </div>
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="apellido" class="form-label">Apellido *</label>
-                                    <input type="text" class="form-control" id="apellido" name="apellido" required>
-                                </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="apellido" class="form-label">Apellido *</label>
+                                <input type="text" class="form-control" id="apellido" name="apellido" required
+                                    placeholder="Apellido del alumno">
                             </div>
                         </div>
-                        
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="email" class="form-label">Email *</label>
-                                    <input type="email" class="form-control" id="email" name="email" required>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="telefono" class="form-label">Teléfono</label>
-                                    <input type="tel" class="form-control" id="telefono" name="telefono">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label for="dni" class="form-label">DNI/NIE</label>
-                            <input type="text" class="form-control" id="dni" name="dni" placeholder="12345678A">
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label for="email" class="form-label">Email *</label>
-                            <input type="email" class="form-control" id="email" name="email" required>
-                        </div>
-                    </div>
 
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label for="telefono" class="form-label">Teléfono</label>
-                            <input type="tel" class="form-control" id="telefono" name="telefono">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="dni" class="form-label">DNI/NIE</label>
+                                <input type="text" class="form-control" id="dni" name="dni" placeholder="12345678A">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="fecha_nacimiento" class="form-label text-premium">Fecha de
+                                    Nacimiento</label>
+                                <input type="date" class="form-control premium-input" id="fecha_nacimiento"
+                                    name="fecha_nacimiento">
+                                <small class="text-muted">Puedes usar el selector o escribir directamente</small>
+                            </div>
                         </div>
-                        <div class="col-md-6 mb-3">
-                            <label for="fecha_nacimiento" class="form-label">Fecha de Nacimiento</label>
-                            <input type="date" class="form-control" id="fecha_nacimiento" name="fecha_nacimiento">
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="email" class="form-label">Email *</label>
+                                <input type="email" class="form-control" id="email" name="email" required
+                                    placeholder="ejemplo@correo.com">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="telefono" class="form-label">Teléfono</label>
+                                <input type="tel" class="form-control" id="telefono" name="telefono"
+                                    placeholder="600 000 000">
+                            </div>
                         </div>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label for="direccion" class="form-label">Dirección</label>
-                        <textarea class="form-control" id="direccion" name="direccion" rows="3"></textarea>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label for="tipo_cuota" class="form-label">Tipo de Cuota *</label>
-                        <select class="form-select" id="tipo_cuota" name="tipo_cuota" required>
-                            <option value="clase_suelta">Clase suelta - €15.00</option>
-                            <option value="1_clase_semanal">1 clase por semana - €40.00</option>
-                            <option value="2_clases_semanal">2 clases por semana - €70.00</option>
-                            <option value="plana">Tarifa plana - €90.00</option>
-                            <option value="1_clase_bimensual">1 clase bimensual - €75.00</option>
-                            <option value="2_clases_bimensual">2 clases bimensual - €135.00</option>
-                        </select>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="matricula_pagada" name="matricula_pagada">
-                            <label class="form-check-label" for="matricula_pagada">
-                                <strong>Matrícula pagada</strong>
-                            </label>
+
+                        <div class="mb-4">
+                            <label for="direccion" class="form-label">Dirección</label>
+                            <textarea class="form-control" id="direccion" name="direccion" rows="2"
+                                placeholder="Calle, número, piso..."></textarea>
                         </div>
-                        
-                        <div class="mb-3">
+
+                        <hr class="my-4">
+                        <h6 class="text-primary mb-3"><i class="fas fa-file-invoice-dollar me-2"></i> Cuota y
+                            Administración</h6>
+
+                        <div class="row">
+                            <div class="col-md-8 mb-3">
+                                <label for="tipo_cuota" class="form-label">Tipo de Cuota *</label>
+                                <select class="form-select" id="tipo_cuota" name="tipo_cuota" required>
+                                    <option value="clase_suelta">Clase suelta - €15.00</option>
+                                    <option value="1_clase_semanal" selected>1 clase por semana - €40.00</option>
+                                    <option value="2_clases_semanal">2 clases por semana - €70.00</option>
+                                    <option value="plana">Tarifa plana - €90.00</option>
+                                    <option value="1_clase_bimensual">1 clase bimensual - €75.00</option>
+                                    <option value="2_clases_bimensual">2 clases bimensual - €135.00</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4 mb-3 d-flex align-items-end">
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" id="matricula_pagada"
+                                        name="matricula_pagada">
+                                    <label class="form-check-label fw-bold" for="matricula_pagada">
+                                        Matrícula pagada (25€)
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
                             <label for="numero_cuenta" class="form-label">Número de Cuenta (IBAN)</label>
-                            <input type="text" class="form-control" id="numero_cuenta" name="numero_cuenta" placeholder="ES00 0000 0000 00 0000000000">
+                            <input type="text" class="form-control" id="numero_cuenta" name="numero_cuenta"
+                                placeholder="ES00 0000 0000 00 0000000000">
                         </div>
-                        
-                        <hr>
-                        <h6 class="text-primary">Información Médica</h6>
-                        
+
+                        <hr class="my-4">
+                        <h6 class="text-primary mb-3"><i class="fas fa-heartbeat me-2"></i> Información Médica y
+                            Motivación</h6>
+
                         <div class="row">
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="condiciones_medicas" class="form-label">Condiciones Médicas</label>
-                                    <textarea class="form-control" id="condiciones_medicas" name="condiciones_medicas" rows="2" placeholder="Ej: Hipertensión, problemas de espalda..."></textarea>
-                                </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="condiciones_medicas" class="form-label">Condiciones Médicas</label>
+                                <textarea class="form-control" id="condiciones_medicas" name="condiciones_medicas"
+                                    rows="2" placeholder="Ej: Hipertensión, problemas de espalda..."></textarea>
                             </div>
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="medicamentos" class="form-label">Medicamentos</label>
-                                    <textarea class="form-control" id="medicamentos" name="medicamentos" rows="2" placeholder="Ej: Ibuprofeno ocasional, vitamina D..."></textarea>
-                                </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="medicamentos" class="form-label">Medicamentos</label>
+                                <textarea class="form-control" id="medicamentos" name="medicamentos" rows="2"
+                                    placeholder="Ej: Tratamientos actuales..."></textarea>
                             </div>
                         </div>
-                        
+
                         <div class="row">
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="alergias" class="form-label">Alergias</label>
-                                    <textarea class="form-control" id="alergias" name="alergias" rows="2" placeholder="Ej: Polen, frutos secos, látex..."></textarea>
-                                </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="alergias" class="form-label">Alergias</label>
+                                <textarea class="form-control" id="alergias" name="alergias" rows="2"
+                                    placeholder="Ej: Polen, látex..."></textarea>
                             </div>
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="estado_fisico" class="form-label">Estado Físico</label>
-                                    <textarea class="form-control" id="estado_fisico" name="estado_fisico" rows="2" placeholder="Ej: Buena forma física, sedentario, en recuperación..."></textarea>
-                                </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="estado_fisico" class="form-label">Estado Físico</label>
+                                <textarea class="form-control" id="estado_fisico" name="estado_fisico" rows="2"
+                                    placeholder="Ej: Sedentario, activo..."></textarea>
                             </div>
                         </div>
-                        
-                        <div class="mb-3">
+
+                        <div class="mb-4">
                             <label for="motivacion" class="form-label">Motivación para practicar yoga</label>
-                            <textarea class="form-control" id="motivacion" name="motivacion" rows="3" placeholder="Ej: Reducir el estrés, mejorar flexibilidad, encontrar paz interior..."></textarea>
+                            <textarea class="form-control" id="motivacion" name="motivacion" rows="2"
+                                placeholder="¿Qué busca el alumno con el yoga?"></textarea>
                         </div>
-                        
-                        <div class="mb-3">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="matricula_pagada" name="matricula_pagada">
-                                <label class="form-check-label" for="matricula_pagada">
-                                    Matrícula pagada (25€)
-                                </label>
-                            </div>
-                        </div>
-                        
-                        <div class="d-flex justify-content-between">
-                            <a href="{{ url_for('students.alumnos') }}" class="btn btn-secondary">
-                                <i class="fas fa-arrow-left"></i> Cancelar
+
+                        <div class="d-flex justify-content-between mt-4">
+                            <a href="{{ url_for('students.alumnos') }}" class="btn btn-outline-secondary px-4">
+                                <i class="fas fa-times me-2"></i> Cancelar
                             </a>
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-save"></i> Guardar Alumno
+                            <button type="submit" class="btn btn-primary px-5">
+                                <i class="fas fa-save me-2"></i> Guardar Alumno
                             </button>
                         </div>
                     </form>

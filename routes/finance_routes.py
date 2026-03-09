@@ -2,6 +2,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash,
 from datetime import datetime, date, timedelta
 from models import db, Alumno, Pago, Cliente, FacturaEmitida, LineaFactura, ConfiguracionFiscal, Ingreso, GastoMensual, FacturaProveedor, GastoFijo, CategoriaGasto, Tarifa, Proveedor
 from utils.auth_utils import login_required
+from utils.finance_utils import exportar_datos_tax_excel
 
 finance_bp = Blueprint('finance', __name__)
 
@@ -473,10 +474,14 @@ def nueva_factura():
             # Calcular importe total
             importe_total = importe_sin_iva * (1 + iva / 100)
             
+            prov_id = request.form.get('proveedor_id')
+            prov_id = int(prov_id) if prov_id and prov_id != '' else None
+            
             # Crear factura
             factura = FacturaProveedor(
                 numero_factura=numero_factura,
-                proveedor_id=proveedor_id,
+                proveedor_id=prov_id,
+                nombre_proveedor=request.form.get('nombre_proveedor_libre', ''),
                 categoria_id=categoria_id,
                 fecha_factura=fecha_factura,
                 fecha_vencimiento=fecha_vencimiento,
@@ -513,7 +518,9 @@ def editar_factura(factura_id):
     if request.method == 'POST':
         try:
             factura.numero_factura = request.form.get('numero_factura')
-            factura.proveedor_id = request.form.get('proveedor_id')
+            prov_id = request.form.get('proveedor_id')
+            factura.proveedor_id = int(prov_id) if prov_id and prov_id != '' else None
+            factura.nombre_proveedor = request.form.get('nombre_proveedor_libre', '')
             factura.categoria_id = request.form.get('categoria_id')
             factura.fecha_factura = datetime.strptime(request.form.get('fecha_factura'), '%Y-%m-%d').date()
             factura.fecha_vencimiento = datetime.strptime(request.form.get('fecha_vencimiento'), '%Y-%m-%d').date() if request.form.get('fecha_vencimiento') else None
@@ -733,6 +740,28 @@ def eliminar_proveedor(proveedor_id):
     
     return redirect(url_for('finance.proveedores'))
 
+@finance_bp.route('/exportar-tax')
+@login_required
+def exportar_tax():
+    """Ruta para exportar datos especializados para impuestos"""
+    año = request.args.get('año', date.today().year, type=int)
+    
+    # Obtener todas las facturas emitidas del año
+    facturas_emitidas = FacturaEmitida.query.filter(
+        db.extract('year', FacturaEmitida.fecha_emision) == año,
+        FacturaEmitida.estado != 'anulada'
+    ).all()
+    
+    # Obtener todas las facturas de proveedores del año
+    facturas_proveedor = FacturaProveedor.query.filter(
+        db.extract('year', FacturaProveedor.fecha_factura) == año
+    ).all()
+    
+    # Obtener gastos fijos activos
+    gastos_fijos = GastoFijo.query.filter_by(activo=True).all()
+    
+    return exportar_datos_tax_excel(facturas_emitidas, facturas_proveedor, gastos_fijos, año)
+
 @finance_bp.route('/exportar/<tipo>')
 @login_required
 def exportar_datos(tipo):
@@ -752,10 +781,10 @@ def exportar_datos(tipo):
             return exportar_ingresos_excel()
         else:
             flash('Tipo de exportación no válido', 'error')
-            return redirect(url_for('finance.economia_historico'))
+            return redirect(url_for('finance.economia'))
     except Exception as e:
         flash(f'Error al exportar datos: {str(e)}', 'error')
-        return redirect(url_for('finance.economia_historico'))
+        return redirect(url_for('finance.economia'))
 
 @finance_bp.route('/reporte-contabilidad-pdf')
 @login_required

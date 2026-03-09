@@ -7,13 +7,16 @@
 
 :root {
     /* Colors */
-    --p-purple: #4B0082;
-    --p-purple-light: #6B4C93;
-    --p-purple-dark: #310055;
-    --p-gold: #D4AF37;
-    --p-gold-light: #E5C76B;
-    --p-gold-dark: #A68A27;
-    --p-lavender: #E6E6FA;
+    /* Softened Colors */
+    --p-purple: #8B6DB1;
+    /* Softer Purple */
+    --p-purple-light: #AD96C9;
+    --p-purple-dark: #6C4F94;
+    --p-gold: #DDBB5B;
+    /* Muted Gold */
+    --p-gold-light: #E9D08D;
+    --p-gold-dark: #B99839;
+    --p-lavender: #F3E8FF;
 
     /* Gradients */
     --grad-premium: linear-gradient(135deg, var(--p-purple) 0%, var(--p-purple-dark) 100%);
@@ -39,9 +42,9 @@
 /* Base Reset & Typography */
 body {
     font-family: 'Inter', sans-serif;
-    background-color: #fdfbff;
-    /* Very light lavender tint */
-    color: #2D3436;
+    background-color: #F9F7FC;
+    /* Ultra-soft Lavender-tinted background */
+    color: #4A4A4A;
     margin: 0;
     overflow-x: hidden;
     line-height: 1.6;
@@ -446,4 +449,30 @@ h4,
 
 .table td:last-child {
     border-radius: 0 16px 16px 0;
+}
+
+/* Build Info Styles */
+.build-info {
+    font-size: 0.65rem;
+    color: var(--text-muted);
+    opacity: 0.6;
+    margin-right: 1.5rem;
+    text-align: right;
+    line-height: 1.2;
+    transition: var(--p-transit-smooth);
+}
+
+.build-info:hover {
+    opacity: 1;
+}
+
+.build-info .version-tag {
+    font-weight: 700;
+    color: var(--p-purple-dark);
+}
+
+@media (max-width: 768px) {
+    .build-info {
+        display: none;
+    }
 }
