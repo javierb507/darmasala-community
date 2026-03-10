@@ -1,10 +1,10 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}{{ config.get('nombre_escuela', 'ATMA SUDDHI') }}{% endblock %}</title>
+    <title>{% block title %}{{ config.get('nombre_escuela', 'ESCUELA DE YOGA') }}{% endblock %}</title>
 
     <!-- Favicon dinámico -->
     {% if config and config.get('logo_escuela') %}
@@ -40,7 +40,7 @@
                     {% else %}
                     <i class="fas fa-om me-2"></i>
                     {% endif %}
-                    <span class="d-none d-lg-inline">{{ config.get('nombre_escuela', 'ATMA SUDDHI') }}</span>
+                    <span class="d-none d-lg-inline">{{ config.get('nombre_escuela', 'ESCUELA DE YOGA') }}</span>
                 </a>
             </div>
 
