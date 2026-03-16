@@ -129,16 +129,29 @@ def init_test_data():
 
     # Students
     students = [
-        {'nombre': 'Ana', 'apellido': 'García', 'email': 'ana@example.com', 'tipo_cuota': '1_clase_semanal', 'activo': True},
-        {'nombre': 'Luis', 'apellido': 'Pérez', 'email': 'luis@example.com', 'tipo_cuota': '2_clases_semanal', 'activo': True},
-        {'nombre': 'Marta', 'apellido': 'Sanz', 'email': 'marta@example.com', 'tipo_cuota': 'plana', 'activo': True}
+        {'nombre': 'Ana', 'apellido': 'García', 'email': 'ana@example.com', 'dni': '12345678A', 'tipo_cuota': '1_clase_semanal', 'activo': True},
+        {'nombre': 'Luis', 'apellido': 'Pérez', 'email': 'luis@example.com', 'dni': '87654321B', 'tipo_cuota': '2_clases_semanal', 'activo': True},
+        {'nombre': 'Marta', 'apellido': 'Sanz', 'email': 'marta@example.com', 'dni': '11223344C', 'tipo_cuota': 'plana', 'activo': True}
     ]
     for s_data in students:
         if not Alumno.query.filter_by(email=s_data['email']).first():
             alumno = Alumno(**s_data)
             db.session.add(alumno)
             db.session.flush()
-            
+            # Create Portal User for this student
+            dni_pass = s_data.get('dni', '12345678X')
+            portal_user = Usuario(
+                username=s_data['email'],
+                email=s_data['email'],
+                password_hash=generate_password_hash(dni_pass),
+                nombre=s_data['nombre'],
+                apellido=s_data['apellido'],
+                rol='alumno',
+                activo=True
+            )
+            db.session.add(portal_user)
+            db.session.flush()
+
             # Add some payments
             for i in range(2):
                 mes = (datetime.now() - timedelta(days=30*i)).strftime('%Y-%m')
