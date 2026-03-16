@@ -155,7 +155,7 @@ class ExportManager:
         
         backup_data = {
             'timestamp': datetime.now().isoformat(),
-            'version': '1.1.0',
+            'version': '1.2.6 version 1',
             'alumnos': [],
             'pagos': [],
             'facturas': [],
