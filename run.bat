@@ -11,6 +11,7 @@ if not exist venv (
 
 echo [2/3] Activando entorno y verificando dependencias...
 call venv\Scripts\activate
+python -m pip install --upgrade pip setuptools wheel
 pip install -r requirements.txt
 
 echo.
