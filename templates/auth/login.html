@@ -33,7 +33,12 @@
 
         body {
             font-family: 'Inter', sans-serif;
+            {% if config and config.fondo_login_admin %}
+            background: url("{{ url_for('static', filename=config.fondo_login_admin) }}") no-repeat center center fixed;
+            background-size: cover;
+            {% else %}
             background: var(--login-gradient);
+            {% endif %}
             min-height: 100vh;
             display: flex;
             align-items: center;

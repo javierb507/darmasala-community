@@ -1,12 +1,12 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session
 from werkzeug.security import generate_password_hash
-from models import db, Usuario
-from utils.auth_utils import login_required
+from models import db, Usuario, Alumno
+from utils.auth_utils import login_required, admin_required
 
 user_routes_bp = Blueprint('users', __name__)
 
 @user_routes_bp.route('/usuarios')
-@login_required
+@admin_required
 def usuarios():
     """Listado de usuarios del sistema"""
     # Solo administradores pueden ver esta página
@@ -18,7 +18,7 @@ def usuarios():
     return render_template('usuarios.html', usuarios=usuarios_list)
 
 @user_routes_bp.route('/usuarios/nuevo', methods=['GET', 'POST'])
-@login_required
+@admin_required
 def nuevo_usuario():
     """Crear nuevo usuario"""
     if session.get('rol') != 'admin':
@@ -57,20 +57,30 @@ def nuevo_usuario():
             
     return render_template('nuevo_usuario.html')
 
-@user_routes_bp.route('/usuarios/<int:user_id>/editar', methods=['GET', 'POST'])
+@user_routes_bp.route('/usuarios/<int:usuario_id>/editar', methods=['GET', 'POST'])
 @login_required
-def editar_usuario(user_id):
+def editar_usuario(usuario_id):
     """Editar usuario existente"""
-    user = Usuario.query.get_or_404(user_id)
+    user = Usuario.query.get_or_404(usuario_id)
     
     # Solo el propio usuario o un admin pueden editar
-    if session.get('rol') != 'admin' and session.get('user_id') != user_id:
+    if session.get('rol') != 'admin' and session.get('user_id') != usuario_id:
         flash('No tienes permiso para editar este perfil', 'error')
         return redirect(url_for('main.index'))
         
     if request.method == 'POST':
         user.email = request.form['email']
         user.nombre = request.form['nombre']
+        user.apellido = request.form.get('apellido', user.apellido)
+        
+        # Sincronizar datos si es un alumno
+        if user.rol == 'alumno':
+            alumno_rec = Alumno.query.filter_by(email=user.email).first()
+            if alumno_rec:
+                alumno_rec.dni = request.form.get('dni')
+                alumno_rec.telefono = request.form.get('telefono')
+                alumno_rec.nombre = user.nombre
+                alumno_rec.apellido = user.apellido
         
         # Solo admin puede cambiar el rol
         if session.get('rol') == 'admin':
@@ -90,7 +100,12 @@ def editar_usuario(user_id):
             db.session.rollback()
             flash(f'Error al actualizar usuario: {str(e)}', 'error')
             
-    return render_template('editar_usuario.html', user=user)
+    # Si es un alumno, intentamos buscar sus datos adicionales
+    alumno_data = None
+    if user.rol == 'alumno':
+        alumno_data = Alumno.query.filter_by(email=user.email).first()
+            
+    return render_template('editar_usuario.html', usuario=user, alumno=alumno_data)
 
 @user_routes_bp.route('/perfil')
 @login_required
@@ -109,7 +124,13 @@ def ver_usuario(usuario_id):
         return redirect(url_for('main.index'))
         
     usuario = Usuario.query.get_or_404(usuario_id)
-    return render_template('ver_usuario.html', usuario=usuario)
+    
+    # Si es un alumno, buscamos sus datos adicionales
+    alumno_data = None
+    if usuario.rol == 'alumno':
+        alumno_data = Alumno.query.filter_by(email=usuario.email).first()
+        
+    return render_template('ver_usuario.html', usuario=usuario, alumno=alumno_data)
 
 @user_routes_bp.route('/usuarios/<int:usuario_id>/eliminar', methods=['POST'])
 @login_required

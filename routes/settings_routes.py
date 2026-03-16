@@ -253,6 +253,38 @@ def guardar_configuracion():
                         descripcion='Logo de la escuela'
                     )
                     db.session.add(config_logo)
+
+        # Manejar subida de fondo login admin
+        if 'fondo_login_admin' in request.files:
+            fondo_file = request.files['fondo_login_admin']
+            if fondo_file and fondo_file.filename:
+                img_dir = os.path.join('static', 'images')
+                os.makedirs(img_dir, exist_ok=True)
+                timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+                filename = f"bg_admin_{timestamp}.{fondo_file.filename.split('.')[-1]}"
+                fondo_file.save(os.path.join(img_dir, filename))
+                
+                config_fondo = Configuracion.query.filter_by(clave='fondo_login_admin').first()
+                if not config_fondo:
+                    config_fondo = Configuracion(clave='fondo_login_admin', descripcion='Fondo login admin')
+                    db.session.add(config_fondo)
+                config_fondo.valor = f"images/{filename}"
+
+        # Manejar subida de fondo login alumno
+        if 'fondo_login_alumno' in request.files:
+            fondo_file = request.files['fondo_login_alumno']
+            if fondo_file and fondo_file.filename:
+                img_dir = os.path.join('static', 'images')
+                os.makedirs(img_dir, exist_ok=True)
+                timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+                filename = f"bg_alumno_{timestamp}.{fondo_file.filename.split('.')[-1]}"
+                fondo_file.save(os.path.join(img_dir, filename))
+                
+                config_fondo = Configuracion.query.filter_by(clave='fondo_login_alumno').first()
+                if not config_fondo:
+                    config_fondo = Configuracion(clave='fondo_login_alumno', descripcion='Fondo login alumno')
+                    db.session.add(config_fondo)
+                config_fondo.valor = f"images/{filename}"
         
         configuraciones = [
             ('precio_clase_suelta', request.form.get('precio_clase_suelta', '15.00'), 'Precio por clase suelta'),

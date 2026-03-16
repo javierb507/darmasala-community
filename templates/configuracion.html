@@ -60,6 +60,32 @@
                                 </div>
                             </div>
                             <div class="row mb-3">
+                                <div class="col-md-6 text-center">
+                                    <label class="form-label d-block small">Fondo Login Admin</label>
+                                    <div class="mb-2 p-1 border rounded bg-light d-inline-block">
+                                        {% if config and config.get('fondo_login_admin') %}
+                                        <img src="{{ url_for('static', filename=config.get('fondo_login_admin')) }}"
+                                            style="max-height: 40px; max-width: 100px; object-fit: cover;">
+                                        {% else %}
+                                        <i class="fas fa-desktop text-muted fa-lg"></i>
+                                        {% endif %}
+                                    </div>
+                                    <input type="file" class="form-control form-control-sm" name="fondo_login_admin">
+                                </div>
+                                <div class="col-md-6 text-center">
+                                    <label class="form-label d-block small">Fondo Login Alumnos</label>
+                                    <div class="mb-2 p-1 border rounded bg-light d-inline-block">
+                                        {% if config and config.get('fondo_login_alumno') %}
+                                        <img src="{{ url_for('static', filename=config.get('fondo_login_alumno')) }}"
+                                            style="max-height: 40px; max-width: 100px; object-fit: cover;">
+                                        {% else %}
+                                        <i class="fas fa-user-circle text-muted fa-lg"></i>
+                                        {% endif %}
+                                    </div>
+                                    <input type="file" class="form-control form-control-sm" name="fondo_login_alumno">
+                                </div>
+                            </div>
+                            <div class="row mb-3">
                                 <div class="col-md-8">
                                     <label class="form-label small">Dirección Fiscal</label>
                                     <input type="text" class="form-control" name="direccion_escuela"

@@ -35,7 +35,12 @@ def login():
     
     # Obtener sutra semanal para mostrar en login
     sutra_semanal = obtener_sutra_semanal()
-    return render_template('auth/login.html', sutra_semanal=sutra_semanal)
+    
+    from models import Configuracion
+    configuraciones = Configuracion.query.all()
+    config_dict = {c.clave: c.valor for c in configuraciones}
+    
+    return render_template('auth/login.html', sutra_semanal=sutra_semanal, config=config_dict)
 
 @auth_bp.route('/setup', methods=['GET', 'POST'])
 def setup():

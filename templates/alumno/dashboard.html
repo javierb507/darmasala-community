@@ -1,127 +1,386 @@
 {% extends "alumno/layout.html" %}
 
+{% block title %}Mi Calendario - Atma Suddhi{% endblock %}
+
 {% block extra_css %}
+<!-- FullCalendar CSS -->
+<link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.css' rel='stylesheet' />
 <style>
-    .class-card {
-        transition: transform 0.2s;
+    :root {
+        --fc-border-color: #f1f2f6;
+        --fc-daygrid-event-dot-width: 8px;
+        --fc-today-bg-color: rgba(139, 95, 191, 0.05);
+    }
+
+    .calendar-container {
+        background: white;
+        border-radius: 30px;
+        padding: 2rem;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.05);
+        border: 1px solid rgba(0,0,0,0.02);
+    }
+
+    #calendar {
+        min-height: 700px;
+        font-family: 'Outfit', sans-serif;
+    }
+
+    /* Estilo Gmail/Premium para el Calendario */
+    .fc .fc-toolbar-title {
+        font-family: 'Playfair Display', serif;
+        font-weight: 700;
+        color: var(--primary);
+        font-size: 1.8rem;
+    }
+
+    .fc .fc-button-primary {
+        background: white;
+        border: 1px solid #e0e0e0;
+        color: var(--dark);
+        font-weight: 500;
+        text-transform: capitalize;
+        padding: 8px 16px;
         border-radius: 12px;
+        transition: all 0.2s ease;
+    }
+
+    .fc .fc-button-primary:hover {
+        background: #f8f9fa;
+        color: var(--primary);
+        border-color: var(--primary);
+    }
+
+    .fc .fc-button-primary:disabled {
+        background: #f8f9fa;
+        color: #b2bec3;
+    }
+
+    .fc .fc-button-active {
+        background: var(--primary) !important;
+        border-color: var(--primary) !important;
+        color: white !important;
+    }
+
+    .fc-event {
+        cursor: pointer;
+        border-radius: 8px !important;
+        padding: 4px 8px !important;
+        border: none !important;
+        font-weight: 500 !important;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        transition: transform 0.2s ease;
+    }
+
+    .fc-event:hover {
+        transform: scale(1.02);
+        z-index: 5;
+    }
+
+    .event-full {
+        opacity: 0.6;
+        filter: grayscale(0.5);
+    }
+
+    .stat-bar {
+        background: var(--primary);
+        color: white;
+        border-radius: 20px;
+        padding: 1.5rem 2rem;
+        margin-bottom: 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 10px 25px rgba(139, 95, 191, 0.2);
+    }
+
+    /* Modal Styling */
+    .modal-content {
+        border-radius: 25px;
+        border: none;
         overflow: hidden;
     }
-    .class-card:hover {
-        transform: translateY(-5px);
+
+    .modal-header {
+        border-bottom: none;
+        padding: 2rem 2rem 1rem;
     }
-    .occupancy-bar {
-        height: 8px;
-        background: #eee;
-        border-radius: 4px;
-        margin: 10px 0;
+
+    .modal-body {
+        padding: 1rem 2rem 2rem;
     }
-    .occupancy-fill {
-        height: 100%;
-        border-radius: 4px;
-        transition: width 0.3s;
+
+    .class-info-tag {
+        background: #f8f9fa;
+        padding: 12px 20px;
+        border-radius: 15px;
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        gap: 15px;
     }
-    .quota-badge {
-        font-size: 0.8rem;
-        padding: 0.4rem 0.8rem;
-        border-radius: 50px;
+
+    .class-info-tag i {
+        color: var(--primary);
+        font-size: 1.2rem;
+        width: 25px;
+        text-align: center;
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="row mb-4">
-    <div class="col-md-8">
-        <h1 class="h3 fw-bold">Mi Calendario de Clases</h1>
-        <p class="text-muted">Visualiza las clases disponibles y gestiona tus reservas.</p>
+<div class="stat-bar animate-fade-in mb-4">
+    <div>
+        <h4 class="mb-1 fw-bold">¡Hola de nuevo, {{ student.nombre }}! 🧘‍♀️</h4>
+        <p class="mb-0 opacity-75">Bienvenido a tu portal de Atma Suddhi</p>
     </div>
-    <div class="col-md-4 text-md-end">
-        <div class="bg-white p-3 rounded shadow-sm">
-            <span class="text-muted d-block small mb-1">Tu cuota semanal:</span>
-            <span class="h5 fw-bold mb-0">{{ student.get_tipo_cuota_display() }}</span>
-            <div class="mt-2">
-                <span class="badge bg-soft-primary text-primary quota-badge">
-                    Reservas esta semana: <strong>{{ asistencias_semana }}</strong>
-                </span>
+    <div class="text-end">
+        <a href="{{ url_for('student_portal.perfil') }}" class="btn btn-light btn-sm rounded-pill px-3">
+            <i class="fas fa-cog me-1"></i> Ajustes
+        </a>
+    </div>
+</div>
+
+<div class="row mb-4 animate-fade-in" style="animation-delay: 0.1s;">
+    <div class="col-lg-4 mb-4 mb-lg-0">
+        <div class="card h-100 border-0 shadow-sm" style="border-radius: 25px; background: linear-gradient(135deg, #ffffff 0%, #f9f9f9 100%);">
+            <div class="card-body p-4">
+                <div class="d-flex align-items-center mb-3">
+                    <div class="bg-primary bg-opacity-10 p-3 rounded-4 me-3">
+                        <i class="fas fa-leaf text-primary fs-4"></i>
+                    </div>
+                    <div>
+                        <h6 class="text-muted small mb-0">Tu suscripción</h6>
+                        <span class="fw-bold">{{ student.get_tipo_cuota_display() }}</span>
+                    </div>
+                </div>
+                <hr class="opacity-10">
+                <div class="d-flex justify-content-between align-items-center">
+                    <span class="small text-muted">Estado Matricula</span>
+                    <span class="badge {{ 'bg-success' if student.matricula_pagada else 'bg-warning' }} rounded-pill">
+                        {{ 'Pagada' if student.matricula_pagada else 'Pendiente' }}
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm mt-4 animate-fade-in" style="border-radius: 25px; animation-delay: 0.2s;">
+            <div class="card-body p-4">
+                <h6 class="fw-bold mb-3"><i class="fas fa-calendar-check me-2 text-primary"></i>Próximas Clases</h6>
+                <div class="upcoming-list">
+                    {% if proximas %}
+                        {% for res in proximas[:5] %}
+                        <div class="d-flex align-items-center p-2 mb-2 rounded-3 bg-light bg-opacity-50">
+                            <div class="me-3 text-center" style="min-width: 45px;">
+                                <span class="d-block fw-bold text-primary">{{ res.fecha_clase.strftime('%d') }}</span>
+                                <span class="small text-muted text-uppercase" style="font-size: 0.65rem;">{{ res.fecha_clase.strftime('%b') }}</span>
+                            </div>
+                            <div>
+                                <h6 class="mb-0 small fw-bold text-dark">{{ res.horario.clase.nombre if res.horario else 'Clase Individual' }}</h6>
+                                <span class="small text-muted">{{ res.horario.hora_inicio.strftime('%H:%M') if res.horario else '' }}</span>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-muted small mb-0 px-2">No tienes próximas reservas.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-8">
+        <div class="card h-100 border-0 shadow-sm card-premium" style="border-radius: 25px;">
+            <div class="card-body p-4">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <div>
+                        <h5 class="fw-bold mb-1">Resumen de Clases</h5>
+                        <p class="text-muted small mb-0">
+                            Periodo {{ periodo_text }}: 
+                            <strong>{{ inicio_periodo.strftime('%d/%m') }}</strong> al 
+                            <strong>{{ fin_periodo.strftime('%d/%m') }}</strong>
+                        </p>
+                    </div>
+                    <div class="text-end">
+                        <span class="display-6 fw-bold text-primary">{{ asistencias_semana }}</span>
+                        <span class="text-muted fs-5">/ {{ limite_semanal }}</span>
+                    </div>
+                </div>
+                
+                {% set porc = (asistencias_semana / limite_semanal * 100) if limite_semanal > 0 else 100 %}
+                {% if porc > 100 %}{% set porc = 100 %}{% endif %}
+                
+                <div class="progress bg-light" style="height: 12px; border-radius: 6px; overflow: hidden;">
+                    <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                         role="progressbar" 
+                         style="width: {{ porc }}%; background-color: var(--primary);" 
+                         aria-valuenow="{{ porc }}" 
+                         aria-valuemin="0" 
+                         aria-valuemax="100"></div>
+                </div>
+                
+                <div class="mt-3 d-flex justify-content-between align-items-center">
+                    <span class="small {{ 'text-danger fw-bold' if asistencias_semana >= limite_semanal else 'text-muted' }}">
+                        {% if asistencias_semana >= limite_semanal %}
+                            <i class="fas fa-exclamation-circle me-1"></i> Has alcanzado tu límite para este periodo
+                        {% else %}
+                            <i class="fas fa-info-circle me-1"></i> Te quedan {{ limite_semanal - asistencias_semana }} clase(s)
+                        {% endif %}
+                    </span>
+                    <button class="btn btn-link btn-sm text-primary p-0 text-decoration-none" data-bs-toggle="collapse" data-bs-target="#infoCuota">
+                        Más detalles <i class="fas fa-chevron-down ms-1"></i>
+                    </button>
+                </div>
+                
+                <div class="collapse mt-3" id="infoCuota">
+                    <div class="p-3 bg-light rounded-4 small">
+                        Tu cuota permite reservar hasta {{ limite_semanal }} clase(s) cada {{ periodo_text }}. 
+                        Si necesitas cambiar tu plan, contacta con recepción.
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 </div>
 
-<div class="row">
-    {% set dias = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'] %}
-    {% for dia_idx in range(7) %}
-        <div class="col-lg-12 mb-4">
-            <h5 class="fw-bold border-bottom pb-2 mb-3">{{ dias[dia_idx] }}</h5>
-            <div class="row row-cols-1 row-cols-md-3 g-4">
-                {% set clase_en_dia = false %}
-                {% for h in horarios if h.dia_semana == dia_idx %}
-                    {% set clase_en_dia = true %}
-                    <div class="col">
-                        <div class="card h-100 border-0 shadow-sm class-card">
-                            <div class="card-body">
-                                <div class="d-flex justify-content-between align-items-start mb-2">
-                                    <span class="badge" style="background-color: {{ h.clase.color }}CC;">{{ h.clase.nombre }}</span>
-                                    <span class="small fw-bold text-muted">{{ h.hora_inicio.strftime('%H:%M') }}</span>
-                                </div>
-                                <p class="small text-muted mb-3"><i class="fas fa-user-circle me-1"></i> {{ h.instructor or 'Minouche' }}</p>
-                                
-                                <div class="occupancy-info">
-                                    <div class="d-flex justify-content-between small mb-1">
-                                        <span>Ocupación</span>
-                                        {% set ocupacion = h.asistencias|length %}
-                                        <span class="fw-bold">{{ ocupacion }}/{{ h.capacidad_maxima }}</span>
-                                    </div>
-                                    <div class="occupancy-bar">
-                                        {% set porc = (ocupacion / h.capacidad_maxima * 100)|round %}
-                                        <div class="occupancy-fill" style="width: {{ porc }}%; background-color: {{ '#FF6B6B' if porc > 80 else h.clase.color }};"></div>
-                                    </div>
-                                </div>
-                                
-                                <div class="d-grid mt-3">
-                                    <button onclick="reservarClase({{ h.id }})" class="btn btn-outline-primary btn-sm" {{ 'disabled' if ocupacion >= h.capacidad_maxima }}>
-                                        {{ 'Clase Completa' if ocupacion >= h.capacidad_maxima else 'Reservar Clase' }}
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
+<div class="calendar-container shadow-lg">
+    <div id='calendar'></div>
+</div>
+
+<!-- Reservation Modal -->
+<div class="modal fade" id="eventModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header d-flex justify-content-between align-items-start">
+                <div>
+                    <h3 class="modal-title fw-bold" id="modalTitle">Nombre de la Clase</h3>
+                    <p class="text-muted mb-0" id="modalDate">Lunes, 12 de Marzo</p>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="class-info-tag">
+                    <i class="far fa-clock"></i>
+                    <div>
+                        <span class="small text-muted d-block">Horario</span>
+                        <strong id="modalTime">18:00 - 19:30</strong>
                     </div>
-                {% endfor %}
-                {% if not clase_en_dia %}
-                    <div class="col-12">
-                        <p class="text-muted small italic">No hay clases programadas para este día.</p>
+                </div>
+                <div class="class-info-tag">
+                    <i class="fas fa-user-tie"></i>
+                    <div>
+                        <span class="small text-muted d-block">Instructor</span>
+                        <strong id="modalInstructor">Minouche</strong>
                     </div>
-                {% endif %}
+                </div>
+                <div class="class-info-tag">
+                    <i class="fas fa-users"></i>
+                    <div>
+                        <span class="small text-muted d-block">Plazas Disponibles</span>
+                        <strong id="modalOccupancy">12/15</strong>
+                    </div>
+                </div>
+
+                <div id="modalStatusAlert" class="mt-4"></div>
+
+                <div class="d-grid mt-4">
+                    <button id="btnAction" class="btn btn-primary btn-lg">Reservar esta Clase</button>
+                    <button id="btnCancel" class="btn btn-outline-danger btn-lg mt-2" style="display: none;">Cancelar Reserva</button>
+                </div>
             </div>
         </div>
-    {% endfor %}
+    </div>
 </div>
 {% endblock %}
 
 {% block extra_js %}
+<!-- FullCalendar JS -->
+<script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js'></script>
+<script src='https://cdn.jsdelivr.net/npm/@fullcalendar/core@6.1.10/locales/es.global.min.js'></script>
+
 <script>
-function reservarClase(horarioId) {
-    if (!confirm('¿Deseas confirmar tu reserva para esta clase?')) return;
+document.addEventListener('DOMContentLoaded', function() {
+    const calendarEl = document.getElementById('calendar');
+    const modal = new bootstrap.Modal(document.getElementById('eventModal'));
     
-    fetch(`/portal/reservar/${horarioId}`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
+    // Info de cuota para el JS
+    const limiteAlcanzado = {{ 'true' if asistencias_semana >= limite_semanal else 'false' }};
+    const periodoText = '{{ periodo_text }}';
+    
+    const calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'timeGridWeek',
+        locale: 'es',
+        headerToolbar: {
+            left: 'prev,next today',
+            center: 'title',
+            right: 'timeGridWeek,timeGridDay'
+        },
+        slotMinTime: '07:00:00',
+        slotMaxTime: '22:00:00',
+        allDaySlot: false,
+        height: 'auto',
+        events: '/portal/eventos',
+        slotLabelFormat: {
+            hour: 'numeric',
+            minute: '2-digit',
+            omitZeroMinute: false,
+            meridiem: 'short'
+        },
+        eventClick: function(info) {
+            const props = info.event.extendedProps;
+            const event = info.event;
+
+            document.getElementById('modalTitle').innerText = event.title.replace(/✅|❌/g, '').trim();
+            document.getElementById('modalDate').innerText = new Date(props.fecha).toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+            document.getElementById('modalTime').innerText = event.start.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }) + ' - ' + event.end.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+            document.getElementById('modalInstructor').innerText = props.instructor;
+            document.getElementById('modalOccupancy').innerText = props.ocupacion;
+
+            const btnAction = document.getElementById('btnAction');
+            const alertContainer = document.getElementById('modalStatusAlert');
+            alertContainer.innerHTML = '';
+
+            if (props.reservada) {
+                btnAction.style.display = 'none';
+                alertContainer.innerHTML = '<div class="alert alert-success"><i class="fas fa-check-circle me-2"></i> Ya tienes reservada esta clase. ¡Te esperamos!</div>';
+            } else if (props.completa) {
+                btnAction.style.display = 'none';
+                alertContainer.innerHTML = '<div class="alert alert-danger"><i class="fas fa-exclamation-triangle me-2"></i> Clase completa. Prueba otro horario.</div>';
+            } else if (limiteAlcanzado) {
+                btnAction.style.display = 'none';
+                alertContainer.innerHTML = '<div class="alert alert-warning"><i class="fas fa-exclamation-circle me-2"></i> Has alcanzado tu límite de clases para este periodo. No puedes realizar más reservas.</div>';
+            } else {
+                btnAction.style.display = 'block';
+                btnAction.onclick = () => procesarReserva(props.horario_id, props.fecha);
+            }
+
+            modal.show();
         }
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            alert(data.message);
-            location.reload();
-        } else {
-            alert('Error: ' + data.message);
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('Hubo un error al procesar la reserva.');
     });
-}
+    
+    calendar.render();
+
+    function procesarReserva(horarioId, fecha) {
+        btnAction.disabled = true;
+        btnAction.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Procesando...';
+        
+        fetch(`/portal/reservar/${horarioId}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ fecha: fecha })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('¡Reserva confirmada!');
+                modal.hide();
+                calendar.refetchEvents();
+            } else {
+                alert('Error: ' + data.message);
+                btnAction.disabled = false;
+                btnAction.innerHTML = 'Reservar esta Clase';
+            }
+        });
+    }
+});
 </script>
 {% endblock %}

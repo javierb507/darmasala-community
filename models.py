@@ -25,7 +25,8 @@ class Usuario(db.Model):
         roles = {
             'admin': 'Administrador',
             'instructor': 'Instructor',
-            'recepcionista': 'Recepcionista'
+            'recepcionista': 'Recepcionista',
+            'alumno': 'Alumno (Portal)'
         }
         return roles.get(self.rol, self.rol)
     
@@ -188,12 +189,19 @@ class HorarioSemanal(db.Model):
     clase = db.relationship('Clase', backref='horarios', lazy=True)
     
     def __repr__(self):
-        dias = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo']
-        return f'<Horario {dias[self.dia_semana]} {self.hora_inicio} - {self.hora_fin}>'
+        try:
+            dias = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo']
+            dia = dias[self.dia_semana]
+        except:
+            dia = f"Día {self.dia_semana}"
+        return f'<Horario {dia} {self.hora_inicio} - {self.hora_fin}>'
     
     def get_dia_display(self):
         dias = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo']
-        return dias[self.dia_semana]
+        try:
+            return dias[self.dia_semana]
+        except (IndexError, TypeError):
+            return f"Día {self.dia_semana}"
 
     def to_dict(self):
         return {
