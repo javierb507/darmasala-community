@@ -1,0 +1,127 @@
+{% extends "alumno/layout.html" %}
+
+{% block extra_css %}
+<style>
+    .class-card {
+        transition: transform 0.2s;
+        border-radius: 12px;
+        overflow: hidden;
+    }
+    .class-card:hover {
+        transform: translateY(-5px);
+    }
+    .occupancy-bar {
+        height: 8px;
+        background: #eee;
+        border-radius: 4px;
+        margin: 10px 0;
+    }
+    .occupancy-fill {
+        height: 100%;
+        border-radius: 4px;
+        transition: width 0.3s;
+    }
+    .quota-badge {
+        font-size: 0.8rem;
+        padding: 0.4rem 0.8rem;
+        border-radius: 50px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h1 class="h3 fw-bold">Mi Calendario de Clases</h1>
+        <p class="text-muted">Visualiza las clases disponibles y gestiona tus reservas.</p>
+    </div>
+    <div class="col-md-4 text-md-end">
+        <div class="bg-white p-3 rounded shadow-sm">
+            <span class="text-muted d-block small mb-1">Tu cuota semanal:</span>
+            <span class="h5 fw-bold mb-0">{{ student.get_tipo_cuota_display() }}</span>
+            <div class="mt-2">
+                <span class="badge bg-soft-primary text-primary quota-badge">
+                    Reservas esta semana: <strong>{{ asistencias_semana }}</strong>
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    {% set dias = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'] %}
+    {% for dia_idx in range(7) %}
+        <div class="col-lg-12 mb-4">
+            <h5 class="fw-bold border-bottom pb-2 mb-3">{{ dias[dia_idx] }}</h5>
+            <div class="row row-cols-1 row-cols-md-3 g-4">
+                {% set clase_en_dia = false %}
+                {% for h in horarios if h.dia_semana == dia_idx %}
+                    {% set clase_en_dia = true %}
+                    <div class="col">
+                        <div class="card h-100 border-0 shadow-sm class-card">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <span class="badge" style="background-color: {{ h.clase.color }}CC;">{{ h.clase.nombre }}</span>
+                                    <span class="small fw-bold text-muted">{{ h.hora_inicio.strftime('%H:%M') }}</span>
+                                </div>
+                                <p class="small text-muted mb-3"><i class="fas fa-user-circle me-1"></i> {{ h.instructor or 'Minouche' }}</p>
+                                
+                                <div class="occupancy-info">
+                                    <div class="d-flex justify-content-between small mb-1">
+                                        <span>Ocupación</span>
+                                        {% set ocupacion = h.asistencias|length %}
+                                        <span class="fw-bold">{{ ocupacion }}/{{ h.capacidad_maxima }}</span>
+                                    </div>
+                                    <div class="occupancy-bar">
+                                        {% set porc = (ocupacion / h.capacidad_maxima * 100)|round %}
+                                        <div class="occupancy-fill" style="width: {{ porc }}%; background-color: {{ '#FF6B6B' if porc > 80 else h.clase.color }};"></div>
+                                    </div>
+                                </div>
+                                
+                                <div class="d-grid mt-3">
+                                    <button onclick="reservarClase({{ h.id }})" class="btn btn-outline-primary btn-sm" {{ 'disabled' if ocupacion >= h.capacidad_maxima }}>
+                                        {{ 'Clase Completa' if ocupacion >= h.capacidad_maxima else 'Reservar Clase' }}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+                {% if not clase_en_dia %}
+                    <div class="col-12">
+                        <p class="text-muted small italic">No hay clases programadas para este día.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    {% endfor %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function reservarClase(horarioId) {
+    if (!confirm('¿Deseas confirmar tu reserva para esta clase?')) return;
+    
+    fetch(`/portal/reservar/${horarioId}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert(data.message);
+            location.reload();
+        } else {
+            alert('Error: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Hubo un error al procesar la reserva.');
+    });
+}
+</script>
+{% endblock %}
