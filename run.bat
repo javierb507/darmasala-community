@@ -12,37 +12,36 @@ if not exist venv (
 echo [2/3] Activando entorno y verificando dependencias...
 call venv\Scripts\activate
 python --version
-python -m pip install --upgrade pip setuptools wheel
+
+REM Check for experimental Python versions
+python -c "import sys; sys.exit(0 if sys.version_info < (3, 14) else 1)"
 if %ERRORLEVEL% NEQ 0 (
     echo.
-    echo ❌ Error actualizando pip/setuptools. Verifica tu conexión a internet.
-    pause
-    exit /b %ERRORLEVEL%
+    echo [!] ATENCION: Estas usando Python 3.14 (Version Experimental).
+    echo [!] Es posible que muchas librerias (como NumPy) aun no funcionen.
+    echo [!] Se recomienda usar Python 3.12 o 3.13.
+    echo.
 )
 
-echo 📥 Instalando librerías (esto puede tardar un minuto)...
-:: Forzamos binarios para evitar errores de compilación (vswhere/Meson)
+python -m pip install --upgrade pip setuptools wheel
+if %ERRORLEVEL% NEQ 0 (
+    echo [!] Error actualizando pip/setuptools.
+)
+
+echo [3/3] Instalando librerias...
+REM Evitamos compilar desde cero para saltar errores de vswhere/Meson
 python -m pip install --only-binary :all: -r requirements.txt
 if %ERRORLEVEL% NEQ 0 (
-    echo.
-    echo ⚠️ Algunos binarios faltan en esta versión de Python. Intentando instalación estándar...
+    echo [!] Algunos binarios no se encontraron. Intentando instalacion estandar...
     python -m pip install -r requirements.txt
     if %ERRORLEVEL% NEQ 0 (
-        echo.
-        echo ❌ Error crítico al instalar dependencias. 
-        echo Revisa el error de arriba (posiblemente falta de compilador C++ o versión de Python incompatible).
+        echo [!] ERROR CRITICO: No se pudieron instalar las dependencias.
         pause
-        exit /b %ERRORLEVEL%
+        exit /b 1
     )
 )
 
 echo.
-echo [3/3] Iniciando la aplicación...
-echo Abre tu navegador en: http://localhost:5001
-echo.
-echo Presiona Ctrl+C para detener el servidor.
-echo.
-
+echo Iniciando aplicacion...
 python run.py
-
 pause
