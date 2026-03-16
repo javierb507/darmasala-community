@@ -129,21 +129,26 @@ def init_test_data():
 
     # Students
     students = [
-        {'nombre': 'Ana', 'apellido': 'García', 'email': 'ana@example.com', 'dni': '12345678A', 'tipo_cuota': '1_clase_semanal', 'activo': True},
-        {'nombre': 'Luis', 'apellido': 'Pérez', 'email': 'luis@example.com', 'dni': '87654321B', 'tipo_cuota': '2_clases_semanal', 'activo': True},
-        {'nombre': 'Marta', 'apellido': 'Sanz', 'email': 'marta@example.com', 'dni': '11223344C', 'tipo_cuota': 'plana', 'activo': True}
+        {'nombre': 'Ana', 'apellido': 'García', 'email': 'ana@example.com', 'dni': '12345678A', 'telefono': '600111222', 'tipo_cuota': '1_clase_semanal', 'activo': True},
+        {'nombre': 'Luis', 'apellido': 'Pérez', 'email': 'luis@example.com', 'dni': '87654321B', 'telefono': '611222333', 'tipo_cuota': '2_clases_semanal', 'activo': True},
+        {'nombre': 'Marta', 'apellido': 'Sanz', 'email': 'marta@example.com', 'dni': '11223344C', 'telefono': '622333444', 'tipo_cuota': 'plana', 'activo': True},
+        {'nombre': 'Carlos', 'apellido': 'Ruiz', 'email': 'carlos@example.com', 'dni': '44332211D', 'telefono': '633444555', 'tipo_cuota': '1_clase_semanal', 'activo': True},
+        {'nombre': 'Elena', 'apellido': 'Martínez', 'email': 'elena@example.com', 'dni': '55667788E', 'telefono': '644555666', 'tipo_cuota': '2_clases_semanal', 'activo': True},
+        {'nombre': 'Javier', 'apellido': 'López', 'email': 'javier@example.com', 'dni': '99887766F', 'telefono': '655666777', 'tipo_cuota': 'plana', 'activo': True}
     ]
     for s_data in students:
         if not Alumno.query.filter_by(email=s_data['email']).first():
             alumno = Alumno(**s_data)
             db.session.add(alumno)
             db.session.flush()
+            
+            # Use DNI as password if exists, otherwise use phone
+            password_plain = s_data.get('dni') or s_data.get('telefono') or 'Atma1234'
             # Create Portal User for this student
-            dni_pass = s_data.get('dni', '12345678X')
             portal_user = Usuario(
                 username=s_data['email'],
                 email=s_data['email'],
-                password_hash=generate_password_hash(dni_pass),
+                password_hash=generate_password_hash(password_plain),
                 nombre=s_data['nombre'],
                 apellido=s_data['apellido'],
                 rol='alumno',
