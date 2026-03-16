@@ -272,15 +272,16 @@ def perfil():
     return render_template('alumno/perfil.html', student=student)
 
 @student_portal_bp.route('/reservar', methods=['POST'])
+@student_portal_bp.route('/reservar/<int:horario_id>', methods=['POST'])
 @student_login_required
-def reservar():
+def reservar(horario_id=None):
     """Reservar una clase o evento puntual"""
     student = Alumno.query.get(session['student_id'])
     
-    data = request.get_json()
-    horario_id = data.get('horario_id')
+    data = request.get_json() if request.is_json else {}
+    horario_id = data.get('horario_id') or horario_id
     evento_id = data.get('evento_id')
-    fecha_str = data.get('fecha')
+    fecha_str = data.get('fecha') or request.form.get('fecha')
     
     if not fecha_str:
         return jsonify({'success': False, 'message': 'Fecha no proporcionada.'}), 400
