@@ -290,75 +290,88 @@ def reservar():
     if fecha_reserva < date.today():
         return jsonify({'success': False, 'message': 'No puedes reservar clases en fechas pasadas.'})
 
-    # Lógica de validación de cuota
-    limite, periodo = get_quota_details(student)
+    try:
+        # Lógica de validación de cuota
+        limite, periodo = get_quota_details(student)
 
-    # Calcular rango para el límite
-    if periodo == 'semanal':
-        inicio_p = fecha_reserva - timedelta(days=fecha_reserva.weekday())
-        fin_p = inicio_p + timedelta(days=6)
-    else: # mensual
-        inicio_p = fecha_reserva.replace(day=1)
-        if fecha_reserva.month == 12:
-            fin_p = fecha_reserva.replace(year=fecha_reserva.year + 1, month=1, day=1) - timedelta(days=1)
-        else:
-            fin_p = fecha_reserva.replace(month=fecha_reserva.month + 1, day=1) - timedelta(days=1)
+        # Calcular rango para el límite
+        if periodo == 'semanal':
+            inicio_p = fecha_reserva - timedelta(days=fecha_reserva.weekday())
+            fin_p = inicio_p + timedelta(days=6)
+        else: # mensual
+            inicio_p = fecha_reserva.replace(day=1)
+            if fecha_reserva.month == 12:
+                fin_p = fecha_reserva.replace(year=fecha_reserva.year + 1, month=1, day=1) - timedelta(days=1)
+            else:
+                fin_p = fecha_reserva.replace(month=fecha_reserva.month + 1, day=1) - timedelta(days=1)
 
-    reservas_periodo = get_reservation_count(student.id, inicio_p, fin_p)
-    
-    if reservas_periodo >= limite:
-        return jsonify({
-            'success': False, 
-            'message': f'Has agotado tus clases para el periodo ({limite} clases {periodo}).'
-        })
-
-    # Verificar si ya tiene reserva para este horario/evento y día
-    existente = Asistencia.query.filter_by(
-        alumno_id=student.id, 
-        horario_id=horario_id, 
-        evento_id=evento_id,
-        fecha_clase=fecha_reserva
-    ).first()
-    
-    if existente:
-        return jsonify({'success': False, 'message': 'Ya tienes una reserva para esta sesión.'})
-
-    # Verificar capacidad
-    if horario_id:
-        horario = HorarioSemanal.query.get_or_404(horario_id)
-        # Contar alumnos del roster + extra (Asistencia que no están en roster)
-        roster_ids = [a.id for a in horario.alumnos]
-        extra_count = Asistencia.query.filter(
-            Asistencia.horario_id == horario_id,
-            Asistencia.fecha_clase == fecha_reserva,
-            ~Asistencia.alumno_id.in_(roster_ids) if roster_ids else True
-        ).count()
-        if (len(roster_ids) + extra_count) >= (horario.capacidad_maxima or 15):
-            return jsonify({'success': False, 'message': 'Lo sentimos, esta clase está completa.'})
-    elif evento_id:
-        evento = EventoCalendario.query.get_or_404(evento_id)
-        # Si es un evento puntual con alumno_id, ya está "reservado" para ese alumno
-        if evento.alumno_id and evento.alumno_id != student.id:
-            return jsonify({'success': False, 'message': 'Esta sesión privada ya está ocupada.'})
+        reservas_periodo = get_reservation_count(student.id, inicio_p, fin_p)
         
-        ocupacion = Asistencia.query.filter_by(evento_id=evento_id, fecha_clase=fecha_reserva).count()
-        capacidad = 1 if evento.alumno_id else 15
-        if ocupacion >= capacidad:
-            return jsonify({'success': False, 'message': 'Esta sesión ya está completa.'})
+        if reservas_periodo >= limite:
+            return jsonify({
+                'success': False, 
+                'message': f'Has agotado tus clases para el periodo ({limite} clases {periodo}).'
+            })
 
-    nueva_reserva = Asistencia(
-        alumno_id=student.id,
-        horario_id=horario_id,
-        evento_id=evento_id,
-        fecha_clase=fecha_reserva,
-        presente=True,
-        observaciones='Reserva desde el portal'
-    )
-    
-    db.session.add(nueva_reserva)
-    db.session.commit()
-    
-    return jsonify({'success': True, 'message': 'Reserva realizada con éxito.'})
+        # Verificar si ya tiene reserva para este horario/evento y día
+        existente = Asistencia.query.filter_by(
+            alumno_id=student.id, 
+            horario_id=horario_id, 
+            evento_id=evento_id,
+            fecha_clase=fecha_reserva
+        ).first()
+        
+        if existente:
+            return jsonify({'success': False, 'message': 'Ya tienes una reserva para esta sesión.'})
+
+        # Verificar capacidad
+        if horario_id:
+            horario = HorarioSemanal.query.get_or_404(horario_id)
+            # Contar alumnos del roster + extra (Asistencia que no están en roster)
+            roster_ids = [a.id for a in horario.alumnos]
+            extra_count = Asistencia.query.filter(
+                Asistencia.horario_id == horario_id,
+                Asistencia.fecha_clase == fecha_reserva,
+                ~Asistencia.alumno_id.in_(roster_ids) if roster_ids else True
+            ).count()
+            
+            # Usar capacidad_centro si no hay capacidad_maxima en el horario
+            capacidad_max = horario.capacidad_maxima
+            if not capacidad_max:
+                from models import Configuracion
+                config_cap = Configuracion.query.filter_by(clave='capacidad_centro').first()
+                capacidad_max = int(config_cap.valor) if config_cap else 15
+
+            if (len(roster_ids) + extra_count) >= capacidad_max:
+                return jsonify({'success': False, 'message': 'Lo sentimos, esta clase está completa.'})
+        elif evento_id:
+            evento = EventoCalendario.query.get_or_404(evento_id)
+            # Si es un evento puntual con alumno_id, ya está "reservado" para ese alumno
+            if evento.alumno_id and evento.alumno_id != student.id:
+                return jsonify({'success': False, 'message': 'Esta sesión privada ya está ocupada.'})
+            
+            ocupacion = Asistencia.query.filter_by(evento_id=evento_id, fecha_clase=fecha_reserva).count()
+            capacidad = 1 if evento.alumno_id else 15
+            if ocupacion >= capacidad:
+                return jsonify({'success': False, 'message': 'Esta sesión ya está completa.'})
+
+        nueva_reserva = Asistencia(
+            alumno_id=student.id,
+            horario_id=horario_id,
+            evento_id=evento_id,
+            fecha_clase=fecha_reserva,
+            presente=True,
+            observaciones='Reserva desde el portal'
+        )
+        
+        db.session.add(nueva_reserva)
+        db.session.commit()
+        return jsonify({'success': True, 'message': 'Reserva realizada con éxito.'})
+
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error en reserva: {e}")
+        return jsonify({'success': False, 'message': f'Error al procesar la reserva: {str(e)}'})
 
 @student_portal_bp.route('/logout')
 def logout():
