@@ -11,7 +11,7 @@ class Config:
     
     # Configuración de la aplicación
     APP_NAME = 'Atma suddhi - Gestión de Escuela de Yoga'
-    APP_VERSION = '1.1.0'
+    APP_VERSION = '1.2.6 version 1'
     
     # Configuración de base de datos
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or 'sqlite:///yoga_school.db'
