@@ -49,9 +49,13 @@ def login():
                 session['user_id_portal'] = user.id # ID de usuario para gestión
                 session['student_name'] = f"{student.nombre} {student.apellido}"
                 
-                # Actualizar último acceso del usuario
-                user.ultimo_acceso = datetime.utcnow()
-                db.session.commit()
+                # Actualizar último acceso del usuario (opcional, no bloqueante)
+                try:
+                    user.ultimo_acceso = datetime.utcnow()
+                    db.session.commit()
+                except Exception as e:
+                    db.session.rollback()
+                    print(f"Error al actualizar último acceso: {e}")
                 
                 flash(f'¡Hola, {student.nombre}! Bienvenido a tu zona personal.', 'success')
                 return redirect(url_for('student_portal.dashboard'))
@@ -115,13 +119,24 @@ def dashboard():
 @student_portal_bp.route('/eventos')
 @student_login_required
 def eventos():
-    """Genera los eventos para FullCalendar basándose en el horario semanal"""
+    """Genera los eventos para FullCalendar basándose en el horario semanal y eventos puntuales"""
     # Mostrar las clases de las últimas 2 semanas y las próximas 4 semanas
     start_date = date.today() - timedelta(days=14)
     end_date = date.today() + timedelta(days=28)
     
     student_id = session['student_id']
-    horarios = HorarioSemanal.query.filter_by(activo=True).all()
+    horarios_semanales = HorarioSemanal.query.filter_by(activo=True).all()
+    
+    # Eventos puntuales (clases únicas)
+    # Convertir fechas a datetimes para la consulta
+    start_dt = datetime.combine(start_date, datetime.min.time())
+    end_dt = datetime.combine(end_date, datetime.max.time())
+    
+    eventos_puntuales = EventoCalendario.query.filter(
+        EventoCalendario.fecha_inicio >= start_dt,
+        EventoCalendario.fecha_inicio <= end_dt,
+        EventoCalendario.activo == True
+    ).all()
     
     # Reservas actuales del alumno
     reservas = Asistencia.query.filter(
@@ -130,21 +145,31 @@ def eventos():
         Asistencia.fecha_clase <= end_date
     ).all()
     
-    reserva_map = { (r.horario_id, r.fecha_clase): r for r in reservas }
+    reserva_map = { (r.horario_id, r.evento_id, r.fecha_clase): r for r in reservas }
     
     events = []
+    
+    # 1. Clases Recurrentes (HorarioSemanal)
     curr = start_date
     while curr <= end_date:
         dia_semana = curr.weekday() # 0 = Lunes, 6 = Domingo
         
-        for h in horarios:
+        for h in horarios_semanales:
             if h.dia_semana == dia_semana:
                 # Verificar si ya está reservada por el alumno
-                reservada = (h.id, curr) in reserva_map
+                # Buscamos en reserva_map usando horario_id
+                reservada = (h.id, None, curr) in reserva_map
                 
-                # Contar ocupación total para ese día/horario
-                ocupacion = Asistencia.query.filter_by(horario_id=h.id, fecha_clase=curr).count()
-                completa = ocupacion >= h.capacidad_maxima
+                # Contar ocupación: Alumnos en roster + Alumnos con Asistencia NO en roster
+                roster_ids = [a.id for a in h.alumnos]
+                extra_count = Asistencia.query.filter(
+                    Asistencia.horario_id == h.id,
+                    Asistencia.fecha_clase == curr,
+                    ~Asistencia.alumno_id.in_(roster_ids) if roster_ids else True
+                ).count()
+                
+                ocupacion_total = len(roster_ids) + extra_count
+                completa = ocupacion_total >= (h.capacidad_maxima or 15)
                 
                 title = f"{h.clase.nombre}"
                 if reservada:
@@ -152,31 +177,75 @@ def eventos():
                 elif completa:
                     title = f"❌ {title} (Completa)"
                 
+                # Color de la clase
+                color = h.clase.color if h.clase else '#8B5FBF'
+                
                 event = {
-                    'id': h.id,
+                    'id': f"h_{h.id}_{curr}",
                     'title': title,
                     'start': f"{curr}T{h.hora_inicio.strftime('%H:%M:%S')}",
                     'end': f"{curr}T{h.hora_fin.strftime('%H:%M:%S')}",
-                    'backgroundColor': h.clase.color,
-                    'borderColor': h.clase.color,
+                    'backgroundColor': color,
+                    'borderColor': color,
                     'extendedProps': {
                         'horario_id': h.id,
+                        'evento_id': None,
                         'fecha': curr.strftime('%Y-%m-%d'),
                         'reservada': reservada,
                         'completa': completa,
-                        'ocupacion': f"{ocupacion}/{h.capacidad_maxima}",
+                        'ocupacion': f"{ocupacion_total}/{h.capacidad_maxima or 15}",
                         'instructor': h.instructor or 'Minouche'
                     }
                 }
                 
-                # Dim if complete and not reserved
                 if completa and not reservada:
                     event['classNames'] = ['event-full']
                 
                 events.append(event)
         
         curr += timedelta(days=1)
-        
+    
+    # 2. Eventos Puntuales (EventoCalendario)
+    for ev in eventos_puntuales:
+        ev_date = ev.fecha_inicio.date()
+        # Si es una Yogaterapia personal de otro alumno, no mostrarla
+        # Si es una clase puntual (tiene clase_id), mostrarla si es para todos o si el alumno está invitado
+        if ev.clase_id or ev.alumno_id == student_id or ev.alumno_id is None:
+            reservada = (None, ev.id, ev_date) in reserva_map or ev.alumno_id == student_id
+            
+            # Para eventos puntuales, la ocupación es diferente (suelen ser 1 a 1 si es Yogaterapia)
+            # Si tiene clase_id, puede ser grupal puntual
+            ocupacion = Asistencia.query.filter_by(evento_id=ev.id, fecha_clase=ev_date).count()
+            capacidad = 1 if ev.alumno_id else 15 # Simplificación
+            completa = ocupacion >= capacidad
+            
+            title = ev.titulo
+            if reservada:
+                title = f"✅ {title}"
+            
+            color = ev.color or '#ffc107'
+            if ev.clase:
+                color = ev.clase.color
+            
+            event = {
+                'id': f"e_{ev.id}",
+                'title': title,
+                'start': ev.fecha_inicio.isoformat(),
+                'end': ev.fecha_fin.isoformat(),
+                'backgroundColor': color,
+                'borderColor': color,
+                'extendedProps': {
+                    'horario_id': None,
+                    'evento_id': ev.id,
+                    'fecha': ev_date.strftime('%Y-%m-%d'),
+                    'reservada': reservada,
+                    'completa': completa,
+                    'ocupacion': f"{ocupacion}/{capacidad}",
+                    'instructor': ev.instructor or 'Minouche'
+                }
+            }
+            events.append(event)
+            
     return jsonify(events)
 
 @student_portal_bp.route('/perfil', methods=['GET', 'POST'])
@@ -202,21 +271,27 @@ def perfil():
 
     return render_template('alumno/perfil.html', student=student)
 
-@student_portal_bp.route('/reservar/<int:horario_id>', methods=['POST'])
+@student_portal_bp.route('/reservar', methods=['POST'])
 @student_login_required
-def reservar(horario_id):
-    """Reservar una clase"""
+def reservar():
+    """Reservar una clase o evento puntual"""
     student = Alumno.query.get(session['student_id'])
-    horario = HorarioSemanal.query.get_or_404(horario_id)
     
+    data = request.get_json()
+    horario_id = data.get('horario_id')
+    evento_id = data.get('evento_id')
+    fecha_str = data.get('fecha')
+    
+    if not fecha_str:
+        return jsonify({'success': False, 'message': 'Fecha no proporcionada.'}), 400
+    
+    fecha_reserva = datetime.strptime(fecha_str, '%Y-%m-%d').date()
+    
+    if fecha_reserva < date.today():
+        return jsonify({'success': False, 'message': 'No puedes reservar clases en fechas pasadas.'})
+
     # Lógica de validación de cuota
     limite, periodo = get_quota_details(student)
-    
-    fecha_str = request.json.get('fecha') if request.is_json else request.form.get('fecha')
-    if not fecha_str:
-        fecha_reserva = date.today()
-    else:
-        fecha_reserva = datetime.strptime(fecha_str, '%Y-%m-%d').date()
 
     # Calcular rango para el límite
     if periodo == 'semanal':
@@ -236,31 +311,48 @@ def reservar(horario_id):
             'success': False, 
             'message': f'Has agotado tus clases para el periodo ({limite} clases {periodo}).'
         })
-    
-    if fecha_reserva < date.today():
-        return jsonify({'success': False, 'message': 'No puedes reservar clases en fechas pasadas.'})
 
-    # Verificar si ya tiene reserva para este horario y día
+    # Verificar si ya tiene reserva para este horario/evento y día
     existente = Asistencia.query.filter_by(
         alumno_id=student.id, 
         horario_id=horario_id, 
+        evento_id=evento_id,
         fecha_clase=fecha_reserva
     ).first()
     
     if existente:
-        return jsonify({'success': False, 'message': 'Ya tienes una reserva para esta clase.'})
+        return jsonify({'success': False, 'message': 'Ya tienes una reserva para esta sesión.'})
 
     # Verificar capacidad
-    ocupacion = Asistencia.query.filter_by(horario_id=horario_id, fecha_clase=fecha_reserva).count()
-    if ocupacion >= horario.capacidad_maxima:
-        return jsonify({'success': False, 'message': 'Lo sentimos, esta clase está completa.'})
+    if horario_id:
+        horario = HorarioSemanal.query.get_or_404(horario_id)
+        # Contar alumnos del roster + extra (Asistencia que no están en roster)
+        roster_ids = [a.id for a in horario.alumnos]
+        extra_count = Asistencia.query.filter(
+            Asistencia.horario_id == horario_id,
+            Asistencia.fecha_clase == fecha_reserva,
+            ~Asistencia.alumno_id.in_(roster_ids) if roster_ids else True
+        ).count()
+        if (len(roster_ids) + extra_count) >= (horario.capacidad_maxima or 15):
+            return jsonify({'success': False, 'message': 'Lo sentimos, esta clase está completa.'})
+    elif evento_id:
+        evento = EventoCalendario.query.get_or_404(evento_id)
+        # Si es un evento puntual con alumno_id, ya está "reservado" para ese alumno
+        if evento.alumno_id and evento.alumno_id != student.id:
+            return jsonify({'success': False, 'message': 'Esta sesión privada ya está ocupada.'})
+        
+        ocupacion = Asistencia.query.filter_by(evento_id=evento_id, fecha_clase=fecha_reserva).count()
+        capacidad = 1 if evento.alumno_id else 15
+        if ocupacion >= capacidad:
+            return jsonify({'success': False, 'message': 'Esta sesión ya está completa.'})
 
     nueva_reserva = Asistencia(
         alumno_id=student.id,
         horario_id=horario_id,
+        evento_id=evento_id,
         fecha_clase=fecha_reserva,
         presente=True,
-        observaciones='Reserva desde el portal del alumno'
+        observaciones='Reserva desde el portal'
     )
     
     db.session.add(nueva_reserva)
