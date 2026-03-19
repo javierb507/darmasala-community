@@ -143,7 +143,26 @@
 
 <div class="row mb-4 animate-fade-in" style="animation-delay: 0.1s;">
     <div class="col-lg-4 mb-4 mb-lg-0">
-        <div class="card h-100 border-0 shadow-sm" style="border-radius: 25px; background: linear-gradient(135deg, #ffffff 0%, #f9f9f9 100%);">
+        <!-- Yogaterapia Section (NUEVO) - Mover al principio para visibilidad -->
+        <div class="card border-0 shadow-sm mb-4 animate-fade-in" style="border-radius: 25px; background: linear-gradient(135deg, #FDFCFB 0%, #E2D1C3 100%); animation-delay: 0.1s; position: relative; z-index: 10;">
+            <div class="card-body p-4">
+                <div class="d-flex align-items-center mb-3">
+                    <div class="bg-dark bg-opacity-10 p-3 rounded-4 me-3">
+                        <i class="fas fa-spa text-dark fs-4"></i>
+                    </div>
+                    <div>
+                        <h6 class="text-dark small mb-0 fw-bold">Yogaterapia Privada</h6>
+                        <span class="text-muted small" style="font-size: 0.7rem;">Sesiones Individuales</span>
+                    </div>
+                </div>
+                <p class="small text-dark mb-3 opacity-75">¿Necesitas una sesión personalizada? Solicítala aquí y nos pondremos en contacto contigo.</p>
+                <a href="{{ url_for('student_portal.solicitar_yogaterapia') }}" class="btn btn-dark btn-sm w-100 rounded-pill py-2">
+                    <i class="fas fa-magic me-1"></i> Solicitar Sesión
+                </a>
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm mb-4" style="border-radius: 25px; background: linear-gradient(135deg, #ffffff 0%, #f9f9f9 100%);">
             <div class="card-body p-4">
                 <div class="d-flex align-items-center mb-3">
                     <div class="bg-primary bg-opacity-10 p-3 rounded-4 me-3">
@@ -155,31 +174,12 @@
                     </div>
                 </div>
                 <hr class="opacity-10">
-                <div class="d-flex justify-content-between align-items-center mb-3">
+                <div class="d-flex justify-content-between align-items-center mb-0">
                     <span class="small text-muted">Estado Matricula</span>
                     <span class="badge {{ 'bg-success' if student.matricula_pagada else 'bg-warning' }} rounded-pill">
                         {{ 'Pagada' if student.matricula_pagada else 'Pendiente' }}
                     </span>
                 </div>
-            </div>
-        </div>
-
-        <!-- Yogaterapia Section (NUEVO) -->
-        <div class="card border-0 shadow-sm mt-4 animate-fade-in" style="border-radius: 25px; background: linear-gradient(135deg, #FDFCFB 0%, #E2D1C3 100%); animation-delay: 0.15s;">
-            <div class="card-body p-4">
-                <div class="d-flex align-items-center mb-3">
-                    <div class="bg-dark bg-opacity-10 p-3 rounded-4 me-3">
-                        <i class="fas fa-spa text-dark fs-4"></i>
-                    </div>
-                    <div>
-                        <h6 class="text-dark small mb-0 fw-bold">Yogaterapia Privada</h6>
-                        <span class="text-muted small" style="font-size: 0.7rem;">Sesiones Individuales</span>
-                    </div>
-                </div>
-                <p class="small text-dark mb-3 opacity-75">Solicita una sesión personalizada para profundizar en tu práctica o tratar dolencias específicas.</p>
-                <a href="{{ url_for('student_portal.solicitar_yogaterapia') }}" class="btn btn-dark btn-sm w-100 rounded-pill py-2">
-                    <i class="fas fa-magic me-1"></i> Solicitar Sesión
-                </a>
             </div>
         </div>
 
@@ -208,7 +208,7 @@
         </div>
     </div>
     <div class="col-lg-8">
-        <div class="card h-100 border-0 shadow-sm card-premium" style="border-radius: 25px;">
+        <div class="card border-0 shadow-sm card-premium" style="border-radius: 25px;">
             <div class="card-body p-4">
                 <div class="d-flex justify-content-between align-items-start mb-3">
                     <div>
