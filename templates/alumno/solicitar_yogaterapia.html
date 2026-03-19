@@ -1,0 +1,152 @@
+{% extends "base.html" %}
+
+{% block title %}Solicitar Yogaterapia - Atma Suddhi Yoga{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --premium-gold: #D4AF37;
+        --soft-gold: #F4E6BD;
+        --deep-purple: #4A148C;
+        --accent-purple: #8E24AA;
+    }
+
+    body {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        min-height: 100vh;
+    }
+
+    .request-container {
+        max-width: 600px;
+        margin: 60px auto;
+        padding: 0 20px;
+    }
+
+    .request-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border: none;
+        border-radius: 20px;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+        overflow: hidden;
+        transition: transform 0.3s ease;
+    }
+
+    .request-header {
+        background: linear-gradient(135deg, var(--deep-purple), var(--accent-purple));
+        padding: 40px 20px;
+        text-align: center;
+        color: white;
+    }
+
+    .request-header i {
+        font-size: 3rem;
+        margin-bottom: 15px;
+        color: var(--soft-gold);
+    }
+
+    .request-body {
+        padding: 40px;
+    }
+
+    .form-control {
+        border-radius: 10px;
+        padding: 12px 15px;
+        border: 1px solid #dee2e6;
+        background: #f8f9fa;
+        transition: all 0.3s ease;
+    }
+
+    .form-control:focus {
+        background: white;
+        box-shadow: 0 0 0 0.25rem rgba(142, 36, 170, 0.1);
+        border-color: var(--accent-purple);
+    }
+
+    .btn-submit {
+        background: linear-gradient(135deg, var(--deep-purple), var(--accent-purple));
+        border: none;
+        border-radius: 10px;
+        padding: 12px;
+        font-weight: 600;
+        color: white;
+        transition: all 0.3s ease;
+        margin-top: 20px;
+    }
+
+    .btn-submit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(74, 20, 140, 0.3);
+        color: white;
+    }
+
+    .back-link {
+        display: block;
+        text-align: center;
+        margin-top: 20px;
+        color: #6c757d;
+        text-decoration: none;
+        font-size: 0.9rem;
+    }
+
+    .back-link:hover {
+        color: var(--deep-purple);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="request-container">
+    <div class="request-card animate-fade-in">
+        <div class="request-header">
+            <i class="fas fa-spa"></i>
+            <h2 class="fw-bold mb-0">Solicitar Yogaterapia</h2>
+            <p class="mb-0 mt-2 opacity-75">Cuéntanos cómo podemos ayudarte a sanar</p>
+        </div>
+        
+        <div class="request-body">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show rounded-pill px-4 mb-4" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <form method="POST">
+                <div class="mb-3">
+                    <label class="form-label text-muted small fw-bold">NOMBRE COMPLETO</label>
+                    <input type="text" name="nombre" class="form-control" required placeholder="Tu nombre">
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label text-muted small fw-bold">EMAIL</label>
+                        <input type="email" name="email" class="form-control" required placeholder="tu@email.com">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label text-muted small fw-bold">TELÉFONO</label>
+                        <input type="tel" name="telefono" class="form-control" placeholder="Tu número">
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label text-muted small fw-bold">MOTIVO DE CONSULTA</label>
+                    <textarea name="motivo" class="form-control" rows="4" required placeholder="Describe brevemente tus necesidades o condiciones físicas..."></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-submit w-100">
+                    <i class="fas fa-paper-plane me-2"></i> Enviar Solicitud
+                </button>
+            </form>
+
+            <a href="{{ url_for('student_portal.login') }}" class="back-link">
+                <i class="fas fa-arrow-left me-1"></i> Volver al Portal de Alumnos
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

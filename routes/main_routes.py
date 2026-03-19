@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, redirect, url_for, request
 from datetime import datetime, date, timedelta
-from models import Alumno, EventoCalendario, Asistencia, db
+from models import Alumno, EventoCalendario, Asistencia, db, SolicitudYogaterapia
 from utils.auth_utils import login_required
 from utils.app_utils import obtener_sutra_semanal, obtener_proximas_citas
 
@@ -112,6 +112,12 @@ def index():
             'count': count
         })
     
+    # Reservas recientes desde el portal para notificaciones
+    reservas_recientes = Asistencia.query.filter(
+        Asistencia.observaciones.like('%portal%'),
+        Asistencia.fecha_clase >= hoy - timedelta(days=2) # Mostrar solo las ultimas 48h
+    ).order_by(Asistencia.id.desc()).limit(5).all()
+
     return render_template('index.html', 
                          proximas_citas=proximas_citas,
                          sesiones_hoy=sesiones_hoy_provinientes,
@@ -121,6 +127,8 @@ def index():
                          asistencias_semana=asistencias_semana,
                          cambio_asistencia=round(cambio_asistencia, 1),
                          grafico_asistencia=grafico_asistencia,
+                         reservas_recientes=reservas_recientes,
+                         solicitudes_yogaterapia=SolicitudYogaterapia.query.filter_by(leida=False).order_by(SolicitudYogaterapia.id.desc()).all(),
                          today=hoy)
 
 @main_bp.route('/dashboard')

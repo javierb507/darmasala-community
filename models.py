@@ -821,3 +821,19 @@ class Sutra(db.Model):
     
     def __repr__(self):
         return f'<Sutra {self.numero}: {self.traduccion[:50]}...>'
+
+# Modelo para Solicitudes de Yogaterapia desde el Portal
+class SolicitudYogaterapia(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    nombre = db.Column(db.String(100), nullable=False)
+    email = db.Column(db.String(100), nullable=False)
+    telefono = db.Column(db.String(20))
+    motivo = db.Column(db.Text)
+    fecha_solicitud = db.Column(db.DateTime, default=datetime.utcnow)
+    leida = db.Column(db.Boolean, default=False)
+    alumno_id = db.Column(db.Integer, db.ForeignKey('alumno.id'), nullable=True)
+    
+    alumno = db.relationship('Alumno', backref='solicitudes_yoga_portal', lazy=True)
+    
+    def __repr__(self):
+        return f'<SolicitudYogaterapia {self.nombre} - {self.fecha_solicitud.strftime("%d/%m/%Y")}>'

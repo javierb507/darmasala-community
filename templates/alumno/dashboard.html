@@ -341,16 +341,16 @@ document.addEventListener('DOMContentLoaded', function() {
 
             if (props.reservada) {
                 btnAction.style.display = 'none';
-                alertContainer.innerHTML = '<div class="alert alert-success"><i class="fas fa-check-circle me-2"></i> Ya tienes reservada esta clase. ¡Te esperamos!</div>';
+                alertContainer.innerHTML = '<div class="alert alert-success d-flex align-items-center"><i class="fas fa-check-circle me-2 fs-4"></i><div>Ya tienes reservada esta clase. ¡Te esperamos!</div></div>';
             } else if (props.completa) {
                 btnAction.style.display = 'none';
-                alertContainer.innerHTML = '<div class="alert alert-danger"><i class="fas fa-exclamation-triangle me-2"></i> Clase completa. Prueba otro horario.</div>';
+                alertContainer.innerHTML = '<div class="alert alert-danger d-flex align-items-center"><i class="fas fa-exclamation-triangle me-2 fs-4"></i><div>Clase completa. Prueba otro horario.</div></div>';
             } else if (limiteAlcanzado) {
                 btnAction.style.display = 'none';
-                alertContainer.innerHTML = '<div class="alert alert-warning"><i class="fas fa-exclamation-circle me-2"></i> Has alcanzado tu límite de clases para este periodo. No puedes realizar más reservas.</div>';
+                alertContainer.innerHTML = '<div class="alert alert-warning d-flex align-items-center"><i class="fas fa-exclamation-circle me-2 fs-4"></i><div>Has alcanzado tu límite de clases para este periodo.</div></div>';
             } else {
                 btnAction.style.display = 'block';
-                btnAction.onclick = () => procesarReserva(props.horario_id, props.fecha);
+                btnAction.onclick = () => procesarReserva(props.horario_id, props.evento_id, props.fecha);
             }
 
             modal.show();
@@ -359,26 +359,47 @@ document.addEventListener('DOMContentLoaded', function() {
     
     calendar.render();
 
-    function procesarReserva(horarioId, fecha) {
+    function procesarReserva(horarioId, eventoId, fecha) {
         btnAction.disabled = true;
         btnAction.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Procesando...';
         
-        fetch(`/portal/reservar/${horarioId}`, {
+        const payload = {
+            fecha: fecha,
+            horario_id: horarioId,
+            evento_id: eventoId
+        };
+
+        fetch('/portal/reservar', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ fecha: fecha })
+            body: JSON.stringify(payload)
         })
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                alert('¡Reserva confirmada!');
+                Swal.fire({
+                    icon: 'success',
+                    title: '¡Reserva confirmada!',
+                    text: data.message,
+                    timer: 2000,
+                    showConfirmButton: false
+                });
                 modal.hide();
                 calendar.refetchEvents();
             } else {
-                alert('Error: ' + data.message);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'No se pudo reservar',
+                    text: data.message
+                });
                 btnAction.disabled = false;
                 btnAction.innerHTML = 'Reservar esta Clase';
             }
+        })
+        .catch(err => {
+            console.error(err);
+            btnAction.disabled = false;
+            btnAction.innerHTML = 'Reservar esta Clase';
         });
     }
 });

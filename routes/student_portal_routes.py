@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session, jsonify
 from werkzeug.security import check_password_hash, generate_password_hash
 from datetime import datetime, date, timedelta
-from models import db, Alumno, Usuario, HorarioSemanal, Asistencia, Clase, EventoCalendario
+from models import db, Alumno, Usuario, HorarioSemanal, Asistencia, Clase, EventoCalendario, SolicitudYogaterapia
 from utils.student_auth import student_login_required
 
 student_portal_bp = Blueprint('student_portal', __name__, url_prefix='/portal')
@@ -292,27 +292,28 @@ def reservar(horario_id=None):
         return jsonify({'success': False, 'message': 'No puedes reservar clases en fechas pasadas.'})
 
     try:
-        # Lógica de validación de cuota
-        limite, periodo = get_quota_details(student)
+        # Lógica de validación de cuota (Omitir si es tarifa plana)
+        if student.tipo_cuota != 'plana':
+            limite, periodo = get_quota_details(student)
 
-        # Calcular rango para el límite
-        if periodo == 'semanal':
-            inicio_p = fecha_reserva - timedelta(days=fecha_reserva.weekday())
-            fin_p = inicio_p + timedelta(days=6)
-        else: # mensual
-            inicio_p = fecha_reserva.replace(day=1)
-            if fecha_reserva.month == 12:
-                fin_p = fecha_reserva.replace(year=fecha_reserva.year + 1, month=1, day=1) - timedelta(days=1)
-            else:
-                fin_p = fecha_reserva.replace(month=fecha_reserva.month + 1, day=1) - timedelta(days=1)
+            # Calcular rango para el límite
+            if periodo == 'semanal':
+                inicio_p = fecha_reserva - timedelta(days=fecha_reserva.weekday())
+                fin_p = inicio_p + timedelta(days=6)
+            else: # mensual
+                inicio_p = fecha_reserva.replace(day=1)
+                if fecha_reserva.month == 12:
+                    fin_p = fecha_reserva.replace(year=fecha_reserva.year + 1, month=1, day=1) - timedelta(days=1)
+                else:
+                    fin_p = fecha_reserva.replace(month=fecha_reserva.month + 1, day=1) - timedelta(days=1)
 
-        reservas_periodo = get_reservation_count(student.id, inicio_p, fin_p)
-        
-        if reservas_periodo >= limite:
-            return jsonify({
-                'success': False, 
-                'message': f'Has agotado tus clases para el periodo ({limite} clases {periodo}).'
-            })
+            reservas_periodo = get_reservation_count(student.id, inicio_p, fin_p)
+            
+            if reservas_periodo >= limite:
+                return jsonify({
+                    'success': False, 
+                    'message': f'Has agotado tus clases para el periodo ({limite} clases {periodo}).'
+                })
 
         # Verificar si ya tiene reserva para este horario/evento y día
         existente = Asistencia.query.filter_by(
@@ -380,3 +381,33 @@ def logout():
     session.pop('student_name', None)
     flash('Has cerrado sesión.', 'info')
     return redirect(url_for('student_portal.login'))
+
+@student_portal_bp.route('/solicitar-yogaterapia', methods=['GET', 'POST'])
+def solicitar_yogaterapia():
+    if request.method == 'POST':
+        nombre = request.form.get('nombre')
+        email = request.form.get('email')
+        telefono = request.form.get('telefono')
+        motivo = request.form.get('motivo')
+        
+        # Si está logueado, asociar el alumno
+        alumno_id = session.get('student_id')
+        
+        solicitud = SolicitudYogaterapia(
+            nombre=nombre,
+            email=email,
+            telefono=telefono,
+            motivo=motivo,
+            alumno_id=alumno_id
+        )
+        
+        try:
+            db.session.add(solicitud)
+            db.session.commit()
+            flash('Tu solicitud de Yogaterapia ha sido enviada. Nos pondremos en contacto contigo pronto.', 'success')
+            return redirect(url_for('student_portal.login'))
+        except Exception as e:
+            db.session.rollback()
+            flash('Hubo un error al enviar tu solicitud. Por favor, inténtalo de nuevo.', 'error')
+            
+    return render_template('alumno/solicitar_yogaterapia.html')
