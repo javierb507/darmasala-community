@@ -405,9 +405,15 @@ def solicitar_yogaterapia():
             db.session.add(solicitud)
             db.session.commit()
             flash('Tu solicitud de Yogaterapia ha sido enviada. Nos pondremos en contacto contigo pronto.', 'success')
+            if alumno_id:
+                return redirect(url_for('student_portal.dashboard'))
             return redirect(url_for('student_portal.login'))
         except Exception as e:
             db.session.rollback()
             flash('Hubo un error al enviar tu solicitud. Por favor, inténtalo de nuevo.', 'error')
             
-    return render_template('alumno/solicitar_yogaterapia.html')
+    student = None
+    if 'student_id' in session:
+        student = Alumno.query.get(session['student_id'])
+            
+    return render_template('alumno/solicitar_yogaterapia.html', student=student)

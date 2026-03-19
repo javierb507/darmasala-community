@@ -119,17 +119,17 @@
             <form method="POST">
                 <div class="mb-3">
                     <label class="form-label text-muted small fw-bold">NOMBRE COMPLETO</label>
-                    <input type="text" name="nombre" class="form-control" required placeholder="Tu nombre">
+                    <input type="text" name="nombre" class="form-control" required placeholder="Tu nombre" value="{{ student.nombre if student else '' }}">
                 </div>
 
                 <div class="row mb-3">
                     <div class="col-md-6">
                         <label class="form-label text-muted small fw-bold">EMAIL</label>
-                        <input type="email" name="email" class="form-control" required placeholder="tu@email.com">
+                        <input type="email" name="email" class="form-control" required placeholder="tu@email.com" value="{{ student.email if student else '' }}">
                     </div>
                     <div class="col-md-6">
                         <label class="form-label text-muted small fw-bold">TELÉFONO</label>
-                        <input type="tel" name="telefono" class="form-control" placeholder="Tu número">
+                        <input type="tel" name="telefono" class="form-control" placeholder="Tu número" value="{{ student.telefono if student else '' }}">
                     </div>
                 </div>
 
@@ -143,9 +143,15 @@
                 </button>
             </form>
 
+            {% if student %}
+            <a href="{{ url_for('student_portal.dashboard') }}" class="back-link">
+                <i class="fas fa-arrow-left me-1"></i> Volver a mi Dashboard
+            </a>
+            {% else %}
             <a href="{{ url_for('student_portal.login') }}" class="back-link">
                 <i class="fas fa-arrow-left me-1"></i> Volver al Portal de Alumnos
             </a>
+            {% endif %}
         </div>
     </div>
 </div>
