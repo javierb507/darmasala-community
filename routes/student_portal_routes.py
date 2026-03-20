@@ -192,6 +192,7 @@ def eventos():
                         'evento_id': None,
                         'fecha': curr.strftime('%Y-%m-%d'),
                         'reservada': reservada,
+                        'asistencia_id': reserva_map.get((h.id, None, curr)).id if reservada and (h.id, None, curr) in reserva_map else None,
                         'completa': completa,
                         'ocupacion': f"{ocupacion_total}/{h.capacidad_maxima or 15}",
                         'instructor': h.instructor or 'Minouche'
@@ -239,6 +240,7 @@ def eventos():
                     'evento_id': ev.id,
                     'fecha': ev_date.strftime('%Y-%m-%d'),
                     'reservada': reservada,
+                    'asistencia_id': reserva_map.get((None, ev.id, ev_date)).id if reservada and (None, ev.id, ev_date) in reserva_map else None,
                     'completa': completa,
                     'ocupacion': f"{ocupacion}/{capacidad}",
                     'instructor': ev.instructor or 'Minouche'

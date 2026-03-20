@@ -358,17 +358,21 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('modalOccupancy').innerText = props.ocupacion;
 
             const btnAction = document.getElementById('btnAction');
+            const btnCancelModal = document.getElementById('btnCancel');
             const alertContainer = document.getElementById('modalStatusAlert');
             alertContainer.innerHTML = '';
+            
+            // Ocultar botones por defecto
+            btnAction.style.display = 'none';
+            btnCancelModal.style.display = 'none';
 
             if (props.reservada) {
-                btnAction.style.display = 'none';
                 alertContainer.innerHTML = '<div class="alert alert-success d-flex align-items-center"><i class="fas fa-check-circle me-2 fs-4"></i><div>Ya tienes reservada esta clase. ¡Te esperamos!</div></div>';
+                btnCancelModal.style.display = 'block';
+                btnCancelModal.onclick = () => window.cancelarReserva(props.asistencia_id);
             } else if (props.completa) {
-                btnAction.style.display = 'none';
                 alertContainer.innerHTML = '<div class="alert alert-danger d-flex align-items-center"><i class="fas fa-exclamation-triangle me-2 fs-4"></i><div>Clase completa. Prueba otro horario.</div></div>';
             } else if (limiteAlcanzado) {
-                btnAction.style.display = 'none';
                 alertContainer.innerHTML = '<div class="alert alert-warning d-flex align-items-center"><i class="fas fa-exclamation-circle me-2 fs-4"></i><div>Has alcanzado tu límite de clases para este periodo.</div></div>';
             } else {
                 btnAction.style.display = 'block';
@@ -382,6 +386,7 @@ document.addEventListener('DOMContentLoaded', function() {
     calendar.render();
 
     function procesarReserva(horarioId, eventoId, fecha) {
+        const btnAction = document.getElementById('btnAction');
         btnAction.disabled = true;
         btnAction.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Procesando...';
         
@@ -403,11 +408,11 @@ document.addEventListener('DOMContentLoaded', function() {
                     icon: 'success',
                     title: '¡Reserva confirmada!',
                     text: data.message,
-                    timer: 2000,
+                    timer: 1500,
                     showConfirmButton: false
+                }).then(() => {
+                    location.reload();
                 });
-                modal.hide();
-                calendar.refetchEvents();
             } else {
                 Swal.fire({
                     icon: 'error',
