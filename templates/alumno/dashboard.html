@@ -194,10 +194,13 @@
                                 <span class="d-block fw-bold text-primary">{{ res.fecha_clase.strftime('%d') }}</span>
                                 <span class="small text-muted text-uppercase" style="font-size: 0.65rem;">{{ res.fecha_clase.strftime('%b') }}</span>
                             </div>
-                            <div>
-                                <h6 class="mb-0 small fw-bold text-dark">{{ res.horario.clase.nombre if res.horario else 'Clase Individual' }}</h6>
-                                <span class="small text-muted">{{ res.horario.hora_inicio.strftime('%H:%M') if res.horario else '' }}</span>
+                            <div class="flex-grow-1">
+                                <h6 class="mb-0 small fw-bold text-dark">{{ res.horario.clase.nombre if res.horario else (res.evento.titulo if res.evento else 'Sesión Especial') }}</h6>
+                                <span class="small text-muted">{{ res.horario.hora_inicio.strftime('%H:%M') if res.horario else (res.evento.hora_inicio.strftime('%H:%M') if res.evento else '') }}</span>
                             </div>
+                            <button onclick="cancelarReserva({{ res.id }})" class="btn btn-sm text-danger p-1 ms-2 opacity-50 hover-opacity-100" title="Anular reserva">
+                                <i class="fas fa-times-circle"></i>
+                            </button>
                         </div>
                         {% endfor %}
                     {% else %}
@@ -421,6 +424,42 @@ document.addEventListener('DOMContentLoaded', function() {
             btnAction.innerHTML = 'Reservar esta Clase';
         });
     }
+
+    window.cancelarReserva = function(reservaId) {
+        Swal.fire({
+            title: '¿Anular reserva?',
+            text: "Esta acción liberará tu plaza para otros alumnos.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Sí, anular',
+            cancelButtonText: 'No, mantener'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                fetch(`/portal/cancelar-reserva/${reservaId}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Cancelada',
+                            text: data.message,
+                            timer: 1500,
+                            showConfirmButton: false
+                        }).then(() => {
+                            location.reload();
+                        });
+                    } else {
+                        Swal.fire('Error', data.message, 'error');
+                    }
+                });
+            }
+        });
+    };
 });
 </script>
 {% endblock %}

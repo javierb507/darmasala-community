@@ -375,6 +375,25 @@ def reservar(horario_id=None):
         print(f"Error en reserva: {e}")
         return jsonify({'success': False, 'message': f'Error al procesar la reserva: {str(e)}'})
 
+@student_portal_bp.route('/cancelar-reserva/<int:asistencia_id>', methods=['POST'])
+@student_login_required
+def cancelar_reserva(asistencia_id):
+    """Anula una reserva realizada desde el portal"""
+    student_id = session.get('student_id')
+    reserva = Asistencia.query.filter_by(id=asistencia_id, alumno_id=student_id).first_or_404()
+    
+    # Solo permitir cancelar si la clase es hoy o en el futuro
+    if reserva.fecha_clase < date.today():
+        return jsonify({'success': False, 'message': 'No puedes cancelar sesiones pasadas.'})
+        
+    try:
+        db.session.delete(reserva)
+        db.session.commit()
+        return jsonify({'success': True, 'message': 'Reserva cancelada correctamente.'})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'message': f'Error al cancelar: {str(e)}'})
+
 @student_portal_bp.route('/logout')
 def logout():
     session.pop('student_id', None)
