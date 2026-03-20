@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "alumno/layout.html" %}
 
 {% block title %}Solicitar Yogaterapia - Atma Suddhi Yoga{% endblock %}
 
@@ -11,15 +11,10 @@
         --accent-purple: #8E24AA;
     }
 
-    body {
-        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-        min-height: 100vh;
-    }
-
     .request-container {
         max-width: 600px;
-        margin: 60px auto;
-        padding: 0 20px;
+        margin: 20px auto;
+        padding: 0 10px;
     }
 
     .request-card {
@@ -105,16 +100,6 @@
         </div>
         
         <div class="request-body">
-            {% with messages = get_flashed_messages(with_categories=true) %}
-                {% if messages %}
-                    {% for category, message in messages %}
-                        <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show rounded-pill px-4 mb-4" role="alert">
-                            {{ message }}
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                        </div>
-                    {% endfor %}
-                {% endif %}
-            {% endwith %}
 
             <form method="POST">
                 <div class="mb-3">
