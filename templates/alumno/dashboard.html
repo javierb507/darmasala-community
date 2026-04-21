@@ -268,45 +268,62 @@
     <div id='calendar'></div>
 </div>
 
-<!-- Reservation Modal -->
+<!-- Modal de Detalles de Clase -->
 <div class="modal fade" id="eventModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header d-flex justify-content-between align-items-start">
-                <div>
-                    <h3 class="modal-title fw-bold" id="modalTitle">Nombre de la Clase</h3>
-                    <p class="text-muted mb-0" id="modalDate">Lunes, 12 de Marzo</p>
-                </div>
+    <div class="modal-dialog modal-dialog-centered modal-lg" id="modalDialog">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 25px;">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold text-primary" id="modalTitle">Detalles de la Clase</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <div class="class-info-tag">
-                    <i class="far fa-clock"></i>
-                    <div>
-                        <span class="small text-muted d-block">Horario</span>
-                        <strong id="modalTime">18:00 - 19:30</strong>
+                <!-- Reproductor de YouTube para Clases Online -->
+                <div id="youtubePlayerContainer" class="mb-4 rounded-4 overflow-hidden shadow-sm d-none">
+                    <div class="ratio ratio-16x9">
+                        <iframe id="youtubePlayer" src="" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
                     </div>
                 </div>
-                <div class="class-info-tag">
-                    <i class="fas fa-user-tie"></i>
-                    <div>
-                        <span class="small text-muted d-block">Instructor</span>
-                        <strong id="modalInstructor">Minouche</strong>
+
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <div class="class-info-tag">
+                            <i class="far fa-calendar-alt text-primary"></i>
+                            <div>
+                                <span class="small text-muted d-block">Fecha</span>
+                                <strong id="modalDate">Lunes, 1 de enero</strong>
+                            </div>
+                        </div>
+                        <div class="class-info-tag">
+                            <i class="far fa-clock text-primary"></i>
+                            <div>
+                                <span class="small text-muted d-block">Horario</span>
+                                <strong id="modalTime">18:00 - 19:30</strong>
+                            </div>
+                        </div>
                     </div>
-                </div>
-                <div class="class-info-tag">
-                    <i class="fas fa-users"></i>
-                    <div>
-                        <span class="small text-muted d-block">Plazas Disponibles</span>
-                        <strong id="modalOccupancy">12/15</strong>
+                    <div class="col-md-6">
+                        <div class="class-info-tag" id="instructorTag">
+                            <i class="fas fa-user-tie text-primary"></i>
+                            <div>
+                                <span class="small text-muted d-block">Instructor</span>
+                                <strong id="modalInstructor">Minouche</strong>
+                            </div>
+                        </div>
+                        <div class="class-info-tag" id="occupancyTag">
+                            <i class="fas fa-users text-primary"></i>
+                            <div>
+                                <span class="small text-muted d-block">Plazas Disponibles</span>
+                                <strong id="modalOccupancy">12/15</strong>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
                 <div id="modalStatusAlert" class="mt-4"></div>
 
                 <div class="d-grid mt-4">
-                    <button id="btnAction" class="btn btn-primary btn-lg">Reservar esta Clase</button>
-                    <button id="btnCancel" class="btn btn-outline-danger btn-lg mt-2" style="display: none;">Cancelar Reserva</button>
+                    <button id="btnAction" class="btn btn-primary btn-lg rounded-pill shadow-sm">Reservar esta Clase</button>
+                    <button id="btnCancel" class="btn btn-outline-danger btn-lg mt-2 rounded-pill" style="display: none;">Cancelar Reserva</button>
                 </div>
             </div>
         </div>
@@ -320,9 +337,17 @@
 <script src='https://cdn.jsdelivr.net/npm/@fullcalendar/core@6.1.10/locales/es.global.min.js'></script>
 
 <script>
+function getYoutubeId(url) {
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+    const match = url.match(regExp);
+    return (match && match[2].length === 11) ? match[2] : null;
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     const calendarEl = document.getElementById('calendar');
     const modal = new bootstrap.Modal(document.getElementById('eventModal'));
+    const youtubeContainer = document.getElementById('youtubePlayerContainer');
+    const youtubePlayer = document.getElementById('youtubePlayer');
     
     // Info de cuota para el JS
     const limiteAlcanzado = {{ 'true' if asistencias_semana >= limite_semanal else 'false' }};
@@ -351,36 +376,68 @@ document.addEventListener('DOMContentLoaded', function() {
             const props = info.event.extendedProps;
             const event = info.event;
 
-            document.getElementById('modalTitle').innerText = event.title.replace(/✅|❌/g, '').trim();
+            document.getElementById('modalTitle').innerText = event.title.replace(/✅|❌|📹/g, '').trim();
             document.getElementById('modalDate').innerText = new Date(props.fecha).toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
             document.getElementById('modalTime').innerText = event.start.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }) + ' - ' + event.end.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
-            document.getElementById('modalInstructor').innerText = props.instructor;
-            document.getElementById('modalOccupancy').innerText = props.ocupacion;
-
+            
+            const instructorTag = document.getElementById('instructorTag');
+            const occupancyTag = document.getElementById('occupancyTag');
             const btnAction = document.getElementById('btnAction');
             const btnCancelModal = document.getElementById('btnCancel');
             const alertContainer = document.getElementById('modalStatusAlert');
-            alertContainer.innerHTML = '';
             
-            // Ocultar botones por defecto
+            alertContainer.innerHTML = '';
             btnAction.style.display = 'none';
             btnCancelModal.style.display = 'none';
+            btnAction.className = 'btn btn-primary btn-lg rounded-pill shadow-sm';
+            
+            // Limpiar Video
+            youtubeContainer.classList.add('d-none');
+            youtubePlayer.src = '';
 
-            if (props.reservada) {
-                alertContainer.innerHTML = '<div class="alert alert-success d-flex align-items-center"><i class="fas fa-check-circle me-2 fs-4"></i><div>Ya tienes reservada esta clase. ¡Te esperamos!</div></div>';
-                btnCancelModal.style.display = 'block';
-                btnCancelModal.onclick = () => window.cancelarReserva(props.asistencia_id);
-            } else if (props.completa) {
-                alertContainer.innerHTML = '<div class="alert alert-danger d-flex align-items-center"><i class="fas fa-exclamation-triangle me-2 fs-4"></i><div>Clase completa. Prueba otro horario.</div></div>';
-            } else if (limiteAlcanzado) {
-                alertContainer.innerHTML = '<div class="alert alert-warning d-flex align-items-center"><i class="fas fa-exclamation-circle me-2 fs-4"></i><div>Has alcanzado tu límite de clases para este periodo.</div></div>';
+            if (props.tipo === 'online') {
+                instructorTag.style.display = 'none';
+                occupancyTag.style.display = 'none';
+                
+                const ytId = getYoutubeId(props.url_youtube);
+                if (ytId) {
+                    youtubePlayer.src = `https://www.youtube.com/embed/${ytId}`;
+                    youtubeContainer.classList.remove('d-none');
+                    alertContainer.innerHTML = `<div class="alert alert-info border-0 shadow-sm d-flex align-items-center" style="border-radius: 15px;">
+                        <i class="fab fa-youtube me-3 fs-4 text-danger"></i>
+                        <div>Esta clase grabada está disponible durante toda la semana.</div>
+                    </div>`;
+                } else {
+                    alertContainer.innerHTML = '<div class="alert alert-warning border-0 shadow-sm" style="border-radius: 15px;">Enlace de YouTube no válido.</div>';
+                }
             } else {
-                btnAction.style.display = 'block';
-                btnAction.onclick = () => procesarReserva(props.horario_id, props.evento_id, props.fecha);
+                instructorTag.style.display = 'flex';
+                occupancyTag.style.display = 'flex';
+                document.getElementById('modalInstructor').innerText = props.instructor || 'Minouche';
+                document.getElementById('modalOccupancy').innerText = props.ocupacion;
+                btnAction.innerHTML = 'Reservar esta Clase';
+
+                if (props.reservada) {
+                    alertContainer.innerHTML = '<div class="alert alert-success border-0 shadow-sm d-flex align-items-center" style="border-radius: 15px;"><i class="fas fa-check-circle me-3 fs-4"></i><div>Ya tienes reservada esta clase. ¡Te esperamos!</div></div>';
+                    btnCancelModal.style.display = 'block';
+                    btnCancelModal.onclick = () => window.cancelarReserva(props.asistencia_id);
+                } else if (props.completa) {
+                    alertContainer.innerHTML = '<div class="alert alert-danger border-0 shadow-sm d-flex align-items-center" style="border-radius: 15px;"><i class="fas fa-exclamation-triangle me-3 fs-4"></i><div>Clase completa. Prueba otro horario.</div></div>';
+                } else if (limiteAlcanzado) {
+                    alertContainer.innerHTML = '<div class="alert alert-warning border-0 shadow-sm d-flex align-items-center" style="border-radius: 15px;"><i class="fas fa-exclamation-circle me-3 fs-4"></i><div>Has alcanzado tu límite de clases para este periodo.</div></div>';
+                } else {
+                    btnAction.style.display = 'block';
+                    btnAction.onclick = () => procesarReserva(props.horario_id, props.evento_id, props.fecha);
+                }
             }
 
             modal.show();
         }
+    });
+
+    // Detener video al cerrar modal
+    document.getElementById('eventModal').addEventListener('hidden.bs.modal', function () {
+        youtubePlayer.src = '';
     });
     
     calendar.render();

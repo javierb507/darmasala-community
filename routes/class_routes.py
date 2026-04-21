@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify
 from datetime import datetime, date, timedelta
-from models import db, Clase, HorarioSemanal, Asistencia, EventoCalendario, SesionYogaterapia, Alumno
+from models import db, Clase, HorarioSemanal, Asistencia, EventoCalendario, SesionYogaterapia, Alumno, ClaseOnline
 from utils.auth_utils import login_required
 from utils.app_utils import obtener_sutra_semanal, obtener_proximas_citas
 from utils.calendar_utils import CalendarioAcademico
@@ -1088,3 +1088,87 @@ def api_get_clases():
         })
     except Exception as e:
         return jsonify({'success': False, 'message': str(e)}), 500
+
+# --- RUTAS PARA CLASES ONLINE (YOUTUBE) ---
+
+@class_bp.route('/clases-online')
+@login_required
+def clases_online():
+    """Vista de gestión de clases online"""
+    clases = ClaseOnline.query.order_by(ClaseOnline.fecha_inicio.desc()).all()
+    return render_template('clases_online.html', clases=clases)
+
+@class_bp.route('/clases-online/guardar', methods=['POST'])
+@login_required
+def guardar_clase_online():
+    """Crear o actualizar una clase online"""
+    try:
+        # Extraer datos, ya sea de form o JSON
+        if request.form:
+            clase_id = request.form.get('id')
+            fecha_inicio_str = request.form.get('fecha_inicio') or request.form.get('fecha')
+            fecha_fin_str = request.form.get('fecha_fin')
+            url = request.form.get('url_youtube')
+            titulo = request.form.get('titulo', 'Clase Online de Yoga')
+            descripcion = request.form.get('descripcion', '')
+        else:
+            data = request.get_json() or {}
+            clase_id = data.get('id')
+            fecha_inicio_str = data.get('fecha_inicio') or data.get('fecha')
+            fecha_fin_str = data.get('fecha_fin')
+            url = data.get('url_youtube')
+            titulo = data.get('titulo', 'Clase Online de Yoga')
+            descripcion = data.get('descripcion', '')
+
+        if not fecha_inicio_str or not url:
+            return jsonify({'success': False, 'message': 'La fecha de inicio y la URL son obligatorias.'}), 400
+
+        fecha_inicio = datetime.strptime(fecha_inicio_str, '%Y-%m-%d').date()
+        fecha_fin = datetime.strptime(fecha_fin_str, '%Y-%m-%d').date() if fecha_fin_str else None
+
+        if fecha_fin and fecha_fin < fecha_inicio:
+            return jsonify({'success': False, 'message': 'La fecha de fin no puede ser anterior a la de inicio.'}), 400
+
+        if clase_id:
+            clase = ClaseOnline.query.get(clase_id)
+            if not clase:
+                return jsonify({'success': False, 'message': 'Clase no encontrada.'}), 404
+        else:
+            clase = ClaseOnline()
+
+        clase.fecha_inicio = fecha_inicio
+        clase.fecha_fin = fecha_fin
+        clase.url_youtube = url
+        clase.titulo = titulo
+        clase.descripcion = descripcion
+        clase.activo = True
+
+        if not clase_id:
+            db.session.add(clase)
+        
+        db.session.commit()
+        return jsonify({'success': True, 'message': 'Clase online guardada correctamente.'})
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'message': f'Error: {str(e)}'}), 500
+
+@class_bp.route('/clases-online/eliminar/<int:clase_id>', methods=['POST'])
+@login_required
+def eliminar_clase_online(clase_id):
+    """Eliminar una clase online"""
+    try:
+        clase = ClaseOnline.query.get_or_404(clase_id)
+        db.session.delete(clase)
+        db.session.commit()
+        return jsonify({'success': True, 'message': 'Clase eliminada correctamente.'})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'message': f'Error al eliminar: {str(e)}'}), 500
+
+@class_bp.route('/clases-online/<int:clase_id>')
+@login_required
+def obtener_clase_online(clase_id):
+    """Obtener datos de una clase online para edición"""
+    clase = ClaseOnline.query.get_or_404(clase_id)
+    return jsonify(clase.to_dict())

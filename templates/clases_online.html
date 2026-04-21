@@ -1,0 +1,223 @@
+{% extends "base.html" %}
+
+{% block title %}Clases Online - Atma suddhi{% endblock %}
+
+{% block content %}
+<div class="container-fluid animate__animated animate__fadeIn">
+    <div class="row mb-4">
+        <div class="col-12 col-lg-8">
+            <h2 class="display-6 fw-bold text-primary mb-1"><i class="fas fa-video me-2"></i> Clases Online</h2>
+            <p class="text-muted">Gestiona los enlaces de YouTube para las clases diarias</p>
+        </div>
+        <div class="col-12 col-lg-4 text-lg-end">
+            <button class="btn btn-primary shadow-sm rounded-pill px-4" onclick="nuevaClase()">
+                <i class="fas fa-plus me-2"></i> Nueva Clase Online
+            </button>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm overflow-hidden">
+                <div class="card-header bg-white py-3 border-0">
+                    <h5 class="mb-0 fw-bold"><i class="fas fa-history text-primary me-2"></i> Historial de Enlaces</h5>
+                </div>
+                <div class="card-body p-0">
+                    {% if clases %}
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="bg-light text-muted small text-uppercase">
+                                <tr>
+                                     <th class="ps-4">Periodo</th>
+                                     <th>Título</th>
+                                     <th>URL YouTube</th>
+                                     <th class="text-center">Estado</th>
+                                     <th class="text-center">Acciones</th>
+                                 </tr>
+                             </thead>
+                             <tbody>
+                                 {% for clase in clases %}
+                                 <tr>
+                                     <td class="ps-4 fw-bold text-dark">
+                                         {{ clase.fecha_inicio.strftime('%d/%m/%Y') }}
+                                         {% if clase.fecha_fin %}
+                                         - {{ clase.fecha_fin.strftime('%d/%m/%Y') }}
+                                         {% endif %}
+                                     </td>
+                                     <td>{{ clase.titulo }}</td>
+                                     <td>
+                                         <a href="{{ clase.url_youtube }}" target="_blank" class="text-decoration-none">
+                                             <i class="fab fa-youtube text-danger me-1"></i> {{ clase.url_youtube[:40] }}...
+                                         </a>
+                                     </td>
+                                     <td class="text-center">
+                                         {% if clase.activo %}
+                                         <span class="badge bg-success-soft text-success rounded-pill px-3">Activa</span>
+                                         {% else %}
+                                         <span class="badge bg-secondary-soft text-secondary rounded-pill px-3">Inactiva</span>
+                                         {% endif %}
+                                     </td>
+                                     <td class="text-center">
+                                         <div class="btn-group">
+                                             <button class="btn btn-sm btn-outline-warning rounded-circle me-1" onclick="editarClase({{ clase.id }})">
+                                                 <i class="fas fa-edit"></i>
+                                             </button>
+                                             <button class="btn btn-sm btn-outline-danger rounded-circle" onclick="eliminarClase({{ clase.id }})">
+                                                 <i class="fas fa-trash"></i>
+                                             </button>
+                                         </div>
+                                     </td>
+                                 </tr>
+                                 {% endfor %}
+                             </tbody>
+                         </table>
+                     </div>
+                     {% else %}
+                     <div class="p-5 text-center text-muted">
+                         <i class="fas fa-video-slash fa-4x mb-3 opacity-25"></i>
+                         <p>No hay clases online registradas.</p>
+                         <button class="btn btn-link" onclick="nuevaClase()">Añadir la primera</button>
+                     </div>
+                     {% endif %}
+                 </div>
+             </div>
+         </div>
+     </div>
+ </div>
+ 
+ <!-- Modal Form -->
+ <div class="modal fade" id="modalClase" tabindex="-1" aria-hidden="true">
+     <div class="modal-dialog modal-dialog-centered">
+         <div class="modal-content border-0 shadow-lg" style="border-radius: 20px;">
+             <div class="modal-header border-0 pb-0">
+                 <h5 class="modal-title fw-bold text-primary" id="modalTitle">Nueva Clase Online</h5>
+                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+             </div>
+             <div class="modal-body p-4">
+                 <form id="formClase">
+                     <input type="hidden" id="clase_id" name="id">
+                     <div class="row">
+                         <div class="col-md-6 mb-3">
+                             <label class="form-label small fw-bold">Fecha Inicio</label>
+                             <input type="date" class="form-control rounded-pill border-light bg-light px-3" id="fecha_inicio" name="fecha_inicio" required>
+                         </div>
+                         <div class="col-md-6 mb-3">
+                             <label class="form-label small fw-bold">Fecha Fin (opcional)</label>
+                             <input type="date" class="form-control rounded-pill border-light bg-light px-3" id="fecha_fin" name="fecha_fin">
+                             <span class="text-muted smaller" style="font-size: 0.75rem;">Para que dure varios días.</span>
+                         </div>
+                     </div>
+                     <div class="mb-3">
+                         <label class="form-label small fw-bold">Título</label>
+                         <input type="text" class="form-control rounded-pill border-light bg-light px-3" id="titulo" name="titulo" placeholder="Ej: Clase de Vinyasa - Lunes Matinal" required>
+                     </div>
+                     <div class="mb-3">
+                         <label class="form-label small fw-bold">Enlace de YouTube</label>
+                         <div class="input-group">
+                             <span class="input-group-text bg-light border-light rounded-start-pill ps-3"><i class="fab fa-youtube text-danger"></i></span>
+                             <input type="url" class="form-control border-light bg-light rounded-end-pill px-3" id="url_youtube" name="url_youtube" placeholder="https://www.youtube.com/watch?v=..." required>
+                         </div>
+                     </div>
+                     <div class="mb-3">
+                         <label class="form-label small fw-bold">Descripción (opcional)</label>
+                         <textarea class="form-control border-light bg-light rounded-4 px-3" id="descripcion" name="descripcion" rows="3"></textarea>
+                     </div>
+                     
+                     <div class="d-grid mt-4">
+                         <button type="submit" class="btn btn-primary btn-lg rounded-pill shadow-sm">
+                             <i class="fas fa-save me-2"></i> Guardar Clase Online
+                         </button>
+                     </div>
+                 </form>
+             </div>
+         </div>
+     </div>
+ </div>
+ 
+ {% endblock %}
+ 
+ {% block extra_css %}
+ <style>
+     .bg-success-soft { background-color: rgba(40, 167, 69, 0.1); }
+     .bg-secondary-soft { background-color: rgba(108, 117, 125, 0.1); }
+     .form-control:focus {
+         border-color: var(--primary) !important;
+         box-shadow: 0 0 0 0.25rem rgba(106, 17, 203, 0.1) !important;
+     }
+ </style>
+ {% endblock %}
+ 
+ {% block extra_js %}
+ <script>
+     const modalClase = new bootstrap.Modal(document.getElementById('modalClase'));
+     const formClase = document.getElementById('formClase');
+ 
+     function nuevaClase() {
+         formClase.reset();
+         document.getElementById('clase_id').value = '';
+         document.getElementById('modalTitle').innerText = 'Nueva Clase Online';
+         document.getElementById('fecha_inicio').value = new Date().toISOString().split('T')[0];
+         modalClase.show();
+     }
+ 
+     function editarClase(id) {
+         fetch(`/clases-online/${id}`)
+             .then(res => res.json())
+             .then(data => {
+                 document.getElementById('clase_id').value = data.id;
+                 document.getElementById('fecha_inicio').value = data.fecha_inicio;
+                 document.getElementById('fecha_fin').value = data.fecha_fin || '';
+                 document.getElementById('titulo').value = data.titulo;
+                 document.getElementById('url_youtube').value = data.url_youtube;
+                 document.getElementById('descripcion').value = data.descripcion;
+                 document.getElementById('modalTitle').innerText = 'Editar Clase Online';
+                 modalClase.show();
+             });
+     }
+
+    formClase.onsubmit = function(e) {
+        e.preventDefault();
+        const formData = new FormData(formClase);
+        const data = Object.fromEntries(formData.entries());
+
+        fetch('/clases-online/guardar', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        })
+        .then(res => res.json())
+        .then(res => {
+            if (res.success) {
+                Swal.fire('¡Éxito!', res.message, 'success').then(() => location.reload());
+            } else {
+                Swal.fire('Error', res.message, 'error');
+            }
+        });
+    };
+
+    function eliminarClase(id) {
+        Swal.fire({
+            title: '¿Estás seguro?',
+            text: "Esta clase dejará de ser visible para los alumnos.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Sí, eliminar',
+            cancelButtonText: 'Cancelar'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                fetch(`/clases-online/eliminar/${id}`, { method: 'POST' })
+                    .then(res => res.json())
+                    .then(res => {
+                        if (res.success) {
+                            Swal.fire('Eliminado', res.message, 'success').then(() => location.reload());
+                        } else {
+                            Swal.fire('Error', res.message, 'error');
+                        }
+                    });
+            }
+        });
+    }
+</script>
+{% endblock %}

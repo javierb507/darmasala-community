@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session, jsonify
 from werkzeug.security import check_password_hash, generate_password_hash
 from datetime import datetime, date, timedelta
-from models import db, Alumno, Usuario, HorarioSemanal, Asistencia, Clase, EventoCalendario, SolicitudYogaterapia
+from models import db, Alumno, Usuario, HorarioSemanal, Asistencia, Clase, EventoCalendario, SolicitudYogaterapia, ClaseOnline
 from utils.student_auth import student_login_required
 
 student_portal_bp = Blueprint('student_portal', __name__, url_prefix='/portal')
@@ -248,6 +248,39 @@ def eventos():
             }
             events.append(event)
             
+    # 3. Clases Online (YouTube)
+    # Buscamos clases que se solapen con el rango del calendario
+    # Simplificado: traemos las activas y filtramos en el loop
+    clases_online = ClaseOnline.query.filter_by(activo=True).all()
+    
+    for co in clases_online:
+        start_loop = co.fecha_inicio
+        end_loop = co.fecha_fin or co.fecha_inicio
+        
+        # Iterar por cada día del rango
+        current_day = start_loop
+        while current_day <= end_loop:
+            # Solo añadir si está en el rango solicitado (optimización visual)
+            if start_date <= current_day <= end_date:
+                event = {
+                    'id': f"online_{co.id}_{current_day.isoformat()}",
+                    'title': f"📹 {co.titulo}",
+                    'start': f"{current_day.isoformat()}T07:00:00", # Temprano para que se vea arriba
+                    'end': f"{current_day.isoformat()}T08:00:00",
+                    'backgroundColor': '#FF0000', # Rojo YouTube
+                    'borderColor': '#CC0000',
+                    'classNames': ['online-class-event'],
+                    'extendedProps': {
+                        'tipo': 'online',
+                        'url_youtube': co.url_youtube,
+                        'titulo': co.titulo,
+                        'descripcion': co.descripcion,
+                        'fecha': current_day.isoformat()
+                    }
+                }
+                events.append(event)
+            current_day += timedelta(days=1)
+            
     return jsonify(events)
 
 @student_portal_bp.route('/perfil', methods=['GET', 'POST'])
@@ -404,6 +437,7 @@ def logout():
     return redirect(url_for('student_portal.login'))
 
 @student_portal_bp.route('/solicitar-yogaterapia', methods=['GET', 'POST'])
+@student_login_required
 def solicitar_yogaterapia():
     if request.method == 'POST':
         nombre = request.form.get('nombre')

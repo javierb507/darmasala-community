@@ -790,6 +790,31 @@ class ArchivoYogaterapia(db.Model):
     def __repr__(self):
         return f'<ArchivoYogaterapia {self.nombre_archivo}>'
 
+# Modelo de Clase Online (YouTube)
+class ClaseOnline(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    fecha_inicio = db.Column(db.Date, nullable=False)
+    fecha_fin = db.Column(db.Date, nullable=True) # Si es nulo, es solo para el día de inicio
+    url_youtube = db.Column(db.String(500), nullable=False)
+    titulo = db.Column(db.String(200), default="Clase Online de Yoga")
+    descripcion = db.Column(db.Text)
+    activo = db.Column(db.Boolean, default=True)
+    fecha_registro = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def __repr__(self):
+        return f'<ClaseOnline {self.fecha_inicio} - {self.titulo}>'
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'fecha_inicio': self.fecha_inicio.isoformat(),
+            'fecha_fin': self.fecha_fin.isoformat() if self.fecha_fin else None,
+            'url_youtube': self.url_youtube,
+            'titulo': self.titulo,
+            'descripcion': self.descripcion or '',
+            'activo': self.activo
+        }
+
 # Modelo de Clase Personal (Simplificado)
 class ClasePersonal(db.Model):
     id = db.Column(db.Integer, primary_key=True)
