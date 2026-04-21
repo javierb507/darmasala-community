@@ -25,11 +25,33 @@
 
         body {
             font-family: 'Outfit', sans-serif;
-            background: var(--bg-gradient);
+            {% if config and config.fondo_login_alumno %}
+            background: url("{{ url_for('static', filename=config.fondo_login_alumno) }}") no-repeat center center fixed;
+            {% else %}
+            background: url('/static/img/yoga_bg.png') no-repeat center center fixed;
+            {% endif %}
+            background-size: cover;
             color: var(--dark);
             min-height: 100vh;
             display: flex;
             flex-direction: column;
+            position: relative;
+        }
+
+        body::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.8); /* Overlay claro para legibilidad */
+            z-index: 0;
+        }
+
+        .student-navbar, .student-container, footer {
+            position: relative;
+            z-index: 1;
         }
 
         h1, h2, h3, .logo-text {
