@@ -77,8 +77,12 @@ def editar_usuario(usuario_id):
         if user.rol == 'alumno':
             alumno_rec = Alumno.query.filter_by(email=user.email).first()
             if alumno_rec:
-                alumno_rec.dni = request.form.get('dni')
-                alumno_rec.telefono = request.form.get('telefono')
+                dni_val = request.form.get('dni')
+                alumno_rec.dni = dni_val.strip() if dni_val and dni_val.strip() and dni_val.strip() != "None" else None
+                
+                tel_val = request.form.get('telefono')
+                alumno_rec.telefono = tel_val.strip() if tel_val and tel_val.strip() and tel_val.strip() != "None" else None
+                
                 alumno_rec.nombre = user.nombre
                 alumno_rec.apellido = user.apellido
         

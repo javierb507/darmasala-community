@@ -71,7 +71,7 @@
                             <div class="mb-3">
                                 <label for="dni" class="form-label">DNI</label>
                                 <input type="text" class="form-control" id="dni" name="dni"
-                                    value="{{ alumno.dni if alumno else '' }}">
+                                    value="{{ alumno.dni if alumno and alumno.dni else '' }}">
                                 <div class="form-text">DNI asociado al alumno</div>
                             </div>
                         </div>
@@ -79,7 +79,7 @@
                             <div class="mb-3">
                                 <label for="telefono" class="form-label">Móvil / Teléfono</label>
                                 <input type="text" class="form-control" id="telefono" name="telefono"
-                                    value="{{ alumno.telefono if alumno else '' }}">
+                                    value="{{ alumno.telefono if alumno and alumno.telefono else '' }}">
                                 <div class="form-text">Teléfono de contacto</div>
                             </div>
                         </div>
