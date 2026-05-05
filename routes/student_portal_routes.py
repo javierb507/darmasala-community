@@ -30,43 +30,10 @@ def get_reservation_count(alumno_id, start_date, end_date):
 
 @student_portal_bp.route('/login', methods=['GET', 'POST'])
 def login():
-    """Login para alumnos usando Email y DNI"""
+    """Redirige al login unificado"""
     if 'student_id' in session:
         return redirect(url_for('student_portal.dashboard'))
-
-    if request.method == 'POST':
-        email = request.form.get('email')
-        password = request.form.get('password')
-
-        # Buscamos en la tabla de usuarios (que está sincronizada con alumnos)
-        user = Usuario.query.filter_by(email=email, rol='alumno', activo=True).first()
-
-        if user and check_password_hash(user.password_hash, password):
-            # Encontrar el alumno asociado al email
-            student = Alumno.query.filter_by(email=email).first()
-            if student:
-                session['student_id'] = student.id
-                session['user_id_portal'] = user.id # ID de usuario para gestión
-                session['student_name'] = f"{student.nombre} {student.apellido}"
-                
-                # Actualizar último acceso del usuario (opcional, no bloqueante)
-                try:
-                    user.ultimo_acceso = datetime.utcnow()
-                    db.session.commit()
-                except Exception as e:
-                    db.session.rollback()
-                    print(f"Error al actualizar último acceso: {e}")
-                
-                flash(f'¡Hola, {student.nombre}! Bienvenido a tu zona personal.', 'success')
-                return redirect(url_for('student_portal.dashboard'))
-            
-        flash('Email o contraseña incorrectos.', 'error')
-
-    from models import Configuracion
-    configuraciones = Configuracion.query.all()
-    config_dict = {c.clave: c.valor for c in configuraciones}
-
-    return render_template('alumno/login.html', config=config_dict)
+    return redirect(url_for('auth.login'))
 
 @student_portal_bp.route('/dashboard')
 @student_login_required

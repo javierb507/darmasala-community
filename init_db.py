@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-MASTER INITIALIZATION SCRIPT - Atma Suddhi Yoga School Management
+MASTER INITIALIZATION SCRIPT - DarmaSala DarmaSala
 This script simplifies the database setup process.
 Usage:
   python init_db.py          - Basic initialization (Tables, Categories, Config)
@@ -76,9 +76,9 @@ def init_base_data():
     # 2. Config
     print("⚙️ Initializing system configuration...")
     config_defaults = {
-        'nombre_escuela': 'Atma Suddhi',
-        'email_escuela': 'info@atmasuddhi.es',
-        'color_primario': '#8B5FBF',
+        'nombre_escuela': 'DarmaSala',
+        'email_escuela': 'info@darmasala.es',
+        'color_primario': '#0F4F4F',
         'capacidad_centro': '20'
     }
     for clave, valor in config_defaults.items():
@@ -88,7 +88,7 @@ def init_base_data():
     # 3. Fiscal Config
     if not ConfiguracionFiscal.query.first():
         db.session.add(ConfiguracionFiscal(
-            nombre_empresa='Atma Suddhi Yoga',
+            nombre_empresa='DarmaSala Yoga',
             nif='00000000X',
             direccion_fiscal='Calle Principal 1, Madrid',
             serie_factura_default='A'
@@ -143,7 +143,7 @@ def init_test_data():
             db.session.flush()
             
             # Use DNI as password if exists, otherwise use phone
-            password_plain = s_data.get('dni') or s_data.get('telefono') or 'Atma1234'
+            password_plain = s_data.get('dni') or s_data.get('telefono') or 'DarmaSala1234'
             # Create Portal User for this student
             portal_user = Usuario(
                 username=s_data['email'],
@@ -189,10 +189,10 @@ def create_admin(password='admin'):
         if not Usuario.query.filter_by(username='admin').first():
             admin = Usuario(
                 username='admin',
-                email='admin@atmasuddhi.es',
+                email='admin@darmasala.es',
                 password_hash=generate_password_hash(password),
                 nombre='Admin',
-                apellido='Atma',
+                apellido='Sala',
                 rol='admin',
                 activo=True
             )
@@ -203,10 +203,10 @@ def create_admin(password='admin'):
             print("👤 Admin user already exists.")
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='Initialize Atma Suddhi database')
+    parser = argparse.ArgumentParser(description='Initialize DarmaSala database')
     parser.add_argument('--reset', action='store_true', help='Wipe database before starting')
     parser.add_argument('--test', action='store_true', help='Load test/demo data')
-    parser.add_argument('--admin-pass', type=str, default='AtmaSuddhi2025!', help='Set initial admin password')
+    parser.add_argument('--admin-pass', type=str, default='DarmaSala2025!', help='Set initial admin password')
     
     args = parser.parse_args()
 

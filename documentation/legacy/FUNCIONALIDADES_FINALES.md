@@ -135,4 +135,4 @@ python test_completo.py
 
 **🎯 La gestión de usuarios y yogaterapia está 100% completa según las especificaciones solicitadas.**
 
-**🧘‍♀️ Atma Suddhi - Sistema profesional listo para uso en producción.**
+**🧘‍♀️ DarmaSala - Sistema profesional listo para uso en producción.**

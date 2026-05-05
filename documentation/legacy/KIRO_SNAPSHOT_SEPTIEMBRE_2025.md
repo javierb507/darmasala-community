@@ -35,7 +35,7 @@
 ## 🗂️ Estructura de Archivos en este Snapshot
 
 ```
-yoga-school-management/
+darmasala/
 ├── 📄 app.py                           # ✅ Funcional
 ├── 📄 config.py                        # ✅ Funcional
 ├── 📄 requirements.txt                 # ✅ Actualizado
@@ -227,7 +227,7 @@ blinker==1.6.3
 ## 📞 Información de Contacto
 
 **Snapshot creado por**: Kiro AI Assistant  
-**Proyecto**: Atma Suddhi - Sistema de Gestión de Yoga  
+**Proyecto**: DarmaSala - Sistema de Gestión de Yoga  
 **Fecha**: 18 de Septiembre 2025  
 **Versión**: 2.0  
 **Estado**: Funcional con issues menores

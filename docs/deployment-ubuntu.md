@@ -37,22 +37,22 @@ server {
 ## Systemd Service Example
 ```ini
 [Unit]
-Description=Gunicorn instance to serve Yoga School Management
+Description=Gunicorn instance to serve DarmaSala
 After=network.target
 
 [Service]
 User=www-data
 Group=www-data
-WorkingDirectory=/var/www/yoga-school-management
-Environment="PATH=/var/www/yoga-school-management/venv/bin"
-ExecStart=/var/www/yoga-school-management/venv/bin/gunicorn --workers 3 --bind localhost:5001 app:app
+WorkingDirectory=/var/www/darmasala
+Environment="PATH=/var/www/darmasala/venv/bin"
+ExecStart=/var/www/darmasala/venv/bin/gunicorn --workers 3 --bind localhost:5001 app:app
 
 [Install]
 WantedBy=multi-user.target
 ```
 
 ## Logs Path
-* Application: `/var/www/yoga-school-management/app.log`
+* Application: `/var/www/darmasala/app.log`
 * Gunicorn: `journalctl -u yoga-management`
 * Nginx: `/var/log/nginx/error.log`
 

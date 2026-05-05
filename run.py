@@ -14,7 +14,7 @@ def open_browser():
     webbrowser.open_new("http://127.0.0.1:5001")
 
 if __name__ == '__main__':
-    print("🧘‍♀️ Iniciando Atma Suddhi - Gestión de Escuela de Yoga")
+    print("🧘‍♀️ Iniciando DarmaSala - Gestión de Escuela de Yoga")
     print("=" * 50)
     
     with app.app_context():

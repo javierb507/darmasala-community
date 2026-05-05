@@ -1,13 +1,13 @@
 <#
 .SYNOPSIS
-    Installs Atma Suddhi as a Windows Service using NSSM.
+    Installs DarmaSala as a Windows Service using NSSM.
     Run this script from an Administrator PowerShell prompt.
 #>
 
 $ProjectDir = Get-Location
 $ServiceName = "AtmaSuddhiYoga"
-$DisplayName = "Atma Suddhi - Yoga Management"
-$Description = "Servicio de gestión de escuela de yoga Atma Suddhi"
+$DisplayName = "DarmaSala - Yoga Management"
+$Description = "Servicio de gestión de escuela de yoga DarmaSala"
 $PythonExe = Join-Path $ProjectDir "venv\Scripts\python.exe"
 $ScriptPath = Join-Path $ProjectDir "production_server.py"
 
@@ -22,7 +22,7 @@ if (-NOT ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdenti
     exit
 }
 
-Write-Host "🧘 Preparando servicio Atma Suddhi..." -ForegroundColor Cyan
+Write-Host "🧘 Preparando servicio DarmaSala..." -ForegroundColor Cyan
 
 # 2. Ensure venv and requirements are ready
 if (-not (Test-Path $PythonExe)) {

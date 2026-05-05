@@ -1,4 +1,4 @@
-# TODO: Futuras Mejoras para Atma Suddhi (v2.1+)
+# TODO: Futuras Mejoras para DarmaSala (v2.1+)
 
 ## 🚀 Funcionalidades Principales
 - [ ] **Automatización de Notificaciones**: Enviar recordatorios automáticos de pago por WhatsApp o Email cuando venza el mes.
@@ -17,9 +17,9 @@
 - [ ] **Personalización de Temas**: Opción para que el administrador cambie los colores base (más allá del Deep Purple) desde el panel de configuración sin tocar código.
 
 ## 🛠 Técnico y Mantenimiento
-- [ ] **Versión Unbranded**: Limpiar referencias fijas a "Atma Suddhi" en el código para permitir un repositorio público genérico.
+- [ ] **Versión Unbranded**: Limpiar referencias fijas a "DarmaSala" en el código para permitir un repositorio público genérico.
 - [ ] **Dockerización**: Crear Dockerfile y docker-compose para facilitar la instalación en cualquier servidor.
-- [ ] **Script de Personalización**: Finalizar y testear `scripts/apply_atma_suddhi.py` para inyectar la marca Atma Suddhi vía base de datos.
+- [ ] **Script de Personalización**: Finalizar y testear `scripts/apply_atma_suddhi.py` para inyectar la marca DarmaSala vía base de datos.
 - [ ] **Copia de Seguridad Automatizada**: Programar una tarea (cron job) que envíe el backup Excel semanalmente al email del administrador.
 - [ ] **Refactorización de Modelos**: Migrar a una estructura de base de datos más escalable para multi-escuela (si se planea expansión).
 - [ ] **Tests Automatizados**: Implementar un suite de pruebas para asegurar que las actualizaciones no rompan el core del sistema.

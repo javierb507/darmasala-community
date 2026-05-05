@@ -8,7 +8,7 @@
 * Git for Windows
 
 ## Installation Steps
-1. Clone the repository: `git clone https://github.com/javierb507/yoga-school-management.git`
+1. Clone the repository: `git clone https://github.com/javierb507/darmasala.git`
 2. Create virtual environment: `python -m venv venv`
 3. Activate environment: `.\venv\Scripts\activate`
 4. Install dependencies: `pip install -r requirements.txt`

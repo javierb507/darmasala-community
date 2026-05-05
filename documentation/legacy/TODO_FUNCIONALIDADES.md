@@ -202,7 +202,7 @@
 ## 📞 Contacto y Soporte
 
 Para reportar bugs o solicitar nuevas funcionalidades:
-- **GitHub Issues**: [Crear issue](https://github.com/tu-usuario/yoga-school-management/issues)
+- **GitHub Issues**: [Crear issue](https://github.com/tu-usuario/darmasala/issues)
 - **Email**: soporte@atmasuddhi.es
 - **Documentación**: Ver DOCUMENTACION_COMPLETA.md
 

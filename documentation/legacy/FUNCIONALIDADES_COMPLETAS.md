@@ -150,4 +150,4 @@ python test_completo.py
 
 **🎯 La aplicación incluye TODAS las funcionalidades especificadas y está lista para uso en producción.**
 
-**🧘‍♀️ Namaste - Atma Suddhi está completo y funcionando perfectamente.**
+**🧘‍♀️ Namaste - DarmaSala está completo y funcionando perfectamente.**

@@ -1,5 +1,5 @@
 ---
-description: Initialize the Yoga School Management System environment
+description: Initialize the DarmaSala System environment
 ---
 
 1. Create a virtual environment:

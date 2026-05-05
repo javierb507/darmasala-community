@@ -1,7 +1,7 @@
-# Core Design System: Atma Suddhi Premium
+# Core Design System: DarmaSala Premium
 
 ## Overview
-This document defines the fixed core UI/UX design for the Atma Suddhi Yoga School Management System. This design is considered the stable baseline and should be preserved in all future iterations.
+This document defines the fixed core UI/UX design for the DarmaSala DarmaSala System. This design is considered the stable baseline and should be preserved in all future iterations.
 
 ## Visual Identity
 *   **Theme Name**: Deep Purple & Enchanted Gold (Premium Edition)

@@ -9,11 +9,11 @@
 - Backend API development
 
 ## Project Information
-- **Project:** ATMA SUDDHI - Yoga School Management System
-- **Client:** Atma Suddhi - Espacio de Yoga
+- **Project:** ATMA SUDDHI - DarmaSala System
+- **Client:** DarmaSala - Espacio de Yoga
 - **License:** GNU GPL v3
 - **Version:** 1.2.6 version 1
-- **Repository:** https://github.com/javierb507/yoga-school-management
+- **Repository:** https://github.com/javierb507/darmasala
 
 ## Development Timeline
 - **Initial Development:** 2025
@@ -21,5 +21,5 @@
 - **Version 2.0:** Complete accounting module, improved yogaterapia management, enhanced calendar system
 
 ## Acknowledgments
-Special thanks to Atma Suddhi - Espacio de Yoga for providing the requirements and feedback during the development process.
+Special thanks to DarmaSala - Espacio de Yoga for providing the requirements and feedback during the development process.
 

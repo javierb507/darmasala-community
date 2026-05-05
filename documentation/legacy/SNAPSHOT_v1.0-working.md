@@ -67,7 +67,7 @@ La aplicación está **completamente funcional** en `http://localhost:5000` con 
 
 ```bash
 # 1. Ir al directorio del proyecto
-cd yoga-school-management/yoga-school-management
+cd darmasala/darmasala
 
 # 2. Verificar el tag
 git tag -l

@@ -75,7 +75,7 @@ def get_app_version():
         'version': '1.0.0',
         'build_date': build_date,
         'git_info': git_info,
-        'app_name': 'Atma Suddhi',
+        'app_name': 'DarmaSala',
         'description': 'Sistema de Gestión de Escuela de Yoga'
     }
 

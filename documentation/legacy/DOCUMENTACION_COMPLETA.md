@@ -1,4 +1,4 @@
-# 🧘‍♀️ Atma Suddhi - Sistema de Gestión de Escuela de Yoga
+# 🧘‍♀️ DarmaSala - Sistema de Gestión de Escuela de Yoga
 
 ## Documentación Completa del Sistema
 
@@ -18,7 +18,7 @@
 
 ## 📖 Descripción General
 
-**Atma Suddhi** es un sistema completo de gestión para escuelas de yoga desarrollado en Flask. Permite administrar alumnos, pagos, clases, horarios, asistencias, yogaterapia y contabilidad de manera integral.
+**DarmaSala** es un sistema completo de gestión para escuelas de yoga desarrollado en Flask. Permite administrar alumnos, pagos, clases, horarios, asistencias, yogaterapia y contabilidad de manera integral.
 
 ### 🎯 Objetivos del Sistema
 - Gestión completa de alumnos y sus datos
@@ -106,7 +106,7 @@
 
 ### Estructura del Proyecto
 ```
-yoga-school-management/
+darmasala/
 ├── app.py                 # Aplicación principal
 ├── config.py             # Configuración
 ├── requirements.txt      # Dependencias
@@ -247,8 +247,8 @@ class Clase(db.Model):
 ### Instalación
 ```bash
 # 1. Clonar el repositorio
-git clone https://github.com/tu-usuario/yoga-school-management.git
-cd yoga-school-management
+git clone https://github.com/tu-usuario/darmasala.git
+cd darmasala
 
 # 2. Crear entorno virtual
 python -m venv venv

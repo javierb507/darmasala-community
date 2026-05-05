@@ -1,8 +1,8 @@
-# 🧘‍♀️ ATMA SUDDHI - Yoga School Management System
+# 🧘‍♀️ ATMA SUDDHI - DarmaSala System
 
 Sistema completo de gestión para una escuela de yoga que incluye gestión de alumnos, pagos, citas individuales de yogaterapia, horarios semanales, calendario unificado y administración de clases.
 
-**Desarrollado por:** Javier Ballesteros para Atma Suddhi - Espacio de Yoga  
+**Desarrollado por:** Javier Ballesteros para DarmaSala - Espacio de Yoga  
 **Licencia:** GNU GPL v3  
 **Versión:** 2.0.0-final  
 
@@ -17,7 +17,7 @@ Sistema completo de gestión para una escuela de yoga que incluye gestión de al
 > — *Walt Whitman, Leaves of Grass*
 
 **Reflexión:**  
-Este sistema, Atma Suddhi, ha sido diseñado para aportar orden y serenidad a la gestión de un santuario de yoga. Al igual que Whitman celebra la suficiencia inherente del ser, este software busca simplificar las cargas administrativas para que practicantes y maestros puedan centrarse en el presente. Al organizar lo múltiple (alumnos, clases, finanzas) en una estructura armónica, el sistema actúa como un compañero silencioso en el camino hacia el equilibrio y el autoconocimiento.
+Este sistema, DarmaSala, ha sido diseñado para aportar orden y serenidad a la gestión de un santuario de yoga. Al igual que Whitman celebra la suficiencia inherente del ser, este software busca simplificar las cargas administrativas para que practicantes y maestros puedan centrarse en el presente. Al organizar lo múltiple (alumnos, clases, finanzas) en una estructura armónica, el sistema actúa como un compañero silencioso en el camino hacia el equilibrio y el autoconocimiento.
 
 ## 📋 Tabla de Contenidos
 
@@ -95,8 +95,8 @@ Dashboard de contabilidad avanzado con resumen de ingresos, gastos y balance men
 
 **Desarrollador:** Javier Ballesteros  
 **Email:** javierb507@gmail.com  
-**Proyecto:** Desarrollado específicamente para Atma Suddhi - Espacio de Yoga  
-**Repositorio:** https://github.com/javierb507/yoga-school-management
+**Proyecto:** Desarrollado específicamente para DarmaSala - Espacio de Yoga  
+**Repositorio:** https://github.com/javierb507/darmasala
 
 ## 📄 Licencia
 
@@ -106,7 +106,7 @@ Para más información sobre la licencia, consulta el archivo [LICENSE](LICENSE)
 
 ## 🤝 Contribución
 
-Este proyecto fue desarrollado específicamente para Atma Suddhi, pero está disponible como software libre bajo licencia GPL v3. Si deseas contribuir o adaptar el sistema para tu propia escuela de yoga, por favor:
+Este proyecto fue desarrollado específicamente para DarmaSala, pero está disponible como software libre bajo licencia GPL v3. Si deseas contribuir o adaptar el sistema para tu propia escuela de yoga, por favor:
 
 1. Fork el repositorio
 2. Crea una rama para tu feature (`git checkout -b feature/nueva-funcionalidad`)
@@ -118,4 +118,4 @@ Este proyecto fue desarrollado específicamente para Atma Suddhi, pero está dis
 
 Para consultas sobre el sistema o soporte técnico, contacta a:
 - **Javier Ballesteros** - javierb507@gmail.com
-- **Atma Suddhi** - Espacio de Yoga
+- **DarmaSala** - Espacio de Yoga

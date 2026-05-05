@@ -58,8 +58,8 @@ git commit -m "🎉 Release v2.0: Sistema completo de gestión de yoga
 ### 5. Crear repositorio en GitHub
 1. Ve a https://github.com
 2. Clic en "New repository"
-3. Nombre: `yoga-school-management` o `atma-suddhi-management`
-4. Descripción: "Sistema completo de gestión para escuelas de yoga - Atma Suddhi"
+3. Nombre: `darmasala` o `atma-suddhi-management`
+4. Descripción: "Sistema completo de gestión para escuelas de yoga - DarmaSala"
 5. Público o Privado según prefieras
 6. NO inicializar con README (ya tenemos uno)
 7. Clic en "Create repository"
@@ -67,7 +67,7 @@ git commit -m "🎉 Release v2.0: Sistema completo de gestión de yoga
 ### 6. Conectar repositorio local con GitHub
 ```bash
 # Reemplaza 'tu-usuario' y 'nombre-repo' con los valores reales
-git remote add origin https://github.com/tu-usuario/yoga-school-management.git
+git remote add origin https://github.com/tu-usuario/darmasala.git
 ```
 
 ### 7. Subir código a GitHub
@@ -208,8 +208,8 @@ git push --force-with-lease
 
 ### Clonar el repositorio en otra máquina
 ```bash
-git clone https://github.com/tu-usuario/yoga-school-management.git
-cd yoga-school-management
+git clone https://github.com/tu-usuario/darmasala.git
+cd darmasala
 pip install -r requirements.txt
 python crear_app_limpia.py
 ```

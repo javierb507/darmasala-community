@@ -14,10 +14,13 @@ def login():
         return redirect(url_for('auth.setup'))
 
     if request.method == 'POST':
-        username = request.form.get('username')
+        username_or_email = request.form.get('username')
         password = request.form.get('password')
         
-        user = Usuario.query.filter_by(username=username, activo=True).first()
+        user = Usuario.query.filter(
+            ((Usuario.username == username_or_email) | (Usuario.email == username_or_email)),
+            Usuario.activo == True
+        ).first()
         
         if user and check_password_hash(user.password_hash, password):
             session['user_id'] = user.id
@@ -29,7 +32,17 @@ def login():
             db.session.commit()
             
             flash(f'¡Bienvenido, {user.nombre}!', 'success')
-            return redirect(url_for('main.index'))
+            
+            if user.rol == 'alumno':
+                from models import Alumno
+                student = Alumno.query.filter_by(email=user.email).first()
+                if student:
+                    session['student_id'] = student.id
+                    session['user_id_portal'] = user.id # ID de usuario para gestión
+                    session['student_name'] = f"{student.nombre} {student.apellido}"
+                return redirect(url_for('student_portal.dashboard'))
+            else:
+                return redirect(url_for('main.index'))
         else:
             flash('Usuario o contraseña incorrectos', 'error')
     

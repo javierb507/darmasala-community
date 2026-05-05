@@ -1,6 +1,6 @@
-# Guía de Despliegue en Windows - Atma Suddhi
+# Guía de Despliegue en Windows - DarmaSala
 
-Esta guía detalla los pasos para desplegar la aplicación Yoga School Management en un entorno Windows.
+Esta guía detalla los pasos para desplegar la aplicación DarmaSala en un entorno Windows.
 
 ## Requisitos Previos
 
@@ -15,7 +15,7 @@ Esta guía detalla los pasos para desplegar la aplicación Yoga School Managemen
 1. **Clonar o descargar el repositorio**:
    ```bash
    git clone <url-del-repositorio>
-   cd yoga-school-management
+   cd darmasala
    ```
 
 2. **Crear un entorno virtual**:
@@ -56,7 +56,7 @@ Para que la aplicación siempre esté disponible (incluso después de reiniciar 
 
 2.  **Ejecutar el script de instalación**:
     ```powershell
-    cd C:\ruta\a\tu\proyecto\yoga-school-management
+    cd C:\ruta\a\tu\proyecto\darmasala
     .\scripts\install_windows_service.ps1
     ```
 

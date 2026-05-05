@@ -2,7 +2,7 @@
 
 ## 📋 **Descripción**
 
-`testing_app.py` es un script completo que inicializa la aplicación **Atma Suddhi** con datos de prueba realistas para desarrollo y testing. Este script es especialmente útil para:
+`testing_app.py` es un script completo que inicializa la aplicación **DarmaSala** con datos de prueba realistas para desarrollo y testing. Este script es especialmente útil para:
 
 - **Desarrollo local**: Tener datos de prueba consistentes
 - **Despliegue en Hostinger**: Cargar la aplicación con datos de ejemplo
@@ -13,7 +13,7 @@
 
 ### Ejecución Local
 ```bash
-cd yoga-school-management
+cd darmasala
 python testing_app.py
 ```
 

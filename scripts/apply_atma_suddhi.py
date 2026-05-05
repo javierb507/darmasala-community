@@ -41,7 +41,7 @@ def setup_atma_suddhi():
                 )
         
         conn.commit()
-        print("✅ Personalización de Atma Suddhi aplicada correctamente.")
+        print("✅ Personalización de DarmaSala aplicada correctamente.")
     except Exception as e:
         print(f"❌ Error al aplicar personalización: {e}")
         conn.rollback()

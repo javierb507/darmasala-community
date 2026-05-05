@@ -10,8 +10,8 @@
 
 ### 1. Clonar el Repositorio
 ```bash
-git clone https://github.com/javierb507/yoga-school-management.git
-cd yoga-school-management
+git clone https://github.com/javierb507/darmasala.git
+cd darmasala
 ```
 
 ### 2. Crear Entorno Virtual
@@ -136,7 +136,7 @@ chmod 755 static/uploads/
 ## 📁 Estructura del Proyecto
 
 ```
-yoga-school-management/
+darmasala/
 ├── app.py                          # Aplicación principal Flask
 ├── requirements.txt                # Dependencias Python
 ├── recrear_bd.py                   # Script de inicialización de BD
@@ -230,8 +230,8 @@ python recrear_bd.py
 
 ### Contacto
 - **Email**: soporte@yogaschool.com
-- **GitHub**: [Issues](https://github.com/javierb507/yoga-school-management/issues)
-- **Documentación**: [Wiki](https://github.com/javierb507/yoga-school-management/wiki)
+- **GitHub**: [Issues](https://github.com/javierb507/darmasala/issues)
+- **Documentación**: [Wiki](https://github.com/javierb507/darmasala/wiki)
 
 ---
 

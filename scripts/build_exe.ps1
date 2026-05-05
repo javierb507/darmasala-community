@@ -1,7 +1,7 @@
-# 🛠️ Build Script for Standalone EXE: Atma Suddhi
+# 🛠️ Build Script for Standalone EXE: DarmaSala
 # This script bundles Python 3.13 + Code + Libraries + Assets into a single 'dist' folder.
 
-Write-Host "🧘 Starting Atma Suddhi Standalone Build..." -ForegroundColor Cyan
+Write-Host "🧘 Starting DarmaSala Standalone Build..." -ForegroundColor Cyan
 
 # Ensure we are in a clean state
 if (Test-Path "dist") { Remove-Item -Recurse -Force "dist" }

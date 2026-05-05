@@ -1,4 +1,4 @@
-# Despliegue en Hostinger - Atma Suddhi 🧘‍♀️
+# Despliegue en Hostinger - DarmaSala 🧘‍♀️
 
 Esta guía detalla los pasos para poner en marcha la aplicación en un entorno de Hostinger.
 
@@ -61,4 +61,4 @@ python setup_hostinger.py
 *⚠️ Nota: Este script borrará los datos actuales para cargar un set de pruebas limpio.*
 
 ---
-Desarrollado para **Atma Suddhi - Espacio de Yoga**
+Desarrollado para **DarmaSala - Espacio de Yoga**

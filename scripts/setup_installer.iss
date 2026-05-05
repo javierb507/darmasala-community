@@ -1,7 +1,7 @@
-; 📦 INNO SETUP SCRIPT: Atma Suddhi - Yoga Management
+; 📦 INNO SETUP SCRIPT: DarmaSala - Yoga Management
 ; This script generates the professional 'AtmaSuddhi_Setup.exe' (MSI alternative)
 
-#define MyAppName "Atma Suddhi"
+#define MyAppName "DarmaSala"
 #define MyAppVersion "1.2.6 version 1"
 #define MyAppPublisher "Javier Ballesteros"
 #define MyAppURL "https://atmasuddhi.es"
