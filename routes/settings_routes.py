@@ -296,7 +296,7 @@ def guardar_configuracion():
             ('precio_matricula', request.form.get('precio_matricula', '25.00'), 'Precio de matrícula anual'),
             ('precio_yogaterapia_individual', request.form.get('precio_yogaterapia_individual', '50.00'), 'Precio yogaterapia individual'),
             ('precio_yogaterapia_pareja', request.form.get('precio_yogaterapia_pareja', '70.00'), 'Precio yogaterapia en pareja'),
-            ('nombre_escuela', request.form.get('nombre_escuela', 'ATMA SUDDHI'), 'Nombre de la escuela'),
+            ('nombre_escuela', request.form.get('nombre_escuela', 'DARMASALA'), 'Nombre de la escuela'),
             ('direccion_escuela', request.form.get('direccion_escuela', ''), 'Dirección de la escuela'),
             ('telefono_escuela', request.form.get('telefono_escuela', ''), 'Teléfono de contacto'),
             ('email_escuela', request.form.get('email_escuela', ''), 'Email de contacto'),

@@ -1,4 +1,4 @@
-# 🗺️ ROADMAP - Sistema de Gestión Atma suddhi
+# 🗺️ ROADMAP - Sistema de Gestión DarmaSala
 
 ## 📋 **TAREAS PENDIENTES PRIORITARIAS**
 
@@ -150,4 +150,4 @@
 ---
 
 *Última actualización: Septiembre 2025*
-*Mantenido por: Equipo Atma suddhi*
+*Mantenido por: Equipo DarmaSala*

@@ -7,3 +7,4 @@ from .yogatherapia_routes import yogatherapia_bp
 from .settings_routes import settings_bp
 from .user_routes import user_routes_bp
 from .student_portal_routes import student_portal_bp
+from .setup_routes import setup_bp

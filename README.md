@@ -1,4 +1,8 @@
-# 🧘‍♀️ ATMA SUDDHI - DarmaSala System
+<p align="center">
+  <img src="static/images/logo_darmasala.png" alt="DarmaSala Logo" width="300">
+</p>
+
+# 🧘‍♀️ DarmaSala System
 
 Sistema completo de gestión para una escuela de yoga que incluye gestión de alumnos, pagos, citas individuales de yogaterapia, horarios semanales, calendario unificado y administración de clases.
 

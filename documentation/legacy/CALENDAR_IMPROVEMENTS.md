@@ -2,7 +2,7 @@
 
 ## Resumen Ejecutivo
 
-Se ha implementado un **sistema de calendario centralizado** que mejora significativamente la gestión de fechas, períodos de pago y horarios en toda la aplicación Atma suddhi.
+Se ha implementado un **sistema de calendario centralizado** que mejora significativamente la gestión de fechas, períodos de pago y horarios en toda la aplicación DarmaSala.
 
 ## Problemas Solucionados
 

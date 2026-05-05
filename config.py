@@ -1,17 +1,17 @@
 """
-Configuración de la aplicación Atma suddhi
+Configuración de la aplicación DarmaSala
 """
 import os
 from datetime import timedelta
 
 class Config:
     """Configuración base"""
-    SECRET_KEY = os.environ.get('SECRET_KEY') or 'atma-suddhi-yoga-management-2025-secure-key'
+    SECRET_KEY = os.environ.get('SECRET_KEY') or 'darmasala-yoga-management-secure-key-2026'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     
     # Configuración de la aplicación
-    APP_NAME = 'Atma suddhi - Gestión de Escuela de Yoga'
-    APP_VERSION = '1.2.6 version 1'
+    APP_NAME = 'DarmaSala - Gestión de Escuela de Yoga'
+    APP_VERSION = '2.0.0-final'
     
     # Configuración de base de datos
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or 'sqlite:///yoga_school.db'

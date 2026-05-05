@@ -1,4 +1,4 @@
-# 📋 CHANGELOG - Sistema de Gestión Atma suddhi
+# 📋 CHANGELOG - Sistema de Gestión DarmaSala
 
 ## [1.1.0] - 2025-09-16
 
@@ -75,7 +75,7 @@
 - **Sistema de matrícula** anual
 - **10 alumnos de prueba** generados automáticamente
 - **Interfaz 100% en español**
-- **Diseño coherente** con el logo de Atma suddhi
+- **Diseño coherente** con el logo de DarmaSala
 
 #### 🎯 Tipos de Cuota Implementados
 - Clase suelta: 15€
@@ -90,7 +90,7 @@
 - **Backend**: Flask + SQLAlchemy
 - **Base de datos**: SQLite para fácil despliegue
 - **Frontend**: Bootstrap 5 + Jinja2
-- **Diseño**: Tema púrpura/amarillo coherente con Atma suddhi
+- **Diseño**: Tema púrpura/amarillo coherente con DarmaSala
 
 #### 📱 Funcionalidades Base
 - Dashboard principal con acceso a todas las funciones
@@ -112,5 +112,5 @@
 
 ---
 
-*Mantenido por: Equipo Atma suddhi*
+*Mantenido por: Equipo DarmaSala*
 *Formato basado en [Keep a Changelog](https://keepachangelog.com/)*

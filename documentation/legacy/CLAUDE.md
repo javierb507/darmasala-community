@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Sistema de Gestión Atma suddhi - A lightweight web-based management system for yoga schools built with Flask and SQLite. The system manages students (alumnos), payments (pagos), classes, schedules, attendance, and financial operations including suppliers and invoices.
+Sistema de Gestión DarmaSala - A lightweight web-based management system for yoga schools built with Flask and SQLite. The system manages students (alumnos), payments (pagos), classes, schedules, attendance, and financial operations including suppliers and invoices.
 
 ## Common Commands
 
@@ -142,7 +142,7 @@ Dependencies: Flask 2.3.3, Flask-SQLAlchemy 3.0.5, Flask-Migrate 4.0.5, python-d
 ## Template Organization
 
 Templates are in `/templates/`:
-- Base template: `base.html` (Bootstrap 5 navbar, purple/yellow Atma suddhi theme)
+- Base template: `base.html` (Bootstrap 5 navbar, purple/yellow DarmaSala theme)
 - Student templates: `alumnos.html`, `nuevo_alumno.html`, `ver_alumno.html`, `editar_alumno.html`, `alumnos_desactivados.html`
 - Payment: `agregar_pago.html`
 - Classes/Schedule: `horarios.html`, `calendario_horarios.html`
@@ -221,7 +221,7 @@ See `docs/CALENDAR_SYSTEM.md` for complete documentation.
 ## Language & Branding
 
 - **Language**: All UI, database fields, and code comments are in Spanish
-- **School Name**: Atma suddhi
+- **School Name**: DarmaSala
 - **Website**: atmasuddhi.es (linked in navigation)
 - **Theme Colors**: Purple and yellow matching school branding
 - **Default Instructor**: "Minouche"

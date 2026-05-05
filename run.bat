@@ -1,6 +1,6 @@
 @echo off
 echo ======================================================
-echo   ATMA SUDDHI - Gestión de Escuela de Yoga
+echo   DARMASALA - Gestión de Escuela de Yoga
 echo ======================================================
 echo.
 
