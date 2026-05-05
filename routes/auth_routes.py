@@ -11,7 +11,7 @@ def login():
     """Página de login"""
     # Verificación de primer uso: si no hay usuarios, redirigir a setup
     if Usuario.query.count() == 0:
-        return redirect(url_for('auth.setup'))
+        return redirect(url_for('setup.onboarding'))
 
     if request.method == 'POST':
         username_or_email = request.form.get('username')
@@ -54,43 +54,6 @@ def login():
     config_dict = {c.clave: c.valor for c in configuraciones}
     
     return render_template('auth/login.html', sutra_semanal=sutra_semanal, config=config_dict)
-
-@auth_bp.route('/setup', methods=['GET', 'POST'])
-def setup():
-    """Configuración inicial del primer administrador"""
-    # Si ya hay usuarios, esta ruta no debe permitirse
-    if Usuario.query.count() > 0:
-        flash('El sistema ya ha sido inicializado.', 'warning')
-        return redirect(url_for('auth.login'))
-
-    if request.method == 'POST':
-        username = request.form.get('username')
-        password = request.form.get('password')
-        confirm_password = request.form.get('confirm_password')
-        nombre = request.form.get('nombre')
-        apellido = request.form.get('apellido')
-        email = request.form.get('email')
-
-        if not all([username, password, nombre, apellido, email]):
-            flash('Todos los campos son obligatorios', 'error')
-        elif password != confirm_password:
-            flash('Las contraseñas no coinciden', 'error')
-        else:
-            new_admin = Usuario(
-                username=username,
-                email=email,
-                password_hash=generate_password_hash(password),
-                nombre=nombre,
-                apellido=apellido,
-                rol='admin',
-                activo=True
-            )
-            db.session.add(new_admin)
-            db.session.commit()
-            flash('Administrador creado correctamente. Ya puedes iniciar sesión.', 'success')
-            return redirect(url_for('auth.login'))
-
-    return render_template('auth/setup.html')
 
 @auth_bp.route('/logout')
 def logout():
