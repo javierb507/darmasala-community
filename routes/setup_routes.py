@@ -30,12 +30,19 @@ def onboarding():
             )
             db.session.add(admin)
 
-            # 2. Configurar el nombre de la escuela
-            config_nombre = Configuracion.query.filter_by(clave='nombre_escuela').first()
-            if config_nombre:
-                config_nombre.valor = school_name
-            else:
-                db.session.add(Configuracion(clave='nombre_escuela', valor=school_name))
+            # 2. Configurar branding básico
+            config_defaults = {
+                'nombre_escuela': school_name,
+                'email_escuela': admin_email,
+                'logo_escuela': 'images/logo_darmasala.jpg',
+                'color_primario': '#1E3A2F'
+            }
+            for clave, valor in config_defaults.items():
+                config_item = Configuracion.query.filter_by(clave=clave).first()
+                if config_item:
+                    config_item.valor = valor
+                else:
+                    db.session.add(Configuracion(clave=clave, valor=valor))
 
             db.session.commit()
 
