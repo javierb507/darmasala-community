@@ -114,6 +114,15 @@ Este proyecto fue desarrollado específicamente para DarmaSala, pero está dispo
 4. Push a la rama (`git push origin feature/nueva-funcionalidad`)
 5. Crea un Pull Request
 
+## 🚀 Despliegue en Producción (Linux VPS)
+
+Para facilitar el despliegue en un VPS Linux (Ubuntu/Debian), se han incluido scripts de automatización en la carpeta `scripts/`:
+
+1.  **Instalación automática**: Ejecuta `./scripts/setup_vps.sh` para instalar dependencias y preparar el entorno virtual.
+2.  **Servicio de sistema**: Utiliza la plantilla `scripts/darmasala.service` para configurar el sistema como un servicio de `systemd` que se inicie automáticamente.
+
+Consulta la guía detallada en [docs/deployment-ubuntu.md](docs/deployment-ubuntu.md) para más información sobre la configuración de Nginx y certificados SSL.
+
 ## 📞 Contacto
 
 Para consultas sobre el sistema o soporte técnico, contacta a:

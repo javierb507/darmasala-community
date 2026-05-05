@@ -1,0 +1,22 @@
+[Unit]
+Description=Servicio DarmaSala - Gestión de Escuela de Yoga
+After=network.target
+
+[Service]
+# Reemplaza 'USUARIO' con tu nombre de usuario de Linux (ej: root o javier)
+User=USUARIO
+Group=www-data
+# Reemplaza '/ruta/al/proyecto' con la ruta absoluta donde clonaste el repo
+WorkingDirectory=/ruta/al/proyecto
+Environment="PATH=/ruta/al/proyecto/venv/bin"
+Environment="FLASK_ENV=production"
+Environment="SECRET_KEY=cambiame-por-una-clave-segura"
+
+ExecStart=/ruta/al/proyecto/venv/bin/python production_server.py
+
+# Reiniciar automáticamente si falla
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
