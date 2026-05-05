@@ -286,7 +286,7 @@ def exportar_alumnos_excel():
         return Response(
             output,
             mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            headers={"Content-disposition": f"attachment; filename=Alumnos_AtmaSuddhi_{datetime.now().strftime('%Y%m%d')}.xlsx"}
+            headers={"Content-disposition": f"attachment; filename=Alumnos_DarmaSala_{datetime.now().strftime('%Y%m%d')}.xlsx"}
         )
     except Exception as e:
         flash(f'Error al exportar Excel: {str(e)}', 'error')

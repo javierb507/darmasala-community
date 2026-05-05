@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="static/images/logo_darmasala.png" alt="DarmaSala Logo" width="300">
+  <img src="static/images/logo_darmasala.jpg" alt="DarmaSala Logo" width="300">
 </p>
 
 # 🧘‍♀️ DarmaSala System
@@ -39,7 +39,7 @@ Este sistema, DarmaSala, ha sido diseñado para aportar orden y serenidad a la g
 ## 📸 Visualización
 
 ### 🏠 Inicio (Dashboard Principal)
-Interfaz premium con el tema "Deep Purple & Enchanted Gold", acceso directo a Alumnos, Calendario, Yogaterapia y Economía.
+Interfaz premium con el tema "Moss Green & Sage", alineado con la identidad visual de darmasala.cloud. Acceso directo a Alumnos, Calendario, Yogaterapia y Economía.
 ![Pantalla de Inicio](documentation/screenshots/01_dashboard.png)
 
 ### 📅 Calendario y Gestión de Asistencias

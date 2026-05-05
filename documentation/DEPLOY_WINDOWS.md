@@ -63,9 +63,9 @@ Para que la aplicación siempre esté disponible (incluso después de reiniciar 
 Este script descargará automáticamente una pequeña herramienta llamada `NSSM` (Non-Sucking Service Manager), configurará el entorno virtual e iniciará el servicio.
 
 ### Comandos Útiles del Servicio:
-- **Ver estado/Editar**: `.\nssm.exe edit AtmaSuddhiYoga`
-- **Reiniciar**: `.\nssm.exe restart AtmaSuddhiYoga`
-- **Eliminar**: `.\nssm.exe remove AtmaSuddhiYoga confirm`
+- **Ver estado/Editar**: `.\nssm.exe edit DarmaSalaYoga`
+- **Reiniciar**: `.\nssm.exe restart DarmaSalaYoga`
+- **Eliminar**: `.\nssm.exe remove DarmaSalaYoga confirm`
 
 ## Notas para Windows 3.13
 - Se ha verificado que todas las librerías son compatibles con Python 3.13 sin necesidad de herramientas de compilación externas.

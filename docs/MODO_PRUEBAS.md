@@ -1,4 +1,4 @@
-# Modo de Pruebas - Sistema de Gestión Atma suddhi
+# Modo de Pruebas - Sistema de Gestión DarmaSala
 
 ## Descripción General
 

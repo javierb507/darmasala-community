@@ -29,14 +29,14 @@
                     {% for clase in clases %}
                     <div class="col-md-3 col-6 mb-2">
                         <div class="d-flex align-items-center">
-                            <div style="width: 20px; height: 20px; background-color: {{ clase.color or '#4ECDC4' }}; border: 1px solid rgba(0,0,0,0.2); border-radius: 3px; margin-right: 8px;"></div>
+                            <div style="width: 20px; height: 20px; background-color: {{ clase.color or '#6B8E7E' }}; border: 1px solid rgba(0,0,0,0.2); border-radius: 3px; margin-right: 8px;"></div>
                             <small>{{ clase.nombre }}</small>
                         </div>
                     </div>
                     {% endfor %}
                     <div class="col-md-3 col-6 mb-2">
                         <div class="d-flex align-items-center">
-                            <div style="width: 20px; height: 20px; background-color: #8B5FBF; border: 1px solid rgba(0,0,0,0.2); border-radius: 3px; margin-right: 8px;"></div>
+                            <div style="width: 20px; height: 20px; background-color: #1E3A2F; border: 1px solid rgba(0,0,0,0.2); border-radius: 3px; margin-right: 8px;"></div>
                             <small>Clase Individual</small>
                         </div>
                     </div>
@@ -121,7 +121,7 @@
                         </div>
                         <div class="col-md-6 mb-3">
                             <label for="color" class="form-label">Color</label>
-                            <input type="color" class="form-control" id="color" name="color" value="#8B5FBF">
+                            <input type="color" class="form-control" id="color" name="color" value="#1E3A2F">
                         </div>
                     </div>
 
@@ -197,7 +197,7 @@
 
 /* Mejorar apariencia de los días */
 .fc-col-header-cell {
-    background: linear-gradient(135deg, #8B5FBF 0%, #6f4a99 100%) !important;
+    background: linear-gradient(135deg, #1E3A2F 0%, #152921 100%) !important;
     border: none !important;
     padding: 12px 8px !important;
 }
@@ -246,23 +246,23 @@
 .fc-toolbar-title {
     font-size: 1.5em !important;
     font-weight: 600;
-    color: #6f4a99;
+    color: #152921;
 }
 
 .fc-button {
-    background: #8B5FBF !important;
-    border-color: #8B5FBF !important;
+    background: #1E3A2F !important;
+    border-color: #1E3A2F !important;
     text-transform: capitalize;
 }
 
 .fc-button:hover {
-    background: #6f4a99 !important;
-    border-color: #6f4a99 !important;
+    background: #152921 !important;
+    border-color: #152921 !important;
 }
 
 .fc-button-active {
-    background: #6f4a99 !important;
-    border-color: #6f4a99 !important;
+    background: #152921 !important;
+    border-color: #152921 !important;
 }
 
 /* Indicador de ahora */
@@ -291,8 +291,8 @@
 }
 
 .fc-event.individual {
-    background-color: #8B5FBF !important;
-    border-color: #6f4a99 !important;
+    background-color: #1E3A2F !important;
+    border-color: #152921 !important;
 }
 
 .fc-event.taller {
@@ -321,12 +321,12 @@
 }
 
 .fc-scroller::-webkit-scrollbar-thumb {
-    background: #8B5FBF;
+    background: #1E3A2F;
     border-radius: 4px;
 }
 
 .fc-scroller::-webkit-scrollbar-thumb:hover {
-    background: #6f4a99;
+    background: #152921;
 }
 </style>
 
@@ -706,7 +706,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 document.getElementById('fecha_inicio').value = formatearFechaInput(new Date(data.fecha_inicio));
                 document.getElementById('fecha_fin').value = formatearFechaInput(new Date(data.fecha_fin));
                 document.getElementById('instructor').value = data.instructor || 'Minouche';
-                document.getElementById('color').value = data.color || '#8B5FBF';
+                document.getElementById('color').value = data.color || '#1E3A2F';
                 document.getElementById('descripcion').value = data.descripcion || '';
                 document.getElementById('btnEliminarEvento').style.display = 'inline-block';
 

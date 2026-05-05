@@ -1,4 +1,4 @@
-# Sistema de Facturación - Atma suddhi
+# Sistema de Facturación - DarmaSala
 
 ## Resumen del Sistema
 

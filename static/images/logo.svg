@@ -1,56 +1,55 @@
 <svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
   <!-- Fondo circular -->
-  <circle cx="100" cy="100" r="95" fill="#f8f9fa" stroke="#e9ecef" stroke-width="2"/>
+  <circle cx="100" cy="100" r="95" fill="#F2F1EB" stroke="#6B8E7E" stroke-width="2"/>
   
   <!-- Raíces del árbol -->
-  <path d="M85 140 Q100 150 115 140 Q110 160 100 155 Q90 160 85 140" fill="#ffd700"/>
-  <path d="M75 145 Q85 150 95 145 Q90 165 80 160 Q70 165 75 145" fill="#ffd700"/>
-  <path d="M105 145 Q115 150 125 145 Q120 165 110 160 Q100 165 105 145" fill="#ffd700"/>
+  <path d="M85 140 Q100 150 115 140 Q110 160 100 155 Q90 160 85 140" fill="#1E3A2F"/>
+  <path d="M75 145 Q85 150 95 145 Q90 165 80 160 Q70 165 75 145" fill="#1E3A2F"/>
+  <path d="M105 145 Q115 150 125 145 Q120 165 110 160 Q100 165 105 145" fill="#1E3A2F"/>
   
   <!-- Tronco del árbol -->
-  <rect x="90" y="120" width="20" height="25" fill="#ffd700"/>
+  <rect x="90" y="120" width="20" height="25" fill="#1E3A2F"/>
   
   <!-- Figura de yoga en el tronco -->
-  <g fill="#6f42c1">
+  <g fill="#6B8E7E">
     <!-- Cabeza -->
-    <circle cx="100" cy="125" r="3" fill="#ffd700"/>
+    <circle cx="100" cy="125" r="3" fill="#6B8E7E"/>
     <!-- Cuerpo -->
-    <rect x="98" y="128" width="4" height="8" fill="#ffd700"/>
+    <rect x="98" y="128" width="4" height="8" fill="#6B8E7E"/>
     <!-- Brazo izquierdo -->
-    <path d="M98 130 Q95 125 92 130" stroke="#6f42c1" stroke-width="2" fill="none"/>
+    <path d="M98 130 Q95 125 92 130" stroke="#1E3A2F" stroke-width="2" fill="none"/>
     <!-- Brazo derecho -->
-    <path d="M102 130 Q105 125 108 130" stroke="#6f42c1" stroke-width="2" fill="none"/>
+    <path d="M102 130 Q105 125 108 130" stroke="#1E3A2F" stroke-width="2" fill="none"/>
     <!-- Pierna de apoyo -->
-    <path d="M100 136 Q100 145 100 150" stroke="#6f42c1" stroke-width="3" fill="none"/>
+    <path d="M100 136 Q100 145 100 150" stroke="#1E3A2F" stroke-width="3" fill="none"/>
     <!-- Pierna en posición de árbol -->
-    <path d="M100 136 Q105 140 110 135 Q115 130 120 135" stroke="#6f42c1" stroke-width="2" fill="none"/>
+    <path d="M100 136 Q105 140 110 135 Q115 130 120 135" stroke="#1E3A2F" stroke-width="2" fill="none"/>
   </g>
   
   <!-- Ramas del árbol -->
-  <path d="M85 120 Q90 110 100 115 Q110 110 115 120" stroke="#ffd700" stroke-width="4" fill="none"/>
-  <path d="M80 115 Q85 105 95 110 Q105 105 110 115" stroke="#ffd700" stroke-width="3" fill="none"/>
-  <path d="M75 110 Q80 100 90 105 Q100 100 105 110" stroke="#ffd700" stroke-width="2" fill="none"/>
+  <path d="M85 120 Q90 110 100 115 Q110 110 115 120" stroke="#1E3A2F" stroke-width="4" fill="none"/>
+  <path d="M80 115 Q85 105 95 110 Q105 105 110 115" stroke="#1E3A2F" stroke-width="3" fill="none"/>
+  <path d="M75 110 Q80 100 90 105 Q100 100 105 110" stroke="#1E3A2F" stroke-width="2" fill="none"/>
   
   <!-- Hojas -->
-  <circle cx="75" cy="105" r="8" fill="#90ee90" opacity="0.8"/>
-  <circle cx="85" cy="100" r="6" fill="#ffffe0" opacity="0.8"/>
-  <circle cx="95" cy="95" r="7" fill="#90ee90" opacity="0.8"/>
-  <circle cx="105" cy="100" r="6" fill="#ffffe0" opacity="0.8"/>
-  <circle cx="115" cy="105" r="8" fill="#90ee90" opacity="0.8"/>
-  <circle cx="90" cy="90" r="5" fill="#ffffe0" opacity="0.8"/>
-  <circle cx="110" cy="90" r="5" fill="#90ee90" opacity="0.8"/>
+  <circle cx="75" cy="105" r="8" fill="#6B8E7E" opacity="0.8"/>
+  <circle cx="85" cy="100" r="6" fill="#F2F1EB" opacity="0.8"/>
+  <circle cx="95" cy="95" r="7" fill="#6B8E7E" opacity="0.8"/>
+  <circle cx="105" cy="100" r="6" fill="#F2F1EB" opacity="0.8"/>
+  <circle cx="115" cy="105" r="8" fill="#6B8E7E" opacity="0.8"/>
+  <circle cx="90" cy="90" r="5" fill="#F2F1EB" opacity="0.8"/>
+  <circle cx="110" cy="90" r="5" fill="#6B8E7E" opacity="0.8"/>
   
   <!-- Texto superior -->
-  <text x="100" y="40" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#6f42c1">
-    <textPath href="#topArc">Meditacion en movimiento</textPath>
+  <text x="100" y="40" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#1E3A2F">
+    <textPath href="#topArc">DarmaSala</textPath>
   </text>
   
   <!-- Texto central -->
-  <text x="70" y="120" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#6f42c1">Atma,</text>
-  <text x="120" y="120" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#6f42c1">Buddhi</text>
+  <text x="100" y="110" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="#1E3A2F">DarmaSala</text>
   
   <!-- Texto inferior -->
-  <text x="100" y="180" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#6f42c1">
+  <text x="100" y="180" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#1E3A2F">
     <textPath href="#bottomArc">Espacio de yoga</textPath>
   </text>
   

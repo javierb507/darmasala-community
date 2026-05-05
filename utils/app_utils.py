@@ -179,14 +179,14 @@ def inicializar_categorias_gastos():
     """Inicializar categorías de gastos predeterminadas si no existen."""
     from models import db, CategoriaGasto
     categorias_default = [
-        {'nombre': 'Alquiler', 'descripcion': 'Alquiler del local', 'color': '#dc3545'},
-        {'nombre': 'Suministros', 'descripcion': 'Luz, agua, gas, internet', 'color': '#ffc107'},
-        {'nombre': 'Material', 'descripcion': 'Esterillas, bloques, material de yoga', 'color': '#28a745'},
-        {'nombre': 'Marketing', 'descripcion': 'Publicidad y promoción', 'color': '#007bff'},
-        {'nombre': 'Formación', 'descripcion': 'Cursos y certificaciones', 'color': '#6f42c1'},
-        {'nombre': 'Seguros', 'descripcion': 'Seguros de responsabilidad civil', 'color': '#fd7e14'},
-        {'nombre': 'Mantenimiento', 'descripcion': 'Limpieza y mantenimiento', 'color': '#20c997'},
-        {'nombre': 'Otros', 'descripcion': 'Gastos varios', 'color': '#6c757d'}
+        {'nombre': 'Alquiler', 'descripcion': 'Alquiler del local', 'color': '#1E3A2F'},
+        {'nombre': 'Suministros', 'descripcion': 'Luz, agua, gas, internet', 'color': '#6B8E7E'},
+        {'nombre': 'Material', 'descripcion': 'Esterillas, bloques, material de yoga', 'color': '#D4C9B3'},
+        {'nombre': 'Marketing', 'descripcion': 'Publicidad y promoción', 'color': '#1E3A2F'},
+        {'nombre': 'Formación', 'descripcion': 'Cursos y certificaciones', 'color': '#1E3A2F'},
+        {'nombre': 'Seguros', 'descripcion': 'Seguros de responsabilidad civil', 'color': '#6B8E7E'},
+        {'nombre': 'Mantenimiento', 'descripcion': 'Limpieza y mantenimiento', 'color': '#D4C9B3'},
+        {'nombre': 'Otros', 'descripcion': 'Gastos varios', 'color': '#6B8E7E'}
     ]
     
     try:

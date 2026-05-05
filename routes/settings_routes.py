@@ -300,7 +300,7 @@ def guardar_configuracion():
             ('direccion_escuela', request.form.get('direccion_escuela', ''), 'Dirección de la escuela'),
             ('telefono_escuela', request.form.get('telefono_escuela', ''), 'Teléfono de contacto'),
             ('email_escuela', request.form.get('email_escuela', ''), 'Email de contacto'),
-            ('web_escuela', request.form.get('web_escuela', 'http://atmasuddhi.es'), 'Página web'),
+            ('web_escuela', request.form.get('web_escuela', 'https://darmasala.cloud'), 'Página web'),
             ('nombre_instructora', request.form.get('nombre_instructora', 'Minouche'), 'Nombre de la instructora principal'),
             ('email_instructora', request.form.get('email_instructora', ''), 'Email de la instructora'),
             ('telefono_instructora', request.form.get('telefono_instructora', ''), 'Teléfono de la instructora'),

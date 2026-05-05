@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-MASTER INITIALIZATION SCRIPT - DarmaSala DarmaSala
+MASTER INITIALIZATION SCRIPT - DarmaSala
 This script simplifies the database setup process.
 Usage:
   python init_db.py          - Basic initialization (Tables, Categories, Config)
@@ -62,12 +62,12 @@ def init_base_data():
     # 1. Categories
     print("📂 Initializing expense categories...")
     categorias = [
-        {'nombre': 'Alquiler', 'descripcion': 'Alquiler del local', 'color': '#dc3545'},
-        {'nombre': 'Suministros', 'descripcion': 'Luz, agua, gas, internet', 'color': '#ffc107'},
-        {'nombre': 'Material', 'descripcion': 'Esterillas, bloques, etc.', 'color': '#28a745'},
-        {'nombre': 'Marketing', 'descripcion': 'Publicidad y promoción', 'color': '#007bff'},
-        {'nombre': 'Formación', 'descripcion': 'Cursos y formación', 'color': '#6f42c1'},
-        {'nombre': 'Otros', 'descripcion': 'Gastos varios', 'color': '#6c757d'}
+        {'nombre': 'Alquiler', 'descripcion': 'Alquiler del local', 'color': '#1E3A2F'},
+        {'nombre': 'Suministros', 'descripcion': 'Luz, agua, gas, internet', 'color': '#6B8E7E'},
+        {'nombre': 'Material', 'descripcion': 'Esterillas, bloques, etc.', 'color': '#D4C9B3'},
+        {'nombre': 'Marketing', 'descripcion': 'Publicidad y promoción', 'color': '#1E3A2F'},
+        {'nombre': 'Formación', 'descripcion': 'Cursos y formación', 'color': '#1E3A2F'},
+        {'nombre': 'Otros', 'descripcion': 'Gastos varios', 'color': '#6B8E7E'}
     ]
     for cat_data in categorias:
         if not CategoriaGasto.query.filter_by(nombre=cat_data['nombre']).first():
@@ -77,8 +77,9 @@ def init_base_data():
     print("⚙️ Initializing system configuration...")
     config_defaults = {
         'nombre_escuela': 'DarmaSala',
-        'email_escuela': 'info@darmasala.es',
-        'color_primario': '#0F4F4F',
+        'email_escuela': 'info@darmasala.cloud',
+        'logo_escuela': 'images/logo_darmasala.jpg',
+        'color_primario': '#1E3A2F',
         'capacidad_centro': '20'
     }
     for clave, valor in config_defaults.items():
@@ -114,9 +115,9 @@ def init_test_data():
     
     # Classes
     clases_data = [
-        {'nombre': 'Yoga Integral', 'color': '#007bff', 'duracion_minutos': 75},
-        {'nombre': 'Yoga Menopausia', 'color': '#e91e63', 'duracion_minutos': 75},
-        {'nombre': 'Meditación', 'color': '#9c27b0', 'duracion_minutos': 45}
+        {'nombre': 'Yoga Integral', 'color': '#1E3A2F', 'duracion_minutos': 75},
+        {'nombre': 'Yoga Menopausia', 'color': '#6B8E7E', 'duracion_minutos': 75},
+        {'nombre': 'Meditación', 'color': '#D4C9B3', 'duracion_minutos': 45}
     ]
     clases = []
     for c_data in clases_data:
@@ -189,7 +190,7 @@ def create_admin(password='admin'):
         if not Usuario.query.filter_by(username='admin').first():
             admin = Usuario(
                 username='admin',
-                email='admin@darmasala.es',
+                email='admin@darmasala.cloud',
                 password_hash=generate_password_hash(password),
                 nombre='Admin',
                 apellido='Sala',

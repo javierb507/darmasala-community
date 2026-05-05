@@ -179,7 +179,7 @@ El PDF generado incluye:
 ┌─────────────────────────┬─────────────────────────┐
 │ DATOS DE LA EMPRESA     │ DATOS DEL CLIENTE       │
 ├─────────────────────────┼─────────────────────────┤
-│ Atma suddhi            │ Juan Pérez              │
+│ DarmaSala            │ Juan Pérez              │
 │ NIF: X1234567X         │ NIF/CIF: 12345678A      │
 │ C/ Ejemplo, 123        │ C/ Cliente, 456         │
 │ 28001 Madrid           │ 28002 Madrid            │
@@ -209,7 +209,7 @@ Observaciones:
 Factura correspondiente a clases del mes de enero 2026
 
 ────────────────────────────────────────────────────────
-Atma suddhi - NIF: X1234567X
+DarmaSala - NIF: X1234567X
 C/ Ejemplo, 123, 28001 Madrid
 ```
 

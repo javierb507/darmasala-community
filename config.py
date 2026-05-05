@@ -6,7 +6,8 @@ from datetime import timedelta
 
 class Config:
     """Configuración base"""
-    SECRET_KEY = os.environ.get('SECRET_KEY') or 'darmasala-yoga-management-secure-key-2026'
+    # IMPORTANTE: Cambiar en producción usando la variable de entorno SECRET_KEY
+    SECRET_KEY = os.environ.get('SECRET_KEY') or 'dev-key-placeholder-change-this-in-production'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     
     # Configuración de la aplicación

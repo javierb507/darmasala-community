@@ -1,5 +1,5 @@
 """
-Utilidades compartidas para el sistema de gestión Atma suddhi.
+Utilidades compartidas para el sistema de gestión DarmaSala.
 """
 
 from .calendar_utils import (

@@ -8,7 +8,7 @@ from datetime import datetime, date
 app = Flask(__name__)
 
 # Configuration
-app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'atma-suddhi-yoga-management-2025-secure-key')
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'darmasala-yoga-management-2025-secure-key-placeholder')
 
 # Configuración de base de datos para producción
 if os.environ.get('FLASK_ENV') == 'production':

@@ -5,7 +5,7 @@
 #>
 
 $ProjectDir = Get-Location
-$ServiceName = "AtmaSuddhiYoga"
+$ServiceName = "DarmaSalaYoga"
 $DisplayName = "DarmaSala - Yoga Management"
 $Description = "Servicio de gestión de escuela de yoga DarmaSala"
 $PythonExe = Join-Path $ProjectDir "venv\Scripts\python.exe"

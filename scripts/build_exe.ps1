@@ -23,7 +23,7 @@ Write-Host "📦 Bundling application (this may take 1-2 minutes)..." -Foregroun
 # --hidden-import: Ensure waitress and sqlalchemy are included
 # --icon: Custom icon if available (falls back to default)
 & .\venv\Scripts\pyinstaller.exe `
-    --name "AtmaSuddhi" `
+    --name "DarmaSala" `
     --noconsole `
     --add-data "templates;templates" `
     --add-data "static;static" `
@@ -39,5 +39,5 @@ Write-Host "📦 Bundling application (this may take 1-2 minutes)..." -Foregroun
     run.py
 
 Write-Host "✅ Build Complete!" -ForegroundColor Green
-Write-Host "📂 Your portable app is in: $(Get-Location)\dist\AtmaSuddhi" -ForegroundColor White
-Write-Host "🚀 You can now run AtmaSuddhi.exe from that folder." -ForegroundColor Gray
+Write-Host "📂 Your portable app is in: $(Get-Location)\dist\DarmaSala" -ForegroundColor White
+Write-Host "🚀 You can now run DarmaSala.exe from that folder." -ForegroundColor Gray

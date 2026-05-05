@@ -2,7 +2,7 @@
 
 ## Descripción General
 
-El sistema de calendario centralizado proporciona utilidades reutilizables para el manejo de fechas, períodos de pago y horarios en todo el sistema de gestión Atma suddhi.
+El sistema de calendario centralizado proporciona utilidades reutilizables para el manejo de fechas, períodos de pago y horarios en todo el sistema de gestión DarmaSala.
 
 ## Arquitectura
 
