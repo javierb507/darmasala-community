@@ -12,7 +12,7 @@ class Config:
     
     # Configuración de la aplicación
     APP_NAME = 'DarmaSala - Gestión de Escuela de Yoga'
-    APP_VERSION = '2.0.0-final'
+    APP_VERSION = '2.0.1-final'
     
     # Configuración de base de datos
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or 'sqlite:///yoga_school.db'

@@ -224,6 +224,13 @@
             </div>
         </div>
     </nav>
+    {% if version_info %}
+    <div class="text-end px-3 pt-1" style="position: relative; z-index: 1;">
+        <span class="text-muted" style="font-size: 0.65rem; opacity: 0.55; letter-spacing: 0.3px;">
+            v{{ version_info.version }} · {{ version_info.build_date }}
+        </span>
+    </div>
+    {% endif %}
     {% endif %}
 
     <div class="container student-container">

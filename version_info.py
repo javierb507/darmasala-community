@@ -4,9 +4,18 @@ Script para obtener información de versión y Git
 """
 
 import os
+import re
 import subprocess
 from datetime import datetime
 import json
+
+
+def _redact_url(url):
+    """Quita credenciales (user:token@) de la URL del remoto antes de guardar."""
+    if not url:
+        return url
+    return re.sub(r'(https?://)[^@/]+@', r'\1', url)
+
 
 def get_git_info():
     """Obtener información de Git"""
@@ -51,7 +60,7 @@ def get_git_info():
             'commit_date': commit_date,
             'commit_message': commit_message,
             'branch': branch,
-            'remote_url': remote_url,
+            'remote_url': _redact_url(remote_url),
             'available': True
         }
     except:
@@ -72,7 +81,7 @@ def get_app_version():
     git_info = get_git_info()
     
     return {
-        'version': '1.0.0',
+        'version': '2.0.1-final',
         'build_date': build_date,
         'git_info': git_info,
         'app_name': 'DarmaSala',

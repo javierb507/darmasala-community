@@ -18,7 +18,7 @@ def get_version_info():
     
     # Fallback si no existe el archivo
     return {
-        'version': '1.0.0',
+        'version': '2.0.1-final',
         'build_date': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
         'git_info': {
             'commit_hash': 'unknown',
