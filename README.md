@@ -10,18 +10,13 @@ Sistema completo de gestión para una escuela de yoga que incluye gestión de al
 **Licencia:** GNU GPL v3  
 **Versión:** 2.0.0-final  
 
-## 🌿 Inspiración (Poem & Reflection)
+## 🌿 Inspiración
 
-> "I exist as I am, that is enough,  
-> If no other in the world be aware I sit content,  
-> And if each and all be aware I sit content.  
-> One world is aware and by far the largest to me, and that is myself,  
-> And whether I come to my own to-day or in ten thousand or ten million years,  
-> I can cheerfully take it now, or with equal cheerfulness I can wait."  
-> — *Walt Whitman, Leaves of Grass*
+> "El éxito del yoga no radica en la capacidad de realizar posturas, sino en cómo cambia positivamente nuestra forma de vivir la vida y nuestras relaciones."  
+> — *T.K.V. Desikachar*
 
 **Reflexión:**  
-Este sistema, DarmaSala, ha sido diseñado para aportar orden y serenidad a la gestión de un santuario de yoga. Al igual que Whitman celebra la suficiencia inherente del ser, este software busca simplificar las cargas administrativas para que practicantes y maestros puedan centrarse en el presente. Al organizar lo múltiple (alumnos, clases, finanzas) en una estructura armónica, el sistema actúa como un compañero silencioso en el camino hacia el equilibrio y el autoconocimiento.
+DarmaSala nace con esa misma intención: medir el valor no por la postura técnica del sistema, sino por cómo libera tiempo a practicantes y maestros para que vivan mejor su práctica y sus vínculos. Organizar lo múltiple (alumnos, clases, finanzas) en una estructura armónica es sólo un medio para que lo esencial pueda respirar.
 
 ## 📋 Tabla de Contenidos
 
