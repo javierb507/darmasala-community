@@ -607,9 +607,9 @@ def modo_pruebas():
 @login_required
 def cargar_datos_prueba():
     try:
-        # Importar dinámicamente para evitar problemas circulares
-        from cargar_datos_prueba_completos import cargar_datos_completos
-        cargar_datos_completos(modo_web=True)
+        from init_db import init_base_data, init_test_data
+        init_base_data()
+        init_test_data()
         flash('¡Datos de prueba cargados exitosamente!', 'success')
     except Exception as e:
         flash(f'Error al cargar datos de prueba: {str(e)}', 'error')
