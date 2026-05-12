@@ -22,6 +22,8 @@ SERVICE_GROUP="${SERVICE_GROUP:-www-data}"
 SERVICE_NAME="${SERVICE_NAME:-darmasala}"
 PORT="${PORT:-5001}"
 SECRET_KEY="${SECRET_KEY:-}"
+# DB por defecto: SQLite en instance/. Para MySQL pasa DATABASE_URL=mysql+pymysql://user:pass@host/db
+DATABASE_URL="${DATABASE_URL:-sqlite:////${INSTALL_DIR#/}/instance/yoga_school.db}"
 
 GREEN='\033[0;32m'
 BLUE='\033[0;34m'
@@ -121,7 +123,10 @@ if [[ -f "$INSTALL_DIR/yoga_school.db" && ! -f "$DB_FILE" ]]; then
 fi
 
 if [[ ! -f "$DB_FILE" ]]; then
-    sudo -u "$SERVICE_USER" "$INSTALL_DIR/venv/bin/python" "$INSTALL_DIR/init_db.py"
+    # Pasa DATABASE_URL para que init_db escriba directamente en instance/
+    sudo -u "$SERVICE_USER" \
+        env DATABASE_URL="$DATABASE_URL" FLASK_ENV=production \
+        "$INSTALL_DIR/venv/bin/python" "$INSTALL_DIR/init_db.py"
     ok "DB inicializada (admin: admin / DarmaSala2025!)"
 else
     ok "DB ya existe — no se toca"
@@ -147,6 +152,7 @@ WorkingDirectory=${INSTALL_DIR}
 Environment="PATH=${INSTALL_DIR}/venv/bin"
 Environment="FLASK_ENV=production"
 Environment="SECRET_KEY=${SECRET_KEY}"
+Environment="DATABASE_URL=${DATABASE_URL}"
 Environment="PORT=${PORT}"
 ExecStart=${INSTALL_DIR}/venv/bin/python ${INSTALL_DIR}/production_server.py
 Restart=always
