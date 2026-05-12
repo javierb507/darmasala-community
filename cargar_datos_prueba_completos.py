@@ -30,7 +30,14 @@ Es idempotente respecto a duplicados detectables por clave única
 import os
 import sys
 import random
+import unicodedata
 from datetime import datetime, date, time, timedelta
+
+
+def _slug(s: str) -> str:
+    """Quita acentos y espacios para construir emails seguros."""
+    s = unicodedata.normalize('NFKD', s).encode('ascii', 'ignore').decode('ascii')
+    return s.lower().split()[0]
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
@@ -158,8 +165,12 @@ ALUMNOS = [
 def _ensure_alumnos():
     alumnos_obj = []
     for data in ALUMNOS:
-        email = f"{data['nombre'].lower()}.{data['apellido'].split()[0].lower()}@example.com"
-        alumno = Alumno.query.filter_by(email=email).first()
+        email = f"{_slug(data['nombre'])}.{_slug(data['apellido'])}@example.com"
+        # Busca por email O dni; cualquiera de los dos puede existir
+        alumno = (
+            Alumno.query.filter_by(email=email).first()
+            or Alumno.query.filter_by(dni=data['dni']).first()
+        )
         if not alumno:
             alumno = Alumno(
                 nombre=data['nombre'],
@@ -175,17 +186,18 @@ def _ensure_alumnos():
             db.session.add(alumno)
             db.session.flush()
 
-            # Usuario de portal vinculado por email
-            if not Usuario.query.filter_by(email=email).first():
-                db.session.add(Usuario(
-                    username=email,
-                    email=email,
-                    password_hash=generate_password_hash(data['dni']),
-                    nombre=data['nombre'],
-                    apellido=data['apellido'],
-                    rol='alumno',
-                    activo=True,
-                ))
+        # Usuario portal: usa el email del alumno encontrado/creado
+        portal_email = alumno.email
+        if not Usuario.query.filter_by(email=portal_email).first():
+            db.session.add(Usuario(
+                username=portal_email,
+                email=portal_email,
+                password_hash=generate_password_hash(data['dni']),
+                nombre=data['nombre'],
+                apellido=data['apellido'],
+                rol='alumno',
+                activo=True,
+            ))
         alumnos_obj.append(alumno)
     return alumnos_obj
 
