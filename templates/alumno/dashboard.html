@@ -25,6 +25,61 @@
         font-family: 'Outfit', sans-serif;
     }
 
+    /* ============ MOBILE ============ */
+    @media (max-width: 768px) {
+        .calendar-container {
+            padding: 0.75rem;
+            border-radius: 20px;
+        }
+        #calendar { min-height: 520px; }
+
+        .fc .fc-toolbar-title {
+            font-size: 1.05rem !important;
+            line-height: 1.2;
+        }
+        .fc .fc-toolbar {
+            flex-wrap: wrap;
+            gap: 0.4rem;
+            margin-bottom: 0.5rem !important;
+        }
+        .fc .fc-toolbar-chunk {
+            display: flex;
+            gap: 4px;
+        }
+        .fc .fc-button-primary {
+            padding: 4px 10px !important;
+            font-size: 0.8rem !important;
+            border-radius: 8px !important;
+        }
+        .fc-col-header-cell-cushion,
+        .fc .fc-col-header-cell-cushion {
+            font-size: 0.7rem;
+            padding: 4px 2px !important;
+        }
+        .fc .fc-timegrid-slot,
+        .fc .fc-timegrid-slot-label {
+            font-size: 0.7rem;
+        }
+        .fc-event-title,
+        .fc .fc-event-time {
+            font-size: 0.65rem !important;
+            line-height: 1.1 !important;
+        }
+        .stat-bar {
+            padding: 1rem;
+            border-radius: 14px;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.5rem;
+        }
+        .card-body { padding: 1rem !important; }
+        .student-container { padding: 1rem 0 !important; }
+    }
+    @media (max-width: 480px) {
+        .fc .fc-toolbar-title { font-size: 0.95rem !important; }
+        .fc .fc-button-primary { padding: 3px 8px !important; font-size: 0.75rem !important; }
+    }
+
     /* Estilo Gmail/Premium para el Calendario */
     .fc .fc-toolbar-title {
         font-family: 'Playfair Display', serif;
@@ -375,24 +430,43 @@ document.addEventListener('DOMContentLoaded', function() {
     const limiteAlcanzado = {{ 'true' if asistencias_semana >= limite_semanal else 'false' }};
     const periodoText = '{{ periodo_text }}';
     
+    const isMobile = () => window.innerWidth < 768;
+
     const calendar = new FullCalendar.Calendar(calendarEl, {
-        initialView: 'timeGridWeek',
+        initialView: isMobile() ? 'listWeek' : 'timeGridWeek',
         locale: 'es',
-        headerToolbar: {
-            left: 'prev,next today',
-            center: 'title',
-            right: 'timeGridWeek,timeGridDay'
+        headerToolbar: isMobile()
+            ? { left: 'prev,next', center: 'title', right: 'listWeek,timeGridDay' }
+            : { left: 'prev,next today', center: 'title', right: 'timeGridWeek,timeGridDay' },
+        buttonText: {
+            today:    'Hoy',
+            month:    'Mes',
+            week:     'Semana',
+            day:      'Día',
+            list:     'Lista',
+            listWeek: 'Lista'
         },
         slotMinTime: '07:00:00',
         slotMaxTime: '22:00:00',
         allDaySlot: false,
         height: 'auto',
+        nowIndicator: true,
         events: '/portal/eventos',
         slotLabelFormat: {
             hour: 'numeric',
             minute: '2-digit',
             omitZeroMinute: false,
             meridiem: 'short'
+        },
+        eventTimeFormat: { hour: '2-digit', minute: '2-digit', hour12: false },
+        windowResize: function(view) {
+            const want = isMobile() ? 'listWeek' : 'timeGridWeek';
+            if (view.view.type !== want) {
+                calendar.changeView(want);
+                calendar.setOption('headerToolbar', isMobile()
+                    ? { left: 'prev,next', center: 'title', right: 'listWeek,timeGridDay' }
+                    : { left: 'prev,next today', center: 'title', right: 'timeGridWeek,timeGridDay' });
+            }
         },
         eventClick: function(info) {
             const props = info.event.extendedProps;
