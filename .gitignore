@@ -188,6 +188,7 @@ secrets.py
 # Upload directories
 uploads/
 static/uploads/
+static/icons/
 media/
 
 # Cache directories

@@ -80,7 +80,8 @@ def init_base_data():
         'email_escuela': 'info@darmasala.cloud',
         'logo_escuela': 'images/logo_darmasala.jpg',
         'color_primario': '#1E3A2F',
-        'capacidad_centro': '20'
+        'capacidad_centro': '20',
+        'dominio_portal': '',  # vacío = auto-detect desde request
     }
     for clave, valor in config_defaults.items():
         if not Configuracion.query.filter_by(clave=clave).first():

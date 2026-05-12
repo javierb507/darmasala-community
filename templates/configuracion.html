@@ -115,6 +115,21 @@
                                 </div>
                             </div>
                             <div class="row mb-3">
+                                <div class="col-12">
+                                    <label class="form-label small">
+                                        Dominio Portal Alumnos (PWA)
+                                        <i class="fas fa-info-circle ms-1 text-muted"
+                                           title="URL pública donde los alumnos acceden al portal. Se usa para la app instalable en móvil. Déjalo vacío para detectar automáticamente."></i>
+                                    </label>
+                                    <input type="text" class="form-control" name="dominio_portal"
+                                        value="{{ config.get('dominio_portal', '') }}"
+                                        placeholder="https://portal.darmasala.cloud">
+                                    <small class="form-text text-muted">
+                                        Para que la instalación en móvil funcione necesita HTTPS y un dominio real (no localhost).
+                                    </small>
+                                </div>
+                            </div>
+                            <div class="row mb-3">
                                 <div class="col-md-9">
                                     <label class="form-label small">Cuenta Bancaria (IBAN)</label>
                                     <input type="text" class="form-control" name="numero_cuenta"

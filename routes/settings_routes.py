@@ -301,6 +301,7 @@ def guardar_configuracion():
             ('telefono_escuela', request.form.get('telefono_escuela', ''), 'Teléfono de contacto'),
             ('email_escuela', request.form.get('email_escuela', ''), 'Email de contacto'),
             ('web_escuela', request.form.get('web_escuela', 'https://darmasala.cloud'), 'Página web'),
+            ('dominio_portal', request.form.get('dominio_portal', '').strip(), 'Dominio público del portal alumnos (PWA)'),
             ('nombre_instructora', request.form.get('nombre_instructora', 'Minouche'), 'Nombre de la instructora principal'),
             ('email_instructora', request.form.get('email_instructora', ''), 'Email de la instructora'),
             ('telefono_instructora', request.form.get('telefono_instructora', ''), 'Teléfono de la instructora'),

@@ -1,10 +1,85 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash, session, jsonify
+import os
+
+from flask import (
+    Blueprint, render_template, request, redirect, url_for, flash, session,
+    jsonify, send_from_directory, send_file, current_app, abort,
+)
 from werkzeug.security import check_password_hash, generate_password_hash
 from datetime import datetime, date, timedelta
-from models import db, Alumno, Usuario, HorarioSemanal, Asistencia, Clase, EventoCalendario, SolicitudYogaterapia, ClaseOnline
+from models import db, Alumno, Usuario, HorarioSemanal, Asistencia, Clase, EventoCalendario, SolicitudYogaterapia, ClaseOnline, Configuracion
 from utils.student_auth import student_login_required
+from utils.pwa import ensure_icons, get_app_domain
 
 student_portal_bp = Blueprint('student_portal', __name__, url_prefix='/portal')
+
+
+# ---------------------------------------------------------------------------
+# PWA: manifest, service worker, iconos
+# ---------------------------------------------------------------------------
+
+def _config_dict():
+    return {c.clave: c.valor for c in Configuracion.query.all()}
+
+
+@student_portal_bp.route('/manifest.webmanifest')
+def manifest():
+    """Manifest dinámico. Lee dominio configurado y nombre de la escuela."""
+    cfg = _config_dict()
+    nombre = cfg.get('nombre_escuela', 'DarmaSala')
+    color = cfg.get('color_primario', '#1E3A2F')
+    domain = get_app_domain(cfg) or request.host_url.rstrip('/')
+
+    payload = {
+        'name': f'{nombre} · Portal Alumnos',
+        'short_name': nombre,
+        'description': 'Portal del alumno: reservas, horarios y clases grabadas.',
+        'start_url': f'{domain}/portal/dashboard',
+        'scope': f'{domain}/portal/',
+        'display': 'standalone',
+        'orientation': 'portrait',
+        'background_color': '#F2F1EB',
+        'theme_color': color,
+        'lang': 'es',
+        'icons': [
+            {'src': f'{domain}/portal/icons/icon-192.png',
+             'sizes': '192x192', 'type': 'image/png', 'purpose': 'any'},
+            {'src': f'{domain}/portal/icons/icon-512.png',
+             'sizes': '512x512', 'type': 'image/png', 'purpose': 'any'},
+            {'src': f'{domain}/portal/icons/icon-192-maskable.png',
+             'sizes': '192x192', 'type': 'image/png', 'purpose': 'maskable'},
+            {'src': f'{domain}/portal/icons/icon-512-maskable.png',
+             'sizes': '512x512', 'type': 'image/png', 'purpose': 'maskable'},
+        ],
+    }
+    resp = jsonify(payload)
+    resp.headers['Content-Type'] = 'application/manifest+json; charset=utf-8'
+    resp.headers['Cache-Control'] = 'no-cache'
+    return resp
+
+
+@student_portal_bp.route('/sw.js')
+def service_worker():
+    """Sirve el service worker con scope /portal/."""
+    sw_path = os.path.join(current_app.root_path, 'static', 'sw.js')
+    if not os.path.exists(sw_path):
+        abort(404)
+    resp = send_file(sw_path, mimetype='application/javascript')
+    resp.headers['Cache-Control'] = 'no-cache'
+    resp.headers['Service-Worker-Allowed'] = '/portal/'
+    return resp
+
+
+@student_portal_bp.route('/icons/<path:filename>')
+def pwa_icon(filename):
+    """Sirve los iconos PWA. Los genera al vuelo si no existen."""
+    ensure_icons()
+    icons_dir = os.path.join(current_app.root_path, 'static', 'icons')
+    safe = os.path.basename(filename)
+    full = os.path.join(icons_dir, safe)
+    if not os.path.exists(full):
+        abort(404)
+    return send_from_directory(icons_dir, safe, mimetype='image/png',
+                                max_age=86400)
 
 def get_quota_details(alumno):
     """Retorna el límite de clases y el periodo para el alumno"""

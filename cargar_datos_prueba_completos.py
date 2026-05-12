@@ -138,6 +138,7 @@ def _ensure_configuracion_basica():
         'logo_escuela':    'images/logo_darmasala.jpg',
         'color_primario':  '#1E3A2F',
         'capacidad_centro':'20',
+        'dominio_portal':  '',
     }
     for clave, valor in defaults.items():
         if not Configuracion.query.filter_by(clave=clave).first():
