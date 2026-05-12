@@ -607,10 +607,16 @@ def modo_pruebas():
 @login_required
 def cargar_datos_prueba():
     try:
-        from init_db import init_base_data, init_test_data
-        init_base_data()
-        init_test_data()
-        flash('¡Datos de prueba cargados exitosamente!', 'success')
+        from cargar_datos_prueba_completos import cargar_datos_completos
+        resumen = cargar_datos_completos(modo_web=True)
+        flash(
+            '¡Datos de prueba cargados! '
+            f"Alumnos: {resumen['alumnos']}, horarios: {resumen['horarios']}, "
+            f"asistencias: {resumen['asistencias']}, pagos: {resumen['pagos']}, "
+            f"facturas emitidas: {resumen['facturas_emitidas']}, "
+            f"facturas proveedores: {resumen['facturas_proveedores']}.",
+            'success'
+        )
     except Exception as e:
         flash(f'Error al cargar datos de prueba: {str(e)}', 'error')
         db.session.rollback()
