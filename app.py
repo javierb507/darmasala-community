@@ -27,9 +27,9 @@ db.init_app(app)
 
 # Import Blueprints
 from routes import (
-    main_bp, auth_bp, student_bp, finance_bp, 
+    main_bp, auth_bp, student_bp, finance_bp,
     class_bp, yogatherapia_bp, settings_bp, user_routes_bp,
-    student_portal_bp, setup_bp
+    student_portal_bp, setup_bp, bug_report_bp
 )
 
 # Register Blueprints
@@ -43,6 +43,7 @@ app.register_blueprint(settings_bp)
 app.register_blueprint(user_routes_bp)
 app.register_blueprint(student_portal_bp)
 app.register_blueprint(setup_bp)
+app.register_blueprint(bug_report_bp)
 
 # Context Processor para hacer disponibles las utilidades de calendario y versión en todos los templates
 @app.context_processor

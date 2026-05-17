@@ -167,6 +167,103 @@
     </script>
     {% block extra_js %}{% endblock %}
     {% block modals %}{% endblock %}
+
+    {% if session.get('user_id') and config.get('bug_report_enabled', 'false') == 'true' %}
+    <!-- Floating bug report button -->
+    <button type="button" id="bugReportFab"
+            class="btn btn-dark shadow"
+            style="position: fixed; bottom: 24px; right: 24px; z-index: 1040;
+                   border-radius: 999px; padding: 10px 16px;"
+            data-bs-toggle="modal" data-bs-target="#bugReportModal"
+            title="Reportar un problema">
+        <i class="fas fa-bug me-1"></i> Reportar bug
+    </button>
+
+    <div class="modal fade" id="bugReportModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content border-0" style="border-radius: 16px;">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title fw-bold">
+                        <i class="fas fa-bug text-danger me-2"></i>Reportar un problema
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="bugReportForm" method="POST" action="{{ url_for('bug_report.submit') }}">
+                    <div class="modal-body">
+                        <p class="text-muted small">
+                            Se creará un issue en GitHub con la descripción y el contexto técnico (URL, versión, navegador). No incluyas datos personales de alumnos.
+                        </p>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Título *</label>
+                            <input type="text" class="form-control" name="title" required
+                                   placeholder="Resumen breve del problema" maxlength="120">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Descripción</label>
+                            <textarea class="form-control" name="description" rows="3"
+                                      placeholder="Qué ha pasado, qué esperabas que pasara..."></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">¿Qué estabas haciendo?</label>
+                            <textarea class="form-control" name="what_doing" rows="2"
+                                      placeholder="Pasos previos al fallo (clic en X, seleccioné Y...)"></textarea>
+                        </div>
+                        <div id="bugReportError" class="alert alert-danger small d-none" role="alert"></div>
+                        <div id="bugReportSuccess" class="alert alert-success small d-none" role="alert"></div>
+                    </div>
+                    <div class="modal-footer border-0">
+                        <button type="button" class="btn btn-link text-muted" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-dark" id="bugReportSubmitBtn">
+                            <i class="fab fa-github me-1"></i> Enviar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    (function() {
+        const form = document.getElementById('bugReportForm');
+        const errBox = document.getElementById('bugReportError');
+        const okBox = document.getElementById('bugReportSuccess');
+        const btn = document.getElementById('bugReportSubmitBtn');
+        if (!form) return;
+
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            errBox.classList.add('d-none');
+            okBox.classList.add('d-none');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Enviando…';
+
+            const data = new FormData(form);
+            try {
+                const resp = await fetch(form.action, {
+                    method: 'POST',
+                    body: data,
+                    headers: { 'Accept': 'application/json' },
+                });
+                const json = await resp.json();
+                if (json.ok) {
+                    okBox.innerHTML = 'Issue creado: <a href="' + json.url + '" target="_blank" rel="noopener">#' + json.number + '</a>';
+                    okBox.classList.remove('d-none');
+                    form.reset();
+                } else {
+                    errBox.textContent = json.error || 'Error desconocido.';
+                    errBox.classList.remove('d-none');
+                }
+            } catch (err) {
+                errBox.textContent = 'No se pudo enviar el reporte. ' + err;
+                errBox.classList.remove('d-none');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fab fa-github me-1"></i> Enviar';
+            }
+        });
+    })();
+    </script>
+    {% endif %}
 </body>
 
 </html>

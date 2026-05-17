@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block page_title %}Reporte de bugs{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+  <h3 class="mb-1"><i class="fab fa-github me-2"></i>Reporte de bugs a GitHub</h3>
+  <p class="text-muted small mb-4">
+    Permite que los administradores envíen issues directamente al repositorio del proyecto desde dentro de la aplicación.
+  </p>
+
+  <div class="card border-0 shadow-sm" style="border-radius: 16px; max-width: 720px;">
+    <div class="card-body p-4">
+      <form method="POST" action="{{ url_for('bug_report.admin_save') }}">
+        <div class="form-check form-switch mb-3">
+          <input class="form-check-input" type="checkbox" name="enabled" id="brEnabled"
+                 {% if enabled %}checked{% endif %}>
+          <label class="form-check-label fw-bold" for="brEnabled">Activar botón "Reportar bug"</label>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label small">Repositorio destino</label>
+          <input type="text" class="form-control" name="repo" value="{{ repo }}"
+                 placeholder="javierb507/darmasala">
+          <small class="text-muted">Formato <code>owner/nombre</code>. El token debe tener acceso de escritura a este repo.</small>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label small">Etiquetas por defecto</label>
+          <input type="text" class="form-control" name="labels" value="{{ labels }}"
+                 placeholder="bug,reportado-desde-app">
+          <small class="text-muted">Separadas por comas. Las etiquetas se crean en GitHub si no existen.</small>
+        </div>
+
+        <div class="alert alert-info border-0 small" style="border-radius: 12px;">
+          <i class="fas fa-info-circle me-1"></i>
+          El token de GitHub se lee SOLO de la variable de entorno
+          <code>GITHUB_ISSUE_TOKEN</code> (nunca se guarda en la BD).<br>
+          Estado:
+          {% if token_set %}<span class="badge bg-success">Token configurado</span>
+          {% else %}<span class="badge bg-danger">Token NO configurado</span>{% endif %}
+        </div>
+
+        <button type="submit" class="btn btn-primary">
+          <i class="fas fa-save me-1"></i> Guardar configuración
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <p class="text-muted small mt-4">
+    Guía: <code>docs/BUG_REPORTING.md</code> en el repositorio.
+  </p>
+</div>
+{% endblock %}

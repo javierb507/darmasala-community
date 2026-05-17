@@ -8,3 +8,4 @@ from .settings_routes import settings_bp
 from .user_routes import user_routes_bp
 from .student_portal_routes import student_portal_bp
 from .setup_routes import setup_bp
+from .bug_report_routes import bug_report_bp
