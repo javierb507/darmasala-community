@@ -114,10 +114,9 @@ def editar_usuario(usuario_id):
 @user_routes_bp.route('/perfil')
 @login_required
 def propio_perfil():
-    """Ver mi propio perfil"""
+    """Redirige al detalle del usuario actual (mismo template que admin)."""
     user_id = session.get('user_id')
-    user = Usuario.query.get_or_404(user_id)
-    return render_template('perfil.html', user=user)
+    return redirect(url_for('users.ver_usuario', usuario_id=user_id))
 
 @user_routes_bp.route('/usuarios/<int:usuario_id>')
 @login_required
