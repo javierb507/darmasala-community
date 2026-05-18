@@ -141,7 +141,10 @@ def _ensure_configuracion_basica():
         'dominio_portal':  '',
     }
     for clave, valor in defaults.items():
-        if not Configuracion.query.filter_by(clave=clave).first():
+        row = Configuracion.query.filter_by(clave=clave).first()
+        if row:
+            row.valor = valor
+        else:
             db.session.add(Configuracion(clave=clave, valor=valor))
 
 
@@ -263,7 +266,7 @@ def _ensure_horarios(clases):
 
 def _seed_asistencias(alumnos, horarios, semanas=4):
     """Genera asistencias para últimas N semanas. Tasa 60-90% por clase."""
-    if Asistencia.query.count() > 0:
+    if alumnos and Asistencia.query.filter_by(alumno_id=alumnos[0].id).first():
         return 0
 
     hoy = date.today()
@@ -308,7 +311,7 @@ PRECIOS = {
 
 def _seed_pagos(alumnos):
     """Cuotas últimos 3 meses + matrículas."""
-    if Pago.query.count() > 0:
+    if alumnos and Pago.query.filter_by(alumno_id=alumnos[0].id).first():
         return 0
 
     hoy = date.today()
@@ -388,7 +391,7 @@ CONCEPTOS_FACTURA = [
 
 
 def _seed_facturas_emitidas(clientes):
-    if FacturaEmitida.query.count() > 0:
+    if clientes and FacturaEmitida.query.filter_by(cliente_id=clientes[0].id).first():
         return 0
 
     hoy = date.today()
@@ -483,7 +486,8 @@ def _ensure_proveedores():
 
 
 def _seed_facturas_proveedores(proveedores_map, categorias):
-    if FacturaProveedor.query.count() > 0:
+    inmo = proveedores_map['Inmobiliaria Centro SL'][0]
+    if FacturaProveedor.query.filter_by(proveedor_id=inmo.id).first():
         return 0
 
     hoy = date.today()
@@ -525,7 +529,7 @@ def _seed_facturas_proveedores(proveedores_map, categorias):
 
 
 def _seed_gastos_fijos(proveedores_map, categorias):
-    if GastoFijo.query.count() > 0:
+    if GastoFijo.query.filter_by(nombre='Alquiler del local').first():
         return 0
 
     inicio = date.today().replace(day=1)
@@ -578,7 +582,7 @@ def _seed_gastos_fijos(proveedores_map, categorias):
 # ---------------------------------------------------------------------------
 
 def _seed_clases_online():
-    if ClaseOnline.query.count() > 0:
+    if ClaseOnline.query.filter_by(url_youtube='https://www.youtube.com/watch?v=GszHuGVB2EA').first():
         return 0
 
     hoy = date.today()
