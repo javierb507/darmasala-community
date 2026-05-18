@@ -3,6 +3,20 @@
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/)
 y este proyecto sigue [SemVer](https://semver.org/lang/es/) en la medida en que tiene sentido para una app monolito.
 
+## [Unreleased]
+
+### Added
+- **Reporte de bugs in-app que crea issues de GitHub automáticamente.**
+  Botón flotante "Reportar bug" abajo a la derecha visible para
+  admins logueados cuando `bug_report_enabled = true`. Modal con
+  título / descripción / "qué estabas haciendo" que dispara
+  `POST /admin/bug-report/submit`. El servidor adjunta contexto
+  técnico (URL, versión, commit, rama, user-agent, usuario, timestamp
+  UTC) y crea el issue vía la API REST de GitHub. Token leído solo
+  de `GITHUB_ISSUE_TOKEN`. Etiquetas configurables. Rate limit de
+  5 reportes por hora y por sesión. Guía completa en
+  `docs/BUG_REPORTING.md`.
+
 ## [2.0.1-final] — 2026-05-12
 
 ### Added
