@@ -307,6 +307,8 @@ def guardar_configuracion():
             ('telefono_instructora', request.form.get('telefono_instructora', ''), 'Teléfono de la instructora'),
             ('numero_cuenta', request.form.get('numero_cuenta', ''), 'Número de cuenta bancaria'),
             ('cif_escuela', request.form.get('cif_escuela', ''), 'CIF de la escuela'),
+            ('session_timeout_admin', request.form.get('session_timeout_admin', '60'), 'Timeout sesión admin (minutos)'),
+            ('session_timeout_alumno', request.form.get('session_timeout_alumno', '30'), 'Timeout sesión alumno (minutos)'),
         ]
         
         for clave, valor, descripcion in configuraciones:

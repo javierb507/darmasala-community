@@ -133,12 +133,14 @@ def _ensure_configuracion_fiscal():
 
 def _ensure_configuracion_basica():
     defaults = {
-        'nombre_escuela':  'DarmaSala',
-        'email_escuela':   'info@darmasala.cloud',
-        'logo_escuela':    'images/logo_darmasala.jpg',
-        'color_primario':  '#1E3A2F',
-        'capacidad_centro':'20',
-        'dominio_portal':  '',
+        'nombre_escuela':         'DarmaSala',
+        'email_escuela':          'info@darmasala.cloud',
+        'logo_escuela':           'images/logo_darmasala.jpg',
+        'color_primario':         '#1E3A2F',
+        'capacidad_centro':       '20',
+        'dominio_portal':         '',
+        'session_timeout_admin':  '60',
+        'session_timeout_alumno': '30',
     }
     for clave, valor in defaults.items():
         row = Configuracion.query.filter_by(clave=clave).first()

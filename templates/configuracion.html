@@ -142,6 +142,20 @@
                                         value="{{ config.get('capacidad_centro', '50') }}">
                                 </div>
                             </div>
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label small"><i class="fas fa-user-shield me-1 text-muted"></i> Timeout sesión staff (min)</label>
+                                    <input type="number" class="form-control" name="session_timeout_admin" min="5" max="480"
+                                        value="{{ config.get('session_timeout_admin', '60') }}">
+                                    <div class="form-text">Minutos de inactividad antes de cerrar sesión de admin/instructor.</div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label small"><i class="fas fa-user me-1 text-muted"></i> Timeout sesión alumnos (min)</label>
+                                    <input type="number" class="form-control" name="session_timeout_alumno" min="5" max="480"
+                                        value="{{ config.get('session_timeout_alumno', '30') }}">
+                                    <div class="form-text">Minutos de inactividad antes de cerrar sesión del portal.</div>
+                                </div>
+                            </div>
                             <div class="row mb-4">
                                 <div class="col-md-4">
                                     <label class="form-label small">Color Principal</label>

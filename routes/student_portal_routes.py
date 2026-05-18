@@ -478,6 +478,78 @@ def logout():
     flash('Has cerrado sesión.', 'info')
     return redirect(url_for('student_portal.login'))
 
+
+@student_portal_bp.route('/forgot-password', methods=['GET', 'POST'])
+def forgot_password():
+    from utils.email_utils import generate_reset_token, enviar_email, smtp_configurado
+    cfg = _config_dict()
+
+    if request.method == 'POST':
+        email = request.form.get('email', '').strip().lower()
+        usuario = Usuario.query.filter_by(email=email, rol='alumno', activo=True).first()
+
+        # Respuesta idéntica exista o no el email (evita enumeración de usuarios)
+        flash('Si existe una cuenta con ese email, recibirás un enlace en breve.', 'info')
+
+        if usuario:
+            token = generate_reset_token(usuario.email)
+            reset_url = url_for('student_portal.reset_password', token=token, _external=True)
+            nombre_escuela = cfg.get('nombre_escuela', 'DarmaSala')
+
+            if smtp_configurado():
+                html = f"""
+                <p>Hola {usuario.nombre},</p>
+                <p>Recibimos una solicitud de restablecimiento de contraseña para tu cuenta en {nombre_escuela}.</p>
+                <p><a href="{reset_url}" style="background:#1E3A2F;color:white;padding:12px 24px;
+                   border-radius:6px;text-decoration:none;display:inline-block;">
+                   Restablecer contraseña</a></p>
+                <p>El enlace caduca en 30 minutos. Si no solicitaste este cambio, ignora este mensaje.</p>
+                """
+                enviar_email(
+                    destinatario=usuario.email,
+                    asunto=f'Restablece tu contraseña — {nombre_escuela}',
+                    cuerpo_html=html,
+                    remitente=cfg.get('email_escuela'),
+                )
+
+        return redirect(url_for('student_portal.forgot_password'))
+
+    return render_template('alumno/forgot_password.html', config=cfg)
+
+
+@student_portal_bp.route('/reset-password/<token>', methods=['GET', 'POST'])
+def reset_password(token):
+    from utils.email_utils import verify_reset_token
+    cfg = _config_dict()
+
+    email = verify_reset_token(token)
+    if not email:
+        flash('El enlace es inválido o ha expirado.', 'error')
+        return redirect(url_for('student_portal.forgot_password'))
+
+    usuario = Usuario.query.filter_by(email=email, rol='alumno', activo=True).first()
+    if not usuario:
+        flash('No se encontró la cuenta asociada.', 'error')
+        return redirect(url_for('student_portal.forgot_password'))
+
+    if request.method == 'POST':
+        new_pass = request.form.get('password', '')
+        confirm = request.form.get('confirm', '')
+        if len(new_pass) < 6:
+            flash('La contraseña debe tener al menos 6 caracteres.', 'error')
+            return render_template('alumno/reset_password.html', token=token, config=cfg)
+        if new_pass != confirm:
+            flash('Las contraseñas no coinciden.', 'error')
+            return render_template('alumno/reset_password.html', token=token, config=cfg)
+
+        usuario.password_hash = generate_password_hash(new_pass)
+        db.session.commit()
+        flash('Contraseña actualizada. Ya puedes iniciar sesión.', 'success')
+        return redirect(url_for('auth.login'))
+
+    return render_template('alumno/reset_password.html', token=token, config=cfg)
+
+
 @student_portal_bp.route('/solicitar-yogaterapia', methods=['GET', 'POST'])
 @student_login_required
 def solicitar_yogaterapia():

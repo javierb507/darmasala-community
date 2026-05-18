@@ -1,7 +1,8 @@
+import time
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session
 from werkzeug.security import check_password_hash, generate_password_hash
 from datetime import datetime
-from models import db, Usuario
+from models import db, Usuario, Configuracion
 from utils.app_utils import obtener_sutra_semanal
 
 auth_bp = Blueprint('auth', __name__)
@@ -26,19 +27,25 @@ def login():
             session['user_id'] = user.id
             session['username'] = user.username
             session['rol'] = user.rol
-            
+            session['last_activity'] = time.time()
+
+            # Timeout según rol
+            timeout_key = 'session_timeout_alumno' if user.rol == 'alumno' else 'session_timeout_admin'
+            cfg = Configuracion.query.filter_by(clave=timeout_key).first()
+            session['timeout_minutes'] = int(cfg.valor) if cfg else (30 if user.rol == 'alumno' else 60)
+
             # Actualizar último acceso
             user.ultimo_acceso = datetime.utcnow()
             db.session.commit()
-            
+
             flash(f'¡Bienvenido, {user.nombre}!', 'success')
-            
+
             if user.rol == 'alumno':
                 from models import Alumno
                 student = Alumno.query.filter_by(email=user.email).first()
                 if student:
                     session['student_id'] = student.id
-                    session['user_id_portal'] = user.id # ID de usuario para gestión
+                    session['user_id_portal'] = user.id
                     session['student_name'] = f"{student.nombre} {student.apellido}"
                 return redirect(url_for('student_portal.dashboard'))
             else:
