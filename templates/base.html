@@ -189,6 +189,8 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <form id="bugReportForm" method="POST" action="{{ url_for('bug_report.submit') }}">
+                    <input type="hidden" name="current_url" id="bugCurrentUrl">
+                    <input type="hidden" name="current_hostname" id="bugCurrentHostname">
                     <div class="modal-body">
                         <p class="text-muted small">
                             Se creará un issue en GitHub con la descripción y el contexto técnico (URL, versión, navegador). No incluyas datos personales de alumnos.
@@ -229,6 +231,12 @@
         const okBox = document.getElementById('bugReportSuccess');
         const btn = document.getElementById('bugReportSubmitBtn');
         if (!form) return;
+
+        // Captura URL y dominio exactos al abrir el modal
+        document.getElementById('bugReportModal').addEventListener('show.bs.modal', function () {
+            document.getElementById('bugCurrentUrl').value = window.location.href;
+            document.getElementById('bugCurrentHostname').value = window.location.hostname;
+        });
 
         form.addEventListener('submit', async function(e) {
             e.preventDefault();
