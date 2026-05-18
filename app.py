@@ -1,5 +1,6 @@
 from flask import Flask
 import os
+import time
 from utils.calendar_utils import crear_contexto_calendario
 from utils.app_utils import get_version_info
 from datetime import datetime, date
@@ -56,30 +57,66 @@ def inject_global_vars():
     except Exception:
         config_dict = {}
 
+    from flask import session as fsession
     context = crear_contexto_calendario()
     context['config'] = config_dict
     context['version_info'] = get_version_info()
     context['today'] = date.today()
     context['datetime'] = datetime
+    context['session_timeout_minutes'] = fsession.get('timeout_minutes', 60)
     return context
 
-# Onboarding check
-from flask import redirect, url_for, request
+# Onboarding check + session timeout
+from flask import redirect, url_for, request, session, flash, jsonify
 from models import Usuario
+
+_SESSION_TIMEOUT_EXEMPT = {
+    'setup.onboarding', 'static',
+    'auth.login', 'auth.logout',
+    'student_portal.login', 'student_portal.logout',
+    'student_portal.forgot_password', 'student_portal.reset_password',
+}
 
 @app.before_request
 def check_onboarding():
-    # Evitar bucle infinito y permitir estáticos
     if request.endpoint in ['setup.onboarding', 'static']:
         return
-        
-    # Si no hay usuarios en la DB, redirigir a setup
     try:
         if not Usuario.query.first():
             return redirect(url_for('setup.onboarding'))
     except Exception:
-        # Probablemente la DB no está inicializada aún
         pass
+
+
+@app.before_request
+def check_session_timeout():
+    if request.endpoint in _SESSION_TIMEOUT_EXEMPT:
+        return
+
+    rol = session.get('rol')
+    if not rol:
+        return
+
+    last_activity = session.get('last_activity')
+    now = time.time()
+
+    if last_activity is not None:
+        timeout_min = int(session.get('timeout_minutes', 60))
+        if (now - last_activity) > timeout_min * 60:
+            session.clear()
+            flash('Tu sesión ha expirado por inactividad.', 'warning')
+            return redirect(url_for('auth.login'))
+
+    session['last_activity'] = now
+
+
+@app.route('/ping')
+def ping():
+    """Renueva last_activity para evitar expiración de sesión."""
+    if session.get('rol'):
+        session['last_activity'] = time.time()
+    return jsonify(ok=True)
+
 
 # The rest of app.py is now handled by Blueprints
 # Only keeping shell commands or app-level error handlers if any

@@ -135,6 +135,40 @@ def ver_usuario(usuario_id):
         
     return render_template('ver_usuario.html', usuario=usuario, alumno=alumno_data)
 
+@user_routes_bp.route('/usuarios/<int:usuario_id>/reset-link')
+@login_required
+def generar_reset_link(usuario_id):
+    """Admin genera un enlace de reset de contraseña para un alumno."""
+    if session.get('rol') != 'admin':
+        flash('Acceso restringido a administradores.', 'error')
+        return redirect(url_for('users.usuarios'))
+    usuario = Usuario.query.get_or_404(usuario_id)
+    if usuario.rol != 'alumno':
+        flash('Solo disponible para alumnos del portal.', 'error')
+        return redirect(url_for('users.ver_usuario', usuario_id=usuario_id))
+    from utils.email_utils import generate_reset_token, enviar_email, smtp_configurado
+    from models import Configuracion
+    token = generate_reset_token(usuario.email)
+    from flask import url_for as _uf
+    reset_url = _uf('student_portal.reset_password', token=token, _external=True)
+    if smtp_configurado():
+        cfg = {c.clave: c.valor for c in Configuracion.query.all()}
+        nombre_escuela = cfg.get('nombre_escuela', 'DarmaSala')
+        html = f"""<p>Hola {usuario.nombre},</p>
+        <p>El administrador de {nombre_escuela} ha generado un enlace para restablecer tu contraseña.</p>
+        <p><a href="{reset_url}" style="background:#1E3A2F;color:white;padding:12px 24px;
+           border-radius:6px;text-decoration:none;display:inline-block;">Restablecer contraseña</a></p>
+        <p>El enlace caduca en 30 minutos.</p>"""
+        enviado = enviar_email(usuario.email, f'Restablece tu contraseña — {nombre_escuela}', html)
+        if enviado:
+            flash(f'Email de reset enviado a {usuario.email}.', 'success')
+        else:
+            flash(f'No se pudo enviar el email. Enlace manual (30 min): {reset_url}', 'warning')
+    else:
+        flash(f'SMTP no configurado. Enlace manual (válido 30 min): {reset_url}', 'info')
+    return redirect(url_for('users.ver_usuario', usuario_id=usuario_id))
+
+
 @user_routes_bp.route('/usuarios/<int:usuario_id>/eliminar', methods=['POST'])
 @login_required
 def eliminar_usuario(usuario_id):
