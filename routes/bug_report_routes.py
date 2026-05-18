@@ -78,28 +78,45 @@ def _rate_limited() -> bool:
 
 
 def _build_body(user_msg: str, what_doing: str) -> str:
+    from models import Usuario, Configuracion
     version = get_version_info()
     git = (version or {}).get('git_info', {}) or {}
+
+    current_url = (request.form.get('current_url') or request.referrer or '(desconocida)').strip()
+    hostname = (request.form.get('current_hostname') or request.host or '(desconocido)').strip()
+
+    user_id = session.get('user_id')
+    usuario = Usuario.query.get(user_id) if user_id else None
+    nombre_completo = f"{usuario.nombre} {usuario.apellido}" if usuario else '(desconocido)'
+
+    cfg_escuela = Configuracion.query.filter_by(clave='nombre_escuela').first()
+    nombre_escuela = cfg_escuela.valor if cfg_escuela else 'DarmaSala'
+
     ctx = {
-        'url':          request.referrer or '(desconocida)',
-        'user_agent':   request.user_agent.string,
-        'version':      version.get('version', '?'),
-        'build_date':   version.get('build_date', '?'),
-        'commit':       git.get('commit_hash', '?'),
-        'branch':       git.get('branch', '?'),
-        'session_user': session.get('username', '?'),
-        'session_rol':  session.get('rol', '?'),
-        'timestamp':    datetime.utcnow().isoformat(timespec='seconds') + 'Z',
+        'url':             current_url,
+        'hostname':        hostname,
+        'user_agent':      request.user_agent.string,
+        'version':         version.get('version', '?'),
+        'build_date':      version.get('build_date', '?'),
+        'commit':          git.get('commit_hash', '?'),
+        'branch':          git.get('branch', '?'),
+        'session_user':    session.get('username', '?'),
+        'nombre_completo': nombre_completo,
+        'session_rol':     session.get('rol', '?'),
+        'escuela':         nombre_escuela,
+        'timestamp':       datetime.utcnow().isoformat(timespec='seconds') + 'Z',
     }
 
     return (
         f"### Descripción\n{user_msg.strip() or '(sin descripción)'}\n\n"
         f"### ¿Qué estabas haciendo?\n{what_doing.strip() or '(no especificado)'}\n\n"
         f"### Contexto técnico\n"
+        f"- **Escuela**: {ctx['escuela']}\n"
+        f"- **Dominio**: `{ctx['hostname']}`\n"
         f"- **URL**: `{ctx['url']}`\n"
+        f"- **Usuario**: {ctx['nombre_completo']} (`{ctx['session_user']}`, rol `{ctx['session_rol']}`)\n"
         f"- **Versión**: `{ctx['version']}` (build {ctx['build_date']})\n"
         f"- **Commit**: `{ctx['commit']}` — rama `{ctx['branch']}`\n"
-        f"- **Usuario**: `{ctx['session_user']}` (rol `{ctx['session_rol']}`)\n"
         f"- **User-Agent**: `{ctx['user_agent']}`\n"
         f"- **Timestamp UTC**: `{ctx['timestamp']}`\n\n"
         f"_Reportado automáticamente desde la aplicación._"
