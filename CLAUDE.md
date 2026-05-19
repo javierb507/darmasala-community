@@ -6,6 +6,16 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 DarmaSala — Flask-based management system for a yoga school (students, payments, attendance, weekly schedules, individual yogatherapy sessions, Spanish-compliant invoicing). Single-tenant deployment. UI, code comments, and DB column names are in Spanish; preserve that convention.
 
+### Editions
+
+This repo is the **Community Edition**: intended for local installation in a single school, no public exposure, no student-facing portal. The student portal, PWA, online reservations, and password reset flows live in the private Enterprise fork only.
+
+- `DARMASALA_EDITION=community` (default) — what this repo ships
+- `DARMASALA_EDITION=enterprise` — set in the private fork
+- The flag is read in `app.py` and exposed to templates as `edition` for the badge in `base.html`
+
+When working on this repo, **do not reintroduce portal endpoints** (`/portal/*`), the `alumno` `Usuario.rol`, or PWA assets. Those belong in the Enterprise fork. If you find yourself needing them, the change goes in the Enterprise repo, not here.
+
 ## Commands
 
 ### Setup & run
@@ -36,9 +46,7 @@ python app.py
 There is no pytest suite. The legacy `python test_calendar.py` is referenced in `docs/CALENDAR_SYSTEM.md` but may not exist in the tree — verify before assuming.
 
 ### One-off scripts
-- `python fix_db.py` — schema repair helper
 - `python reset_admin.py` — reset admin credentials
-- `python sync_alumnos.py` — sync `Alumno` ↔ portal `Usuario` (rol='alumno') accounts
 - `python cargar_sutras_produccion.py` — seed weekly sutras shown on login
 - `python scripts/migrate_clase_online.py` — one-off migration
 
@@ -48,19 +56,18 @@ There is no pytest suite. The legacy `python test_calendar.py` is referenced in 
 `app.py` is the composition root. It:
 1. Builds the `Flask` app and chooses DB URI based on `FLASK_ENV` (SQLite in dev, MySQL in prod).
 2. Calls `db.init_app(app)` from `models.py` (single SQLAlchemy `db` instance, no factory pattern).
-3. Imports and registers **ten Blueprints** from `routes/__init__.py`: `main, auth, student, finance, class, yogatherapia, settings, user_routes, student_portal, setup`.
+3. Imports and registers **ten Blueprints** from `routes/__init__.py`: `main, auth, student, finance, class, yogatherapia, settings, user_routes, setup, bug_report`. (No student portal in Community Edition.)
 4. Registers a `@before_request` hook that redirects to `/setup` (the onboarding flow) when `Usuario` table is empty — this is how first-run provisioning works. The hook MUST exclude endpoints `setup.onboarding` and `static` or it infinite-loops (see commit `90eed08`).
 5. Registers a `@context_processor` injecting four things into **every template**: school config (`Configuracion` key/value rows), calendar helpers, version info, today's date. Templates rely on this — adding a render path that bypasses the context processor will break shared partials.
 
-### Two parallel auth flows
-- **Staff** (`routes/auth_routes.py`, blueprint `auth`): username/email + password, `session['rol']` ∈ `{admin, instructor, recepcionista}`. Admin-only actions are gated by `Usuario.is_admin()` / `can_manage_*` helpers on the model.
-- **Student portal** (`routes/student_portal_routes.py`, blueprint `student_portal`): same login endpoint, but if `Usuario.rol == 'alumno'` it redirects to `/portal/dashboard` and sets `session['student_id']`. A student has BOTH an `Alumno` row (the domain entity) and a `Usuario` row with `rol='alumno'` (the auth principal), linked by email. `sync_alumnos.py` reconciles them.
+### Auth flow
+- **Staff only** (`routes/auth_routes.py`, blueprint `auth`): username/email + password, `session['rol']` ∈ `{admin, instructor, recepcionista}`. Admin-only actions are gated by `Usuario.is_admin()` / `can_manage_*` helpers on the model.
 
-Auth is session-based (`session['user_id']`, `session['rol']`). No Flask-Login. Decorators/checks live in `utils/auth_utils.py` and `utils/student_auth.py`.
+Auth is session-based (`session['user_id']`, `session['rol']`). No Flask-Login. Decorators/checks live in `utils/auth_utils.py`.
 
 ### Domain model layout
 All ~30+ SQLAlchemy models live in a **single file** `models.py` (~37KB). Key entities and relationships:
-- `Usuario` — staff and portal-student auth
+- `Usuario` — staff auth (admin/instructor/recepcionista)
 - `Alumno` — student domain entity; `tipo_cuota` drives pricing and the payment-calendar UI
 - `Pago` — monthly payments; `mes` stored as `YYYY-MM` string, `tipo_pago` ∈ {`cuota`, `matricula`, `clase_suelta`, ...}
 - `Clase` / `TipoClase` / `Tarifa` — class definitions and pricing

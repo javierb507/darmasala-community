@@ -4,7 +4,6 @@ import pandas as pd
 from datetime import datetime, date, timedelta
 from models import db, Alumno, Pago, Asistencia
 from utils.auth_utils import login_required
-from utils.sync_utils import sync_alumno_to_usuario
 
 student_bp = Blueprint('students', __name__)
 
@@ -69,11 +68,8 @@ def nuevo_alumno():
             )
             db.session.add(alumno)
             db.session.commit()
-            
-            # Sincronizar con el portal de usuarios
-            sync_alumno_to_usuario(alumno)
-            
-            flash('¡Alumno registrado y portal de acceso creado!', 'success')
+
+            flash('¡Alumno registrado!', 'success')
             return redirect(url_for('students.alumnos'))
         except Exception as e:
             flash(f'Error al registrar alumno: {str(e)}', 'error')
@@ -139,11 +135,8 @@ def editar_alumno(alumno_id):
             alumno.activo = 'activo' in request.form
             
             db.session.commit()
-            
-            # Sincronizar cambios con el portal
-            sync_alumno_to_usuario(alumno)
-            
-            flash('¡Alumno y acceso al portal actualizados!', 'success')
+
+            flash('¡Alumno actualizado!', 'success')
             return redirect(url_for('students.ver_alumno', alumno_id=alumno.id))
         except Exception as e:
             flash(f'Error al actualizar alumno: {str(e)}', 'error')
@@ -158,11 +151,7 @@ def eliminar_alumno(alumno_id):
     if request.method == 'POST':
         alumno.activo = False
         db.session.commit()
-        
-        # Desactivar acceso al portal
-        sync_alumno_to_usuario(alumno)
-        
-        flash('¡Alumno y acceso al portal desactivados!', 'success')
+        flash('¡Alumno desactivado!', 'success')
         return redirect(url_for('students.alumnos'))
     else:
         if request.args.get('confirm') == '1':
@@ -182,11 +171,7 @@ def reactivar_alumno(alumno_id):
         alumno = Alumno.query.get_or_404(alumno_id)
         alumno.activo = True
         db.session.commit()
-        
-        # Reactivar acceso al portal
-        sync_alumno_to_usuario(alumno)
-        
-        return jsonify({'success': True, 'message': 'Alumno y acceso al portal reactivados'})
+        return jsonify({'success': True, 'message': 'Alumno reactivado'})
     except Exception as e:
         db.session.rollback()
         return jsonify({'success': False, 'message': str(e)}), 500

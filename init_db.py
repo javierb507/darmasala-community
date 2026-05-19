@@ -81,7 +81,6 @@ def init_base_data():
         'logo_escuela': 'images/logo_darmasala.jpg',
         'color_primario': '#1E3A2F',
         'capacidad_centro': '20',
-        'dominio_portal': '',  # vacío = auto-detect desde request
     }
     for clave, valor in config_defaults.items():
         if not Configuracion.query.filter_by(clave=clave).first():
@@ -142,21 +141,6 @@ def init_test_data():
         if not Alumno.query.filter_by(email=s_data['email']).first():
             alumno = Alumno(**s_data)
             db.session.add(alumno)
-            db.session.flush()
-            
-            # Use DNI as password if exists, otherwise use phone
-            password_plain = s_data.get('dni') or s_data.get('telefono') or 'DarmaSala1234'
-            # Create Portal User for this student
-            portal_user = Usuario(
-                username=s_data['email'],
-                email=s_data['email'],
-                password_hash=generate_password_hash(password_plain),
-                nombre=s_data['nombre'],
-                apellido=s_data['apellido'],
-                rol='alumno',
-                activo=True
-            )
-            db.session.add(portal_user)
             db.session.flush()
 
             # Add some payments

@@ -23,40 +23,26 @@ def login():
             Usuario.activo == True
         ).first()
         
-        if user and check_password_hash(user.password_hash, password):
+        if user and user.rol != 'alumno' and check_password_hash(user.password_hash, password):
             session['user_id'] = user.id
             session['username'] = user.username
             session['rol'] = user.rol
             session['last_activity'] = time.time()
 
-            # Timeout según rol
-            timeout_key = 'session_timeout_alumno' if user.rol == 'alumno' else 'session_timeout_admin'
-            cfg = Configuracion.query.filter_by(clave=timeout_key).first()
-            session['timeout_minutes'] = int(cfg.valor) if cfg else (30 if user.rol == 'alumno' else 60)
+            cfg = Configuracion.query.filter_by(clave='session_timeout_admin').first()
+            session['timeout_minutes'] = int(cfg.valor) if cfg else 60
 
-            # Actualizar último acceso
             user.ultimo_acceso = datetime.utcnow()
             db.session.commit()
 
             flash(f'¡Bienvenido, {user.nombre}!', 'success')
-
-            if user.rol == 'alumno':
-                from models import Alumno
-                student = Alumno.query.filter_by(email=user.email).first()
-                if student:
-                    session['student_id'] = student.id
-                    session['user_id_portal'] = user.id
-                    session['student_name'] = f"{student.nombre} {student.apellido}"
-                return redirect(url_for('student_portal.dashboard'))
-            else:
-                return redirect(url_for('main.index'))
+            return redirect(url_for('main.index'))
         else:
             flash('Usuario o contraseña incorrectos', 'error')
     
     # Obtener sutra semanal para mostrar en login
     sutra_semanal = obtener_sutra_semanal()
     
-    from models import Configuracion
     configuraciones = Configuracion.query.all()
     config_dict = {c.clave: c.valor for c in configuraciones}
     

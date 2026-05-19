@@ -270,22 +270,6 @@ def guardar_configuracion():
                     db.session.add(config_fondo)
                 config_fondo.valor = f"images/{filename}"
 
-        # Manejar subida de fondo login alumno
-        if 'fondo_login_alumno' in request.files:
-            fondo_file = request.files['fondo_login_alumno']
-            if fondo_file and fondo_file.filename:
-                img_dir = os.path.join('static', 'images')
-                os.makedirs(img_dir, exist_ok=True)
-                timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-                filename = f"bg_alumno_{timestamp}.{fondo_file.filename.split('.')[-1]}"
-                fondo_file.save(os.path.join(img_dir, filename))
-                
-                config_fondo = Configuracion.query.filter_by(clave='fondo_login_alumno').first()
-                if not config_fondo:
-                    config_fondo = Configuracion(clave='fondo_login_alumno', descripcion='Fondo login alumno')
-                    db.session.add(config_fondo)
-                config_fondo.valor = f"images/{filename}"
-        
         configuraciones = [
             ('precio_clase_suelta', request.form.get('precio_clase_suelta', '15.00'), 'Precio por clase suelta'),
             ('precio_1_clase_semanal', request.form.get('precio_1_clase_semanal', '40.00'), 'Precio 1 clase por semana'),
@@ -301,14 +285,12 @@ def guardar_configuracion():
             ('telefono_escuela', request.form.get('telefono_escuela', ''), 'Teléfono de contacto'),
             ('email_escuela', request.form.get('email_escuela', ''), 'Email de contacto'),
             ('web_escuela', request.form.get('web_escuela', 'https://darmasala.cloud'), 'Página web'),
-            ('dominio_portal', request.form.get('dominio_portal', '').strip(), 'Dominio público del portal alumnos (PWA)'),
             ('nombre_instructora', request.form.get('nombre_instructora', 'Minouche'), 'Nombre de la instructora principal'),
             ('email_instructora', request.form.get('email_instructora', ''), 'Email de la instructora'),
             ('telefono_instructora', request.form.get('telefono_instructora', ''), 'Teléfono de la instructora'),
             ('numero_cuenta', request.form.get('numero_cuenta', ''), 'Número de cuenta bancaria'),
             ('cif_escuela', request.form.get('cif_escuela', ''), 'CIF de la escuela'),
-            ('session_timeout_admin', request.form.get('session_timeout_admin', '60'), 'Timeout sesión admin (minutos)'),
-            ('session_timeout_alumno', request.form.get('session_timeout_alumno', '30'), 'Timeout sesión alumno (minutos)'),
+            ('session_timeout_admin', request.form.get('session_timeout_admin', '60'), 'Timeout sesión (minutos)'),
         ]
         
         for clave, valor, descripcion in configuraciones:

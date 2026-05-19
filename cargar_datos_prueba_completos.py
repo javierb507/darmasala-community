@@ -41,11 +41,9 @@ def _slug(s: str) -> str:
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-from werkzeug.security import generate_password_hash
-
 from app import app, db
 from models import (
-    Usuario, Alumno, Pago, Clase, HorarioSemanal, Asistencia,
+    Alumno, Pago, Clase, HorarioSemanal, Asistencia,
     Cliente, ConfiguracionFiscal, FacturaEmitida, LineaFactura,
     Proveedor, CategoriaGasto, FacturaProveedor, GastoFijo,
     Configuracion, TipoClase, ClaseOnline,
@@ -138,9 +136,7 @@ def _ensure_configuracion_basica():
         'logo_escuela':           'images/logo_darmasala.jpg',
         'color_primario':         '#1E3A2F',
         'capacidad_centro':       '20',
-        'dominio_portal':         '',
         'session_timeout_admin':  '60',
-        'session_timeout_alumno': '30',
     }
     for clave, valor in defaults.items():
         row = Configuracion.query.filter_by(clave=clave).first()
@@ -192,18 +188,6 @@ def _ensure_alumnos():
             db.session.add(alumno)
             db.session.flush()
 
-        # Usuario portal: usa el email del alumno encontrado/creado
-        portal_email = alumno.email
-        if not Usuario.query.filter_by(email=portal_email).first():
-            db.session.add(Usuario(
-                username=portal_email,
-                email=portal_email,
-                password_hash=generate_password_hash(data['dni']),
-                nombre=data['nombre'],
-                apellido=data['apellido'],
-                rol='alumno',
-                activo=True,
-            ))
         alumnos_obj.append(alumno)
     return alumnos_obj
 
