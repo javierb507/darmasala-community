@@ -129,4 +129,4 @@ La licencia AGPL exige que cualquier servicio público derivado de este código 
 ## Contacto
 
 - **Soporte cloud y Enterprise:** [darmasala.cloud](https://darmasala.cloud)
-- **Autor:** Javier Ballesteros — javierb507@gmail.com
+- **Autor:** Javier Ballesteros — javier.ballesteros@gmail.com
