@@ -73,18 +73,6 @@
                                     </div>
                                     <input type="file" class="form-control form-control-sm" name="fondo_login_admin">
                                 </div>
-                                <div class="col-md-6 text-center">
-                                    <label class="form-label d-block small">Fondo Login Alumnos</label>
-                                    <div class="mb-2 p-1 border rounded bg-light d-inline-block">
-                                        {% if config and config.get('fondo_login_alumno') %}
-                                        <img src="{{ url_for('static', filename=config.get('fondo_login_alumno')) }}"
-                                            style="max-height: 40px; max-width: 100px; object-fit: cover;">
-                                        {% else %}
-                                        <i class="fas fa-user-circle text-muted fa-lg"></i>
-                                        {% endif %}
-                                    </div>
-                                    <input type="file" class="form-control form-control-sm" name="fondo_login_alumno">
-                                </div>
                             </div>
                             <div class="row mb-3">
                                 <div class="col-md-8">
@@ -116,21 +104,6 @@
                                 </div>
                             </div>
                             <div class="row mb-3">
-                                <div class="col-12">
-                                    <label class="form-label small">
-                                        Dominio Portal Alumnos (PWA)
-                                        <i class="fas fa-info-circle ms-1 text-muted"
-                                           title="URL pública donde los alumnos acceden al portal. Se usa para la app instalable en móvil. Déjalo vacío para detectar automáticamente."></i>
-                                    </label>
-                                    <input type="text" class="form-control" name="dominio_portal"
-                                        value="{{ config.get('dominio_portal', '') }}"
-                                        placeholder="https://portal.darmasala.cloud">
-                                    <small class="form-text text-muted">
-                                        Para que la instalación en móvil funcione necesita HTTPS y un dominio real (no localhost).
-                                    </small>
-                                </div>
-                            </div>
-                            <div class="row mb-3">
                                 <div class="col-md-9">
                                     <label class="form-label small">Cuenta Bancaria (IBAN)</label>
                                     <input type="text" class="form-control" name="numero_cuenta"
@@ -144,16 +117,10 @@
                             </div>
                             <div class="row mb-3">
                                 <div class="col-md-6">
-                                    <label class="form-label small"><i class="fas fa-user-shield me-1 text-muted"></i> Timeout sesión staff (min)</label>
+                                    <label class="form-label small"><i class="fas fa-user-shield me-1 text-muted"></i> Timeout sesión (min)</label>
                                     <input type="number" class="form-control" name="session_timeout_admin" min="5" max="480"
                                         value="{{ config.get('session_timeout_admin', '60') }}">
-                                    <div class="form-text">Minutos de inactividad antes de cerrar sesión de admin/instructor.</div>
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label small"><i class="fas fa-user me-1 text-muted"></i> Timeout sesión alumnos (min)</label>
-                                    <input type="number" class="form-control" name="session_timeout_alumno" min="5" max="480"
-                                        value="{{ config.get('session_timeout_alumno', '30') }}">
-                                    <div class="form-text">Minutos de inactividad antes de cerrar sesión del portal.</div>
+                                    <div class="form-text">Minutos de inactividad antes de cerrar sesión.</div>
                                 </div>
                             </div>
                             <div class="row mb-4">

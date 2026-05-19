@@ -26,7 +26,6 @@ class Usuario(db.Model):
             'admin': 'Administrador',
             'instructor': 'Instructor',
             'recepcionista': 'Recepcionista',
-            'alumno': 'Alumno (Portal)'
         }
         return roles.get(self.rol, self.rol)
     
@@ -52,7 +51,6 @@ class Alumno(db.Model):
     apellido = db.Column(db.String(50), nullable=False)
     dni = db.Column(db.String(20), unique=True)
     email = db.Column(db.String(100), unique=True, nullable=False)
-    password_hash = db.Column(db.String(255))  # Para el portal de alumnos
     telefono = db.Column(db.String(20))
     fecha_nacimiento = db.Column(db.Date)
     direccion = db.Column(db.Text)

@@ -3,17 +3,11 @@ from flask import session, redirect, url_for, flash
 from models import Usuario
 
 def login_required(f):
-    """Decorador para proteger rutas que requieren autenticación.
-    Si el usuario es un alumno, le redirige a su portal."""
+    """Decorador para proteger rutas que requieren autenticación."""
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if 'user_id' not in session:
             return redirect(url_for('auth.login'))
-        
-        # Si es un alumno intentando acceder a la administración
-        if session.get('rol') == 'alumno':
-            return redirect(url_for('student_portal.dashboard'))
-            
         return f(*args, **kwargs)
     return decorated_function
 

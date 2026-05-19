@@ -65,27 +65,6 @@
                         </div>
                     </div>
 
-                    {% if usuario.rol == 'alumno' or alumno %}
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label for="dni" class="form-label">DNI</label>
-                                <input type="text" class="form-control" id="dni" name="dni"
-                                    value="{{ alumno.dni if alumno and alumno.dni else '' }}">
-                                <div class="form-text">DNI asociado al alumno</div>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label for="telefono" class="form-label">Móvil / Teléfono</label>
-                                <input type="text" class="form-control" id="telefono" name="telefono"
-                                    value="{{ alumno.telefono if alumno and alumno.telefono else '' }}">
-                                <div class="form-text">Teléfono de contacto</div>
-                            </div>
-                        </div>
-                    </div>
-                    {% endif %}
-
                     <div class="row">
                         <div class="col-md-6">
                             <div class="mb-3">
@@ -105,7 +84,6 @@
                                         Instructor</option>
                                     <option value="recepcionista" {% if usuario.rol=='recepcionista' %}selected{% endif
                                         %}>Recepcionista</option>
-                                    <option value="alumno" {% if usuario.rol=='alumno' %}selected{% endif %}>Alumno (Portal)</option>
                                 </select>
                                 <div class="form-text">
                                     <strong>Administrador:</strong> Acceso completo<br>

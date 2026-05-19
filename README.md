@@ -2,13 +2,32 @@
   <img src="static/images/logo_darmasala.jpg" alt="DarmaSala Logo" width="300">
 </p>
 
-# 🧘‍♀️ DarmaSala System
+# 🧘‍♀️ DarmaSala — Community Edition
 
-Sistema completo de gestión para una escuela de yoga que incluye gestión de alumnos, pagos, citas individuales de yogaterapia, horarios semanales, calendario unificado y administración de clases.
+Sistema de gestión para una escuela de yoga: alumnos, pagos, asistencia, yogaterapia, horarios semanales, calendario unificado, facturación española y administración de clases.
 
-**Desarrollado por:** Javier Ballesteros para DarmaSala - Espacio de Yoga  
-**Licencia:** GNU GPL v3  
-**Versión:** 2.0.0-final  
+**Desarrollado por:** Javier Ballesteros para DarmaSala - Espacio de Yoga
+**Licencia:** GNU AGPL v3
+**Versión:** 2.0.0-community
+
+## Ediciones
+
+Existen dos ediciones del proyecto:
+
+| Edición | Distribución | Portal alumnos | Audiencia |
+|---------|--------------|----------------|-----------|
+| **Community** (este repo) | Pública, AGPL-3 | ❌ | Despliegue local en una escuela individual |
+| **Enterprise** | Privada | ✅ + reservas, pagos online, lista de espera | SaaS gestionado |
+
+La Community Edition está pensada para correr en local (un PC, una intranet) sin exposición pública. Por eso no incluye:
+
+- Portal de alumnos (`/portal/*`)
+- Login con rol `alumno`
+- PWA / Service Worker
+- Reset de contraseña por email a alumnos
+- Reservas y pagos online desde portal
+
+Todo lo demás (gestión administrativa completa, facturación, yogaterapia, calendario) está incluido.
 
 ## 🌿 Inspiración
 
@@ -41,10 +60,6 @@ Interfaz premium con el tema "Moss Green & Sage", alineado con la identidad visu
 Vista unificada de clases con capacidad de pasar lista de forma visual y moderna.
 ![Calendario](documentation/screenshots/04_calendario.png)
 ![Gestión de Asistencia](documentation/screenshots/05_asistencia_modal.png)
-
-### 👤 Perfil del Alumno
-Historial completo de asistencias, estadísticas y sesiones de yogaterapia integradas.
-![Perfil de Alumno](documentation/screenshots/03_perfil_alumno.png)
 
 ### 📊 Gestión Económica
 Dashboard de contabilidad avanzado con resumen de ingresos, gastos y balance mensual/anual.
@@ -99,13 +114,13 @@ Dashboard de contabilidad avanzado con resumen de ingresos, gastos y balance men
 
 ## 📄 Licencia
 
-Este proyecto está licenciado bajo la Licencia Pública General de GNU v3.0 (GPL-3.0).
+DarmaSala Community Edition se distribuye bajo la **GNU Affero General Public License v3.0** ([LICENSE](LICENSE)).
 
-Para más información sobre la licencia, consulta el archivo [LICENSE](LICENSE) o visita: https://www.gnu.org/licenses/gpl-3.0.html
+La licencia AGPL exige que cualquier servicio público derivado de este código publique sus modificaciones bajo la misma licencia. Si necesitas una licencia comercial o una versión gestionada (DarmaSala Enterprise), contacta con el autor.
 
 ## 🤝 Contribución
 
-Este proyecto fue desarrollado específicamente para DarmaSala, pero está disponible como software libre bajo licencia GPL v3. Si deseas contribuir o adaptar el sistema para tu propia escuela de yoga, por favor:
+Si deseas contribuir o adaptar el sistema para tu propia escuela de yoga, por favor:
 
 1. Fork el repositorio
 2. Crea una rama para tu feature (`git checkout -b feature/nueva-funcionalidad`)

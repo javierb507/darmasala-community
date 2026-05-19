@@ -108,6 +108,13 @@
                 </div>
 
                 <div class="user-info d-flex align-items-center">
+                    {% if edition %}
+                    <span class="badge {% if edition == 'enterprise' %}bg-warning text-dark{% else %}bg-secondary{% endif %} me-3"
+                          title="Edición {{ edition|capitalize }}">
+                        {{ edition|capitalize }}
+                    </span>
+                    {% endif %}
+
                     {% if version_info %}
                     <div class="build-info me-3">
                         <span class="d-block text-uppercase small" style="letter-spacing: 0.5px;">Desplegado:</span>

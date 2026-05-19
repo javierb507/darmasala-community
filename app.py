@@ -26,11 +26,14 @@ app.config['UPLOAD_FOLDER'] = os.path.join(os.path.dirname(os.path.abspath(__fil
 from models import db, Configuracion
 db.init_app(app)
 
+# Edition flag (community | enterprise). Community Edition strips the student portal.
+app.config['DARMASALA_EDITION'] = os.environ.get('DARMASALA_EDITION', 'community')
+
 # Import Blueprints
 from routes import (
     main_bp, auth_bp, student_bp, finance_bp,
     class_bp, yogatherapia_bp, settings_bp, user_routes_bp,
-    student_portal_bp, setup_bp, bug_report_bp
+    setup_bp, bug_report_bp
 )
 
 # Register Blueprints
@@ -42,7 +45,6 @@ app.register_blueprint(class_bp)
 app.register_blueprint(yogatherapia_bp)
 app.register_blueprint(settings_bp)
 app.register_blueprint(user_routes_bp)
-app.register_blueprint(student_portal_bp)
 app.register_blueprint(setup_bp)
 app.register_blueprint(bug_report_bp)
 
@@ -64,6 +66,7 @@ def inject_global_vars():
     context['today'] = date.today()
     context['datetime'] = datetime
     context['session_timeout_minutes'] = fsession.get('timeout_minutes', 60)
+    context['edition'] = app.config.get('DARMASALA_EDITION', 'community')
     return context
 
 # Onboarding check + session timeout
@@ -73,8 +76,6 @@ from models import Usuario
 _SESSION_TIMEOUT_EXEMPT = {
     'setup.onboarding', 'static',
     'auth.login', 'auth.logout',
-    'student_portal.login', 'student_portal.logout',
-    'student_portal.forgot_password', 'student_portal.reset_password',
 }
 
 @app.before_request
