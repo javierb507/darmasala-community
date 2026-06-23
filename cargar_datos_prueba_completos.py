@@ -10,7 +10,7 @@ Uso desde la web (Modo Pruebas):
     cargar_datos_completos(modo_web=True)
 
 Genera:
-- 10 alumnos con sus usuarios de portal (rol=alumno, password=DNI)
+- 10 alumnos
 - 3 clases (Yoga Integral, Yoga Menopausia, Meditación)
 - 16 horarios semanales repartidos entre lunes y viernes
 - 4 semanas de asistencias históricas con tasa realista
@@ -445,10 +445,10 @@ def _seed_facturas_emitidas(clientes):
 
 PROVEEDORES = [
     {'nombre': 'Inmobiliaria Centro SL',     'cif_nif': 'B11111111', 'categoria': 'Alquiler'},
-    {'nombre': 'Iberdrola SA',               'cif_nif': 'A95758389', 'categoria': 'Suministros'},
+    {'nombre': 'Iberdrola SA',               'cif_nif': 'A99000001', 'categoria': 'Suministros'},
     {'nombre': 'Suministros Yoga Spain SL',  'cif_nif': 'B22222222', 'categoria': 'Material'},
     {'nombre': 'Material Deportivo Pro',     'cif_nif': 'B33333333', 'categoria': 'Material'},
-    {'nombre': 'Seguros Mapfre',             'cif_nif': 'A28141935', 'categoria': 'Seguros'},
+    {'nombre': 'Seguros Mapfre',             'cif_nif': 'A99000002', 'categoria': 'Seguros'},
 ]
 
 
@@ -582,7 +582,7 @@ def cargar_datos_completos(modo_web=False):
         categorias = _ensure_categorias()
         clases = _ensure_clases()
 
-        log('👥 Alumnos + portal users...')
+        log('👥 Alumnos...')
         alumnos = _ensure_alumnos()
         db.session.flush()
 
