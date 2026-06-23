@@ -9,7 +9,15 @@ from datetime import datetime, date
 app = Flask(__name__)
 
 # Configuration
-app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'darmasala-yoga-management-2025-secure-key-placeholder')
+_secret_key = os.environ.get('SECRET_KEY', '')
+if not _secret_key:
+    if os.environ.get('FLASK_ENV') == 'production':
+        raise RuntimeError(
+            "SECRET_KEY environment variable is required in production. "
+            "Generate one with: python -c \"import secrets; print(secrets.token_hex(32))\""
+        )
+    _secret_key = 'darmasala-dev-only-not-for-production'
+app.config['SECRET_KEY'] = _secret_key
 
 # Configuración de base de datos para producción
 if os.environ.get('FLASK_ENV') == 'production':

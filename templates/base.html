@@ -70,11 +70,6 @@
                         <i class="fas fa-user-md"></i> <span>Yogaterapia</span>
                     </a>
                 </li>
-                <li class="{% if 'clases_online' in request.endpoint %}active{% endif %}">
-                    <a href="{{ url_for('classes.clases_online') }}">
-                        <i class="fas fa-video"></i> <span>Clases Online</span>
-                    </a>
-                </li>
                 <li class="{% if 'settings' in request.endpoint %}active{% endif %}">
                     <a href="{{ url_for('settings.configuracion') }}">
                         <i class="fas fa-cog"></i> <span>Configuración</span>

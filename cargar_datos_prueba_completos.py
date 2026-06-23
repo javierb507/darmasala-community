@@ -46,7 +46,7 @@ from models import (
     Alumno, Pago, Clase, HorarioSemanal, Asistencia,
     Cliente, ConfiguracionFiscal, FacturaEmitida, LineaFactura,
     Proveedor, CategoriaGasto, FacturaProveedor, GastoFijo,
-    Configuracion, TipoClase, ClaseOnline,
+    Configuracion, TipoClase,
 )
 
 
@@ -564,38 +564,6 @@ def _seed_gastos_fijos(proveedores_map, categorias):
 
 
 # ---------------------------------------------------------------------------
-# Clases online (YouTube)
-# ---------------------------------------------------------------------------
-
-def _seed_clases_online():
-    if ClaseOnline.query.filter_by(url_youtube='https://www.youtube.com/watch?v=GszHuGVB2EA').first():
-        return 0
-
-    hoy = date.today()
-    onlines = [
-        ClaseOnline(
-            fecha_inicio=hoy,
-            fecha_fin=hoy + timedelta(days=7),
-            url_youtube='https://www.youtube.com/watch?v=GszHuGVB2EA',
-            titulo='Clase en silla',
-            descripcion='Yoga adaptado en silla, apta para todos los niveles.',
-            activo=True,
-        ),
-        ClaseOnline(
-            fecha_inicio=hoy,
-            fecha_fin=hoy + timedelta(days=7),
-            url_youtube='https://www.youtube.com/watch?v=ACHTd7IuwtM',
-            titulo='Meditación guiada',
-            descripcion='Meditación guiada de 30 minutos.',
-            activo=True,
-        ),
-    ]
-    for o in onlines:
-        db.session.add(o)
-    return len(onlines)
-
-
-# ---------------------------------------------------------------------------
 # Orquestador
 # ---------------------------------------------------------------------------
 
@@ -643,9 +611,6 @@ def cargar_datos_completos(modo_web=False):
         log('🔁 Gastos fijos...')
         n_gf = _seed_gastos_fijos(proveedores_map, categorias)
 
-        log('📹 Clases online...')
-        n_online = _seed_clases_online()
-
         db.session.commit()
 
         resumen = {
@@ -658,7 +623,6 @@ def cargar_datos_completos(modo_web=False):
             'proveedores':          len(proveedores_map),
             'facturas_proveedores': n_facprov,
             'gastos_fijos':         n_gf,
-            'clases_online':        n_online,
         }
         if not modo_web:
             print('\n✅ Datos de prueba cargados:')
