@@ -21,16 +21,15 @@
 
 <table>
   <tr>
-    <td align="center"><img src="docs/screenshots/01-login.png" width="380" alt="Login"/><br><sub>Login</sub></td>
-    <td align="center"><img src="docs/screenshots/02-dashboard.png" width="380" alt="Dashboard"/><br><sub>Dashboard</sub></td>
+    <td align="center"><img src="docs/screenshots/01-dashboard.png" width="380" alt="Dashboard"/><br><sub>Dashboard</sub></td>
+    <td align="center"><img src="docs/screenshots/02-alumnos.png" width="380" alt="Gestión de Alumnos"/><br><sub>Student management / Gestión de alumnos</sub></td>
   </tr>
   <tr>
-    <td align="center"><img src="docs/screenshots/03-alumnos.png" width="380" alt="Gestión de Alumnos"/><br><sub>Student management / Gestión de alumnos</sub></td>
-    <td align="center"><img src="docs/screenshots/04-horarios.png" width="380" alt="Horarios Semanales"/><br><sub>Weekly schedule / Horarios semanales</sub></td>
+    <td align="center"><img src="docs/screenshots/03-horarios.png" width="380" alt="Horarios Semanales"/><br><sub>Weekly schedule / Horarios semanales</sub></td>
+    <td align="center"><img src="docs/screenshots/04-economia.png" width="380" alt="Economía y Fiscalidad"/><br><sub>Finance dashboard / Panel de economía</sub></td>
   </tr>
   <tr>
-    <td align="center"><img src="docs/screenshots/05-economia.png" width="380" alt="Economía y Fiscalidad"/><br><sub>Finance dashboard / Panel de economía</sub></td>
-    <td align="center"><img src="docs/screenshots/06-factura.png" width="380" alt="Facturación"/><br><sub>Spanish invoicing / Facturación española</sub></td>
+    <td align="center" colspan="2"><img src="docs/screenshots/05-alumno.png" width="380" alt="Ficha de Alumno"/><br><sub>Student profile / Ficha de alumno</sub></td>
   </tr>
 </table>
 
