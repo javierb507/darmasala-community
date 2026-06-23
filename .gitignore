@@ -249,5 +249,5 @@ docs/superpowers/
 # Original spec PDF (may contain private business info)
 *.pdf
 
-# Screenshots (tracked separately if needed)
+# Screenshots dir in static (not committed)
 static/screenshots/

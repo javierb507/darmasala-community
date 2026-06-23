@@ -1,132 +1,201 @@
 <p align="center">
-  <img src="static/images/logo_darmasala.jpg" alt="DarmaSala Logo" width="300">
+  <img src="static/images/logo_darmasala.jpg" alt="DarmaSala Logo" width="200">
+</p>
+
+<h1 align="center">DarmaSala — Community Edition</h1>
+
+<p align="center">
+  Open-source management system for yoga schools · Sistema de gestión de código abierto para escuelas de yoga
 </p>
 
 <p align="center">
-  <a href="https://darmasala.cloud"><strong>☁️ Versión gestionada en la nube → darmasala.cloud</strong></a>
+  <a href="https://github.com/javierb507/darmasala/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-AGPL--3.0-green" alt="License"></a>
+  <img src="https://img.shields.io/badge/python-3.10%2B-blue" alt="Python">
+  <img src="https://img.shields.io/badge/flask-3.x-lightgrey" alt="Flask">
+  <a href="https://darmasala.cloud"><img src="https://img.shields.io/badge/cloud-darmasala.cloud-brightgreen" alt="Cloud"></a>
 </p>
 
-# DarmaSala — Community Edition
+---
 
-Sistema de gestión de código abierto para escuelas de yoga: alumnos, pagos, asistencia, horarios semanales, yogaterapia individual, calendario unificado y facturación española.
+## Screenshots
 
-**Licencia:** GNU AGPL v3  
-**Versión:** 2.0.0-community
+<table>
+  <tr>
+    <td align="center"><img src="docs/screenshots/01-login.png" width="380" alt="Login"/><br><sub>Login</sub></td>
+    <td align="center"><img src="docs/screenshots/02-dashboard.png" width="380" alt="Dashboard"/><br><sub>Dashboard</sub></td>
+  </tr>
+  <tr>
+    <td align="center"><img src="docs/screenshots/03-alumnos.png" width="380" alt="Gestión de Alumnos"/><br><sub>Student management / Gestión de alumnos</sub></td>
+    <td align="center"><img src="docs/screenshots/04-horarios.png" width="380" alt="Horarios Semanales"/><br><sub>Weekly schedule / Horarios semanales</sub></td>
+  </tr>
+  <tr>
+    <td align="center"><img src="docs/screenshots/05-economia.png" width="380" alt="Economía y Fiscalidad"/><br><sub>Finance dashboard / Panel de economía</sub></td>
+    <td align="center"><img src="docs/screenshots/06-factura.png" width="380" alt="Facturación"/><br><sub>Spanish invoicing / Facturación española</sub></td>
+  </tr>
+</table>
 
 ---
 
-## ¿Community o Enterprise?
+## English
 
-| | Community (este repo) | Enterprise / Cloud |
+### What is DarmaSala?
+
+DarmaSala is a self-hosted management system for yoga schools — built for the front desk, not the cloud. It runs on your own computer or local server, keeps student data on your premises, and has no subscription fees.
+
+### Features
+
+| Module | Description |
+|--------|-------------|
+| **Students** | Full profiles, payment history, quotas (monthly, drop-in, bonos) |
+| **Schedule** | Weekly recurring classes, attendance tracking, instructor management |
+| **Finance** | Income/expense dashboard, fixed costs, supplier invoices |
+| **Spanish invoicing** | Sequential numbering, VAT exemption (Art. 20.Uno.9º), IRPF withholding, PDF generation |
+| **Yogatherapy** | Individual therapy session records, file uploads, goal tracking |
+| **Staff** | Admin / instructor / receptionist roles |
+| **Settings** | Branding (name, logo, colors), session timeout, bug reporting to GitHub |
+
+### Community vs Enterprise
+
+| | Community (this repo) | Enterprise / Cloud |
 |---|---|---|
-| Distribución | Pública, AGPL-3 | [darmasala.cloud](https://darmasala.cloud) |
-| Despliegue | Local (PC, intranet) | Gestionado en la nube |
-| Gestión administrativa completa | ✅ | ✅ |
-| Facturación española (IVA, IRPF) | ✅ | ✅ |
-| Yogaterapia individual | ✅ | ✅ |
-| Calendario unificado | ✅ | ✅ |
-| Portal de alumnos | ❌ | ✅ |
-| Reservas y pagos online | ❌ | ✅ |
-| PWA / app móvil | ❌ | ✅ |
-| Notificaciones por email | ❌ | ✅ |
-| Lista de espera | ❌ | ✅ |
-| Soporte y actualizaciones | Comunidad | Incluido |
+| Distribution | Public, AGPL-3 | [darmasala.cloud](https://darmasala.cloud) |
+| Deployment | Self-hosted (PC, intranet) | Managed cloud |
+| Full admin panel | ✅ | ✅ |
+| Spanish invoicing (IVA, IRPF) | ✅ | ✅ |
+| Yogatherapy sessions | ✅ | ✅ |
+| Student portal (online bookings) | ❌ | ✅ |
+| Email notifications | ❌ | ✅ |
+| Mobile PWA | ❌ | ✅ |
+| Support & updates | Community | Included |
 
-> **¿Quieres todo sin instalar nada?** Visita [darmasala.cloud](https://darmasala.cloud) para la versión gestionada.
+### Quick Start
 
----
-
-## Características
-
-### Alumnos
-- Ficha completa: datos personales, contacto, tipo de cuota
-- Historial de pagos y asistencia por alumno
-- Cuotas mensuales, bonos y clases sueltas
-- Seguimiento de pagos pendientes
-
-### Calendario y Horarios
-- Vista mensual, semanal y anual con mini-calendarios
-- Horarios semanales recurrentes con tipos de clase y precios
-- Pase de lista visual desde cualquier clase
-- Gestión de instructores y aforo
-
-### Economía
-- Dashboard de ingresos, gastos y balance mensual/anual
-- Gastos fijos, variables y por categoría
-- Gestión de proveedores
-- Exportación de datos
-
-### Facturación española
-- Facturas emitidas con numeración secuencial (`{SERIE}/{AÑO}/{NNNN}`)
-- IVA con exención Art. 20.Uno.9º (enseñanza)
-- Retención IRPF configurable (0 / 7 / 15 %)
-- Facturas de proveedor recibidas
-- Generación de PDF con ReportLab
-
-### Yogaterapia Individual
-- Citas individuales con sesiones terapéuticas detalladas
-- Subida de archivos de práctica personal
-- Seguimiento de objetivos y evaluaciones
-
-### Administración
-- Usuarios staff con roles: `admin`, `instructor`, `recepcionista`
-- Configuración de branding (nombre, logo, colores)
-- Timeout de sesión configurable
-- Reportar bugs directamente a GitHub desde la app
-
----
-
-## Instalación
+**Requirements:** Python 3.10+ (3.14 not supported)
 
 ```bash
-# Requisitos: Python 3.10+ (3.14 no compatible con numpy)
-python -m venv venv && source venv/bin/activate  # Linux/Mac
-.\venv\Scripts\activate                           # Windows
+git clone https://github.com/javierb507/darmasala.git
+cd darmasala
+
+python -m venv venv
+source venv/bin/activate    # Linux/Mac
+.\venv\Scripts\activate     # Windows
 
 pip install -r requirements.txt
 
-# Inicializar base de datos
-python init_db.py              # datos base + usuario admin
-python init_db.py --test       # + alumnos y pagos de demo
-python init_db.py --reset      # borrar y reinicializar
+# Initialize with demo data
+python init_db.py --test
 
-# Arrancar servidor de desarrollo (puerto 5001)
+# Start development server (port 5001)
 python run.py
 ```
 
-Credenciales por defecto: `admin` / `DarmaSala2025!`
+Open http://localhost:5001 — default login: `admin` / `DarmaSala2025!`
+
+**Change the admin password immediately after first login.**
+
+### Production Deployment
+
+| Platform | Method |
+|---|---|
+| Linux VPS | Gunicorn + Nginx + systemd — see `scripts/setup_vps.sh` and `docs/deployment-ubuntu.md` |
+| Windows | Waitress via `production_server.py` |
+| Shared hosting | `wsgi.py` entrypoint + `DATABASE_URL=mysql://...` |
+
+Set these environment variables before running in production:
+
+```bash
+export SECRET_KEY=$(python -c "import secrets; print(secrets.token_hex(32))")
+export FLASK_ENV=production
+export DATABASE_URL=mysql://user:pass@host/dbname
+```
+
+See [SECURITY.md](SECURITY.md) for the full list of required variables.
+
+---
+
+## Español
+
+### ¿Qué es DarmaSala?
+
+DarmaSala es un sistema de gestión autoalojado para escuelas de yoga — diseñado para la recepción, no para la nube. Funciona en tu propio ordenador o servidor local, mantiene los datos de los alumnos en tus instalaciones y no tiene cuotas mensuales.
+
+### Características
+
+| Módulo | Descripción |
+|--------|-------------|
+| **Alumnos** | Fichas completas, historial de pagos, cuotas (mensual, sueltas, bonos) |
+| **Horarios** | Clases semanales recurrentes, pase de lista, gestión de instructores |
+| **Economía** | Dashboard de ingresos/gastos, gastos fijos, facturas de proveedor |
+| **Facturación española** | Numeración secuencial, exención IVA (Art. 20.Uno.9º), retención IRPF, PDF |
+| **Yogaterapia** | Sesiones individuales, subida de archivos, seguimiento de objetivos |
+| **Usuarios** | Roles admin / instructor / recepcionista |
+| **Configuración** | Branding personalizable, timeout de sesión, reporte de bugs a GitHub |
+
+### Instalación rápida
+
+**Requisitos:** Python 3.10+ (3.14 no compatible)
+
+```bash
+git clone https://github.com/javierb507/darmasala.git
+cd darmasala
+
+python -m venv venv
+source venv/bin/activate    # Linux/Mac
+.\venv\Scripts\activate     # Windows
+
+pip install -r requirements.txt
+
+# Inicializar con datos de demostración
+python init_db.py --test
+
+# Arrancar servidor (puerto 5001)
+python run.py
+```
+
+Abre http://localhost:5001 — credenciales: `admin` / `DarmaSala2025!`
+
+**Cambia la contraseña de admin inmediatamente tras el primer acceso.**
 
 ### Producción
 
-| Plataforma | Método |
-|---|---|
-| Linux VPS | Gunicorn + Nginx + systemd (`scripts/setup_vps.sh`, guía en `docs/deployment-ubuntu.md`) |
-| Windows | Waitress vía `production_server.py` |
-| Hostinger / shared hosting | `wsgi.py` + `DATABASE_URL=mysql://...` |
+```bash
+export SECRET_KEY=$(python -c "import secrets; print(secrets.token_hex(32))")
+export FLASK_ENV=production
+export DATABASE_URL=mysql://usuario:pass@host/base_de_datos
+```
+
+Ver guía completa: [`docs/deployment-ubuntu.md`](docs/deployment-ubuntu.md) y [`SECURITY.md`](SECURITY.md).
 
 ---
 
-## 🌿 Inspiración
+## Architecture
 
-> "El éxito del yoga no radica en la capacidad de realizar posturas, sino en cómo cambia positivamente nuestra forma de vivir la vida y nuestras relaciones."  
-> — *T.K.V. Desikachar*
+Flask · SQLAlchemy · SQLite (dev) / MySQL (prod) · Jinja2 · Bootstrap 5 · ReportLab
+
+- `app.py` — Flask app, Blueprint registration, context processor
+- `models.py` — 30+ SQLAlchemy models (single file)
+- `routes/` — 10 Blueprints: auth, student, finance, class, yogatherapia, settings, user, setup, bug_report, main
+- `utils/` — calendar logic, PDF generation, auth helpers, exports
+- `templates/` — ~60 Jinja2 templates extending `base.html`
 
 ---
 
-## Licencia
+## License / Licencia
 
-DarmaSala Community Edition se distribuye bajo la **GNU Affero General Public License v3.0** ([LICENSE](LICENSE)).
+[GNU AGPL v3.0](LICENSE) — free to use, modify, and self-host.  
+If you distribute a modified version or offer it as a service, you must publish the source under the same license.
 
-La licencia AGPL exige que cualquier servicio público derivado de este código publique sus modificaciones bajo la misma licencia. Para la versión gestionada en la nube sin restricciones AGPL, visita [darmasala.cloud](https://darmasala.cloud).
+> Para una versión gestionada sin restricciones AGPL: [darmasala.cloud](https://darmasala.cloud)
 
-## Contribución
+---
 
-1. Fork el repositorio
-2. Crea una rama (`git checkout -b feature/nueva-funcionalidad`)
-3. Commit y push
-4. Abre un Pull Request
+## Support / Soporte
 
-## Contacto
+- **Community:** [GitHub Issues](https://github.com/javierb507/darmasala/issues)
+- **Cloud & Enterprise:** [darmasala.cloud](https://darmasala.cloud)
+- **Contact / Contacto:** javier.ballesteros@gmail.com
 
-- **Soporte cloud y Enterprise:** [darmasala.cloud](https://darmasala.cloud)
-- **Autor:** Javier Ballesteros — javier.ballesteros@gmail.com
+---
+
+> *"El éxito del yoga no radica en la capacidad de realizar posturas, sino en cómo cambia positivamente nuestra forma de vivir la vida y nuestras relaciones."*  
+> — T.K.V. Desikachar
