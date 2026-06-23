@@ -23,5 +23,5 @@
 
 ## Reporting Vulnerabilities
 
-Open an issue at https://github.com/javierb507/darmasala/issues with the label `security`.  
+Open an issue at https://github.com/javierb507/darmasala-community/issues with the label `security`.  
 For sensitive disclosures, contact: javier.ballesteros@gmail.com

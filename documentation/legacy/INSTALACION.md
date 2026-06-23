@@ -10,8 +10,8 @@
 
 ### 1. Clonar el Repositorio
 ```bash
-git clone https://github.com/javierb507/darmasala.git
-cd darmasala
+git clone https://github.com/javierb507/darmasala-community.git
+cd darmasala-community
 ```
 
 ### 2. Crear Entorno Virtual
@@ -230,8 +230,8 @@ python recrear_bd.py
 
 ### Contacto
 - **Email**: soporte@yogaschool.com
-- **GitHub**: [Issues](https://github.com/javierb507/darmasala/issues)
-- **Documentación**: [Wiki](https://github.com/javierb507/darmasala/wiki)
+- **GitHub**: [Issues](https://github.com/javierb507/darmasala-community/issues)
+- **Documentación**: [Wiki](https://github.com/javierb507/darmasala-community/wiki)
 
 ---
 

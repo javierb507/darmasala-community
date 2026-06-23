@@ -107,5 +107,5 @@ y este proyecto sigue [SemVer](https://semver.org/lang/es/) en la medida en que 
 - Bucle infinito de redirecciones en `/setup` cuando ya había usuario.
 - Todas las claves de branding se siembran durante el onboarding.
 
-[2.0.1-final]: https://github.com/javierb507/darmasala/releases/tag/v2.0.1-final
-[2.0.0-final]: https://github.com/javierb507/darmasala/releases/tag/v2.0.0-final
+[2.0.1-final]: https://github.com/javierb507/darmasala-community/releases/tag/v2.0.1-final
+[2.0.0-final]: https://github.com/javierb507/darmasala-community/releases/tag/v2.0.0-final

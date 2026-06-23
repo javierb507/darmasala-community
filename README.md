@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/javierb507/darmasala/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-AGPL--3.0-green" alt="License"></a>
+  <a href="https://github.com/javierb507/darmasala-community/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-AGPL--3.0-green" alt="License"></a>
   <img src="https://img.shields.io/badge/python-3.10%2B-blue" alt="Python">
   <img src="https://img.shields.io/badge/flask-3.x-lightgrey" alt="Flask">
   <a href="https://darmasala.cloud"><img src="https://img.shields.io/badge/cloud-darmasala.cloud-brightgreen" alt="Cloud"></a>
@@ -72,8 +72,8 @@ DarmaSala is a self-hosted management system for yoga schools — built for the 
 **Requirements:** Python 3.10+ (3.14 not supported)
 
 ```bash
-git clone https://github.com/javierb507/darmasala.git
-cd darmasala
+git clone https://github.com/javierb507/darmasala-community.git
+cd darmasala-community
 
 python -m venv venv
 source venv/bin/activate    # Linux/Mac
@@ -135,8 +135,8 @@ DarmaSala es un sistema de gestión autoalojado para escuelas de yoga — diseñ
 **Requisitos:** Python 3.10+ (3.14 no compatible)
 
 ```bash
-git clone https://github.com/javierb507/darmasala.git
-cd darmasala
+git clone https://github.com/javierb507/darmasala-community.git
+cd darmasala-community
 
 python -m venv venv
 source venv/bin/activate    # Linux/Mac
@@ -190,7 +190,7 @@ If you distribute a modified version or offer it as a service, you must publish 
 
 ## Support / Soporte
 
-- **Community:** [GitHub Issues](https://github.com/javierb507/darmasala/issues)
+- **Community:** [GitHub Issues](https://github.com/javierb507/darmasala-community/issues)
 - **Cloud & Enterprise:** [darmasala.cloud](https://darmasala.cloud)
 - **Contact / Contacto:** javier.ballesteros@gmail.com
 
