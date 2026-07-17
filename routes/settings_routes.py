@@ -187,7 +187,7 @@ def export_data(tipo):
         for a in asistencias:
             alumno_nom = f"{a.alumno.nombre} {a.alumno.apellido}" if a.alumno else "N/A"
             clase_nom = a.horario.clase.nombre if a.horario and a.horario.clase else "N/A"
-            writer.writerow([alumno_nom, clase_nom, a.fecha_clase.strftime('%Y-%m-%d') if a.fecha_clase else '', 'Sí' if a.presente else 'No', a.notas or ''])
+            writer.writerow([alumno_nom, clase_nom, a.fecha_clase.strftime('%Y-%m-%d') if a.fecha_clase else '', 'Sí' if a.presente else 'No', a.observaciones or ''])
     
     # ... handle other types if needed from app_recovered
     
