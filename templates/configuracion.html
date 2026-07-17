@@ -455,7 +455,63 @@
             </div>
         </div>
 
-        <!-- SECCIÓN 5: SISTEMA Y DESARROLLADOR (DISCRETO) -->
+        <!-- SECCIÓN 5: SUTRAS SEMANALES -->
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                <h5 class="mb-0 text-dark"><i class="fas fa-book-open text-success me-2"></i> Sutras semanales</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('settings.nuevo_sutra') }}" class="row g-2 mb-3">
+                    <div class="col-md-1"><input type="text" name="numero" class="form-control" placeholder="I.1"
+                            required></div>
+                    <div class="col-md-3"><input type="text" name="sanscrito" class="form-control"
+                            placeholder="Sánscrito" required></div>
+                    <div class="col-md-3"><input type="text" name="transliteracion" class="form-control"
+                            placeholder="Transliteración" required></div>
+                    <div class="col-md-3"><input type="text" name="traduccion" class="form-control"
+                            placeholder="Traducción" required></div>
+                    <div class="col-md-1"><input type="text" name="libro" class="form-control" placeholder="Libro"
+                            required></div>
+                    <div class="col-md-1"><button type="submit" class="btn btn-primary w-100">Añadir</button></div>
+                </form>
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="ps-4">Nº</th>
+                                <th>Traducción</th>
+                                <th>Libro</th>
+                                <th class="text-end pe-4">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for sutra in sutras %}
+                            <tr>
+                                <td class="ps-4">{{ sutra.numero }}</td>
+                                <td>{{ sutra.traduccion }}</td>
+                                <td>{{ sutra.libro }}</td>
+                                <td class="text-end pe-4">
+                                    <form method="POST"
+                                        action="{{ url_for('settings.eliminar_sutra', sutra_id=sutra.id) }}"
+                                        class="d-inline"
+                                        onsubmit="return confirm('¿Eliminar el sutra {{ sutra.numero }}?')">
+                                        <button class="btn btn-sm btn-outline-danger"><i
+                                                class="fas fa-trash"></i></button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="4" class="text-center text-muted py-4">No hay sutras registrados</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECCIÓN 6: SISTEMA Y DESARROLLADOR (DISCRETO) -->
         <div class="mt-5 pt-5 border-top opacity-50">
             <div class="row align-items-center">
                 <div class="col-md-6">

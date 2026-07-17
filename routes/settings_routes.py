@@ -200,21 +200,21 @@ def export_data(tipo):
 def nuevo_sutra():
     """Agregar un nuevo sutra"""
     numero = request.form.get('numero')
-    contenido_sanscrito = request.form.get('contenido_sanscrito')
-    contenido_espanol = request.form.get('contenido_espanol', '')
-    significado = request.form.get('significado', '')
-    libro = request.form.get('libro', 'Yoga Sutras de Patanjali')
-    
-    if not numero or not contenido_sanscrito:
-        flash('Número y contenido sánscrito son obligatorios', 'error')
+    sanscrito = request.form.get('sanscrito')
+    transliteracion = request.form.get('transliteracion')
+    traduccion = request.form.get('traduccion')
+    libro = request.form.get('libro')
+
+    if not all([numero, sanscrito, transliteracion, traduccion, libro]):
+        flash('Todos los campos del sutra son obligatorios', 'error')
         return redirect(url_for('settings.configuracion'))
-    
+
     try:
         sutra = Sutra(
             numero=numero,
-            contenido_sanscrito=contenido_sanscrito,
-            contenido_espanol=contenido_espanol,
-            significado=significado,
+            sanscrito=sanscrito,
+            transliteracion=transliteracion,
+            traduccion=traduccion,
             libro=libro
         )
         db.session.add(sutra)
@@ -223,7 +223,20 @@ def nuevo_sutra():
     except Exception as e:
         db.session.rollback()
         flash(f'Error al agregar sutra: {str(e)}', 'error')
-    
+    return redirect(url_for('settings.configuracion'))
+
+@settings_bp.route('/sutras/<int:sutra_id>/eliminar', methods=['POST'])
+@login_required
+def eliminar_sutra(sutra_id):
+    """Eliminar un sutra"""
+    sutra = Sutra.query.get_or_404(sutra_id)
+    try:
+        db.session.delete(sutra)
+        db.session.commit()
+        flash('Sutra eliminado exitosamente', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Error al eliminar sutra: {str(e)}', 'error')
     return redirect(url_for('settings.configuracion'))
 
 @settings_bp.route('/configuracion/guardar', methods=['POST'])
