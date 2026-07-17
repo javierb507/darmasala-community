@@ -653,6 +653,8 @@ def resetear_sistema():
         Asistencia.query.delete()
         Pago.query.delete()
         LineaFactura.query.delete()
+        # Rectificativas primero: FacturaEmitida tiene self-FK factura_origen_id
+        FacturaEmitida.query.filter(FacturaEmitida.factura_origen_id.isnot(None)).delete()
         FacturaEmitida.query.delete()
         Cliente.query.delete()
         FacturaProveedor.query.delete()
