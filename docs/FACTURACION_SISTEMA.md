@@ -255,7 +255,7 @@ Script: `crear_datos_prueba_economia.py`
 ## Templates Creados
 
 1. `templates/configuracion_fiscal.html` - Configuración fiscal del negocio
-2. `templates/facturacion.html` - Dashboard de facturación
+2. ~~`templates/facturacion.html`~~ — eliminado (plantilla huérfana, Fase 0)
 3. `templates/clientes_facturacion.html` - Listado de clientes
 4. `templates/nuevo_cliente.html` - Formulario de cliente
 5. `templates/editar_cliente.html` - Edición de cliente

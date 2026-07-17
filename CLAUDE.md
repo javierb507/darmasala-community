@@ -43,18 +43,19 @@ python app.py
 - **Hostinger/shared**: `wsgi.py` exposes `app`. Set `FLASK_ENV=production` and `DATABASE_URL=mysql://...` — `app.py` switches to MySQL only when `FLASK_ENV=production`.
 
 ### Tests
-There is no pytest suite. The legacy `python test_calendar.py` is referenced in `docs/CALENDAR_SYSTEM.md` but may not exist in the tree — verify before assuming.
+There is no test suite. `docs/CALENDAR_SYSTEM.md` references a `test_calendar.py` that does not exist in the tree. Verification is manual: run the app and exercise the affected flow.
 
 ### One-off scripts
 - `python reset_admin.py` — reset admin credentials
 - `python cargar_sutras_produccion.py` — seed weekly sutras shown on login
+- `python cargar_datos_prueba_completos.py` — full demo dataset for "modo pruebas" (see `docs/MODO_PRUEBAS.md`)
 - `python scripts/migrate_clase_online.py` — one-off migration
 
 ## Architecture
 
 ### Flask app composition
 `app.py` is the composition root. It:
-1. Builds the `Flask` app and chooses DB URI based on `FLASK_ENV` (SQLite in dev, MySQL in prod).
+1. Builds the `Flask` app and chooses DB URI based on `FLASK_ENV` (SQLite in dev at `instance/yoga_school.db`, MySQL via `DATABASE_URL` in prod). Note: all configuration is inline in `app.py`; there is no separate config module.
 2. Calls `db.init_app(app)` from `models.py` (single SQLAlchemy `db` instance, no factory pattern).
 3. Imports and registers **ten Blueprints** from `routes/__init__.py`: `main, auth, student, finance, class, yogatherapia, settings, user_routes, setup, bug_report`. (No student portal in Community Edition.)
 4. Registers a `@before_request` hook that redirects to `/setup` (the onboarding flow) when `Usuario` table is empty — this is how first-run provisioning works. The hook MUST exclude endpoints `setup.onboarding` and `static` or it infinite-loops (see commit `90eed08`).
@@ -84,7 +85,8 @@ When changing models, also update `init_db.py` (seed data) and the `templates/mo
 - `calendar_utils.py` — **centralized date/period logic**. `CalendarioAcademico`, `PeriodoPago`, `HorarioSemanalHelper`. Do NOT re-implement date math in routes or templates; route everything through here. The context processor exposes its constants (`meses_nombres`, `dias_semana`, etc.) and helpers to every template. Detailed docs in `docs/CALENDAR_SYSTEM.md`.
 - `app_utils.py` — `get_version_info()` (reads git), `obtener_sutra_semanal()`.
 - `finance_utils.py`, `pdf_generator.py` — invoice math and ReportLab PDF generation (Spanish fiscal: IVA Art. 20.Uno.9º exemption for teaching, IRPF retention at 0/7/15%, sequential numbering by serie/year, format `{SERIE}/{YYYY}/{NNNN}`). See `docs/FACTURACION_SISTEMA.md`.
-- `backup.py`, `export.py`, `sync_utils.py`, `validators.py`, `alerts.py` — self-explanatory; check before adding parallel implementations.
+- `github_issues.py` — minimal GitHub Issues API client used by `routes/bug_report_routes.py` to file issues from in-app bug reports (see `docs/BUG_REPORTING.md`).
+- `validators.py` — input validation helpers; check before adding parallel implementations.
 
 ### Templates (`templates/`)
 - ~60 Jinja2 templates, flat layout with a few subdirs (`alumno/`, `auth/`, `economia/`, `configuracion/`, `components/`, `setup/`).
@@ -97,7 +99,9 @@ Two design docs exist and **disagree** — treat `docs/CORE_DESIGN.md` ("Deep Pu
 ## Conventions
 
 - **Language**: All user-facing strings, flash messages, and most identifiers are Spanish. Keep new code consistent (e.g. `alumno` not `student` in DB models; the `Alumno`/`Usuario` split is intentional).
-- **Branding**: The app rebranded from "Atma Suddhi" → "DarmaSala" in v2.0.0 (commit `ff7519d`). Don't reintroduce the old name. The `.env.example` still contains a stale "atma-suddhi" SECRET_KEY default — override via env var.
+- **Branding**: The app rebranded from "Atma Suddhi" → "DarmaSala" in v2.0.0 (commit `ff7519d`). Don't reintroduce the old name.
+- **SECRET_KEY**: `app.py` refuses to start with `FLASK_ENV=production` unless the `SECRET_KEY` env var is set; dev falls back to a hardcoded dev-only key.
 - **DB sessions**: Routes commit via `db.session.commit()` directly and `rollback()` on exception — no service layer. Follow the same pattern in new routes.
 - **First-run gate**: Any new top-level route should be reachable without an authenticated user only if it's `/setup`, `/login`, or `/static/...` — the onboarding redirect in `app.py` runs before every request.
+- **Docs live in `docs/`**: `documentation/` is legacy (old Windows deploy guide + `legacy/` archive) — put new docs in `docs/`.
 - **No migrations framework wired up**: `Flask-Migrate` is in `requirements.txt` but there's no `migrations/` directory. Schema changes today rely on `db.create_all()` (additive) + ad-hoc scripts in `scripts/` (e.g. `migrate_clase_online.py`). For destructive schema changes, write a one-off script and document it.

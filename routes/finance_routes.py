@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify, send_file
 from datetime import datetime, date, timedelta
-from models import db, Alumno, Pago, Cliente, FacturaEmitida, LineaFactura, ConfiguracionFiscal, Ingreso, GastoMensual, FacturaProveedor, GastoFijo, CategoriaGasto, Tarifa, Proveedor
+from models import db, Alumno, Pago, Cliente, FacturaEmitida, LineaFactura, ConfiguracionFiscal, GastoMensual, FacturaProveedor, GastoFijo, CategoriaGasto, Tarifa, Proveedor
 from utils.auth_utils import login_required
 from utils.finance_utils import exportar_datos_tax_excel
 

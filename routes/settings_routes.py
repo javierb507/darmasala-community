@@ -1,10 +1,10 @@
-from flask import Blueprint, render_template, redirect, url_for, flash, request, jsonify, send_file
+from flask import Blueprint, render_template, redirect, url_for, flash, request, jsonify, send_file, current_app
 from datetime import datetime, date
 import os
 import shutil
 import json
 from models import db, CategoriaGasto, Sutra, Configuracion, Tarifa, Instructor, Clase, HorarioSemanal, Alumno, Pago, Asistencia, FacturaEmitida, FacturaProveedor, Cliente, Proveedor, GastoFijo
-from utils.auth_utils import login_required
+from utils.auth_utils import login_required, admin_required
 
 settings_bp = Blueprint('settings', __name__)
 
@@ -86,7 +86,29 @@ def editar_categoria_gasto(categoria_id):
     except Exception as e:
         db.session.rollback()
         flash(f'Error al actualizar categoría: {str(e)}', 'error')
-    
+
+    return redirect(url_for('settings.configuracion'))
+
+@settings_bp.route('/categorias-gasto/<int:categoria_id>/eliminar', methods=['POST'])
+@login_required
+def eliminar_categoria_gasto(categoria_id):
+    """Eliminar categoría de gasto; si tiene movimientos asociados, solo desactivar"""
+    categoria = CategoriaGasto.query.get_or_404(categoria_id)
+    en_uso = (FacturaProveedor.query.filter_by(categoria_id=categoria_id).count()
+              + GastoFijo.query.filter_by(categoria_id=categoria_id).count()) > 0
+    try:
+        if en_uso:
+            categoria.activo = False
+            db.session.commit()
+            flash('Categoría desactivada (tiene facturas o gastos asociados; se conserva el histórico)', 'warning')
+        else:
+            db.session.delete(categoria)
+            db.session.commit()
+            flash('Categoría eliminada exitosamente', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Error al eliminar categoría: {str(e)}', 'error')
+
     return redirect(url_for('settings.configuracion'))
 
 @settings_bp.route('/backup/crear', methods=['POST'])
@@ -187,7 +209,7 @@ def export_data(tipo):
         for a in asistencias:
             alumno_nom = f"{a.alumno.nombre} {a.alumno.apellido}" if a.alumno else "N/A"
             clase_nom = a.horario.clase.nombre if a.horario and a.horario.clase else "N/A"
-            writer.writerow([alumno_nom, clase_nom, a.fecha_clase.strftime('%Y-%m-%d') if a.fecha_clase else '', 'Sí' if a.presente else 'No', a.notas or ''])
+            writer.writerow([alumno_nom, clase_nom, a.fecha_clase.strftime('%Y-%m-%d') if a.fecha_clase else '', 'Sí' if a.presente else 'No', a.observaciones or ''])
     
     # ... handle other types if needed from app_recovered
     
@@ -200,21 +222,21 @@ def export_data(tipo):
 def nuevo_sutra():
     """Agregar un nuevo sutra"""
     numero = request.form.get('numero')
-    contenido_sanscrito = request.form.get('contenido_sanscrito')
-    contenido_espanol = request.form.get('contenido_espanol', '')
-    significado = request.form.get('significado', '')
-    libro = request.form.get('libro', 'Yoga Sutras de Patanjali')
-    
-    if not numero or not contenido_sanscrito:
-        flash('Número y contenido sánscrito son obligatorios', 'error')
+    sanscrito = request.form.get('sanscrito')
+    transliteracion = request.form.get('transliteracion')
+    traduccion = request.form.get('traduccion')
+    libro = request.form.get('libro')
+
+    if not all([numero, sanscrito, transliteracion, traduccion, libro]):
+        flash('Todos los campos del sutra son obligatorios', 'error')
         return redirect(url_for('settings.configuracion'))
-    
+
     try:
         sutra = Sutra(
             numero=numero,
-            contenido_sanscrito=contenido_sanscrito,
-            contenido_espanol=contenido_espanol,
-            significado=significado,
+            sanscrito=sanscrito,
+            transliteracion=transliteracion,
+            traduccion=traduccion,
             libro=libro
         )
         db.session.add(sutra)
@@ -223,7 +245,20 @@ def nuevo_sutra():
     except Exception as e:
         db.session.rollback()
         flash(f'Error al agregar sutra: {str(e)}', 'error')
-    
+    return redirect(url_for('settings.configuracion'))
+
+@settings_bp.route('/sutras/<int:sutra_id>/eliminar', methods=['POST'])
+@login_required
+def eliminar_sutra(sutra_id):
+    """Eliminar un sutra"""
+    sutra = Sutra.query.get_or_404(sutra_id)
+    try:
+        db.session.delete(sutra)
+        db.session.commit()
+        flash('Sutra eliminado exitosamente', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Error al eliminar sutra: {str(e)}', 'error')
     return redirect(url_for('settings.configuracion'))
 
 @settings_bp.route('/configuracion/guardar', methods=['POST'])
@@ -608,15 +643,36 @@ def cargar_datos_prueba():
     return redirect(url_for('settings.modo_pruebas'))
 
 @settings_bp.route('/resetear-sistema', methods=['POST'])
-@login_required
+@admin_required
 def resetear_sistema():
+    """Borra todos los datos transaccionales; conserva catálogos, usuarios y configuración"""
+    from models import (LineaFactura, GastoMensual, ArchivoYogaterapia,
+                        SesionYogaterapia, EventoCalendario, inscripciones_horarios)
     try:
-        # Eliminar en orden para respetar foreign keys
+        # Orden: hijos antes que padres (respeta foreign keys)
         Asistencia.query.delete()
-        # Agregar otros modelos según sea necesario
+        Pago.query.delete()
+        LineaFactura.query.delete()
+        # Rectificativas primero: FacturaEmitida tiene self-FK factura_origen_id
+        FacturaEmitida.query.filter(FacturaEmitida.factura_origen_id.isnot(None)).delete()
+        FacturaEmitida.query.delete()
+        Cliente.query.delete()
+        FacturaProveedor.query.delete()
+        GastoMensual.query.delete()
+        ArchivoYogaterapia.query.delete()
+        SesionYogaterapia.query.delete()
+        EventoCalendario.query.delete()
+        db.session.execute(inscripciones_horarios.delete())
+        Alumno.query.delete()
         db.session.commit()
-        flash('Sistema reseteado exitosamente', 'success')
+
+        # Archivos adjuntos de yogaterapia en disco
+        yogaterapia_dir = os.path.join(current_app.config['UPLOAD_FOLDER'], 'yogaterapia')
+        if os.path.isdir(yogaterapia_dir):
+            shutil.rmtree(yogaterapia_dir)
+
+        flash('Sistema reseteado: datos transaccionales eliminados, catálogos y configuración conservados', 'success')
     except Exception as e:
-        flash(f'Error al resetear sistema: {str(e)}', 'error')
         db.session.rollback()
+        flash(f'Error al resetear sistema: {str(e)}', 'error')
     return redirect(url_for('settings.modo_pruebas'))

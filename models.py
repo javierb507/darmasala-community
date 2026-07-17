@@ -659,24 +659,6 @@ class GastoFijo(db.Model):
         return f'<GastoFijo {self.nombre} - {self.importe}€/{self.frecuencia}>'
 
 
-# Modelo de Ingreso
-class Ingreso(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    fecha = db.Column(db.Date, nullable=False)
-    concepto = db.Column(db.String(200), nullable=False)
-    importe = db.Column(db.Float, nullable=False)
-    tipo = db.Column(db.String(50), default='Varios')
-    metodo_pago = db.Column(db.String(50))
-    alumno_id = db.Column(db.Integer, db.ForeignKey('alumno.id'), nullable=True)
-    notas = db.Column(db.Text)
-    fecha_creacion = db.Column(db.DateTime, default=datetime.utcnow)
-    
-    # Relación
-    alumno = db.relationship('Alumno', backref='ingresos')
-    
-    def __repr__(self):
-        return f'<Ingreso {self.concepto} - {self.importe}€>'
-
 # Modelo de Gasto Mensual (Simplificado)
 class GastoMensual(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -788,25 +770,6 @@ class ArchivoYogaterapia(db.Model):
     def __repr__(self):
         return f'<ArchivoYogaterapia {self.nombre_archivo}>'
 
-# Modelo de Clase Personal (Simplificado)
-class ClasePersonal(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    alumno_id = db.Column(db.Integer, db.ForeignKey('alumno.id'), nullable=False)
-    fecha_clase = db.Column(db.Date, nullable=False)
-    duracion_minutos = db.Column(db.Integer, default=60)
-    tipo_sesion = db.Column(db.String(50), default='individual')  # individual, pareja
-    objetivos = db.Column(db.Text)
-    desarrollo = db.Column(db.Text)
-    observaciones = db.Column(db.Text)
-    instructor = db.Column(db.String(50), default='Minouche')
-    precio = db.Column(db.Float, default=50.00)
-    pagado = db.Column(db.Boolean, default=False)
-    metodo_pago = db.Column(db.String(50))
-    fecha_creacion = db.Column(db.DateTime, default=datetime.utcnow)
-    
-    def __repr__(self):
-        return f'<ClasePersonal {self.alumno.nombre} - {self.fecha_clase}>'
-
 # Modelo de Sutra
 class Sutra(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -819,19 +782,3 @@ class Sutra(db.Model):
     
     def __repr__(self):
         return f'<Sutra {self.numero}: {self.traduccion[:50]}...>'
-
-# Modelo para Solicitudes de Yogaterapia desde el Portal
-class SolicitudYogaterapia(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    nombre = db.Column(db.String(100), nullable=False)
-    email = db.Column(db.String(100), nullable=False)
-    telefono = db.Column(db.String(20))
-    motivo = db.Column(db.Text)
-    fecha_solicitud = db.Column(db.DateTime, default=datetime.utcnow)
-    leida = db.Column(db.Boolean, default=False)
-    alumno_id = db.Column(db.Integer, db.ForeignKey('alumno.id'), nullable=True)
-    
-    alumno = db.relationship('Alumno', backref='solicitudes_yoga_portal', lazy=True)
-    
-    def __repr__(self):
-        return f'<SolicitudYogaterapia {self.nombre} - {self.fecha_solicitud.strftime("%d/%m/%Y")}>'
