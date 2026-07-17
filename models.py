@@ -788,25 +788,6 @@ class ArchivoYogaterapia(db.Model):
     def __repr__(self):
         return f'<ArchivoYogaterapia {self.nombre_archivo}>'
 
-# Modelo de Clase Personal (Simplificado)
-class ClasePersonal(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    alumno_id = db.Column(db.Integer, db.ForeignKey('alumno.id'), nullable=False)
-    fecha_clase = db.Column(db.Date, nullable=False)
-    duracion_minutos = db.Column(db.Integer, default=60)
-    tipo_sesion = db.Column(db.String(50), default='individual')  # individual, pareja
-    objetivos = db.Column(db.Text)
-    desarrollo = db.Column(db.Text)
-    observaciones = db.Column(db.Text)
-    instructor = db.Column(db.String(50), default='Minouche')
-    precio = db.Column(db.Float, default=50.00)
-    pagado = db.Column(db.Boolean, default=False)
-    metodo_pago = db.Column(db.String(50))
-    fecha_creacion = db.Column(db.DateTime, default=datetime.utcnow)
-    
-    def __repr__(self):
-        return f'<ClasePersonal {self.alumno.nombre} - {self.fecha_clase}>'
-
 # Modelo de Sutra
 class Sutra(db.Model):
     id = db.Column(db.Integer, primary_key=True)
