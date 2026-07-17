@@ -659,24 +659,6 @@ class GastoFijo(db.Model):
         return f'<GastoFijo {self.nombre} - {self.importe}€/{self.frecuencia}>'
 
 
-# Modelo de Ingreso
-class Ingreso(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    fecha = db.Column(db.Date, nullable=False)
-    concepto = db.Column(db.String(200), nullable=False)
-    importe = db.Column(db.Float, nullable=False)
-    tipo = db.Column(db.String(50), default='Varios')
-    metodo_pago = db.Column(db.String(50))
-    alumno_id = db.Column(db.Integer, db.ForeignKey('alumno.id'), nullable=True)
-    notas = db.Column(db.Text)
-    fecha_creacion = db.Column(db.DateTime, default=datetime.utcnow)
-    
-    # Relación
-    alumno = db.relationship('Alumno', backref='ingresos')
-    
-    def __repr__(self):
-        return f'<Ingreso {self.concepto} - {self.importe}€>'
-
 # Modelo de Gasto Mensual (Simplificado)
 class GastoMensual(db.Model):
     id = db.Column(db.Integer, primary_key=True)
