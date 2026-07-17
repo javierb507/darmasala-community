@@ -17,6 +17,20 @@
 
 ---
 
+## En memoria · In memoriam
+
+> A **Santiago Cogolludo**, mi profesor.
+> Me abrió la puerta del yoga y caminó a mi lado siempre que lo necesité.
+> Lo que él sembró vive en cada página de este proyecto.
+> Om shanti. 🙏
+>
+> *To **Santiago Cogolludo**, my teacher.
+> He opened the door of yoga for me and walked beside me whenever I needed him.
+> What he planted lives on in every page of this project.
+> Om shanti.*
+
+---
+
 ## Screenshots
 
 <table>
