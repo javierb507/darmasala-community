@@ -86,7 +86,7 @@ When changing models, also update `init_db.py` (seed data) and the `templates/mo
 - `app_utils.py` — `get_version_info()` (reads git), `obtener_sutra_semanal()`.
 - `finance_utils.py`, `pdf_generator.py` — invoice math and ReportLab PDF generation (Spanish fiscal: IVA Art. 20.Uno.9º exemption for teaching, IRPF retention at 0/7/15%, sequential numbering by serie/year, format `{SERIE}/{YYYY}/{NNNN}`). See `docs/FACTURACION_SISTEMA.md`.
 - `github_issues.py` — minimal GitHub Issues API client used by `routes/bug_report_routes.py` to file issues from in-app bug reports (see `docs/BUG_REPORTING.md`).
-- `backup.py`, `export.py`, `validators.py`, `alerts.py` — self-explanatory; check before adding parallel implementations.
+- `validators.py` — input validation helpers; check before adding parallel implementations.
 
 ### Templates (`templates/`)
 - ~60 Jinja2 templates, flat layout with a few subdirs (`alumno/`, `auth/`, `economia/`, `configuracion/`, `components/`, `setup/`).
