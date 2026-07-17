@@ -92,28 +92,33 @@ Un solo clic carga un conjunto completo de datos realistas para simular una escu
 
 ### 2. Resetear Sistema Completo
 
-Elimina TODOS los datos del sistema para empezar de cero.
+Elimina los datos transaccionales para empezar de cero, conservando catálogos y configuración.
 
 #### Datos que SE ELIMINAN:
-- ❌ Todos los alumnos
+- ❌ Todos los alumnos e inscripciones a horarios
 - ❌ Todos los pagos
-- ❌ Todos los horarios semanales
 - ❌ Todas las asistencias
 - ❌ Todos los eventos de calendario
 - ❌ Todos los clientes
 - ❌ Todas las facturas emitidas y líneas de factura
-- ❌ Todos los proveedores
-- ❌ Todos los gastos fijos
 - ❌ Todas las facturas de proveedores
-- ❌ Todos los ingresos registrados
+- ❌ Todos los gastos mensuales
+- ❌ Todas las sesiones de yogaterapia y sus archivos adjuntos
 
 #### Datos que SE MANTIENEN:
-- ✅ Tipos de clases (Yoga integral, Meditación, etc.)
+- ✅ Usuarios y configuración general
+- ✅ Clases, tipos de clase, horarios semanales e instructores
 - ✅ Categorías de gastos (Alquiler, Suministros, etc.)
 - ✅ Tarifas configuradas
-- ✅ Configuración fiscal
+- ✅ Gastos fijos y proveedores
+- ✅ Sutras y configuración fiscal
+
+Nota: si cargaste el dataset de demo, sus filas de catálogo (proveedores,
+gastos fijos, horarios, clases) sobreviven al reset por diseño — el reset
+limpia movimientos, no catálogos.
 
 #### Protección:
+- Solo administradores (`@admin_required`)
 - Confirmación doble obligatoria
 - Advertencias claras sobre irreversibilidad
 - Mensajes de confirmación en la interfaz

@@ -4,7 +4,7 @@ import os
 import shutil
 import json
 from models import db, CategoriaGasto, Sutra, Configuracion, Tarifa, Instructor, Clase, HorarioSemanal, Alumno, Pago, Asistencia, FacturaEmitida, FacturaProveedor, Cliente, Proveedor, GastoFijo
-from utils.auth_utils import login_required
+from utils.auth_utils import login_required, admin_required
 
 settings_bp = Blueprint('settings', __name__)
 
@@ -643,7 +643,7 @@ def cargar_datos_prueba():
     return redirect(url_for('settings.modo_pruebas'))
 
 @settings_bp.route('/resetear-sistema', methods=['POST'])
-@login_required
+@admin_required
 def resetear_sistema():
     """Borra todos los datos transaccionales; conserva catálogos, usuarios y configuración"""
     from models import (LineaFactura, GastoMensual, ArchivoYogaterapia,

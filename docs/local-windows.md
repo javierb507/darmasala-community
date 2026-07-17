@@ -31,4 +31,3 @@ Default port: 5001
 
 ## Logs Location
 * Console output (stdout)
-* Temp folder if configured in `config.py`

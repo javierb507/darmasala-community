@@ -59,22 +59,22 @@
                                 <h5 class="mb-0"><i class="fas fa-trash-alt"></i> Resetear Sistema</h5>
                             </div>
                             <div class="card-body">
-                                <p>Elimina TODOS los datos del sistema excepto:</p>
+                                <p>Elimina los datos transaccionales y conserva:</p>
                                 <ul>
-                                    <li><i class="fas fa-check text-success"></i> Tipos de clases</li>
-                                    <li><i class="fas fa-check text-success"></i> Categorías de gastos</li>
-                                    <li><i class="fas fa-check text-success"></i> Tarifas configuradas</li>
-                                    <li><i class="fas fa-check text-success"></i> Configuración fiscal</li>
+                                    <li><i class="fas fa-check text-success"></i> Usuarios y configuración</li>
+                                    <li><i class="fas fa-check text-success"></i> Clases, horarios e instructores</li>
+                                    <li><i class="fas fa-check text-success"></i> Tarifas, categorías y gastos fijos</li>
+                                    <li><i class="fas fa-check text-success"></i> Proveedores, sutras y configuración fiscal</li>
                                 </ul>
 
                                 <p class="text-danger"><strong>SE ELIMINARÁN:</strong></p>
                                 <ul class="text-danger">
-                                    <li>Todos los alumnos y pagos</li>
-                                    <li>Todos los horarios</li>
+                                    <li>Todos los alumnos, pagos e inscripciones</li>
                                     <li>Todas las asistencias</li>
                                     <li>Todas las facturas emitidas y clientes</li>
-                                    <li>Todas las facturas de proveedores</li>
-                                    <li>Todos los gastos fijos</li>
+                                    <li>Todas las facturas de proveedores y gastos mensuales</li>
+                                    <li>Todas las sesiones de yogaterapia y sus archivos</li>
+                                    <li>Todos los eventos del calendario</li>
                                 </ul>
 
                                 <div class="alert alert-warning">
@@ -83,7 +83,7 @@
                                 </div>
 
                                 <form method="POST" action="{{ url_for('settings.resetear_sistema') }}"
-                                    onsubmit="return confirm('¡ADVERTENCIA! Esta acción eliminará TODOS los datos del sistema. ¿Está completamente seguro?') && confirm('¿REALMENTE desea eliminar TODOS los datos? Esta acción NO SE PUEDE DESHACER.');">
+                                    onsubmit="return confirm('¡ADVERTENCIA! Esta acción eliminará todos los datos transaccionales (alumnos, pagos, asistencias, facturas, sesiones). ¿Está completamente seguro?') && confirm('¿REALMENTE desea continuar? Esta acción NO SE PUEDE DESHACER.');">
                                     <button type="submit" class="btn btn-danger w-100">
                                         <i class="fas fa-exclamation-triangle"></i> RESETEAR TODO EL SISTEMA
                                     </button>

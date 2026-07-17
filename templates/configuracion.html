@@ -494,7 +494,7 @@
                                     <form method="POST"
                                         action="{{ url_for('settings.eliminar_sutra', sutra_id=sutra.id) }}"
                                         class="d-inline"
-                                        onsubmit="return confirm('¿Eliminar el sutra {{ sutra.numero }}?')">
+                                        onsubmit="return confirm('¿Eliminar este sutra?')">
                                         <button class="btn btn-sm btn-outline-danger"><i
                                                 class="fas fa-trash"></i></button>
                                     </form>
@@ -532,7 +532,7 @@
                         <form method="POST"
                             action="{{ url_for('settings.eliminar_categoria_gasto', categoria_id=categoria.id) }}"
                             class="d-inline"
-                            onsubmit="return confirm('¿Eliminar la categoría {{ categoria.nombre }}?')">
+                            onsubmit="return confirm('¿Eliminar esta categoría?')">
                             <button class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i></button>
                         </form>
                     </li>
