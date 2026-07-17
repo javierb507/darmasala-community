@@ -86,7 +86,29 @@ def editar_categoria_gasto(categoria_id):
     except Exception as e:
         db.session.rollback()
         flash(f'Error al actualizar categoría: {str(e)}', 'error')
-    
+
+    return redirect(url_for('settings.configuracion'))
+
+@settings_bp.route('/categorias-gasto/<int:categoria_id>/eliminar', methods=['POST'])
+@login_required
+def eliminar_categoria_gasto(categoria_id):
+    """Eliminar categoría de gasto; si tiene movimientos asociados, solo desactivar"""
+    categoria = CategoriaGasto.query.get_or_404(categoria_id)
+    en_uso = (FacturaProveedor.query.filter_by(categoria_id=categoria_id).count()
+              + GastoFijo.query.filter_by(categoria_id=categoria_id).count()) > 0
+    try:
+        if en_uso:
+            categoria.activo = False
+            db.session.commit()
+            flash('Categoría desactivada (tiene facturas o gastos asociados; se conserva el histórico)', 'warning')
+        else:
+            db.session.delete(categoria)
+            db.session.commit()
+            flash('Categoría eliminada exitosamente', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Error al eliminar categoría: {str(e)}', 'error')
+
     return redirect(url_for('settings.configuracion'))
 
 @settings_bp.route('/backup/crear', methods=['POST'])

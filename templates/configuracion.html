@@ -511,7 +511,39 @@
             </div>
         </div>
 
-        <!-- SECCIÓN 6: SISTEMA Y DESARROLLADOR (DISCRETO) -->
+        <!-- SECCIÓN 6: CATEGORÍAS DE GASTO -->
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                <h5 class="mb-0 text-dark"><i class="fas fa-tags text-success me-2"></i> Categorías de gasto</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('settings.nueva_categoria_gasto') }}" class="row g-2 mb-3">
+                    <div class="col-md-4"><input type="text" name="nombre" class="form-control" placeholder="Nombre"
+                            required></div>
+                    <div class="col-md-6"><input type="text" name="descripcion" class="form-control"
+                            placeholder="Descripción (opcional)"></div>
+                    <div class="col-md-2"><button type="submit" class="btn btn-primary w-100">Añadir</button></div>
+                </form>
+                <ul class="list-group">
+                    {% for categoria in categorias %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <span>{{ categoria.nombre }}{% if categoria.descripcion %} <small class="text-muted">—
+                                {{ categoria.descripcion }}</small>{% endif %}</span>
+                        <form method="POST"
+                            action="{{ url_for('settings.eliminar_categoria_gasto', categoria_id=categoria.id) }}"
+                            class="d-inline"
+                            onsubmit="return confirm('¿Eliminar la categoría {{ categoria.nombre }}?')">
+                            <button class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i></button>
+                        </form>
+                    </li>
+                    {% else %}
+                    <li class="list-group-item text-center text-muted py-4">No hay categorías registradas</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+
+        <!-- SECCIÓN 7: SISTEMA Y DESARROLLADOR (DISCRETO) -->
         <div class="mt-5 pt-5 border-top opacity-50">
             <div class="row align-items-center">
                 <div class="col-md-6">
