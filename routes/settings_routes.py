@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, redirect, url_for, flash, request, jsonify, send_file
+from flask import Blueprint, render_template, redirect, url_for, flash, request, jsonify, send_file, current_app
 from datetime import datetime, date
 import os
 import shutil
@@ -645,13 +645,32 @@ def cargar_datos_prueba():
 @settings_bp.route('/resetear-sistema', methods=['POST'])
 @login_required
 def resetear_sistema():
+    """Borra todos los datos transaccionales; conserva catálogos, usuarios y configuración"""
+    from models import (LineaFactura, GastoMensual, ArchivoYogaterapia,
+                        SesionYogaterapia, EventoCalendario, inscripciones_horarios)
     try:
-        # Eliminar en orden para respetar foreign keys
+        # Orden: hijos antes que padres (respeta foreign keys)
         Asistencia.query.delete()
-        # Agregar otros modelos según sea necesario
+        Pago.query.delete()
+        LineaFactura.query.delete()
+        FacturaEmitida.query.delete()
+        Cliente.query.delete()
+        FacturaProveedor.query.delete()
+        GastoMensual.query.delete()
+        ArchivoYogaterapia.query.delete()
+        SesionYogaterapia.query.delete()
+        EventoCalendario.query.delete()
+        db.session.execute(inscripciones_horarios.delete())
+        Alumno.query.delete()
         db.session.commit()
-        flash('Sistema reseteado exitosamente', 'success')
+
+        # Archivos adjuntos de yogaterapia en disco
+        yogaterapia_dir = os.path.join(current_app.config['UPLOAD_FOLDER'], 'yogaterapia')
+        if os.path.isdir(yogaterapia_dir):
+            shutil.rmtree(yogaterapia_dir)
+
+        flash('Sistema reseteado: datos transaccionales eliminados, catálogos y configuración conservados', 'success')
     except Exception as e:
-        flash(f'Error al resetear sistema: {str(e)}', 'error')
         db.session.rollback()
+        flash(f'Error al resetear sistema: {str(e)}', 'error')
     return redirect(url_for('settings.modo_pruebas'))
