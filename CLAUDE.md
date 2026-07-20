@@ -43,7 +43,11 @@ python app.py
 - **Hostinger/shared**: `wsgi.py` exposes `app`. Set `FLASK_ENV=production` and `DATABASE_URL=mysql://...` — `app.py` switches to MySQL only when `FLASK_ENV=production`.
 
 ### Tests
-There is no test suite. `docs/CALENDAR_SYSTEM.md` references a `test_calendar.py` that does not exist in the tree. Verification is manual: run the app and exercise the affected flow.
+```bash
+./venv_mac/bin/python -m pytest tests/ -v        # toda la suite
+./venv_mac/bin/python -m pytest tests/test_pagos.py -v   # un fichero
+```
+La suite usa una BD SQLite temporal (`DATABASE_URL` se fija en `tests/conftest.py` antes de importar `app`); nunca toca `instance/yoga_school.db`. Cobertura actual: pagos, facturación, asistencia por lotes, humo de login. `docs/CALENDAR_SYSTEM.md` references a `test_calendar.py` that does not exist.
 
 ### One-off scripts
 - `python reset_admin.py` — reset admin credentials
