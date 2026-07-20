@@ -34,6 +34,10 @@ app.config['UPLOAD_FOLDER'] = os.path.join(os.path.dirname(os.path.abspath(__fil
 from models import db, Configuracion
 db.init_app(app)
 
+# Migraciones de esquema (migrations/ contiene la baseline)
+from flask_migrate import Migrate
+migrate = Migrate(app, db)
+
 # Edition flag (community | enterprise). Community Edition strips the student portal.
 app.config['DARMASALA_EDITION'] = os.environ.get('DARMASALA_EDITION', 'community')
 
