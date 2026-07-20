@@ -24,8 +24,8 @@ if os.environ.get('FLASK_ENV') == 'production':
     # Para Hostinger con MySQL
     app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'mysql://usuario:password@localhost/nombre_bd')
 else:
-    # Para desarrollo local
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///yoga_school.db'
+    # Para desarrollo local (DATABASE_URL permite BD alternativa: tests, migraciones)
+    app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///yoga_school.db')
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['UPLOAD_FOLDER'] = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'uploads')
