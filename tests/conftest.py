@@ -6,7 +6,11 @@ import tempfile
 import pytest
 
 _db_fd, _db_path = tempfile.mkstemp(suffix='_test.db')
+os.close(_db_fd)
 os.environ['DATABASE_URL'] = f'sqlite:///{_db_path}'
+
+import atexit
+atexit.register(lambda: os.path.exists(_db_path) and os.unlink(_db_path))
 
 from app import app as flask_app          # noqa: E402  (tras fijar DATABASE_URL)
 from models import (db, Usuario, Alumno, Clase, HorarioSemanal,       # noqa: E402

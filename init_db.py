@@ -59,6 +59,11 @@ def init_base_data():
     print("🏗️ Creating database tables...")
     db.create_all()
 
+    # Marcar la BD como al día para Flask-Migrate: create_all ya crea el
+    # esquema completo, sin stamp el primer `flask db upgrade` fallaría
+    from flask_migrate import stamp
+    stamp()
+
     # 1. Categories
     print("📂 Initializing expense categories...")
     categorias = [

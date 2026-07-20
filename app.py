@@ -36,7 +36,8 @@ db.init_app(app)
 
 # Migraciones de esquema (migrations/ contiene la baseline)
 from flask_migrate import Migrate
-migrate = Migrate(app, db)
+# render_as_batch: SQLite no soporta ALTER de columnas/constraints sin batch mode
+migrate = Migrate(app, db, render_as_batch=True)
 
 # Edition flag (community | enterprise). Community Edition strips the student portal.
 app.config['DARMASALA_EDITION'] = os.environ.get('DARMASALA_EDITION', 'community')
