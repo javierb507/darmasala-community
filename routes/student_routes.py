@@ -106,9 +106,9 @@ def ver_alumno(alumno_id):
         if asistencia.presente:
             asistencias_por_mes[mes_key]['presente'] += 1
 
-    # Morosidad: periodos de cuota pendientes del año en curso
+    # Morosidad: periodos de cuota pendientes del año en curso (solo alumnos activos)
     from utils.finance_utils import periodos_pendientes
-    pendientes = periodos_pendientes(alumno)
+    pendientes = periodos_pendientes(alumno) if alumno.activo else []
     deuda = alumno.get_precio_cuota() * len(pendientes)
 
     return render_template('ver_alumno.html',

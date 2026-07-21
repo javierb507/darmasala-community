@@ -71,14 +71,14 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        const etiquetasMeses = [{% for e in etiquetas_meses %}"{{ e }}"{% if not loop.last %}, {% endif %}{% endfor %}];
+        const etiquetasMeses = {{ etiquetas_meses|tojson }};
 
         // 1. Ocupación por horario (bar horizontal, %)
         {% if ocupacion %}
-        const ocupacionLabels = [{% for o in ocupacion %}"{{ o.nombre }}"{% if not loop.last %}, {% endif %}{% endfor %}];
-        const ocupacionPct = [{% for o in ocupacion %}{{ o.pct }}{% if not loop.last %}, {% endif %}{% endfor %}];
-        const ocupacionMedia = [{% for o in ocupacion %}{{ o.media }}{% if not loop.last %}, {% endif %}{% endfor %}];
-        const ocupacionCapacidad = [{% for o in ocupacion %}{{ o.capacidad }}{% if not loop.last %}, {% endif %}{% endfor %}];
+        const ocupacionLabels = {{ ocupacion|map(attribute='nombre')|list|tojson }};
+        const ocupacionPct = {{ ocupacion|map(attribute='pct')|list|tojson }};
+        const ocupacionMedia = {{ ocupacion|map(attribute='media')|list|tojson }};
+        const ocupacionCapacidad = {{ ocupacion|map(attribute='capacidad')|list|tojson }};
 
         new Chart(document.getElementById('ocupacionChart').getContext('2d'), {
             type: 'bar',
@@ -121,8 +121,8 @@
         {% endif %}
 
         // 2. Altas vs bajas (line, 2 datasets)
-        const altas = [{% for v in altas %}{{ v }}{% if not loop.last %}, {% endif %}{% endfor %}];
-        const bajas = [{% for v in bajas %}{{ v }}{% if not loop.last %}, {% endif %}{% endfor %}];
+        const altas = {{ altas|tojson }};
+        const bajas = {{ bajas|tojson }};
 
         new Chart(document.getElementById('altasBajasChart').getContext('2d'), {
             type: 'line',
@@ -170,10 +170,10 @@
         });
 
         // 3. Ingresos por tipo (bar apilada, 4 datasets)
-        const ingresosCuota = [{% for v in ingresos['cuota'] %}{{ v }}{% if not loop.last %}, {% endif %}{% endfor %}];
-        const ingresosMatricula = [{% for v in ingresos['matricula'] %}{{ v }}{% if not loop.last %}, {% endif %}{% endfor %}];
-        const ingresosClaseSuelta = [{% for v in ingresos['clase_suelta'] %}{{ v }}{% if not loop.last %}, {% endif %}{% endfor %}];
-        const ingresosYogaterapia = [{% for v in ingresos['yogaterapia'] %}{{ v }}{% if not loop.last %}, {% endif %}{% endfor %}];
+        const ingresosCuota = {{ ingresos['cuota']|tojson }};
+        const ingresosMatricula = {{ ingresos['matricula']|tojson }};
+        const ingresosClaseSuelta = {{ ingresos['clase_suelta']|tojson }};
+        const ingresosYogaterapia = {{ ingresos['yogaterapia']|tojson }};
 
         new Chart(document.getElementById('ingresosChart').getContext('2d'), {
             type: 'bar',
