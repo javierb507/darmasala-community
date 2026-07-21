@@ -60,3 +60,10 @@ def test_venta_bono_crea_pago_y_bono(app, auth_client):
         assert bono.precio == 80.0
         assert bono.fecha_caducidad == date(2026, 12, 31)
         assert bono.pago_id is not None
+
+
+def test_ficha_muestra_bonos(app, auth_client):
+    aid, _, _ = _bonista(app)
+    r = auth_client.get(f'/alumnos/{aid}')
+    assert r.status_code == 200
+    assert b'Bonos' in r.data

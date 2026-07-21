@@ -1169,7 +1169,7 @@ def informes():
                 bajas_por_mes[ym] += 1
 
     # 3. Ingresos por tipo por mes (últimos 12 meses, por fecha de cobro; incluye yogaterapia)
-    tipos = ['cuota', 'matricula', 'clase_suelta', 'yogaterapia']
+    tipos = ['cuota', 'matricula', 'clase_suelta', 'yogaterapia', 'bono']
     ingresos = {t: {ym: 0.0 for ym in meses} for t in tipos}
     desde_pagos = date(meses[0][0], meses[0][1], 1)
     for p in Pago.query.filter(Pago.fecha_creacion >= desde_pagos).all():

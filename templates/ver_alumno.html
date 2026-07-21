@@ -225,6 +225,41 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Bonos -->
+            {% if bonos %}
+            <div class="card border-0 shadow-sm mt-4">
+                <div class="card-header bg-white py-3 border-0">
+                    <h5 class="mb-0 fw-bold"><i class="fas fa-ticket-alt text-muted me-2"></i> Bonos</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="list-group list-group-flush">
+                        {% for bono in bonos %}
+                        <div class="list-group-item px-4 py-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-0 fw-bold">{{ bono.clases_consumidas }}/{{ bono.clases_totales }}
+                                        clases</h6>
+                                    <small class="text-muted">
+                                        Comprado {{ bono.fecha_compra.strftime('%d/%m/%Y') }}
+                                        {% if bono.fecha_caducidad %}· caduca
+                                        {{ bono.fecha_caducidad.strftime('%d/%m/%Y') }}{% endif %}
+                                    </small>
+                                </div>
+                                {% if bono.esta_vigente(today) %}
+                                <span class="badge rounded-pill bg-success">Vigente</span>
+                                {% elif bono.clases_restantes == 0 %}
+                                <span class="badge rounded-pill bg-secondary">Agotado</span>
+                                {% else %}
+                                <span class="badge rounded-pill bg-warning text-dark">Caducado</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
         </div>
     </div>
 </div>

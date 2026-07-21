@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash,
 import io
 import pandas as pd
 from datetime import datetime, date, timedelta
-from models import db, Alumno, Pago, Asistencia
+from models import db, Alumno, Pago, Asistencia, Bono
 from utils.auth_utils import login_required
 
 student_bp = Blueprint('students', __name__)
@@ -111,9 +111,13 @@ def ver_alumno(alumno_id):
     pendientes = periodos_pendientes(alumno) if alumno.activo else []
     deuda = alumno.get_precio_cuota() * len(pendientes)
 
+    # Bonos del alumno (más recientes primero)
+    bonos = Bono.query.filter_by(alumno_id=alumno.id).order_by(Bono.fecha_compra.desc()).all()
+
     return render_template('ver_alumno.html',
                          alumno=alumno,
                          pagos=pagos,
+                         bonos=bonos,
                          asistencias=asistencias,
                          total_asistencias=total_asistencias,
                          asistencias_presente=asistencias_presente,

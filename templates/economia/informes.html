@@ -169,11 +169,12 @@
             }
         });
 
-        // 3. Ingresos por tipo (bar apilada, 4 datasets)
+        // 3. Ingresos por tipo (bar apilada, 5 datasets)
         const ingresosCuota = {{ ingresos['cuota']|tojson }};
         const ingresosMatricula = {{ ingresos['matricula']|tojson }};
         const ingresosClaseSuelta = {{ ingresos['clase_suelta']|tojson }};
         const ingresosYogaterapia = {{ ingresos['yogaterapia']|tojson }};
+        const ingresosBono = {{ ingresos['bono']|tojson }};
 
         new Chart(document.getElementById('ingresosChart').getContext('2d'), {
             type: 'bar',
@@ -195,6 +196,10 @@
                     label: 'Yogaterapia',
                     data: ingresosYogaterapia,
                     backgroundColor: '#8A8A8A'
+                }, {
+                    label: 'Bonos',
+                    data: ingresosBono,
+                    backgroundColor: '#B99A45'
                 }]
             },
             options: {
