@@ -46,6 +46,57 @@ def calcular_morosidad(hoy=None):
     return morosos
 
 
+def tiene_cuota_mes(alumno, fecha):
+    """True si el alumno tiene pagada la cuota del periodo que contiene `fecha`."""
+    from utils.calendar_utils import CalendarioAcademico
+
+    if alumno.tipo_cuota in TIPOS_SIN_CUOTA:
+        return False
+    cal = CalendarioAcademico(fecha.year)
+    es_bimensual = alumno.tipo_cuota.endswith('_bimensual')
+    periodos = cal.generar_periodos_con_pagos(es_bimensual, alumno.pagos, fecha.year)
+    for p in periodos:
+        if p.contiene_mes(fecha.month):
+            return p.pagado
+    return False
+
+
+def bono_vigente(alumno, fecha):
+    """Bono más antiguo con clases restantes y sin caducar a `fecha` (FIFO)."""
+    from models import Bono
+
+    bonos = (Bono.query.filter_by(alumno_id=alumno.id)
+             .order_by(Bono.fecha_compra, Bono.id).all())
+    for b in bonos:
+        if b.esta_vigente(fecha):
+            return b
+    return None
+
+
+def sincronizar_consumo_bono(asistencia):
+    """Consume o devuelve una clase de bono según el estado de la asistencia.
+
+    Idempotente: `asistencia.bono_id` marca si esta asistencia ya consumió.
+    Llamar SIEMPRE tras fijar `presente`, dentro de la misma transacción
+    (antes del commit). No consume si el alumno tiene cuota del mes.
+    """
+    from models import db, Bono
+
+    if asistencia.presente and asistencia.bono_id is None:
+        alumno = asistencia.alumno
+        if tiene_cuota_mes(alumno, asistencia.fecha_clase):
+            return
+        bono = bono_vigente(alumno, asistencia.fecha_clase)
+        if bono:
+            bono.clases_consumidas += 1
+            asistencia.bono_id = bono.id
+    elif not asistencia.presente and asistencia.bono_id is not None:
+        bono = db.session.get(Bono, asistencia.bono_id)
+        if bono and bono.clases_consumidas > 0:
+            bono.clases_consumidas -= 1
+        asistencia.bono_id = None
+
+
 def exportar_facturas_excel(facturas):
     """Exportar facturas a Excel"""
     try:
