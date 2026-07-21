@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+
+{% block title %}Morosidad - DarmaSala{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2><i class="fas fa-exclamation-circle"></i> Morosidad</h2>
+            <a href="{{ url_for('finance.economia') }}" class="btn btn-outline-primary">
+                <i class="fas fa-chart-line"></i> Economía
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Resumen -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card bg-danger text-white">
+            <div class="card-body text-center">
+                <i class="fas fa-user-clock fa-2x mb-2"></i>
+                <h3>{{ morosos|length }}</h3>
+                <p class="mb-0">Alumnos con cuotas pendientes</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-warning text-dark">
+            <div class="card-body text-center">
+                <i class="fas fa-euro-sign fa-2x mb-2"></i>
+                <h3>{{ "%.0f"|format(total_deuda) }}€</h3>
+                <p class="mb-0">Deuda total estimada</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Listado -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-danger text-white">
+                <h5 class="mb-0"><i class="fas fa-list"></i> Cuotas pendientes del año en curso</h5>
+            </div>
+            <div class="card-body">
+                {% if morosos %}
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead>
+                            <tr>
+                                <th>Alumno</th>
+                                <th>Tipo de Cuota</th>
+                                <th>Periodos Pendientes</th>
+                                <th class="text-end">Deuda</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for m in morosos %}
+                            <tr>
+                                <td>
+                                    <a href="{{ url_for('students.ver_alumno', alumno_id=m.alumno.id) }}">
+                                        {{ m.alumno.nombre }} {{ m.alumno.apellido }}
+                                    </a>
+                                </td>
+                                <td>{{ m.alumno.get_tipo_cuota_display() }}</td>
+                                <td>
+                                    {% for periodo in m.periodos %}
+                                    <span class="badge bg-danger me-1">{{ periodo.nombre_corto }}</span>
+                                    {% endfor %}
+                                </td>
+                                <td class="text-end"><strong>{{ "%.2f"|format(m.deuda) }}€</strong></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="alert alert-success mb-0">
+                    <i class="fas fa-thumbs-up"></i>
+                    <strong>Sin morosidad 🎉</strong> Todos los alumnos están al día con sus cuotas.
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

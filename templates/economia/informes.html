@@ -1,0 +1,229 @@
+{% extends "base.html" %}
+
+{% block title %}Informes - DarmaSala{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2><i class="fas fa-chart-bar"></i> Informes</h2>
+            <a href="{{ url_for('finance.economia') }}" class="btn btn-outline-primary">
+                <i class="fas fa-chart-line"></i> Economía
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Ocupación por horario -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-users"></i> Ocupación por horario (últimas 4 semanas)</h5>
+            </div>
+            <div class="card-body">
+                {% if ocupacion %}
+                <div style="position: relative; height: {{ [ocupacion|length * 40 + 60, 200]|max }}px;">
+                    <canvas id="ocupacionChart"></canvas>
+                </div>
+                {% else %}
+                <p class="text-muted small mb-0">Sin asistencias registradas en las últimas 4 semanas</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Altas vs bajas -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-user-plus"></i> Altas y bajas de alumnos (últimos 12 meses)</h5>
+            </div>
+            <div class="card-body">
+                <div style="position: relative; height: 300px;">
+                    <canvas id="altasBajasChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Ingresos por tipo -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-euro-sign"></i> Ingresos por tipo (últimos 12 meses)</h5>
+            </div>
+            <div class="card-body">
+                <div style="position: relative; height: 300px;">
+                    <canvas id="ingresosChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const etiquetasMeses = {{ etiquetas_meses|tojson }};
+
+        // 1. Ocupación por horario (bar horizontal, %)
+        {% if ocupacion %}
+        const ocupacionLabels = {{ ocupacion|map(attribute='nombre')|list|tojson }};
+        const ocupacionPct = {{ ocupacion|map(attribute='pct')|list|tojson }};
+        const ocupacionMedia = {{ ocupacion|map(attribute='media')|list|tojson }};
+        const ocupacionCapacidad = {{ ocupacion|map(attribute='capacidad')|list|tojson }};
+
+        new Chart(document.getElementById('ocupacionChart').getContext('2d'), {
+            type: 'bar',
+            data: {
+                labels: ocupacionLabels,
+                datasets: [{
+                    label: 'Ocupación (%)',
+                    data: ocupacionPct,
+                    backgroundColor: '#6B8E7E',
+                    borderColor: '#1E3A2F',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: function (ctx) {
+                                const i = ctx.dataIndex;
+                                return ctx.parsed.x + '% (media ' + ocupacionMedia[i] + ' de ' + ocupacionCapacidad[i] + ' plazas)';
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        max: 100,
+                        ticks: { callback: function (v) { return v + '%'; } },
+                        grid: { color: 'rgba(0,0,0,0.05)', drawBorder: false }
+                    },
+                    y: { grid: { display: false } }
+                }
+            }
+        });
+        {% endif %}
+
+        // 2. Altas vs bajas (line, 2 datasets)
+        const altas = {{ altas|tojson }};
+        const bajas = {{ bajas|tojson }};
+
+        new Chart(document.getElementById('altasBajasChart').getContext('2d'), {
+            type: 'line',
+            data: {
+                labels: etiquetasMeses,
+                datasets: [{
+                    label: 'Altas',
+                    data: altas,
+                    borderColor: '#6B8E7E',
+                    backgroundColor: 'rgba(107, 142, 126, 0.1)',
+                    borderWidth: 3,
+                    tension: 0.4,
+                    fill: true,
+                    pointBackgroundColor: '#6B8E7E',
+                    pointRadius: 4,
+                    pointHoverRadius: 6
+                }, {
+                    label: 'Bajas',
+                    data: bajas,
+                    borderColor: '#1E3A2F',
+                    backgroundColor: 'rgba(30, 58, 47, 0.1)',
+                    borderWidth: 3,
+                    tension: 0.4,
+                    fill: true,
+                    pointBackgroundColor: '#1E3A2F',
+                    pointRadius: 4,
+                    pointHoverRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'bottom' }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: { stepSize: 1, precision: 0 },
+                        grid: { color: 'rgba(0,0,0,0.05)', drawBorder: false }
+                    },
+                    x: { grid: { display: false } }
+                }
+            }
+        });
+
+        // 3. Ingresos por tipo (bar apilada, 4 datasets)
+        const ingresosCuota = {{ ingresos['cuota']|tojson }};
+        const ingresosMatricula = {{ ingresos['matricula']|tojson }};
+        const ingresosClaseSuelta = {{ ingresos['clase_suelta']|tojson }};
+        const ingresosYogaterapia = {{ ingresos['yogaterapia']|tojson }};
+
+        new Chart(document.getElementById('ingresosChart').getContext('2d'), {
+            type: 'bar',
+            data: {
+                labels: etiquetasMeses,
+                datasets: [{
+                    label: 'Cuota',
+                    data: ingresosCuota,
+                    backgroundColor: '#1E3A2F'
+                }, {
+                    label: 'Matrícula',
+                    data: ingresosMatricula,
+                    backgroundColor: '#6B8E7E'
+                }, {
+                    label: 'Clase suelta',
+                    data: ingresosClaseSuelta,
+                    backgroundColor: '#D4C9B3'
+                }, {
+                    label: 'Yogaterapia',
+                    data: ingresosYogaterapia,
+                    backgroundColor: '#8A8A8A'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'bottom' },
+                    tooltip: {
+                        callbacks: {
+                            label: function (ctx) {
+                                return ctx.dataset.label + ': ' + ctx.parsed.y.toFixed(2) + '€';
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        stacked: true,
+                        beginAtZero: true,
+                        ticks: { callback: function (v) { return v + '€'; } },
+                        grid: { color: 'rgba(0,0,0,0.05)', drawBorder: false }
+                    },
+                    x: {
+                        stacked: true,
+                        grid: { display: false }
+                    }
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}

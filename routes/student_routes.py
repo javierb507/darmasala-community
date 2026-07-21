@@ -106,6 +106,11 @@ def ver_alumno(alumno_id):
         if asistencia.presente:
             asistencias_por_mes[mes_key]['presente'] += 1
 
+    # Morosidad: periodos de cuota pendientes del año en curso (solo alumnos activos)
+    from utils.finance_utils import periodos_pendientes
+    pendientes = periodos_pendientes(alumno) if alumno.activo else []
+    deuda = alumno.get_precio_cuota() * len(pendientes)
+
     return render_template('ver_alumno.html',
                          alumno=alumno,
                          pagos=pagos,
@@ -114,7 +119,9 @@ def ver_alumno(alumno_id):
                          asistencias_presente=asistencias_presente,
                          asistencias_ausente=asistencias_ausente,
                          porcentaje_asistencia=porcentaje_asistencia,
-                         asistencias_por_mes=asistencias_por_mes)
+                         asistencias_por_mes=asistencias_por_mes,
+                         pendientes=pendientes,
+                         deuda=deuda)
 
 @student_bp.route('/alumnos/<int:alumno_id>/editar', methods=['GET', 'POST'])
 @login_required
@@ -132,8 +139,13 @@ def editar_alumno(alumno_id):
             alumno.direccion = request.form.get('direccion')
             alumno.condiciones_medicas = request.form.get('condiciones_medicas')
             alumno.tipo_cuota = request.form.get('tipo_cuota', '1_clase_semanal')
-            alumno.activo = 'activo' in request.form
-            
+            nuevo_activo = 'activo' in request.form
+            if not nuevo_activo and alumno.fecha_baja is None:
+                alumno.fecha_baja = date.today()
+            elif nuevo_activo:
+                alumno.fecha_baja = None
+            alumno.activo = nuevo_activo
+
             db.session.commit()
 
             flash('¡Alumno actualizado!', 'success')
@@ -150,12 +162,14 @@ def eliminar_alumno(alumno_id):
     alumno = Alumno.query.get_or_404(alumno_id)
     if request.method == 'POST':
         alumno.activo = False
+        alumno.fecha_baja = date.today()
         db.session.commit()
         flash('¡Alumno desactivado!', 'success')
         return redirect(url_for('students.alumnos'))
     else:
         if request.args.get('confirm') == '1':
             alumno.activo = False
+            alumno.fecha_baja = date.today()
             db.session.commit()
             flash('¡Alumno desactivado exitosamente!', 'success')
             return redirect(url_for('students.alumnos'))
@@ -170,6 +184,7 @@ def reactivar_alumno(alumno_id):
     try:
         alumno = Alumno.query.get_or_404(alumno_id)
         alumno.activo = True
+        alumno.fecha_baja = None
         db.session.commit()
         return jsonify({'success': True, 'message': 'Alumno reactivado'})
     except Exception as e:

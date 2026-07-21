@@ -47,7 +47,7 @@ python app.py
 ./venv_mac/bin/python -m pytest tests/ -v        # toda la suite
 ./venv_mac/bin/python -m pytest tests/test_pagos.py -v   # un fichero
 ```
-La suite usa una BD SQLite temporal (`DATABASE_URL` se fija en `tests/conftest.py` antes de importar `app`); nunca toca `instance/yoga_school.db`. Cobertura actual: pagos, facturación, asistencia por lotes, humo de login. `docs/CALENDAR_SYSTEM.md` references a `test_calendar.py` that does not exist.
+La suite usa una BD SQLite temporal (`DATABASE_URL` se fija en `tests/conftest.py` antes de importar `app`); nunca toca `instance/yoga_school.db`. Cobertura actual: pagos, facturación, asistencia por lotes, morosidad, bajas, informes, humo de login. `docs/CALENDAR_SYSTEM.md` references a `test_calendar.py` that does not exist.
 
 ### One-off scripts
 - `python reset_admin.py` — reset admin credentials
