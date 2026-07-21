@@ -44,3 +44,19 @@ def test_lote_flip_devuelve(app, auth_client):
     auth_client.post('/api/asistencias/registrar-lote', json=payload)
     with app.app_context():
         assert db.session.get(Bono, bid).clases_consumidas == 0
+
+
+def test_venta_bono_crea_pago_y_bono(app, auth_client):
+    with app.app_context():
+        aid = Alumno.query.first().id
+    r = auth_client.post(f'/alumnos/{aid}/pago', data={
+        'tipo_pago': 'bono', 'monto': '80', 'bono_clases': '10',
+        'bono_caducidad': '2026-12-31', 'metodo_pago': 'efectivo'})
+    assert r.status_code == 302
+    with app.app_context():
+        bono = Bono.query.filter_by(alumno_id=aid).order_by(Bono.id.desc()).first()
+        assert bono is not None
+        assert bono.clases_totales == 10
+        assert bono.precio == 80.0
+        assert bono.fecha_caducidad == date(2026, 12, 31)
+        assert bono.pago_id is not None

@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify, send_file
 from datetime import datetime, date, timedelta
-from models import db, Alumno, Pago, Cliente, FacturaEmitida, LineaFactura, ConfiguracionFiscal, GastoMensual, FacturaProveedor, GastoFijo, CategoriaGasto, Tarifa, Proveedor, HorarioSemanal, Asistencia
+from models import db, Alumno, Pago, Bono, Cliente, FacturaEmitida, LineaFactura, ConfiguracionFiscal, GastoMensual, FacturaProveedor, GastoFijo, CategoriaGasto, Tarifa, Proveedor, HorarioSemanal, Asistencia
 from utils.auth_utils import login_required
 from utils.finance_utils import exportar_datos_tax_excel
 
@@ -136,7 +136,13 @@ def agregar_pago(alumno_id):
                 if pago_existente:
                     flash(f'⚠️ Ya existe un pago de clase suelta para el {fecha_clase.strftime("%d/%m/%Y")}. Si necesitas modificarlo, edita el pago existente.', 'warning')
                     return redirect(url_for('students.ver_alumno', alumno_id=alumno_id))
-            
+
+            elif tipo_pago == 'bono':
+                clases_totales = int(request.form.get('bono_clases', 10))
+                caducidad_str = request.form.get('bono_caducidad', '')
+                fecha_caducidad = (datetime.strptime(caducidad_str, '%Y-%m-%d').date()
+                                   if caducidad_str else None)
+
             # Crear descripción según el tipo de pago
             if tipo_pago == 'matricula':
                 # Calcular formato de año académico
@@ -148,7 +154,8 @@ def agregar_pago(alumno_id):
             descripciones = {
                 'cuota': f'Cuota mensual - {alumno.get_tipo_cuota_display()}',
                 'matricula': matricula_desc if tipo_pago == 'matricula' else f'Matrícula {año}',
-                'clase_suelta': f'Clase suelta - {fecha_clase.strftime("%d/%m/%Y") if fecha_clase else ""}'
+                'clase_suelta': f'Clase suelta - {fecha_clase.strftime("%d/%m/%Y") if fecha_clase else ""}',
+                'bono': f'Bono de {clases_totales} clases' if tipo_pago == 'bono' else 'Bono de clases'
             }
             
             pago = Pago(
@@ -162,7 +169,15 @@ def agregar_pago(alumno_id):
                 metodo_pago=metodo_pago
             )
             db.session.add(pago)
-            
+
+            # Si es bono, crear el Bono vinculado al pago
+            if tipo_pago == 'bono':
+                db.session.flush()
+                bono = Bono(alumno_id=alumno_id, pago_id=pago.id,
+                            clases_totales=clases_totales,
+                            fecha_caducidad=fecha_caducidad, precio=monto)
+                db.session.add(bono)
+
             # Si es matrícula, marcar al alumno como que pagó la matrícula
             if tipo_pago == 'matricula':
                 alumno.matricula_pagada = True
