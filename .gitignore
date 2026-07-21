@@ -236,7 +236,7 @@ development.db
 
 # Specific to this project
 verificar_bd.py
-test_*.py
+/test_*.py
 debug_*.py
 temp_*.py
 

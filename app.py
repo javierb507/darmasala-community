@@ -24,8 +24,8 @@ if os.environ.get('FLASK_ENV') == 'production':
     # Para Hostinger con MySQL
     app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'mysql://usuario:password@localhost/nombre_bd')
 else:
-    # Para desarrollo local
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///yoga_school.db'
+    # Para desarrollo local (DATABASE_URL permite BD alternativa: tests, migraciones)
+    app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///yoga_school.db')
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['UPLOAD_FOLDER'] = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'uploads')
@@ -33,6 +33,11 @@ app.config['UPLOAD_FOLDER'] = os.path.join(os.path.dirname(os.path.abspath(__fil
 # Initialize database
 from models import db, Configuracion
 db.init_app(app)
+
+# Migraciones de esquema (migrations/ contiene la baseline)
+from flask_migrate import Migrate
+# render_as_batch: SQLite no soporta ALTER de columnas/constraints sin batch mode
+migrate = Migrate(app, db, render_as_batch=True)
 
 # Edition flag (community | enterprise). Community Edition strips the student portal.
 app.config['DARMASALA_EDITION'] = os.environ.get('DARMASALA_EDITION', 'community')

@@ -43,7 +43,11 @@ python app.py
 - **Hostinger/shared**: `wsgi.py` exposes `app`. Set `FLASK_ENV=production` and `DATABASE_URL=mysql://...` — `app.py` switches to MySQL only when `FLASK_ENV=production`.
 
 ### Tests
-There is no test suite. `docs/CALENDAR_SYSTEM.md` references a `test_calendar.py` that does not exist in the tree. Verification is manual: run the app and exercise the affected flow.
+```bash
+./venv_mac/bin/python -m pytest tests/ -v        # toda la suite
+./venv_mac/bin/python -m pytest tests/test_pagos.py -v   # un fichero
+```
+La suite usa una BD SQLite temporal (`DATABASE_URL` se fija en `tests/conftest.py` antes de importar `app`); nunca toca `instance/yoga_school.db`. Cobertura actual: pagos, facturación, asistencia por lotes, humo de login. `docs/CALENDAR_SYSTEM.md` references a `test_calendar.py` that does not exist.
 
 ### One-off scripts
 - `python reset_admin.py` — reset admin credentials
@@ -104,4 +108,4 @@ Two design docs exist and **disagree** — treat `docs/CORE_DESIGN.md` ("Deep Pu
 - **DB sessions**: Routes commit via `db.session.commit()` directly and `rollback()` on exception — no service layer. Follow the same pattern in new routes.
 - **First-run gate**: Any new top-level route should be reachable without an authenticated user only if it's `/setup`, `/login`, or `/static/...` — the onboarding redirect in `app.py` runs before every request.
 - **Docs live in `docs/`**: `documentation/` is legacy (old Windows deploy guide + `legacy/` archive) — put new docs in `docs/`.
-- **No migrations framework wired up**: `Flask-Migrate` is in `requirements.txt` but there's no `migrations/` directory. Schema changes today rely on `db.create_all()` (additive) + ad-hoc scripts in `scripts/` (e.g. `migrate_clase_online.py`). For destructive schema changes, write a one-off script and document it.
+- **Migrations**: Flask-Migrate is wired in `app.py` (`migrations/` holds the baseline). New schema change = `flask db migrate -m "..."` + review + `flask db upgrade`. `init_db.py` creates the schema via `db.create_all()` and stamps the DB automatically; only installs that predate migrations must run `FLASK_APP=app.py flask db stamp head` once by hand.

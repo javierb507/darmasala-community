@@ -10,3 +10,6 @@ Werkzeug==3.0.3
 cryptography==43.0.1
 pymysql==1.1.1
 waitress==3.0.0
+
+# Testing
+pytest==9.0.2
