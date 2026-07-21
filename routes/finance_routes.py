@@ -1097,3 +1097,13 @@ def configuracion_fiscal():
 
     return render_template('economia/configuracion_fiscal.html', config=config)
 
+
+@finance_bp.route('/morosidad')
+@login_required
+def morosidad():
+    """Listado de alumnos con cuotas pendientes del año en curso"""
+    from utils.finance_utils import calcular_morosidad
+    morosos = calcular_morosidad()
+    total_deuda = sum(m['deuda'] for m in morosos)
+    return render_template('economia/morosidad.html',
+                           morosos=morosos, total_deuda=total_deuda)

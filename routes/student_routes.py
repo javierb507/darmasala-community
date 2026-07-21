@@ -106,6 +106,11 @@ def ver_alumno(alumno_id):
         if asistencia.presente:
             asistencias_por_mes[mes_key]['presente'] += 1
 
+    # Morosidad: periodos de cuota pendientes del año en curso
+    from utils.finance_utils import periodos_pendientes
+    pendientes = periodos_pendientes(alumno)
+    deuda = alumno.get_precio_cuota() * len(pendientes)
+
     return render_template('ver_alumno.html',
                          alumno=alumno,
                          pagos=pagos,
@@ -114,7 +119,9 @@ def ver_alumno(alumno_id):
                          asistencias_presente=asistencias_presente,
                          asistencias_ausente=asistencias_ausente,
                          porcentaje_asistencia=porcentaje_asistencia,
-                         asistencias_por_mes=asistencias_por_mes)
+                         asistencias_por_mes=asistencias_por_mes,
+                         pendientes=pendientes,
+                         deuda=deuda)
 
 @student_bp.route('/alumnos/<int:alumno_id>/editar', methods=['GET', 'POST'])
 @login_required

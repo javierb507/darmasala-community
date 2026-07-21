@@ -58,3 +58,9 @@ def test_calcular_morosidad_agrega_deuda(app):
         moroso = next(m for m in morosos if m['alumno'].nombre == 'Moroso')
         assert len(moroso['periodos']) == 4
         assert moroso['deuda'] == pytest.approx(4 * moroso['alumno'].get_precio_cuota())
+
+def test_pagina_morosidad(app, auth_client):
+    _alta(app, '1_clase_semanal', date(2026, 1, 10))
+    r = auth_client.get('/morosidad')
+    assert r.status_code == 200
+    assert 'Moroso'.encode() in r.data
