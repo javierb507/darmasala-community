@@ -132,8 +132,13 @@ def editar_alumno(alumno_id):
             alumno.direccion = request.form.get('direccion')
             alumno.condiciones_medicas = request.form.get('condiciones_medicas')
             alumno.tipo_cuota = request.form.get('tipo_cuota', '1_clase_semanal')
-            alumno.activo = 'activo' in request.form
-            
+            nuevo_activo = 'activo' in request.form
+            if not nuevo_activo and alumno.fecha_baja is None:
+                alumno.fecha_baja = date.today()
+            elif nuevo_activo:
+                alumno.fecha_baja = None
+            alumno.activo = nuevo_activo
+
             db.session.commit()
 
             flash('¡Alumno actualizado!', 'success')
@@ -150,12 +155,14 @@ def eliminar_alumno(alumno_id):
     alumno = Alumno.query.get_or_404(alumno_id)
     if request.method == 'POST':
         alumno.activo = False
+        alumno.fecha_baja = date.today()
         db.session.commit()
         flash('¡Alumno desactivado!', 'success')
         return redirect(url_for('students.alumnos'))
     else:
         if request.args.get('confirm') == '1':
             alumno.activo = False
+            alumno.fecha_baja = date.today()
             db.session.commit()
             flash('¡Alumno desactivado exitosamente!', 'success')
             return redirect(url_for('students.alumnos'))
@@ -170,6 +177,7 @@ def reactivar_alumno(alumno_id):
     try:
         alumno = Alumno.query.get_or_404(alumno_id)
         alumno.activo = True
+        alumno.fecha_baja = None
         db.session.commit()
         return jsonify({'success': True, 'message': 'Alumno reactivado'})
     except Exception as e:

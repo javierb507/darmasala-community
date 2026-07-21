@@ -59,6 +59,7 @@ class Alumno(db.Model):
     matricula_pagada = db.Column(db.Boolean, default=False)
     fecha_matricula = db.Column(db.Date)
     fecha_registro = db.Column(db.DateTime, default=datetime.utcnow)
+    fecha_baja = db.Column(db.Date, nullable=True)
     activo = db.Column(db.Boolean, default=True)
 
     # Relaciones
