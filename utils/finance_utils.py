@@ -3,6 +3,49 @@ import os
 from flask import flash, redirect, url_for, make_response
 from models import Pago
 
+# Tipos de cuota sin pago mensual/bimensual recurrente (excluidos de morosidad)
+TIPOS_SIN_CUOTA = ('clase_suelta', 'yogaterapia_individual', 'yogaterapia_pareja')
+
+
+def periodos_pendientes(alumno, hoy=None):
+    """Periodos de cuota del año en curso sin pago, desde el alta del alumno.
+
+    Bimensuales usan los bimestres naturales de CalendarioAcademico. Solo
+    considera el año natural de `hoy` (limitación del motor de periodos).
+    """
+    from utils.calendar_utils import CalendarioAcademico
+
+    hoy = hoy or date.today()
+    if alumno.tipo_cuota in TIPOS_SIN_CUOTA:
+        return []
+
+    alta = alumno.fecha_registro.date() if hasattr(alumno.fecha_registro, 'date') else alumno.fecha_registro
+    if alta and alta.year > hoy.year:
+        return []
+    mes_alta = alta.month if (alta and alta.year == hoy.year) else 1
+
+    cal = CalendarioAcademico(hoy.year)
+    es_bimensual = alumno.tipo_cuota.endswith('_bimensual')
+    periodos = cal.generar_periodos_con_pagos(es_bimensual, alumno.pagos, hoy.year)
+    return [p for p in periodos
+            if not p.pagado and p.mes_fin >= mes_alta and p.mes_inicio <= hoy.month]
+
+
+def calcular_morosidad(hoy=None):
+    """Deuda de cuotas por alumno activo, ordenada de mayor a menor."""
+    from models import Alumno
+
+    morosos = []
+    for alumno in Alumno.query.filter_by(activo=True).all():
+        pendientes = periodos_pendientes(alumno, hoy)
+        if pendientes:
+            precio = alumno.get_precio_cuota()
+            morosos.append({'alumno': alumno, 'periodos': pendientes,
+                            'deuda': precio * len(pendientes)})
+    morosos.sort(key=lambda m: m['deuda'], reverse=True)
+    return morosos
+
+
 def exportar_facturas_excel(facturas):
     """Exportar facturas a Excel"""
     try:
