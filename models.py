@@ -135,6 +135,33 @@ class Pago(db.Model):
     def __repr__(self):
         return f'<Pago {self.mes} - {self.monto}>'
 
+# Modelo de Bono de clases
+class Bono(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    alumno_id = db.Column(db.Integer, db.ForeignKey('alumno.id'), nullable=False)
+    pago_id = db.Column(db.Integer, db.ForeignKey('pago.id'), nullable=True)
+    clases_totales = db.Column(db.Integer, nullable=False)
+    clases_consumidas = db.Column(db.Integer, nullable=False, default=0)
+    fecha_compra = db.Column(db.Date, nullable=False, default=date.today)
+    fecha_caducidad = db.Column(db.Date, nullable=True)
+    precio = db.Column(db.Float, nullable=False, default=0.0)
+
+    alumno = db.relationship('Alumno', backref='bonos')
+
+    def __repr__(self):
+        return f'<Bono {self.alumno_id}: {self.clases_consumidas}/{self.clases_totales}>'
+
+    @property
+    def clases_restantes(self):
+        return max(0, self.clases_totales - self.clases_consumidas)
+
+    def esta_vigente(self, fecha=None):
+        """Vigente si quedan clases y no ha caducado a la fecha dada."""
+        fecha = fecha or date.today()
+        if self.clases_restantes <= 0:
+            return False
+        return self.fecha_caducidad is None or fecha <= self.fecha_caducidad
+
 # Modelo de Clase
 class Clase(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -223,6 +250,7 @@ class Asistencia(db.Model):
     alumno_id = db.Column(db.Integer, db.ForeignKey('alumno.id'), nullable=False)
     horario_id = db.Column(db.Integer, db.ForeignKey('horario_semanal.id'), nullable=True)  # Nullable para clases individuales
     evento_id = db.Column(db.Integer, db.ForeignKey('evento_calendario.id'), nullable=True)  # Para eventos individuales
+    bono_id = db.Column(db.Integer, db.ForeignKey('bono.id'), nullable=True)  # Bono consumido por esta asistencia
     fecha_clase = db.Column(db.Date, nullable=False)
     presente = db.Column(db.Boolean, default=True)
     observaciones = db.Column(db.Text)
