@@ -4,6 +4,7 @@ from models import db, Clase, HorarioSemanal, Asistencia, EventoCalendario, Sesi
 from utils.auth_utils import login_required
 from utils.app_utils import obtener_sutra_semanal, obtener_proximas_citas
 from utils.calendar_utils import CalendarioAcademico
+from utils.finance_utils import sincronizar_consumo_bono
 
 class_bp = Blueprint('classes', __name__)
 
@@ -133,6 +134,7 @@ def registrar_asistencia():
                 # Actualizar asistencia existente
                 asistencia_existente.presente = presente
                 asistencia_existente.observaciones = observaciones
+                sincronizar_consumo_bono(asistencia_existente)
             else:
                 # Crear nueva asistencia
                 asistencia = Asistencia(
@@ -143,7 +145,9 @@ def registrar_asistencia():
                     observaciones=observaciones
                 )
                 db.session.add(asistencia)
-            
+                db.session.flush()
+                sincronizar_consumo_bono(asistencia)
+
             db.session.commit()
             flash('¡Asistencia registrada exitosamente!', 'success')
             return redirect(url_for('classes.calendario_unificado'))
@@ -805,6 +809,8 @@ def agregar_alumno_evento_api():
                 presente=True # Por defecto al inscribirse desde esta vista se marca como presente/confirmado
             )
             db.session.add(asistencia)
+            db.session.flush()
+            sincronizar_consumo_bono(asistencia)
             db.session.commit()
             
         return jsonify({'success': True, 'message': 'Inscripción realizada con éxito'})
@@ -922,6 +928,7 @@ def api_registrar_asistencias_lote():
             if asistencia:
                 asistencia.presente = asistio
                 asistencia.observaciones = observaciones
+                sincronizar_consumo_bono(asistencia)
             else:
                 asistencia = Asistencia(
                     alumno_id=alumno_id,
@@ -931,6 +938,8 @@ def api_registrar_asistencias_lote():
                     observaciones=observaciones
                 )
                 db.session.add(asistencia)
+                db.session.flush()
+                sincronizar_consumo_bono(asistencia)
                 
         db.session.commit()
         return jsonify({'success': True})
