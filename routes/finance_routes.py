@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify, send_file
 from datetime import datetime, date, timedelta
-from models import db, Alumno, Pago, Cliente, FacturaEmitida, LineaFactura, ConfiguracionFiscal, GastoMensual, FacturaProveedor, GastoFijo, CategoriaGasto, Tarifa, Proveedor
+from models import db, Alumno, Pago, Cliente, FacturaEmitida, LineaFactura, ConfiguracionFiscal, GastoMensual, FacturaProveedor, GastoFijo, CategoriaGasto, Tarifa, Proveedor, HorarioSemanal, Asistencia
 from utils.auth_utils import login_required
 from utils.finance_utils import exportar_datos_tax_excel
 
@@ -1107,3 +1107,65 @@ def morosidad():
     total_deuda = sum(m['deuda'] for m in morosos)
     return render_template('economia/morosidad.html',
                            morosos=morosos, total_deuda=total_deuda)
+
+
+@finance_bp.route('/informes')
+@login_required
+def informes():
+    """Informes: ocupación por horario, altas/bajas, ingresos por tipo"""
+    hoy = date.today()
+
+    # 1. Ocupación por horario (últimas 4 semanas): media de presentes por sesión vs capacidad
+    desde = hoy - timedelta(weeks=4)
+    ocupacion = []
+    for h in HorarioSemanal.query.filter_by(activo=True).all():
+        asistencias = Asistencia.query.filter(
+            Asistencia.horario_id == h.id,
+            Asistencia.fecha_clase >= desde,
+            Asistencia.presente == True).all()  # noqa: E712
+        fechas = {a.fecha_clase for a in asistencias}
+        if not fechas:
+            continue
+        media = len(asistencias) / len(fechas)
+        capacidad = h.capacidad_maxima or 15
+        ocupacion.append({
+            'nombre': f"{h.clase.nombre} {['L','M','X','J','V','S','D'][h.dia_semana]} {h.hora_inicio.strftime('%H:%M')}",
+            'media': round(media, 1), 'capacidad': capacidad,
+            'pct': round(100 * media / capacidad)})
+    ocupacion.sort(key=lambda o: o['pct'], reverse=True)
+
+    # 2. Altas y bajas por mes (últimos 12 meses)
+    meses = []
+    for i in range(11, -1, -1):
+        y, m = hoy.year, hoy.month - i
+        while m <= 0:
+            y, m = y - 1, m + 12
+        meses.append((y, m))
+    altas_por_mes = {ym: 0 for ym in meses}
+    bajas_por_mes = {ym: 0 for ym in meses}
+    for a in Alumno.query.all():
+        if a.fecha_registro:
+            ym = (a.fecha_registro.year, a.fecha_registro.month)
+            if ym in altas_por_mes:
+                altas_por_mes[ym] += 1
+        if a.fecha_baja:
+            ym = (a.fecha_baja.year, a.fecha_baja.month)
+            if ym in bajas_por_mes:
+                bajas_por_mes[ym] += 1
+
+    # 3. Ingresos por tipo por mes (últimos 12 meses, por fecha de cobro; incluye yogaterapia)
+    tipos = ['cuota', 'matricula', 'clase_suelta', 'yogaterapia']
+    ingresos = {t: {ym: 0.0 for ym in meses} for t in tipos}
+    desde_pagos = date(meses[0][0], meses[0][1], 1)
+    for p in Pago.query.filter(Pago.fecha_creacion >= desde_pagos).all():
+        ym = (p.fecha_creacion.year, p.fecha_creacion.month)
+        if ym in altas_por_mes and p.tipo_pago in ingresos:
+            ingresos[p.tipo_pago][ym] += p.monto or 0
+
+    etiquetas_meses = [f"{m:02d}/{y % 100}" for (y, m) in meses]
+    return render_template('economia/informes.html',
+                           ocupacion=ocupacion,
+                           etiquetas_meses=etiquetas_meses,
+                           altas=[altas_por_mes[ym] for ym in meses],
+                           bajas=[bajas_por_mes[ym] for ym in meses],
+                           ingresos={t: [ingresos[t][ym] for ym in meses] for t in tipos})
