@@ -23,3 +23,20 @@ jobs:
         run: pip install -r requirements.txt
       - name: Run test suite
         run: python -m pytest tests/ -v
+
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build image
+        run: docker build -t darmasala:ci .
+      - name: Smoke test container
+        run: |
+          docker run -d --name darmasala -p 5001:5001 -e INIT_DB_ARGS=--test darmasala:ci
+          for i in $(seq 1 30); do
+            if curl -fs http://localhost:5001/login > /dev/null; then
+              echo "App responde"; exit 0
+            fi
+            sleep 2
+          done
+          echo "La app no respondió a tiempo"; docker logs darmasala; exit 1

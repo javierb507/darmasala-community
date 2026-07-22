@@ -1,0 +1,17 @@
+services:
+  darmasala:
+    build: .
+    ports:
+      - "5001:5001"
+    volumes:
+      - ./data/instance:/app/instance
+      - ./data/uploads:/app/uploads
+    environment:
+      # Genera una clave propia: python -c "import secrets; print(secrets.token_hex(32))"
+      - SECRET_KEY=${SECRET_KEY:-}
+      # Descomenta para cargar datos de demostración en el primer arranque:
+      # - INIT_DB_ARGS=--test
+      # Para MySQL en lugar de SQLite:
+      # - FLASK_ENV=production
+      # - DATABASE_URL=mysql://usuario:password@host/base_de_datos
+    restart: unless-stopped
