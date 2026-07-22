@@ -83,7 +83,7 @@ DarmaSala is a self-hosted management system for yoga schools — built for the 
 
 ### Quick Start
 
-**Requirements:** Python 3.10+ (3.14 not supported)
+**Requirements:** Python 3.10 – 3.14
 
 ```bash
 git clone https://github.com/javierb507/darmasala-community.git
@@ -146,7 +146,7 @@ DarmaSala es un sistema de gestión autoalojado para escuelas de yoga — diseñ
 
 ### Instalación rápida
 
-**Requisitos:** Python 3.10+ (3.14 no compatible)
+**Requisitos:** Python 3.10 – 3.14
 
 ```bash
 git clone https://github.com/javierb507/darmasala-community.git

@@ -20,7 +20,7 @@ When working on this repo, **do not reintroduce portal endpoints** (`/portal/*`)
 
 ### Setup & run
 ```bash
-# Install (Python 3.10+ required; experimental 3.14 known-broken for numpy)
+# Install (Python 3.10-3.14 supported)
 python -m venv venv && source venv/bin/activate     # Linux/Mac
 .\venv\Scripts\activate                              # Windows
 pip install -r requirements.txt
