@@ -1,8 +1,8 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify, Response
+from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify, Response, send_file
 import io
 import pandas as pd
 from datetime import datetime, date, timedelta
-from models import db, Alumno, Pago, Asistencia, Bono
+from models import db, Alumno, Pago, Asistencia, Bono, Configuracion
 from utils.auth_utils import login_required
 
 student_bp = Blueprint('students', __name__)
@@ -81,12 +81,21 @@ def nuevo_alumno():
 @login_required
 def ver_alumno(alumno_id):
     alumno = Alumno.query.get_or_404(alumno_id)
-    pagos = Pago.query.filter_by(alumno_id=alumno_id).order_by(Pago.mes.desc()).all()
+    datos = _datos_ficha(alumno)
+
+    return render_template('ver_alumno.html',
+                         alumno=alumno,
+                         **datos)
+
+
+def _datos_ficha(alumno):
+    """Datos calculados de la ficha del alumno (compartidos por la vista y el PDF)."""
+    pagos = Pago.query.filter_by(alumno_id=alumno.id).order_by(Pago.mes.desc()).all()
 
     # Obtener asistencias del alumno (últimos 90 días)
     fecha_inicio = date.today() - timedelta(days=90)
     asistencias = Asistencia.query.filter(
-        Asistencia.alumno_id == alumno_id,
+        Asistencia.alumno_id == alumno.id,
         Asistencia.fecha_clase >= fecha_inicio
     ).order_by(Asistencia.fecha_clase.desc()).all()
 
@@ -114,18 +123,43 @@ def ver_alumno(alumno_id):
     # Bonos del alumno (más recientes primero)
     bonos = Bono.query.filter_by(alumno_id=alumno.id).order_by(Bono.fecha_compra.desc()).all()
 
-    return render_template('ver_alumno.html',
-                         alumno=alumno,
-                         pagos=pagos,
-                         bonos=bonos,
-                         asistencias=asistencias,
-                         total_asistencias=total_asistencias,
-                         asistencias_presente=asistencias_presente,
-                         asistencias_ausente=asistencias_ausente,
-                         porcentaje_asistencia=porcentaje_asistencia,
-                         asistencias_por_mes=asistencias_por_mes,
-                         pendientes=pendientes,
-                         deuda=deuda)
+    return {
+        'pagos': pagos,
+        'bonos': bonos,
+        'asistencias': asistencias,
+        'total_asistencias': total_asistencias,
+        'asistencias_presente': asistencias_presente,
+        'asistencias_ausente': asistencias_ausente,
+        'porcentaje_asistencia': porcentaje_asistencia,
+        'asistencias_por_mes': asistencias_por_mes,
+        'pendientes': pendientes,
+        'deuda': deuda,
+    }
+
+
+@student_bp.route('/alumnos/<int:alumno_id>/pdf')
+@login_required
+def descargar_ficha_pdf(alumno_id):
+    """Generar y descargar PDF con la ficha completa del alumno"""
+    try:
+        alumno = Alumno.query.get_or_404(alumno_id)
+        datos = _datos_ficha(alumno)
+
+        config_nombre = Configuracion.query.filter_by(clave='nombre_escuela').first()
+        datos['nombre_escuela'] = config_nombre.valor if config_nombre else 'DarmaSala'
+
+        from utils.pdf_generator import generar_pdf_ficha_alumno
+        pdf_buffer = generar_pdf_ficha_alumno(alumno, datos)
+
+        return send_file(
+            pdf_buffer,
+            mimetype='application/pdf',
+            as_attachment=True,
+            download_name=f'Ficha_{alumno.nombre}_{alumno.apellido}.pdf'
+        )
+    except Exception as e:
+        flash(f'Error al generar PDF: {str(e)}', 'error')
+        return redirect(url_for('students.ver_alumno', alumno_id=alumno_id))
 
 @student_bp.route('/alumnos/<int:alumno_id>/editar', methods=['GET', 'POST'])
 @login_required
