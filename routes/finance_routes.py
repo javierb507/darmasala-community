@@ -138,7 +138,7 @@ def agregar_pago(alumno_id):
                     return redirect(url_for('students.ver_alumno', alumno_id=alumno_id))
 
             elif tipo_pago == 'bono':
-                clases_totales = int(request.form.get('bono_clases', 10))
+                clases_totales = max(1, int(request.form.get('bono_clases', 10)))
                 caducidad_str = request.form.get('bono_caducidad', '')
                 fecha_caducidad = (datetime.strptime(caducidad_str, '%Y-%m-%d').date()
                                    if caducidad_str else None)
@@ -293,9 +293,15 @@ def eliminar_pago(pago_id):
                 alumno.matricula_pagada = False
                 alumno.fecha_matricula = None
         
+        # Si el pago vendió un bono, desvincularlo (el bono y su historial de
+        # consumo se conservan; solo se separa del registro de pago)
+        if pago.tipo_pago == 'bono':
+            for bono in Bono.query.filter_by(pago_id=pago.id).all():
+                bono.pago_id = None
+
         db.session.delete(pago)
         db.session.commit()
-        
+
         return jsonify({'success': True, 'message': 'Pago eliminado exitosamente'})
     except Exception as e:
         db.session.rollback()

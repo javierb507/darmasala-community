@@ -47,7 +47,7 @@ python app.py
 ./venv_mac/bin/python -m pytest tests/ -v        # toda la suite
 ./venv_mac/bin/python -m pytest tests/test_pagos.py -v   # un fichero
 ```
-La suite usa una BD SQLite temporal (`DATABASE_URL` se fija en `tests/conftest.py` antes de importar `app`); nunca toca `instance/yoga_school.db`. Cobertura actual: pagos, facturación, asistencia por lotes, morosidad, bajas, informes, humo de login. `docs/CALENDAR_SYSTEM.md` references a `test_calendar.py` that does not exist.
+La suite usa una BD SQLite temporal (`DATABASE_URL` se fija en `tests/conftest.py` antes de importar `app`); nunca toca `instance/yoga_school.db`. Cobertura actual: pagos, facturación, asistencia por lotes, morosidad, bajas, informes, bonos, humo de login. `docs/CALENDAR_SYSTEM.md` references a `test_calendar.py` that does not exist.
 
 ### One-off scripts
 - `python reset_admin.py` — reset admin credentials
@@ -77,7 +77,8 @@ All ~30+ SQLAlchemy models live in a **single file** `models.py` (~37KB). Key en
 - `Pago` — monthly payments; `mes` stored as `YYYY-MM` string, `tipo_pago` ∈ {`cuota`, `matricula`, `clase_suelta`, ...}
 - `Clase` / `TipoClase` / `Tarifa` — class definitions and pricing
 - `HorarioSemanal` + `inscripciones_horarios` (M2M) — weekly recurring schedule
-- `Asistencia` — attendance per `(alumno, horario, fecha_clase)`
+- `Asistencia` — attendance per `(alumno, horario, fecha_clase)`; `bono_id` links a consumed class to its `Bono`
+- `Bono` — class packs (N clases, caducidad); sold via `Pago` `tipo_pago='bono'`, consumed automatically on attendance when the student has no cuota for that month (`utils/finance_utils.sincronizar_consumo_bono`)
 - `Cliente` / `FacturaEmitida` / `LineaFactura` / `ConfiguracionFiscal` — Spanish invoicing (issued)
 - `Proveedor` / `FacturaProveedor` / `CategoriaGasto` / `GastoMensual` / `GastoFijo` — expense side
 - `SesionYogaterapia` — individual therapy session records (separate from group attendance)

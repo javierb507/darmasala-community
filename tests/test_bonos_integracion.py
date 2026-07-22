@@ -67,3 +67,28 @@ def test_ficha_muestra_bonos(app, auth_client):
     r = auth_client.get(f'/alumnos/{aid}')
     assert r.status_code == 200
     assert b'Bonos' in r.data
+
+
+def test_eliminar_pago_bono_desvincula(app, auth_client):
+    with app.app_context():
+        aid = Alumno.query.first().id
+    auth_client.post(f'/alumnos/{aid}/pago', data={
+        'tipo_pago': 'bono', 'monto': '80', 'bono_clases': '5', 'metodo_pago': 'efectivo'})
+    with app.app_context():
+        bono = Bono.query.filter_by(alumno_id=aid).order_by(Bono.id.desc()).first()
+        bid, pid = bono.id, bono.pago_id
+        assert pid is not None
+    r = auth_client.post(f'/pagos/{pid}/eliminar')
+    assert r.get_json()['success'] is True
+    with app.app_context():
+        b = db.session.get(Bono, bid)
+        assert b is not None          # el bono sobrevive
+        assert b.pago_id is None      # desvinculado del pago borrado
+
+
+def test_reset_elimina_bonos(app, auth_client):
+    _bonista(app)
+    auth_client.post('/resetear-sistema')
+    with app.app_context():
+        assert Bono.query.count() == 0
+        assert Alumno.query.count() == 0
