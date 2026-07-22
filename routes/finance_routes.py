@@ -3,6 +3,7 @@ from datetime import datetime, date, timedelta
 from models import db, Alumno, Pago, Bono, Cliente, FacturaEmitida, LineaFactura, ConfiguracionFiscal, GastoMensual, FacturaProveedor, GastoFijo, CategoriaGasto, Tarifa, Proveedor, HorarioSemanal, Asistencia
 from utils.auth_utils import login_required
 from utils.finance_utils import exportar_datos_tax_excel
+from utils.email_utils import enviar_email, componer_recordatorio, smtp_configurado
 
 finance_bp = Blueprint('finance', __name__)
 
@@ -1127,7 +1128,29 @@ def morosidad():
     morosos = calcular_morosidad()
     total_deuda = sum(m['deuda'] for m in morosos)
     return render_template('economia/morosidad.html',
-                           morosos=morosos, total_deuda=total_deuda)
+                           morosos=morosos, total_deuda=total_deuda,
+                           smtp_ok=smtp_configurado())
+
+
+@finance_bp.route('/morosidad/<int:alumno_id>/recordatorio', methods=['POST'])
+@login_required
+def enviar_recordatorio(alumno_id):
+    """Envía por email el recordatorio de impago a un alumno"""
+    from utils.finance_utils import periodos_pendientes
+    alumno = Alumno.query.get_or_404(alumno_id)
+    if not alumno.activo:
+        flash('El alumno está dado de baja; no se envían recordatorios', 'info')
+        return redirect(url_for('finance.morosidad'))
+    if not periodos_pendientes(alumno):
+        flash('El alumno no tiene pagos pendientes', 'info')
+        return redirect(url_for('finance.morosidad'))
+    asunto, html = componer_recordatorio(alumno)
+    ok, error = enviar_email(alumno.email, asunto, html)
+    if ok:
+        flash(f'Recordatorio enviado a {alumno.email}', 'success')
+    else:
+        flash(f'No se pudo enviar el recordatorio: {error}', 'error')
+    return redirect(url_for('finance.morosidad'))
 
 
 @finance_bp.route('/informes')

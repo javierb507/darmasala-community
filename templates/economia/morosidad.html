@@ -53,6 +53,7 @@
                                 <th>Tipo de Cuota</th>
                                 <th>Periodos Pendientes</th>
                                 <th class="text-end">Deuda</th>
+                                <th class="text-end">Acciones</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -70,6 +71,16 @@
                                     {% endfor %}
                                 </td>
                                 <td class="text-end"><strong>{{ "%.2f"|format(m.deuda) }}€</strong></td>
+                                <td class="text-end">
+                                    <form method="POST" class="d-inline"
+                                          action="{{ url_for('finance.enviar_recordatorio', alumno_id=m.alumno.id) }}"
+                                          onsubmit="return confirm('¿Enviar recordatorio por email?');">
+                                        <button type="submit" class="btn btn-sm btn-outline-primary"
+                                                {% if not smtp_ok %}disabled title="Configura SMTP en Configuración"{% endif %}>
+                                            <i class="fas fa-envelope"></i> Recordatorio
+                                        </button>
+                                    </form>
+                                </td>
                             </tr>
                             {% endfor %}
                         </tbody>

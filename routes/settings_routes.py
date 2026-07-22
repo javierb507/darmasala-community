@@ -39,15 +39,17 @@ def configuracion():
         # Ordenar por fecha descendente
         backups.sort(key=lambda x: x['fecha'], reverse=True)
 
-    return render_template('configuracion.html', 
-                          config=config_dict, 
-                          clases=clases, 
-                          tarifas=tarifas, 
+    from utils.email_utils import smtp_configurado
+    return render_template('configuracion.html',
+                          config=config_dict,
+                          clases=clases,
+                          tarifas=tarifas,
                           instructores=instructores,
                           horarios=horarios,
-                          categorias=categorias, 
-                          sutras=sutras, 
-                          backups=backups)
+                          categorias=categorias,
+                          sutras=sutras,
+                          backups=backups,
+                          smtp_ok=smtp_configurado())
 
 @settings_bp.route('/categorias-gasto/nueva', methods=['POST'])
 @login_required
@@ -607,6 +609,57 @@ def descargar_db():
     except Exception as e:
         flash(f'Error al descargar base de datos: {str(e)}', 'error')
         return redirect(url_for('settings.configuracion'))
+
+@settings_bp.route('/configuracion/smtp/guardar', methods=['POST'])
+@login_required
+def guardar_smtp():
+    claves = ['smtp_host', 'smtp_port', 'smtp_user', 'smtp_from', 'smtp_use_tls']
+    for clave in claves:
+        valor = request.form.get(clave, '').strip()
+        cfg = Configuracion.query.filter_by(clave=clave).first()
+        if cfg:
+            cfg.valor = valor
+        else:
+            db.session.add(Configuracion(clave=clave, valor=valor))
+    db.session.commit()
+    flash('Configuración SMTP guardada. Recuerda definir SMTP_PASS en el servidor.', 'success')
+    return redirect(url_for('settings.configuracion') + '#smtp')
+
+
+@settings_bp.route('/configuracion/recordatorio/guardar', methods=['POST'])
+@login_required
+def guardar_textos_recordatorio():
+    claves = ['recordatorio_asunto', 'recordatorio_plantilla']
+    for clave in claves:
+        valor = request.form.get(clave, '').strip()
+        cfg = Configuracion.query.filter_by(clave=clave).first()
+        if cfg:
+            cfg.valor = valor
+        else:
+            db.session.add(Configuracion(clave=clave, valor=valor))
+    db.session.commit()
+    flash('Textos del recordatorio de impago guardados.', 'success')
+    return redirect(url_for('settings.configuracion') + '#recordatorio')
+
+
+@settings_bp.route('/configuracion/smtp/test', methods=['POST'])
+@login_required
+def test_smtp():
+    from utils.email_utils import enviar_email
+    from flask import session as fsession
+    destinatario = request.form.get('test_email', '').strip()
+    if not destinatario:
+        return jsonify(ok=False, error='Indica un email de destino')
+    ok, err = enviar_email(
+        destinatario=destinatario,
+        asunto='Test SMTP — DarmaSala',
+        cuerpo_html='<p>Si recibes esto, el SMTP está correctamente configurado en DarmaSala.</p>',
+        cuerpo_texto='Si recibes esto, el SMTP está correctamente configurado en DarmaSala.',
+    )
+    if ok:
+        return jsonify(ok=True, msg=f'Email enviado a {destinatario}')
+    return jsonify(ok=False, error=err)
+
 
 @settings_bp.route('/modo-pruebas')
 @login_required
