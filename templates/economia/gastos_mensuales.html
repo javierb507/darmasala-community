@@ -96,7 +96,6 @@
                                 </td>
                                 <td>
                                     {% if not gasto.pagado %}
-                                    {% if not gasto.pagado %}
                                     <button class="btn btn-sm btn-success btn-marcar-pagado" data-id="{{ gasto.id }}">
                                         <i class="fas fa-check"></i>
                                     </button>
@@ -138,7 +137,7 @@
                     <div class="mb-3">
                         <label for="fecha" class="form-label">Fecha</label>
                         <input type="date" class="form-control" id="fecha" name="fecha"
-                            value="{{ date.today().isoformat() }}" required>
+                            value="{{ today.isoformat() }}" required>
                     </div>
 
                     <div class="mb-3">
