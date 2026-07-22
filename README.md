@@ -9,6 +9,7 @@
 </p>
 
 <p align="center">
+  <a href="https://github.com/javierb507/darmasala-community/actions/workflows/tests.yml"><img src="https://github.com/javierb507/darmasala-community/actions/workflows/tests.yml/badge.svg" alt="Tests"></a>
   <a href="https://github.com/javierb507/darmasala-community/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-AGPL--3.0-green" alt="License"></a>
   <img src="https://img.shields.io/badge/python-3.10%2B-blue" alt="Python">
   <img src="https://img.shields.io/badge/flask-3.x-lightgrey" alt="Flask">
