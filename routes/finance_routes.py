@@ -358,8 +358,21 @@ def economia_historico():
         Pago.fecha_creacion >= fecha_inicio,
         Pago.fecha_creacion <= fecha_fin
     ).scalar() or 0
-    
-    total_ingresos = ingresos_cuotas + ingresos_matriculas + ingresos_clases_sueltas
+
+    ingresos_yogaterapia = db.session.query(db.func.sum(Pago.monto)).filter(
+        Pago.tipo_pago == 'yogaterapia',
+        Pago.fecha_creacion >= fecha_inicio,
+        Pago.fecha_creacion <= fecha_fin
+    ).scalar() or 0
+
+    ingresos_bonos = db.session.query(db.func.sum(Pago.monto)).filter(
+        Pago.tipo_pago == 'bono',
+        Pago.fecha_creacion >= fecha_inicio,
+        Pago.fecha_creacion <= fecha_fin
+    ).scalar() or 0
+
+    total_ingresos = (ingresos_cuotas + ingresos_matriculas + ingresos_clases_sueltas
+                      + ingresos_yogaterapia + ingresos_bonos)
     
     # Calcular gastos del período
     total_gastos = db.session.query(db.func.sum(GastoMensual.importe)).filter(
@@ -378,7 +391,8 @@ def economia_historico():
         'cuotas': ingresos_cuotas,
         'matriculas': ingresos_matriculas,
         'clases_sueltas': ingresos_clases_sueltas,
-        'yogaterapia': 0
+        'yogaterapia': ingresos_yogaterapia,
+        'bonos': ingresos_bonos
     }
     
     # Desglose de gastos

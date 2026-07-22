@@ -33,3 +33,18 @@ def test_informes_ocupacion(app, auth_client):
     r = auth_client.get('/informes')
     assert r.status_code == 200
     assert b'Yoga Test' in r.data  # el horario seed aparece en ocupación
+
+
+def test_economia_historico_incluye_yogaterapia_y_bonos(app, auth_client):
+    from datetime import datetime as _dt
+    with app.app_context():
+        alumno = Alumno.query.first()
+        db.session.add(Pago(alumno_id=alumno.id, tipo_pago='yogaterapia', monto=61.07,
+                            fecha_creacion=_dt.now()))
+        db.session.add(Pago(alumno_id=alumno.id, tipo_pago='bono', monto=87.03,
+                            fecha_creacion=_dt.now()))
+        db.session.commit()
+    r = auth_client.get('/economia/historico')
+    assert r.status_code == 200
+    assert b'61.07' in r.data
+    assert b'87.03' in r.data
