@@ -19,6 +19,7 @@
                             <option value="cuota">Cuota mensual ({{ alumno.get_tipo_cuota_display() }} - €{{ "%.2f"|format(alumno.get_precio_cuota()) }})</option>
                             <option value="matricula">Matrícula {{ matricula_year }} (€25.00)</option>
                             <option value="clase_suelta">Clase suelta (€15.00)</option>
+                            <option value="bono">Bono de clases</option>
                         </select>
                     </div>
                     
@@ -41,7 +42,18 @@
                         <label for="fecha_clase" class="form-label">Fecha de la Clase *</label>
                         <input type="date" class="form-control" id="fecha_clase" name="fecha_clase">
                     </div>
-                    
+
+                    <div id="bono-fields" style="display: none;">
+                        <div class="mb-3">
+                            <label for="bono_clases" class="form-label">Número de clases *</label>
+                            <input type="number" class="form-control" id="bono_clases" name="bono_clases" value="10" min="1">
+                        </div>
+                        <div class="mb-3">
+                            <label for="bono_caducidad" class="form-label">Caducidad (opcional)</label>
+                            <input type="date" class="form-control" id="bono_caducidad" name="bono_caducidad">
+                        </div>
+                    </div>
+
                     <div class="mb-3">
                         <label for="monto" class="form-label">Monto *</label>
                         <div class="input-group">
@@ -94,25 +106,36 @@ document.addEventListener('DOMContentLoaded', function() {
     
     function actualizarMonto() {
         const tipoSeleccionado = tipoPagoSelect.value;
+        if (tipoSeleccionado === 'bono') {
+            // Para bonos el monto es libre: editable y sin precio fijo
+            montoInput.readOnly = false;
+            montoInput.value = '';
+            return;
+        }
+        montoInput.readOnly = true;
         const precio = precios[tipoSeleccionado];
         montoInput.value = precio.toFixed(2);
     }
-    
+
     function actualizarCampos() {
         const tipoSeleccionado = tipoPagoSelect.value;
         const fechaClaseField = document.getElementById('fecha-clase-field');
         const fechaClaseInput = document.getElementById('fecha_clase');
-        
+        const bonoFields = document.getElementById('bono-fields');
+        const bonoClasesInput = document.getElementById('bono_clases');
+
         // Ocultar todos los campos primero
         mesField.style.display = 'none';
         añoField.style.display = 'none';
         fechaClaseField.style.display = 'none';
-        
+        bonoFields.style.display = 'none';
+
         // Resetear required
         mesInput.required = false;
         añoInput.required = false;
         fechaClaseInput.required = false;
-        
+        bonoClasesInput.required = false;
+
         // Mostrar el campo apropiado
         if (tipoSeleccionado === 'matricula') {
             añoField.style.display = 'block';
@@ -120,6 +143,9 @@ document.addEventListener('DOMContentLoaded', function() {
         } else if (tipoSeleccionado === 'clase_suelta') {
             fechaClaseField.style.display = 'block';
             fechaClaseInput.required = true;
+        } else if (tipoSeleccionado === 'bono') {
+            bonoFields.style.display = 'block';
+            bonoClasesInput.required = true;
         } else {
             mesField.style.display = 'block';
             mesInput.required = true;

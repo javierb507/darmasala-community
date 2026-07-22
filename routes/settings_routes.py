@@ -651,6 +651,9 @@ def resetear_sistema():
     try:
         # Orden: hijos antes que padres (respeta foreign keys)
         Asistencia.query.delete()
+        # Bono referencia a Pago y Alumno: borrar tras Asistencia (bono_id) y antes que ellos
+        from models import Bono
+        Bono.query.delete()
         Pago.query.delete()
         LineaFactura.query.delete()
         # Rectificativas primero: FacturaEmitida tiene self-FK factura_origen_id
