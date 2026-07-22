@@ -3,10 +3,35 @@ from datetime import datetime, date
 import os
 import shutil
 import json
+import zipfile
 from models import db, CategoriaGasto, Sutra, Configuracion, Tarifa, Instructor, Clase, HorarioSemanal, Alumno, Pago, Asistencia, FacturaEmitida, FacturaProveedor, Cliente, Proveedor, GastoFijo
 from utils.auth_utils import login_required, admin_required
 
 settings_bp = Blueprint('settings', __name__)
+
+
+# --- Helpers de backups (issue #38) ---
+
+def _backup_dir():
+    """Directorio de backups (configurable en tests vía BACKUP_DIR)."""
+    return current_app.config.get('BACKUP_DIR') or os.path.join(current_app.root_path, 'backups')
+
+
+def _sqlite_db_path():
+    """Ruta real del fichero SQLite en uso, o None si el motor no es SQLite."""
+    url = db.engine.url
+    if url.drivername != 'sqlite' or not url.database:
+        return None
+    return url.database
+
+
+def _alembic_head():
+    """Revisión alembic de la BD actual (None si no hay tabla alembic_version)."""
+    try:
+        return db.session.execute(db.text('SELECT version_num FROM alembic_version')).scalar()
+    except Exception:
+        db.session.rollback()
+        return None
 
 @settings_bp.route('/configuracion')
 @login_required
@@ -25,12 +50,13 @@ def configuracion():
     instructores = Instructor.query.all()
     horarios = HorarioSemanal.query.all()
     
-    # Backups (lógica simplificada)
+    # Backups (ZIP nuevos + .db antiguos)
     backups = []
-    if os.path.exists('backups'):
-        for f in os.listdir('backups'):
-            if f.endswith('.db'):
-                stats = os.stat(os.path.join('backups', f))
+    backup_dir = _backup_dir()
+    if os.path.exists(backup_dir):
+        for f in os.listdir(backup_dir):
+            if f.endswith(('.db', '.zip')):
+                stats = os.stat(os.path.join(backup_dir, f))
                 backups.append({
                     'nombre': f,
                     'fecha': datetime.fromtimestamp(stats.st_mtime).strftime('%Y-%m-%d %H:%M:%S'),
@@ -116,24 +142,44 @@ def eliminar_categoria_gasto(categoria_id):
 @settings_bp.route('/backup/crear', methods=['POST'])
 @login_required
 def crear_backup():
-    """Crear backup de la base de datos"""
+    """Crear backup completo en ZIP: BD + uploads/ + meta.json"""
     try:
-        backup_dir = 'backups'
-        os.makedirs(backup_dir, exist_ok=True)
-        
-        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-        db_path = 'yoga_escuela.db'
-        backup_path = os.path.join(backup_dir, f'backup_{timestamp}.db')
-        
-        if os.path.exists(db_path):
-            shutil.copy2(db_path, backup_path)
-            flash(f'Backup creado exitosamente: {os.path.basename(backup_path)}', 'success')
-        else:
+        db_path = _sqlite_db_path()
+        if not db_path:
+            flash('Backups integrados solo para SQLite; en MySQL usa mysqldump (ver docs/BACKUPS.md)', 'warning')
+            return redirect(url_for('settings.configuracion'))
+        if not os.path.exists(db_path):
             flash('Error: No se encontró el archivo de base de datos', 'error')
-            
+            return redirect(url_for('settings.configuracion'))
+
+        backup_dir = _backup_dir()
+        os.makedirs(backup_dir, exist_ok=True)
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        backup_path = os.path.join(backup_dir, f'backup_darmasala_{timestamp}.zip')
+
+        from utils.app_utils import get_version_info
+        meta = {
+            'fecha': datetime.now().isoformat(),
+            'alembic': _alembic_head(),
+            'version': get_version_info().get('version'),
+        }
+
+        with zipfile.ZipFile(backup_path, 'w', zipfile.ZIP_DEFLATED) as z:
+            z.write(db_path, 'yoga_school.db')
+            uploads_dir = current_app.config.get('UPLOAD_FOLDER')
+            if uploads_dir and os.path.isdir(uploads_dir):
+                for root, _, files in os.walk(uploads_dir):
+                    for fn in files:
+                        full = os.path.join(root, fn)
+                        rel = os.path.relpath(full, uploads_dir)
+                        z.write(full, os.path.join('uploads', rel))
+            z.writestr('meta.json', json.dumps(meta, ensure_ascii=False, indent=2))
+
+        flash(f'Backup creado exitosamente: {os.path.basename(backup_path)}', 'success')
+
     except Exception as e:
         flash(f'Error al crear backup: {str(e)}', 'error')
-        
+
     return redirect(url_for('settings.configuracion'))
 
 @settings_bp.route('/backup/restaurar', methods=['POST'])
@@ -149,27 +195,64 @@ def restaurar_backup():
         if file.filename == '':
             flash('No se seleccionó ningún archivo', 'error')
             return redirect(url_for('settings.configuracion'))
-        
-        if file and file.filename.endswith('.db'):
-            # Crear backup del archivo actual antes de restaurar
-            timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-            backup_actual = f'yoga_school_backup_before_restore_{timestamp}.db'
-            db_path = 'yoga_escuela.db'
-            
-            if os.path.exists(db_path):
-                backup_dir = 'backups'
-                os.makedirs(backup_dir, exist_ok=True)
-                shutil.copy2(db_path, os.path.join(backup_dir, backup_actual))
-            
-            # Restaurar el archivo subido
-            file.save(db_path)
-            flash('Backup restaurado exitosamente. Se creó un backup del estado anterior.', 'success')
+
+        if not file.filename.endswith(('.db', '.zip')):
+            flash('Formato de archivo no válido. Solo se permiten archivos .db o .zip', 'error')
+            return redirect(url_for('settings.configuracion'))
+
+        db_path = _sqlite_db_path()
+        if not db_path:
+            flash('Backups integrados solo para SQLite; en MySQL usa mysqldump (ver docs/BACKUPS.md)', 'warning')
+            return redirect(url_for('settings.configuracion'))
+
+        es_zip = file.filename.endswith('.zip')
+        zf = None
+        if es_zip:
+            # Validar el ZIP ANTES de tocar nada
+            import io
+            zf = zipfile.ZipFile(io.BytesIO(file.read()))
+            if 'yoga_school.db' not in zf.namelist():
+                flash('El ZIP no es un backup válido: no contiene yoga_school.db', 'error')
+                return redirect(url_for('settings.configuracion'))
+
+        # Copia de seguridad automática del estado actual antes de restaurar
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        backup_actual = f'yoga_school_backup_before_restore_{timestamp}.db'
+        if os.path.exists(db_path):
+            backup_dir = _backup_dir()
+            os.makedirs(backup_dir, exist_ok=True)
+            shutil.copy2(db_path, os.path.join(backup_dir, backup_actual))
+
+        # Cerrar conexiones antes de sobrescribir el fichero SQLite
+        db.session.remove()
+        db.engine.dispose()
+
+        if es_zip:
+            with zf.open('yoga_school.db') as src, open(db_path, 'wb') as dst:
+                shutil.copyfileobj(src, dst)
+            # Restaurar adjuntos (uploads/)
+            uploads_dir = current_app.config.get('UPLOAD_FOLDER')
+            if uploads_dir:
+                for name in zf.namelist():
+                    if not name.startswith('uploads/') or name.endswith('/'):
+                        continue
+                    rel = os.path.normpath(name[len('uploads/'):])
+                    if rel.startswith('..') or os.path.isabs(rel):
+                        continue  # protección contra path traversal
+                    dest = os.path.join(uploads_dir, rel)
+                    os.makedirs(os.path.dirname(dest), exist_ok=True)
+                    with zf.open(name) as src, open(dest, 'wb') as dst:
+                        shutil.copyfileobj(src, dst)
+            zf.close()
         else:
-            flash('Formato de archivo no válido. Solo se permiten archivos .db', 'error')
-            
+            # Formato antiguo: fichero .db suelto
+            file.save(db_path)
+
+        flash('Backup restaurado exitosamente. Se creó un backup del estado anterior.', 'success')
+
     except Exception as e:
         flash(f'Error al restaurar backup: {str(e)}', 'error')
-    
+
     return redirect(url_for('settings.configuracion'))
 
 @settings_bp.route('/backup/eliminar/<nombre>', methods=['POST'])
@@ -177,15 +260,32 @@ def restaurar_backup():
 def eliminar_backup(nombre):
     """Eliminar un archivo de backup"""
     try:
-        backup_path = os.path.join('backups', nombre)
-        if os.path.exists(backup_path) and nombre.endswith('.db'):
+        backup_path = os.path.join(_backup_dir(), nombre)
+        if (nombre == os.path.basename(nombre) and nombre.endswith(('.db', '.zip'))
+                and os.path.exists(backup_path)):
             os.remove(backup_path)
             flash('Backup eliminado correctamente', 'success')
         else:
             flash('Error: No se pudo encontrar el archivo', 'error')
     except Exception as e:
         flash(f'Error al eliminar backup: {str(e)}', 'error')
-        
+
+    return redirect(url_for('settings.configuracion'))
+
+
+@settings_bp.route('/backup/descargar/<nombre>')
+@login_required
+def descargar_backup(nombre):
+    """Descargar un archivo de backup concreto"""
+    try:
+        backup_path = os.path.join(_backup_dir(), nombre)
+        if (nombre == os.path.basename(nombre) and nombre.endswith(('.db', '.zip'))
+                and os.path.exists(backup_path)):
+            return send_file(backup_path, as_attachment=True)
+        flash('Error: No se pudo encontrar el archivo', 'error')
+    except Exception as e:
+        flash(f'Error al descargar backup: {str(e)}', 'error')
+
     return redirect(url_for('settings.configuracion'))
 
 @settings_bp.route('/exportar-datos/<tipo>')
@@ -600,9 +700,9 @@ def editar_clase_config(clase_id):
 @login_required
 def descargar_db():
     try:
-        db_path = 'yoga_escuela.db'
-        if os.path.exists(db_path):
-            return send_file(db_path, as_attachment=True)
+        db_path = _sqlite_db_path()
+        if db_path and os.path.exists(db_path):
+            return send_file(db_path, as_attachment=True, download_name='yoga_school.db')
         else:
             flash('Error: Archivo de base de datos no encontrado', 'error')
             return redirect(url_for('settings.configuracion'))
