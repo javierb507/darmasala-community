@@ -138,6 +138,12 @@
                         <small class="text-muted">Yogaterapia</small>
                     </div>
                 </div>
+                <div class="row text-center mt-2">
+                    <div class="col-6">
+                        <strong>{{ "%.0f"|format(ingresos_detalle.bonos) }}€</strong><br>
+                        <small class="text-muted">Bonos</small>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -244,6 +250,8 @@
                                 "%.2f"|format(ingresos_detalle.clases_sueltas) }}€</li>
                             <li><i class="fas fa-circle text-warning"></i> Yogaterapia: {{
                                 "%.2f"|format(ingresos_detalle.yogaterapia) }}€</li>
+                            <li><i class="fas fa-circle text-secondary"></i> Bonos: {{
+                                "%.2f"|format(ingresos_detalle.bonos) }}€</li>
                         </ul>
                     </div>
                     <div class="col-md-6">
