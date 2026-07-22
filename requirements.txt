@@ -13,3 +13,9 @@ waitress==3.0.0
 
 # Testing
 pytest==9.0.2
+
+# HTTP client (bug reporter → GitHub Issues)
+requests==2.32.3
+
+# Producción Linux (systemd/Nginx, ver docs/deployment-ubuntu.md)
+gunicorn==23.0.0
