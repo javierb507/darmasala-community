@@ -543,7 +543,111 @@
             </div>
         </div>
 
-        <!-- SECCIÓN 7: SISTEMA Y DESARROLLADOR (DISCRETO) -->
+        <!-- SECCIÓN 7: SMTP / CORREO -->
+        <div class="card shadow-sm border-0 mb-4" id="smtp">
+            <div class="card-header bg-white py-3">
+                <h5 class="mb-0 text-primary"><i class="fas fa-envelope me-2"></i> Correo electrónico (SMTP)</h5>
+            </div>
+            <div class="card-body">
+                <p class="text-muted small mb-3">
+                    Configura el servidor de correo para el envío de recordatorios y notificaciones.
+                    La contraseña <strong>no</strong> se guarda aquí — defínela como variable de entorno
+                    <code>SMTP_PASS</code> en el servidor.
+                    {% if not smtp_ok %}
+                    <span class="badge bg-warning text-dark ms-2"><i class="fas fa-exclamation-triangle me-1"></i>SMTP_PASS no detectada</span>
+                    {% else %}
+                    <span class="badge bg-success ms-2"><i class="fas fa-check me-1"></i>SMTP listo</span>
+                    {% endif %}
+                </p>
+                <div class="row g-3">
+                    <div class="col-12">
+                        <form method="POST" action="{{ url_for('settings.guardar_smtp') }}">
+                            <div class="row g-2">
+                                <div class="col-md-5">
+                                    <label class="form-label small fw-bold">Servidor SMTP</label>
+                                    <input type="text" class="form-control form-control-sm" name="smtp_host"
+                                        value="{{ config.get('smtp_host', 'mail-eu.smtp2go.com') }}"
+                                        placeholder="mail-eu.smtp2go.com">
+                                </div>
+                                <div class="col-md-2">
+                                    <label class="form-label small fw-bold">Puerto</label>
+                                    <input type="number" class="form-control form-control-sm" name="smtp_port"
+                                        value="{{ config.get('smtp_port', '2525') }}">
+                                </div>
+                                <div class="col-md-5">
+                                    <label class="form-label small fw-bold">Usuario SMTP</label>
+                                    <input type="text" class="form-control form-control-sm" name="smtp_user"
+                                        value="{{ config.get('smtp_user', '') }}"
+                                        placeholder="info-darmasala">
+                                </div>
+                                <div class="col-md-8">
+                                    <label class="form-label small fw-bold">Remitente (From)</label>
+                                    <input type="text" class="form-control form-control-sm" name="smtp_from"
+                                        value="{{ config.get('smtp_from', '') }}"
+                                        placeholder="DarmaSala &lt;info@darmasala.cloud&gt;">
+                                </div>
+                                <div class="col-md-4 d-flex align-items-end">
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="checkbox" name="smtp_use_tls"
+                                            value="true" id="smtpTls"
+                                            {% if config.get('smtp_use_tls', 'true') == 'true' %}checked{% endif %}>
+                                        <label class="form-check-label small" for="smtpTls">Usar STARTTLS</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mt-3 d-flex gap-2 align-items-center">
+                                <button type="submit" class="btn btn-primary btn-sm">
+                                    <i class="fas fa-save me-1"></i>Guardar configuración SMTP
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="col-12 border-top pt-3">
+                        <label class="form-label small fw-bold">Enviar email de prueba</label>
+                        <div class="input-group input-group-sm" style="max-width:420px">
+                            <input type="email" class="form-control" id="testEmailInput"
+                                placeholder="tu@email.com">
+                            <button class="btn btn-outline-primary" id="testEmailBtn" type="button">
+                                <i class="fas fa-paper-plane me-1"></i>Probar
+                            </button>
+                        </div>
+                        <div id="testEmailResult" class="mt-2 small"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECCIÓN 8: RECORDATORIOS DE IMPAGO -->
+        <div class="card shadow-sm border-0 mb-4" id="recordatorio">
+            <div class="card-header bg-white py-3">
+                <h5 class="mb-0 text-primary"><i class="fas fa-bell me-2"></i> Recordatorios de impago</h5>
+            </div>
+            <div class="card-body">
+                <p class="text-muted small mb-3">
+                    Personaliza el asunto y el cuerpo del email de recordatorio que se envía desde Morosidad.
+                    Si se dejan vacíos se usan los textos por defecto. Marcadores disponibles:
+                    <code>{nombre}</code> <code>{periodos}</code> <code>{deuda}</code> <code>{escuela}</code>.
+                </p>
+                <form method="POST" action="{{ url_for('settings.guardar_textos_recordatorio') }}">
+                    <div class="mb-2">
+                        <label class="form-label small fw-bold">Asunto</label>
+                        <input type="text" class="form-control form-control-sm" name="recordatorio_asunto"
+                            value="{{ config.get('recordatorio_asunto', '') }}"
+                            placeholder="Recordatorio de pago pendiente — {escuela}">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Plantilla del email (HTML)</label>
+                        <textarea class="form-control form-control-sm" name="recordatorio_plantilla" rows="6"
+                            placeholder="<p>Hola {nombre},</p> <p>Te recordamos que tienes pendiente el pago de: <strong>{periodos}</strong>.</p> <p>Importe pendiente: <strong>{deuda}</strong>.</p> <p>Gracias,<br>{escuela}</p>">{{ config.get('recordatorio_plantilla', '') }}</textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-sm">
+                        <i class="fas fa-save me-1"></i>Guardar textos del recordatorio
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- SECCIÓN 9: SISTEMA Y DESARROLLADOR (DISCRETO) -->
         <div class="mt-5 pt-5 border-top opacity-50">
             <div class="row align-items-center">
                 <div class="col-md-6">
@@ -886,5 +990,43 @@
             form.submit();
         }
     }
+
+    // SMTP test email
+    document.getElementById('testEmailBtn').addEventListener('click', async function () {
+        const email = document.getElementById('testEmailInput').value.trim();
+        const result = document.getElementById('testEmailResult');
+        if (!email) { result.innerHTML = '<span class="text-danger">Introduce un email de destino.</span>'; return; }
+
+        this.disabled = true;
+        this.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Enviando…';
+        result.innerHTML = '';
+
+        const fd = new FormData();
+        fd.append('test_email', email);
+        try {
+            const r = await fetch('{{ url_for("settings.test_smtp") }}', { method: 'POST', body: fd });
+            const j = await r.json();
+            result.innerHTML = j.ok
+                ? `<span class="text-success"><i class="fas fa-check me-1"></i>${j.msg}</span>`
+                : `<span class="text-danger"><i class="fas fa-times me-1"></i>${j.error}</span>`;
+        } catch (e) {
+            result.innerHTML = `<span class="text-danger">Error de red: ${e}</span>`;
+        } finally {
+            this.disabled = false;
+            this.innerHTML = '<i class="fas fa-paper-plane me-1"></i>Probar';
+        }
+    });
+
+    // Checkbox STARTTLS — asegura que envíe 'false' cuando está desmarcado
+    document.querySelector('form[action*="smtp/guardar"]').addEventListener('submit', function () {
+        const cb = document.getElementById('smtpTls');
+        if (!cb.checked) {
+            const hidden = document.createElement('input');
+            hidden.type = 'hidden';
+            hidden.name = 'smtp_use_tls';
+            hidden.value = 'false';
+            this.appendChild(hidden);
+        }
+    });
 </script>
 {% endblock %}
