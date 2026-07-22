@@ -249,6 +249,250 @@ class FacturaPDFGenerator:
         return buffer
 
 
+class FichaAlumnoPDFGenerator:
+    """Generador de PDFs con la ficha completa de un alumno"""
+
+    COLOR_CABECERA = colors.HexColor('#8B5FBF')
+
+    def __init__(self):
+        self.width, self.height = A4
+        self.margin = 20 * mm
+
+    def _tabla_seccion(self, titulo, filas, col_widths):
+        """Tabla con cabecera de sección al estilo de las facturas."""
+        data = [[titulo] + [''] * (len(col_widths) - 1)] + filas
+        table = Table(data, colWidths=col_widths)
+        table.setStyle(TableStyle([
+            ('SPAN', (0, 0), (-1, 0)),
+            ('BACKGROUND', (0, 0), (-1, 0), self.COLOR_CABECERA),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+            ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, 0), 11),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 8),
+            ('TOPPADDING', (0, 0), (-1, 0), 8),
+            ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
+            ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+            ('FONTSIZE', (0, 1), (-1, -1), 9),
+            ('LEFTPADDING', (0, 1), (-1, -1), 6),
+            ('RIGHTPADDING', (0, 1), (-1, -1), 6),
+            ('TOPPADDING', (0, 1), (-1, -1), 4),
+            ('BOTTOMPADDING', (0, 1), (-1, -1), 4),
+        ]))
+        return table
+
+    def generar_ficha(self, alumno, datos):
+        """
+        Genera un PDF con la ficha completa del alumno
+
+        Args:
+            alumno: Objeto Alumno
+            datos: dict con los datos ya calculados (sin acceso a BD):
+                nombre_escuela, pagos, pendientes, deuda, total_asistencias,
+                asistencias_presente, porcentaje_asistencia,
+                asistencias_por_mes, bonos
+
+        Returns:
+            BytesIO con el contenido del PDF
+        """
+        buffer = BytesIO()
+
+        doc = SimpleDocTemplate(
+            buffer,
+            pagesize=A4,
+            rightMargin=self.margin,
+            leftMargin=self.margin,
+            topMargin=self.margin,
+            bottomMargin=self.margin
+        )
+
+        story = []
+        styles = getSampleStyleSheet()
+
+        title_style = ParagraphStyle(
+            'FichaTitle',
+            parent=styles['Heading1'],
+            fontSize=20,
+            textColor=self.COLOR_CABECERA,
+            spaceAfter=5,
+            alignment=1  # Centro
+        )
+        subtitle_style = ParagraphStyle(
+            'FichaSubtitle',
+            parent=styles['Normal'],
+            fontSize=10,
+            textColor=colors.grey,
+            alignment=1
+        )
+
+        # Cabecera
+        story.append(Paragraph("FICHA DE ALUMNO", title_style))
+        story.append(Paragraph(
+            f"{datos['nombre_escuela']} — Generada el {datetime.now().strftime('%d/%m/%Y')}",
+            subtitle_style))
+        story.append(Spacer(1, 8 * mm))
+
+        # Datos personales y de contacto
+        fmt_fecha = lambda f: f.strftime('%d/%m/%Y') if f else '-'
+        personales = [
+            ['Nombre:', f"{alumno.nombre} {alumno.apellido}",
+             'DNI:', alumno.dni or '-'],
+            ['Email:', alumno.email or '-',
+             'Teléfono:', alumno.telefono or '-'],
+            ['Fecha de nacimiento:', fmt_fecha(alumno.fecha_nacimiento),
+             'Fecha de alta:', fmt_fecha(alumno.fecha_registro)],
+            ['Dirección:', Paragraph(alumno.direccion or '-', styles['Normal']), '', ''],
+            ['Estado:', 'Activo' if alumno.activo else
+             f"Inactivo (baja: {fmt_fecha(alumno.fecha_baja)})",
+             'Tipo de cuota:', alumno.get_tipo_cuota_display()],
+            ['Matrícula:', 'Pagada' if alumno.matricula_pagada else 'Pendiente',
+             '', ''],
+        ]
+        tabla = self._tabla_seccion('DATOS PERSONALES', personales,
+                                    [35 * mm, 50 * mm, 35 * mm, 50 * mm])
+        tabla.setStyle(TableStyle([
+            ('FONTNAME', (0, 1), (0, -1), 'Helvetica-Bold'),
+            ('FONTNAME', (2, 1), (2, -1), 'Helvetica-Bold'),
+            ('SPAN', (1, 4), (-1, 4)),  # Dirección a lo ancho (fila 4: título + 3)
+        ]))
+        story.append(tabla)
+        story.append(Spacer(1, 6 * mm))
+
+        # Condiciones médicas
+        story.append(self._tabla_seccion(
+            'CONDICIONES MÉDICAS',
+            [[Paragraph(alumno.condiciones_medicas or 'Sin condiciones médicas registradas',
+                        styles['Normal'])]],
+            [170 * mm]))
+        story.append(Spacer(1, 6 * mm))
+
+        # Historial de pagos
+        pagos = datos['pagos']
+        filas_pagos = [['Periodo', 'Tipo', 'Método', 'Fecha', 'Importe']]
+        for pago in pagos:
+            if pago.mes:
+                periodo = pago.mes
+            elif pago.fecha_clase:
+                periodo = pago.fecha_clase.strftime('%d/%m/%Y')
+            else:
+                periodo = str(pago.año) if pago.año else '-'
+            filas_pagos.append([
+                periodo,
+                (pago.tipo_pago or '-').replace('_', ' ').capitalize(),
+                (pago.metodo_pago or '-').capitalize(),
+                pago.fecha_creacion.strftime('%d/%m/%Y') if pago.fecha_creacion else '-',
+                f"{pago.monto:.2f} €",
+            ])
+        if not pagos:
+            filas_pagos.append(['Sin pagos registrados', '', '', '', ''])
+        tabla_pagos = self._tabla_seccion(
+            'HISTORIAL DE PAGOS', filas_pagos,
+            [40 * mm, 35 * mm, 30 * mm, 30 * mm, 35 * mm])
+        tabla_pagos.setStyle(TableStyle([
+            ('FONTNAME', (0, 1), (-1, 1), 'Helvetica-Bold'),
+            ('ALIGN', (-1, 1), (-1, -1), 'RIGHT'),
+        ]))
+        story.append(tabla_pagos)
+
+        # Deuda pendiente
+        if datos['pendientes']:
+            periodos_txt = ', '.join(p.nombre_corto for p in datos['pendientes'])
+            deuda_style = ParagraphStyle(
+                'Deuda',
+                parent=styles['Normal'],
+                fontSize=10,
+                textColor=colors.HexColor('#B00020'),
+            )
+            story.append(Spacer(1, 3 * mm))
+            story.append(Paragraph(
+                f"<b>Deuda pendiente: {datos['deuda']:.2f} €</b> "
+                f"(periodos sin pagar: {periodos_txt})",
+                deuda_style))
+        story.append(Spacer(1, 6 * mm))
+
+        # Resumen de asistencias (últimos 90 días)
+        filas_asis = [[
+            'Clases registradas:', str(datos['total_asistencias']),
+            'Presente:', str(datos['asistencias_presente']),
+            '% asistencia:', f"{datos['porcentaje_asistencia']:.0f}%",
+        ]]
+        for mes_key in sorted(datos['asistencias_por_mes'].keys(), reverse=True):
+            stats = datos['asistencias_por_mes'][mes_key]
+            filas_asis.append([
+                f"Mes {mes_key}:",
+                f"{stats['presente']} de {stats['total']} clases",
+                '', '', '', '',
+            ])
+        tabla_asis = self._tabla_seccion(
+            'ASISTENCIAS (ÚLTIMOS 90 DÍAS)', filas_asis,
+            [40 * mm, 40 * mm, 25 * mm, 20 * mm, 30 * mm, 15 * mm])
+        tabla_asis.setStyle(TableStyle([
+            ('FONTNAME', (0, 1), (0, -1), 'Helvetica-Bold'),
+            ('FONTNAME', (2, 1), (2, 1), 'Helvetica-Bold'),
+            ('FONTNAME', (4, 1), (4, 1), 'Helvetica-Bold'),
+        ]))
+        story.append(tabla_asis)
+        story.append(Spacer(1, 6 * mm))
+
+        # Bonos
+        bonos = datos['bonos']
+        filas_bonos = [['Clases', 'Compra', 'Caducidad', 'Estado']]
+        for bono in bonos:
+            if bono.esta_vigente():
+                estado = 'Vigente'
+            elif bono.clases_restantes <= 0:
+                estado = 'Agotado'
+            else:
+                estado = 'Caducado'
+            filas_bonos.append([
+                f"{bono.clases_consumidas}/{bono.clases_totales}",
+                fmt_fecha(bono.fecha_compra),
+                fmt_fecha(bono.fecha_caducidad),
+                estado,
+            ])
+        if not bonos:
+            filas_bonos.append(['Sin bonos', '', '', ''])
+        tabla_bonos = self._tabla_seccion(
+            'BONOS DE CLASES', filas_bonos,
+            [42.5 * mm, 42.5 * mm, 42.5 * mm, 42.5 * mm])
+        tabla_bonos.setStyle(TableStyle([
+            ('FONTNAME', (0, 1), (-1, 1), 'Helvetica-Bold'),
+        ]))
+        story.append(tabla_bonos)
+        story.append(Spacer(1, 10 * mm))
+
+        # Pie de página
+        footer_style = ParagraphStyle(
+            'FichaFooter',
+            parent=styles['Normal'],
+            fontSize=8,
+            textColor=colors.grey,
+            alignment=1
+        )
+        story.append(Paragraph(
+            f"{datos['nombre_escuela']} — Documento de uso interno",
+            footer_style))
+
+        doc.build(story)
+        buffer.seek(0)
+        return buffer
+
+
+def generar_pdf_ficha_alumno(alumno, datos):
+    """
+    Función helper para generar el PDF de la ficha de un alumno
+
+    Args:
+        alumno: Objeto Alumno
+        datos: dict con los datos calculados (ver FichaAlumnoPDFGenerator)
+
+    Returns:
+        BytesIO con el contenido del PDF
+    """
+    generator = FichaAlumnoPDFGenerator()
+    return generator.generar_ficha(alumno, datos)
+
+
 def generar_pdf_factura(factura, config_fiscal):
     """
     Función helper para generar un PDF de factura

@@ -30,6 +30,10 @@
                     <a href="{{ url_for('students.editar_alumno', alumno_id=alumno.id) }}" class="btn btn-warning">
                         <i class="fas fa-edit me-2"></i> Editar Ficha
                     </a>
+                    <a href="{{ url_for('students.descargar_ficha_pdf', alumno_id=alumno.id) }}"
+                        class="btn btn-outline-secondary">
+                        <i class="fas fa-file-pdf me-2"></i> Descargar PDF
+                    </a>
                     <a href="{{ url_for('students.eliminar_alumno', alumno_id=alumno.id, confirm=1) }}"
                         class="btn btn-outline-danger"
                         onclick="return confirm('¿Estás seguro de que quieres desactivar a este alumno?')">
