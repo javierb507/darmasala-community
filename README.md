@@ -82,7 +82,17 @@ DarmaSala is a self-hosted management system for yoga schools — built for the 
 | Mobile PWA | ❌ | ✅ |
 | Support & updates | Community | Included |
 
-### Quick Start
+### Quick Start (Docker)
+
+```bash
+git clone https://github.com/javierb507/darmasala-community.git
+cd darmasala-community
+docker compose up -d
+```
+
+Open http://localhost:5001 — default login: `admin` / `DarmaSala2025!`. Data persists in `./data/`. To start with demo data, uncomment `INIT_DB_ARGS=--test` in `docker-compose.yml` before the first run.
+
+### Quick Start (manual)
 
 **Requirements:** Python 3.10 – 3.14
 
@@ -145,7 +155,17 @@ DarmaSala es un sistema de gestión autoalojado para escuelas de yoga — diseñ
 | **Usuarios** | Roles admin / instructor / recepcionista |
 | **Configuración** | Branding personalizable, timeout de sesión, reporte de bugs a GitHub |
 
-### Instalación rápida
+### Instalación rápida (Docker)
+
+```bash
+git clone https://github.com/javierb507/darmasala-community.git
+cd darmasala-community
+docker compose up -d
+```
+
+Abre http://localhost:5001 — credenciales: `admin` / `DarmaSala2025!`. Los datos persisten en `./data/`. Para empezar con datos de demostración, descomenta `INIT_DB_ARGS=--test` en `docker-compose.yml` antes del primer arranque.
+
+### Instalación rápida (manual)
 
 **Requisitos:** Python 3.10 – 3.14
 

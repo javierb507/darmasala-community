@@ -1,0 +1,15 @@
+venv/
+venv_mac/
+__pycache__/
+*.pyc
+instance/
+uploads/
+backups/
+data/
+.git/
+.github/
+.claude/
+docs/screenshots/
+documentation/
+tests/
+*.db
