@@ -156,3 +156,17 @@ def test_descargar_db_actual(backup_env, auth_client):
     r = auth_client.get('/descargar-db')
     assert r.status_code == 200
     assert r.data[:15] == b'SQLite format 3'
+
+
+def test_restaurar_db_basura_rechazado(app, auth_client):
+    """Un .db que no es SQLite no debe tocar la BD."""
+    import io as _io
+    from models import Alumno
+    with app.app_context():
+        antes = Alumno.query.count()
+    r = auth_client.post('/backup/restaurar', data={
+        'backup_file': (_io.BytesIO(b'esto no es una base de datos'), 'malo.db')},
+        content_type='multipart/form-data', follow_redirects=True)
+    assert r.status_code == 200
+    with app.app_context():
+        assert Alumno.query.count() == antes

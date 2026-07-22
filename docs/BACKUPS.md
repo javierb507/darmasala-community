@@ -37,7 +37,7 @@ Un backup que vive en el mismo disco que la aplicación no protege contra el fal
 
 1. En **Configuración → Copias de seguridad**, selecciona el archivo (`.zip` o `.db` antiguo) en el formulario de restauración.
 2. Pulsa **Restaurar** y confirma.
-3. La base de datos y los adjuntos del ZIP reemplazan a los actuales.
+3. La base de datos del ZIP reemplaza a la actual. Los adjuntos del ZIP se escriben sobre los actuales (los archivos añadidos después del backup **no se borran**; si quieres una restauración exacta, vacía `uploads/` antes de restaurar).
 
 ### En una instalación nueva (migrar de equipo o recuperar tras un desastre)
 

@@ -140,7 +140,7 @@ def eliminar_categoria_gasto(categoria_id):
     return redirect(url_for('settings.configuracion'))
 
 @settings_bp.route('/backup/crear', methods=['POST'])
-@login_required
+@admin_required
 def crear_backup():
     """Crear backup completo en ZIP: BD + uploads/ + meta.json"""
     try:
@@ -183,7 +183,7 @@ def crear_backup():
     return redirect(url_for('settings.configuracion'))
 
 @settings_bp.route('/backup/restaurar', methods=['POST'])
-@login_required
+@admin_required
 def restaurar_backup():
     """Restaurar backup de la base de datos"""
     try:
@@ -213,6 +213,13 @@ def restaurar_backup():
             zf = zipfile.ZipFile(io.BytesIO(file.read()))
             if 'yoga_school.db' not in zf.namelist():
                 flash('El ZIP no es un backup válido: no contiene yoga_school.db', 'error')
+                return redirect(url_for('settings.configuracion'))
+        else:
+            # Validar cabecera SQLite ANTES de tocar nada
+            cabecera = file.stream.read(16)
+            file.stream.seek(0)
+            if not cabecera.startswith(b'SQLite format 3'):
+                flash('El archivo .db no es una base de datos SQLite válida', 'error')
                 return redirect(url_for('settings.configuracion'))
 
         # Copia de seguridad automática del estado actual antes de restaurar
@@ -256,7 +263,7 @@ def restaurar_backup():
     return redirect(url_for('settings.configuracion'))
 
 @settings_bp.route('/backup/eliminar/<nombre>', methods=['POST'])
-@login_required
+@admin_required
 def eliminar_backup(nombre):
     """Eliminar un archivo de backup"""
     try:
@@ -274,7 +281,7 @@ def eliminar_backup(nombre):
 
 
 @settings_bp.route('/backup/descargar/<nombre>')
-@login_required
+@admin_required
 def descargar_backup(nombre):
     """Descargar un archivo de backup concreto"""
     try:
@@ -697,7 +704,7 @@ def editar_clase_config(clase_id):
     return render_template('configuracion/editar_clase.html', clase=clase)
 
 @settings_bp.route('/descargar-db')
-@login_required
+@admin_required
 def descargar_db():
     try:
         db_path = _sqlite_db_path()
